@@ -26,12 +26,9 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 50),
-                Image.asset(
-                  "assets/app/logo/logos1.png",
-                  height: 150,
-                ),
+                Image.asset("assets/app/logo/logos1.png", height: 150),
                 const SizedBox(height: 30),
-                
+
                 const Text(
                   "Bienvenue sur Fasolingo",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -41,14 +38,16 @@ class _LoginPageState extends State<LoginPage> {
                   "Connectez-vous pour continuer",
                   style: TextStyle(color: Colors.grey),
                 ),
-                
+
                 const SizedBox(height: 40),
 
                 TextFormField(
                   decoration: InputDecoration(
-                    labelText: "Email ou Numéro",
+                    labelText: "Email ou Numéro de téléphone",
                     prefixIcon: const Icon(Icons.person_outline),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     filled: true,
                     fillColor: Colors.grey[50],
                   ),
@@ -62,10 +61,15 @@ class _LoginPageState extends State<LoginPage> {
                     labelText: "Mot de passe",
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
-                      icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _showPassword = !_showPassword),
+                      icon: Icon(
+                        _showPassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () =>
+                          setState(() => _showPassword = !_showPassword),
                     ),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     filled: true,
                     fillColor: Colors.grey[50],
                   ),
@@ -79,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 10),
 
                 SizedBox(
                   width: double.infinity,
@@ -87,19 +91,91 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF1E232C),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    onPressed: () {
-                    },
-                    child: const Text("Se connecter", style: TextStyle(color: Colors.white, fontSize: 16)),
+                    onPressed: () {},
+                    child: const Text(
+                      "Se connecter",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
                   ),
+                ),
+
+                const SizedBox(height: 10),
+
+                Align(
+                  alignment: Alignment.center,
+                  child: Text("ou continuer avec"),
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.g_mobiledata,
+                        color: Colors.red,
+                        size: 30,
+                      ),
+                      label: Text(
+                        "Google",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        minimumSize: const Size(20, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        side: BorderSide(color: Colors.grey.shade300,width: 2),
+                        elevation: 2,
+                      ),
+                    ),
+
+                    const SizedBox(width: 15),
+
+                    ElevatedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.facebook,
+                        color: Colors.blue,
+                        size: 30,
+                      ),
+                      label: const Text(
+                        "Facebook",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        minimumSize: const Size(20, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        side: BorderSide(color: Colors.grey.shade300,width: 2),
+                        elevation: 2,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         ),
       ),
-      
+
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(
@@ -110,7 +186,10 @@ class _LoginPageState extends State<LoginPage> {
               onTap: () => Get.toNamed('/register'),
               child: const Text(
                 "S'inscrire",
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
               ),
             ),
           ],
