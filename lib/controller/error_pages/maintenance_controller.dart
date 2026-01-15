@@ -1,0 +1,3 @@
+import 'package:fasolingo/controller/my_controller.dart';
+
+class MaintenanceController extends MyController {}

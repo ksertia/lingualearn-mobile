@@ -1,0 +1,6 @@
+-keep class io.flutter.** { *; }
+-keep class io.flutter.plugins.** { *; }
+-keep class kotlinx.coroutines.** { *; }
+-keep class com.dexterous.flutterlocalnotifications.** { *; }
+-dontwarn io.flutter.**
+-dontwarn kotlinx.coroutines.**
