@@ -164,7 +164,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E232C),
+                    backgroundColor: Color.fromARGB(255, 0, 0, 153),
                     padding: EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -189,7 +189,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
               },
               child: const Text(
                 "Renvoyer",
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent),
+                style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 153),),
               ),
             ),
           ],

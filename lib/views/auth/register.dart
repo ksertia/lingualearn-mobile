@@ -21,15 +21,26 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController password = TextEditingController();
   final TextEditingController confirmPassword = TextEditingController();
   
-  void nextStep() {
-    if (_formKey.currentState!.validate()) {
-      if (currentStep < 1) {
-        setState(() => currentStep++);
-      } else {
-        print("Inscription lancée pour: ${email.text}");
-      }
+void nextStep() {
+  if (_formKey.currentState!.validate()) {
+    if (currentStep < 1) {
+      setState(() => currentStep++);
+    } else {
+      print("Inscription lancée pour: ${email.text}");
+
+      Get.snackbar(
+        "Succès", 
+        "Votre compte a été créé avec succès !",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+      Future.delayed(const Duration(seconds: 1), () {
+        Get.toNamed('/login'); 
+      });
     }
   }
+}
 
   void previousStep() {
     if (currentStep > 0) setState(() => currentStep--);
@@ -54,7 +65,7 @@ class _RegisterPageState extends State<RegisterPage> {
               Text(
                 "Étape ${currentStep + 1}/2",
                 style: TextStyle(
-                  color: Colors.blueAccent, 
+                  color: Color.fromARGB(255, 0, 0, 153), 
                   fontWeight: FontWeight.bold, 
                   fontSize: 14
                 ),
@@ -90,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           onPressed: previousStep,
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 15),
-                            side: const BorderSide(color: Color(0xFF1E232C)),
+                            side: const BorderSide(color: Color.fromARGB(255, 0, 0, 153),),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: const Text("Précédent", style: TextStyle(color: Color(0xFF1E232C))),
@@ -101,7 +112,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: ElevatedButton(
                         onPressed: nextStep,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1E232C),
+                          backgroundColor: Color.fromARGB(255, 0, 0, 153),
                           padding: EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
@@ -253,7 +264,7 @@ class _RegisterPageState extends State<RegisterPage> {
           const Text("Déjà un compte ?"),
           TextButton(
             onPressed: () => Get.toNamed('/login'),
-            child: const Text("Se connecter", style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text("Se connecter", style: TextStyle(fontWeight: FontWeight.bold,color: Color.fromARGB(255, 0, 0, 153),)),
           ),
         ],
       ),

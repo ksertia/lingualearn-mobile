@@ -12,7 +12,6 @@ class _SplashCreeState extends State<SplashCree> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  // Données de ton Onboarding Fasolingo
   final List<Map<String, String>> _pages = [
     {
       "image": "assets/images/app/splash1.jpg",
@@ -64,7 +63,6 @@ class _SplashCreeState extends State<SplashCree> {
             },
           ),
 
-          // 2. Texte et Boutons
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
             child: Column(
@@ -96,10 +94,10 @@ class _SplashCreeState extends State<SplashCree> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(143, 255, 235, 59),
+                        backgroundColor: const Color.fromARGB(255, 255, 127, 0),
                         foregroundColor: Colors.black,
                       ),
-                      onPressed: () => Get.toNamed('/essaipage'),
+                      onPressed: () => Get.toNamed('/intro'),
                       child: const Text("Découvrir"),
                     ),
                   ),
