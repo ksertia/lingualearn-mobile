@@ -86,7 +86,7 @@ class _EnterPhonenumberPaggeState extends State<EnterPhonenumberPagge> {
                       Get.offNamed("/otpCode");
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E232C), 
+                      backgroundColor: Color.fromARGB(255, 0, 0, 153),
                       elevation: 1,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -124,7 +124,7 @@ class _EnterPhonenumberPaggeState extends State<EnterPhonenumberPagge> {
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
-                  color: Colors.blue,
+                  color: Color.fromARGB(255, 0, 0, 153),
                 ),
               ),
             ),

@@ -10,6 +10,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _showPassword = true;
+  bool _isRememberMe = false;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -25,11 +26,13 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 50),
-                Image.asset("assets/images/logo/login.png", height: 150),
-                const SizedBox(height: 30),
+                Image.asset("assets/images/logo/login.png",
+                    height: 150,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.login, size: 100, color: Colors.blue)),
 
                 const Text(
-                  "Bienvenue sur Fasolingo",
+                  "Bienvenue sur Lingualearn",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
@@ -37,9 +40,7 @@ class _LoginPageState extends State<LoginPage> {
                   "Connectez-vous pour continuer",
                   style: TextStyle(color: Colors.grey),
                 ),
-
-                const SizedBox(height: 40),
-
+                const SizedBox(height: 20),
                 TextFormField(
                   decoration: InputDecoration(
                     labelText: "Email ou Numéro de téléphone",
@@ -51,9 +52,7 @@ class _LoginPageState extends State<LoginPage> {
                     fillColor: Colors.grey[50],
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 TextFormField(
                   obscureText: _showPassword,
                   decoration: InputDecoration(
@@ -73,99 +72,83 @@ class _LoginPageState extends State<LoginPage> {
                     fillColor: Colors.grey[50],
                   ),
                 ),
-
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () => Get.toNamed('/numberphone'),
-                    child: Text("Mot de passe oublié ?"),
+                    child: const Text(
+                      "Mot de passe oublié ?",
+                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 153)),
+                    ),
                   ),
                 ),
 
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Checkbox(
+                      value: _isRememberMe,
+                      activeColor: const Color.fromARGB(255, 0, 0, 153),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)),
+                      onChanged: (value) {
+                        setState(() {
+                          _isRememberMe = value!;
+                        });
+                      },
+                    ),
+                    const Text(
+                      "Se souvenir de moi",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 10),
-
                 SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E232C),
+                      backgroundColor: const Color.fromARGB(255, 0, 0, 153),
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    onPressed: () => Get.toNamed('/parcours'),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {}
+                    },
                     child: const Text(
                       "Se connecter",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
-
+                const SizedBox(height: 15),
+                const Text("ou continuer avec",
+                    style: TextStyle(color: Colors.grey)),
                 const SizedBox(height: 10),
-
-                Align(
-                  alignment: Alignment.center,
-                  child: Text("ou continuer avec"),
-                ),
-
-                const SizedBox(height: 20),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: Icon(
-                        Icons.g_mobiledata,
-                        color: Colors.red,
-                        size: 30,
-                      ),
-                      label: Text(
-                        "Google",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        minimumSize: const Size(20, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        side: BorderSide(color: Colors.grey.shade300,width: 2),
-                        elevation: 2,
-                      ),
+                    _socialButton(
+                      label: "Google",
+                      icon: Icons.g_mobiledata,
+                      iconColor: Colors.red,
+                      onTap: () => Get.toNamed('/parcours'),
                     ),
-
                     const SizedBox(width: 15),
-
-                    ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.facebook,
-                        color: Colors.blue,
-                        size: 30,
-                      ),
-                      label: const Text(
-                        "Facebook",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        minimumSize: const Size(20, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        side: BorderSide(color: Colors.grey.shade300,width: 2),
-                        elevation: 2,
-                      ),
+                    _socialButton(
+                      label: "Facebook",
+                      icon: Icons.facebook,
+                      iconColor: Colors.blue,
+                      onTap: () {},
                     ),
                   ],
                 ),
@@ -174,9 +157,8 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
-
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.only(bottom: 25),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -187,11 +169,35 @@ class _LoginPageState extends State<LoginPage> {
                 "S'inscrire",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: Color.fromARGB(255, 0, 0, 153),
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _socialButton(
+      {required String label,
+      required IconData icon,
+      required Color iconColor,
+      required VoidCallback onTap}) {
+    return Expanded(
+      child: ElevatedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, color: iconColor, size: 28),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          minimumSize: const Size(20, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          side: BorderSide(color: Colors.grey.shade300, width: 2),
+          elevation: 2,
         ),
       ),
     );

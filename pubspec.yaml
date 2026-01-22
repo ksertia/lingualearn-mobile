@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  lottie: ^2.7.0
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -129,6 +130,8 @@ flutter:
     - assets/images/app/
     - assets/icon/
     - assets/avatar/
+    - assets/lottie/
+
 
 
 dependency_overrides:   # 👇 ajouté ici

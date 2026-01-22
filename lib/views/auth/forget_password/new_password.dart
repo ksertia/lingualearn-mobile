@@ -54,7 +54,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
               child: ElevatedButton(
                 onPressed: () => Get.toNamed("/login"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E232C),
+                  backgroundColor: Color.fromARGB(255, 0, 0, 153),
                   padding: EdgeInsets.symmetric(vertical: 18),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
@@ -120,7 +120,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
               child: ElevatedButton(
                 onPressed: _showSuccessBottomSheet,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E232C),
+                  backgroundColor: Color.fromARGB(255, 0, 0, 153),
                   padding: EdgeInsets.symmetric(vertical: 18),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
