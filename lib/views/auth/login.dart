@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () => Get.toNamed('/parcours'),
                     child: const Text(
                       "Se connecter",
                       style: TextStyle(color: Colors.white, fontSize: 16),

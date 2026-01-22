@@ -1,6 +1,7 @@
 import 'package:fasolingo/views/apps/change_language.dart';
 import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
 import 'package:fasolingo/views/apps/home/home_page.dart';
+import 'package:fasolingo/views/apps/home/parcours_page.dart';
 import 'package:fasolingo/views/apps/profile/edit_profile.dart';
 import 'package:fasolingo/views/apps/profile/profile.dart';
 import 'package:fasolingo/views/apps/setting/settings_page.dart';
@@ -45,6 +46,7 @@ getPageRoute() {
     GetPage(name: '/numberphone', page: () => const EnterPhonenumberPagge()),
     GetPage(name: '/otpCode', page: () => const OtpcodePage()),
     GetPage(name: '/newPassword', page: () => const NewPasswordPage()),
+    GetPage(name: '/parcours', page: () =>  ParcoursPage()),
 
 
 
