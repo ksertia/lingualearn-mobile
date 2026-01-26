@@ -1,3 +1,4 @@
+import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,6 +13,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _showPassword = true;
   bool _isRememberMe = false;
   final _formKey = GlobalKey<FormState>();
+
+  final session = Get.find<SessionController>();
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +33,6 @@ class _LoginPageState extends State<LoginPage> {
                     height: 150,
                     errorBuilder: (context, error, stackTrace) =>
                         const Icon(Icons.login, size: 100, color: Colors.blue)),
-
                 const Text(
                   "Bienvenue sur Lingualearn",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -82,7 +84,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -119,7 +120,19 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {}
+                      bool loginSuccess = true;
+
+                      if (loginSuccess) {
+                        if (session.vientDeLaDecouverte) {
+                          // CAS A : Il a déjà fait le parcours découverte
+                          // On l'envoie direct choisir son niveau (débutant, etc.)
+                          Get.offAllNamed('/niveau');
+                        } else {
+                          // CAS B : Il s'est connecté sans passer par la découverte
+                          // Il doit obligatoirement choisir sa langue d'abord
+                          Get.toNamed('/bienvenue');
+                        }
+                      }
                     },
                     child: const Text(
                       "Se connecter",
@@ -141,7 +154,8 @@ class _LoginPageState extends State<LoginPage> {
                       label: "Google",
                       icon: Icons.g_mobiledata,
                       iconColor: Colors.red,
-                      onTap: () => Get.toNamed('/parcours'),
+                      onTap: () {}
+                      // => Get.toNamed('/parcours'),
                     ),
                     const SizedBox(width: 15),
                     _socialButton(

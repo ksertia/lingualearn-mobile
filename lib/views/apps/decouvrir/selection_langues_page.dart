@@ -1,3 +1,4 @@
+import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -11,7 +12,6 @@ class LanguageSelectionPage extends StatefulWidget {
 
 class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
   String selectedLanguage = "";
-
   String userSourceLanguage = "Français";
 
   final List<Map<String, String>> targetLanguages = [
@@ -22,6 +22,8 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final session = Get.find<SessionController>();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -88,25 +90,13 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                       child: DropdownButton<String>(
                         dropdownColor: Colors.white,
                         value: userSourceLanguage,
-                        isExpanded: false,
-                        icon: const Icon(Icons.keyboard_arrow_down,
-                            color: Colors.blue),
-                        style: const TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15),
                         items:
                             <String>['Français', 'Anglais'].map((String value) {
                           return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
+                              value: value, child: Text(value));
                         }).toList(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            userSourceLanguage = newValue!;
-                          });
-                        },
+                        onChanged: (newValue) =>
+                            setState(() => userSourceLanguage = newValue!),
                       ),
                     ),
                   ),
@@ -120,15 +110,10 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                 itemBuilder: (context, index) {
                   String langName = targetLanguages[index]["name"]!;
                   bool isSelected = selectedLanguage == langName;
-
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 15),
                     child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          selectedLanguage = langName;
-                        });
-                      },
+                      onTap: () => setState(() => selectedLanguage = langName),
                       borderRadius: BorderRadius.circular(15),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
@@ -140,11 +125,10 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                               : Colors.white,
                           borderRadius: BorderRadius.circular(15),
                           border: Border.all(
-                            color: isSelected
-                                ? Colors.orange
-                                : Colors.grey.shade300,
-                            width: 2.5,
-                          ),
+                              color: isSelected
+                                  ? Colors.orange
+                                  : Colors.grey.shade300,
+                              width: 2.5),
                         ),
                         child: Row(
                           children: [
@@ -161,23 +145,23 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                                   targetLanguages[index]["flag"]!,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(Icons.flag,
-                                        color: Colors.grey);
+                                    return const Icon(
+                                      Icons.flag,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    );
                                   },
                                 ),
                               ),
                             ),
                             const SizedBox(width: 15),
-                            Text(
-                              langName,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: isSelected
-                                    ? Colors.orange.shade900
-                                    : Colors.black87,
-                              ),
-                            ),
+                            Text(langName,
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected
+                                        ? Colors.orange.shade900
+                                        : Colors.black87)),
                             const Spacer(),
                             if (isSelected)
                               const Icon(Icons.check_circle,
@@ -196,16 +180,20 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage> {
                 onPressed: selectedLanguage.isEmpty
                     ? null
                     : () {
-                        Get.toNamed('/decouvrir');
+                        session.langueChoisie = selectedLanguage;
+
+                        if (session.vientDeLaDecouverte) {
+                          Get.toNamed('/decouvrir');
+                        } else {
+                          Get.toNamed('/niveau');
+                        }
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 255, 127, 0),
                   disabledBackgroundColor: Colors.grey.shade300,
                   minimumSize: const Size(double.infinity, 60),
-                  elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+                      borderRadius: BorderRadius.circular(15)),
                 ),
                 child: Text(
                   "CONTINUER",

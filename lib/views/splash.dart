@@ -1,5 +1,6 @@
+import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart'; 
 
 class SplashCree extends StatefulWidget {
   const SplashCree({super.key});
@@ -16,25 +17,24 @@ class _SplashCreeState extends State<SplashCree> {
     {
       "image": "assets/images/app/splash1.jpg",
       "title": "Bienvenue sur Fasolingo",
-      "subtitle":
-          "L'application pour maîtriser nos langues locales facilement.",
+      "subtitle": "L'application pour maîtriser nos langues locales facilement.",
     },
     {
       "image": "assets/images/app/splash2.jpg",
       "title": "Apprenez partout",
-      "subtitle":
-          "Accédez à des cours interactifs et progressez à votre rythme.",
+      "subtitle": "Accédez à des cours interactifs et progressez à votre rythme.",
     },
     {
       "image": "assets/images/app/splash3.jpg",
       "title": "Prêt à commencer ?",
-      "subtitle":
-          "Rejoignez la communauté et préservez notre patrimoine linguistique.",
+      "subtitle": "Rejoignez la communauté et préservez notre patrimoine linguistique.",
     },
   ];
 
   @override
   Widget build(BuildContext context) {
+    final session = Get.find<SessionController>();
+
     return Scaffold(
       body: Stack(
         children: [
@@ -48,7 +48,6 @@ class _SplashCreeState extends State<SplashCree> {
                 children: [
                   Container(color: Colors.blueGrey),
                   Image.asset(_pages[index]["image"]!, fit: BoxFit.cover),
-
                   Container(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
@@ -62,7 +61,6 @@ class _SplashCreeState extends State<SplashCree> {
               );
             },
           ),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
             child: Column(
@@ -88,21 +86,23 @@ class _SplashCreeState extends State<SplashCree> {
                   style: const TextStyle(color: Colors.white70, fontSize: 16),
                 ),
                 const SizedBox(height: 20),
-
                 if (_currentPage == _pages.length - 1) ...[
-                    SizedBox(
+                  SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 255, 127, 0),
                         foregroundColor: Colors.black,
                       ),
-                      onPressed: () => Get.toNamed('/intro'),
+                      onPressed: () {
+                        session.vientDeLaDecouverte = true; 
+                        Get.toNamed('/intro');
+                      },
                       child: const Text("Découvrir"),
                     ),
                   ),
-                   const SizedBox(height: 8),
-                   
+                  const SizedBox(height: 8),
+                  
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -110,28 +110,33 @@ class _SplashCreeState extends State<SplashCree> {
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
                       ),
-                      onPressed: () => Get.toNamed('/register'),
+                      onPressed: () {
+                        session.vientDeLaDecouverte = false; 
+                        Get.toNamed('/register');
+                      },
                       child: const Text("S'inscrire"),
                     ),
                   ),
                   const SizedBox(height: 8),
+                  
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.white),
                       ),
-                      onPressed: () => Get.toNamed('/login'),
-                      child:  Text(
+                      onPressed: () {
+                        session.vientDeLaDecouverte = false; 
+                        Get.toNamed('/login');
+                      },
+                      child: const Text(
                         "Se connecter",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
                 ],
-
                 const SizedBox(height: 30),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(

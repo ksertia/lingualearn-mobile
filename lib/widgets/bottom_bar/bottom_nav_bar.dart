@@ -20,21 +20,26 @@ class _AppBottomNavBarState extends State<AppBottomNavBar>
     with SingleTickerProviderStateMixin, UIMixin {
   @override
   Widget build(BuildContext context) {
-    final items = [
+final items = [
       _NavItem(
-        icon: LucideIcons.home,
+        icon: LucideIcons.layoutDashboard, 
         label: 'Dashboard',
         index: 0,
       ),
       _NavItem(
-        icon: LucideIcons.messageCircle,
-        label: 'Message',
+        icon: LucideIcons.bookOpen, 
+        label: 'Lexique',
         index: 1,
       ),
       _NavItem(
-        icon: LucideIcons.settings,
-        label: 'Paramètres',
+        icon: LucideIcons.trendingUp, 
+        label: 'Progrès',
         index: 2,
+      ),
+      _NavItem(
+        icon: LucideIcons.user, 
+        label: 'Paramètres',
+        index: 3,
       ),
     ];
 

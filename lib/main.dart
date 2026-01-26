@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ import 'helpers/theme/theme_customizer.dart';
 import 'widgets/bottom_bar/navigation_provider.dart';
 
 Future<void> main() async {
+  Get.put(SessionController());
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
   await GetStorage.init();
