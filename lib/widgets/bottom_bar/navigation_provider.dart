@@ -11,6 +11,7 @@ class NavigationProvider with ChangeNotifier {
   }
 
   void goToDashboard() => setCurrentIndex(0);
-  void goToMessages() => setCurrentIndex(1);
-  void goToSettings() => setCurrentIndex(2);
+  void goToLexique() => setCurrentIndex(1);
+  void goToProgres() => setCurrentIndex(2);
+  void goToSettings() => setCurrentIndex(3);
 }

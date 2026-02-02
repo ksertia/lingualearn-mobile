@@ -1,4 +1,6 @@
 import 'package:fasolingo/views/apps/change_language.dart';
+import 'package:fasolingo/views/apps/decouvrir/bienvenu_page.dart';
+import 'package:fasolingo/views/apps/decouvrir/choisie_niveau_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/intro_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/selection_langues_page.dart';
@@ -10,8 +12,12 @@ import 'package:fasolingo/views/apps/home/screens/Detaillepage.dart';
 import 'package:fasolingo/views/apps/home/screens/Etapes2.dart';
 import 'package:fasolingo/views/apps/home/screens/Revision.dart';
 import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
+
+import 'package:fasolingo/views/apps/lexique/lexique_page.dart';
+
 import 'package:fasolingo/views/apps/profile/edit_profile.dart';
 import 'package:fasolingo/views/apps/profile/profile.dart';
+import 'package:fasolingo/views/apps/progres/progres_page.dart';
 import 'package:fasolingo/views/apps/setting/settings_page.dart';
 import 'package:fasolingo/views/apps/setting/widget/select_language.dart';
 import 'package:fasolingo/views/auth/forget_password/enter_phone_number.dart';
@@ -46,24 +52,28 @@ class AuthMiddleware extends GetMiddleware {
 
 getPageRoute() {
   var routes = [
-    GetPage(name: '/dashboard', page: () => const HomePage()),
+    GetPage(name: '/dashboard', page: () =>  HomePage()),
     GetPage(name: '/splash', page: () => const SplashCree()),
     GetPage(name: '/login', page: () => const LoginPage()),
-    GetPage(name: '/dashboard', page: () => const HomePage()),
     GetPage(name: '/register', page: () => const RegisterPage()),
     GetPage(name: '/numberphone', page: () => const EnterPhonenumberPagge()),
     GetPage(name: '/otpCode', page: () => const OtpcodePage()),
     GetPage(name: '/newPassword', page: () => const NewPasswordPage()),
-    GetPage(name: '/parcours', page: () =>  ParcoursPage()),
+    // GetPage(name: '/parcours', page: () =>  ParcoursPage()),
      GetPage(name: '/decouvrir', page: () => const DiscoveryPage()),
      GetPage(name: '/intro', page: () => const IntroPage()),
      GetPage(name: '/step', page: () => const StepMascotte()),
      GetPage(name: '/selection', page: () => const LanguageSelectionPage()),
+
     GetPage(name: '/stepsscreens', page: () => const StepsScreensPages()),
     GetPage(name: '/detaillepage', page: () => const DetaillePage()),
     GetPage(name: '/etapes2pages', page: () => const Etapes2Pages()),
     GetPage(name: '/lesson1', page: () => const RevisionPage()),
     GetPage(name: '/lesson2', page: () => const DetaillePage()),
+
+     GetPage(name: '/bienvenue', page: () => const BienvenuPage()),
+     GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
+
 
 
 
@@ -71,6 +81,8 @@ getPageRoute() {
 
     GetPage(name: '/settingScreen', page: () => SettingScreen()),
     GetPage(name: '/HomeScreen', page: () => HomeScreen()),
+        GetPage(name: '/lexique', page: () => LexiquePage()),
+        GetPage(name: '/progres', page: () => ProgresPage()),
     GetPage(
         name: '/profile',
         page: () => const ProfilePage(),

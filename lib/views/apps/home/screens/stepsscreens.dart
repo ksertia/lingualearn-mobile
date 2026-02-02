@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../../../widgets/stepsscreens/custom_app_bar.dart';
 import '../../../../widgets/stepsscreens/parcours_item.dart';
-²
+
 class StepsScreensPages extends StatelessWidget {
   const StepsScreensPages({super.key});
 

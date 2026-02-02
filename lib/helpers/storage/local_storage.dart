@@ -26,6 +26,8 @@ class LocalStorage {
   static const String _loggedIn = "loggedIn";
   static const String _notification = "notification";
 
+  static const String _vientDeLaDecouverteKey = "vient_de_la_decouverte";
+
   static const String _languageIndexKey =
       'app_language_index'; // New key for index
 
@@ -41,6 +43,19 @@ class LocalStorage {
   static Future<void> init() async {
     _preferencesInstance = await SharedPreferences.getInstance();
     await initData();
+  }
+
+
+// Dans ton fichier local_storage.dart
+
+// Pour sauvegarder quand il commence la découverte
+  static Future<bool> setVientDeLaDecouverte(bool value) async {
+    return preferences.setBool(_vientDeLaDecouverteKey, value);
+  }
+
+  // Pour vérifier au moment du login
+  static bool getVientDeLaDecouverte() {
+    return preferences.getBool(_vientDeLaDecouverteKey) ?? false;
   }
 
   static Future<void> initData() async {
