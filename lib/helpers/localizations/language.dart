@@ -17,6 +17,10 @@ class Language {
 
   Language(this.locale, this.languageName, [this.supportRTL = false]);
 
+  String get name => languageName;
+
+  get iconUrl => null;
+
   static Future<bool> init() async {
     ThemeCustomizer.instance.currentLanguage = await getLanguage();
     return true;
@@ -64,4 +68,6 @@ class Language {
   String toString() {
     return 'Language{locale: $locale, isRTL: $supportRTL, languageName: $languageName}';
   }
+
+  static fromJson(item) {}
 }

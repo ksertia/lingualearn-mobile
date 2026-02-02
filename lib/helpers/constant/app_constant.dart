@@ -5,8 +5,8 @@ final DateFormat timeFormatter = DateFormat('jms');
 
 class AppConstant {
   // static const String baseAPI = 'https://api.helios.preprod.link2digit.com/helios-core';
-  static const String baseAPI = 'https://projectwise.onrender.com';
-  static const String baseURl = '$baseAPI/api';
+static const String baseAPI = 'http://213.32.120.11:4001'; // L'AIP du Swagger
+static const String baseURl = '$baseAPI/api/v1'; // Ajout du v1
 
   static const String GOOGLE_MAPS_API_KEY =
       "AIzaSyBNCe6MI-3F33A81XYdiIogk2ewWYp7DSk";

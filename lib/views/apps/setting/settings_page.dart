@@ -12,16 +12,11 @@ import 'package:fasolingo/views/ui/apploader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:get/get_state_manager/src/simple/get_state.dart';
-import 'package:get/get_utils/src/extensions/widget_extensions.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class SettingScreen extends StatefulWidget {
-  SettingScreen({super.key});
+  const SettingScreen({super.key});
 
   @override
   State<SettingScreen> createState() => _SettingScreenState();
@@ -37,91 +32,74 @@ class _SettingScreenState extends State<SettingScreen>
       canPop: false,
       child: Consumer<AppNotifier>(
         builder: (_, value, child) => Scaffold(
-          body: GetBuilder<SettingsController>(
-            builder: (_) {
-              return Obx(() => controller.isLoading.value
-                  ? AppLoader()
-                  : Column(
-                      children: [
-                        Platform.isIOS ? 70.verticalSpace : 60.verticalSpace,
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20.w),
-                          child: InkWell(child: _buildProfileSection()),
-                        ),
-                        SizedBox(height: 20.h),
-                        Divider(
-                          color: contentTheme.kE6E6E6,
-                          thickness: 1.0,
-                        ).paddingSymmetric(horizontal: 20.w),
-                        Expanded(
-                          child: ListView(
-                            padding: EdgeInsets.symmetric(horizontal: 20.w),
-                            children: [
-                              10.verticalSpace,
-                              // Divider(
-                              //   color: contentTheme.kE6E6E6,
-                              //   thickness: 1.0,
-                              // ),
-                              10.verticalSpace,
-                              _buildLanguageSetting(),
-                              _buildDarkModeSetting(),
-                              10.verticalSpace,
-                              Divider(
-                                color: contentTheme.kE6E6E6,
-                                thickness: 1.0,
-                              ),
-                              _buildSettingsItem(
-                                icon: Images.logout,
-                                title: 'logout'.tr(),
-                                onTap: () async {
-                                  final confirmed =
-                                      await showModalBottomSheet<bool>(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(20.r)),
-                                    ),
-                                    builder: (_) => LogoutDeleteBottomSheet(
-                                      title: 'logout'.tr(),
-                                      subTitle:
-                                          'are_you_sure_you_want_to_logout'
-                                              .tr(),
-                                    ),
-                                  );
+          body: Obx(() {
+            if (controller.isLoading.value) {
+              return const AppLoader();
+            }
 
-                                  if (confirmed == true) {
-                                    controller.isLoading(true);
-                                    await controller.onLogout();
-                                  }
-                                },
-                              ),
+            return Column(
+              children: [
+                Platform.isIOS ? 70.verticalSpace : 60.verticalSpace,
+                
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: _buildProfileSection(),
+                ),
 
-                              10.verticalSpace,
-                              Divider(
-                                color: contentTheme.kE6E6E6,
-                                thickness: 1.0,
-                              ),
-                              SizedBox(height: 80.h),
-                            ],
-                          ),
+                SizedBox(height: 25.h),
+                Divider(
+                  color: contentTheme.kE6E6E6,
+                  thickness: 1.0,
+                ).paddingSymmetric(horizontal: 20.w),
+
+                // --- LISTE DES PARAMÈTRES ---
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    children: [
+                      15.verticalSpace,
+                      _buildLanguageSetting(),
+                      _buildDarkModeSetting(),
+                      
+                      15.verticalSpace,
+                      Divider(color: contentTheme.kE6E6E6, thickness: 1.0),
+                      
+                      _buildSettingsItem(
+                        icon: Images.logout,
+                        title: 'logout',
+                        onTap: () => _handleLogout(context),
+                      ),
+
+                      15.verticalSpace,
+                      Divider(color: contentTheme.kE6E6E6, thickness: 1.0),
+                      
+                      SizedBox(height: 30.h),
+                      Center(
+                        child: MyText.bodySmall(
+                          "Version 1.0.0",
+                          color: contentTheme.black.withOpacity(0.3),
                         ),
-                      ],
-                    ));
-            },
-          ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
+                      ),
+                      SizedBox(height: 80.h),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }),
         ),
       ),
     );
   }
 
   Widget _buildProfileSection() {
+    final user = controller.user.value;
+
     return Row(
       children: [
         CircleAvatar(
           radius: 35.sp,
+          backgroundColor: contentTheme.primary.withOpacity(0.1),
           backgroundImage: AssetImage(Images.avatars[2]),
         ),
         const SizedBox(width: 16),
@@ -130,16 +108,17 @@ class _SettingScreenState extends State<SettingScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               MyText.titleMedium(
-                LocalStorage.getUserName() ?? "",
-                fontWeight: 600,
-                fontSize: 16.sp,
+                user != null ? "${user.firstName} ${user.lastName}" : "Utilisateur",
+                fontWeight: 700,
+                fontSize: 18.sp,
                 color: contentTheme.black,
               ),
-              MyText.titleMedium(
-                LocalStorage.getEmail() ?? "",
+              SizedBox(height: 2.h),
+              MyText.bodyMedium(
+                user?.email ?? "Email non disponible",
                 fontWeight: 400,
-                fontSize: 16.sp,
-                color: contentTheme.black,
+                fontSize: 14.sp,
+                color: contentTheme.black.withOpacity(0.6),
               )
             ],
           ),
@@ -152,22 +131,14 @@ class _SettingScreenState extends State<SettingScreen>
     required String icon,
     required String title,
     required VoidCallback? onTap,
-    double? iconWidth, // Optional width
-    double? iconHeight,
   }) {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        padding: EdgeInsets.symmetric(vertical: 15.h),
         child: Row(
           children: [
-            Image.asset(
-              icon,
-              fit: BoxFit.fill,
-              width: iconWidth ?? 32.w,
-              height: iconHeight ?? 32.h,
-              color: contentTheme.black,
-            ),
+            Image.asset(icon, width: 28.w, height: 28.h, color: contentTheme.black),
             16.horizontalSpace,
             Expanded(
               child: MyText.titleMedium(
@@ -177,10 +148,7 @@ class _SettingScreenState extends State<SettingScreen>
                 color: contentTheme.black,
               ),
             ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 24.sp,
-            ),
+            Icon(Icons.arrow_forward_ios, size: 18.sp, color: contentTheme.black.withOpacity(0.4)),
           ],
         ),
       ),
@@ -189,45 +157,28 @@ class _SettingScreenState extends State<SettingScreen>
 
   Widget _buildLanguageSetting() {
     return InkWell(
-      onTap: () {
-        // if (LocalStorage.getLanguage() == "en") {
-        //   controller.selectLanguage(0);
-        // } else {
-        //   controller.selectLanguage(2);
-        // }
-        Get.offNamed('/selectLanguageScreen');
-      },
+      onTap: () => Get.toNamed('/selectLanguageScreen'), 
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        padding: EdgeInsets.symmetric(vertical: 15.h),
         child: Row(
           children: [
-            Image.asset(
-              Images.language,
-              fit: BoxFit.fill,
-              width: 32.w,
-              height: 32.h,
-              color: contentTheme.black,
-            ),
+            Image.asset(Images.language, width: 28.w, height: 28.h, color: contentTheme.black),
             16.horizontalSpace,
             Expanded(
               child: MyText.titleMedium(
-                'language'.tr(),
+                'language',
                 fontWeight: 600,
                 fontSize: 16.sp,
                 color: contentTheme.black,
               ),
             ),
-            Text(LocalStorage.getLanguage() == "en"
-                ? "english".tr()
-                : LocalStorage.getLanguage() == "fr"
-                    ? "french".tr()
-                    : LocalStorage.getLanguage() == "mos"
-                        ? "moore".tr()
-                        : "dioula".tr()),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 24.sp,
+            MyText.bodyMedium(
+              _getCurrentLanguageName(),
+              color: contentTheme.primary,
+              fontWeight: 500,
             ),
+            8.horizontalSpace,
+            Icon(Icons.arrow_forward_ios, size: 18.sp, color: contentTheme.black.withOpacity(0.4)),
           ],
         ),
       ),
@@ -236,70 +187,59 @@ class _SettingScreenState extends State<SettingScreen>
 
   Widget _buildDarkModeSetting() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      padding: EdgeInsets.symmetric(vertical: 15.h),
       child: Row(
         children: [
-          Image.asset(
-            Images.lightDarkMode,
-            fit: BoxFit.fill,
-            width: 32.w,
-            height: 32.h,
-            color: contentTheme.black,
-          ),
+          Image.asset(Images.lightDarkMode, width: 28.w, height: 28.h, color: contentTheme.black),
           16.horizontalSpace,
           Expanded(
             child: MyText.titleMedium(
-              'dark_mode'.tr(),
+              'dark_mode',
               fontWeight: 600,
               fontSize: 16.sp,
               color: contentTheme.black,
             ),
           ),
-          SizedBox(
-            width: 44.w,
-            height: 24,
-            child: Consumer<AppNotifier>(
-              builder: (_, value, child) => Transform.scale(
-                scale: 0.6,
-                child: CupertinoSwitch(
-                    onChanged: (value) async {
-                      if (value) {
-                        LocalStorage.setTheme("Dark");
-                        Provider.of<AppNotifier>(
-                                NavigationService.globalContext!,
-                                listen: false)
-                            .changeTheme();
-                      } else {
-                        LocalStorage.setTheme("Light");
-                        Provider.of<AppNotifier>(
-                                NavigationService.globalContext!,
-                                listen: false)
-                            .changeTheme();
-                      }
-                    },
-                    value: LocalStorage.getTheme() == "Dark" ? true : false,
-                    activeColor: contentTheme.primary,
-                    thumbColor: contentTheme.white,
-                    trackColor: contentTheme.kAFAFAF),
-              ),
+          Transform.scale(
+            scale: 0.8,
+            child: CupertinoSwitch(
+              value: LocalStorage.getTheme() == "Dark",
+              activeColor: contentTheme.primary,
+              onChanged: (bool val) {
+                LocalStorage.setTheme(val ? "Dark" : "Light");
+                Provider.of<AppNotifier>(context, listen: false).changeTheme();
+              },
             ),
           ),
-          // Obx(
-          //   () => SizedBox(
-          //     height: 24.h,
-          //     child: CupertinoSwitch(
-          //       onChanged: (value) async {},
-          //       value: controller.isDarkMode.value,
-          //       activeColor: contentTheme.onPrimary, // Use your primary color
-          //       thumbColor: contentTheme
-          //           .white, // Use a color that contrasts with primary
-          //       trackColor:
-          //           contentTheme.kCECECE, // Use a subtle background color
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
   }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
+      builder: (_) => LogoutDeleteBottomSheet(
+        title: 'logout',
+        subTitle: 'are_you_sure_you_want_to_logout',
+      ),
+    );
+
+    if (confirmed == true) {
+      await controller.onLogout();
+    }
+  }
+
+String _getCurrentLanguageName() {
+  int index = controller.selectedLanguageIndex.value;
+  
+  if (index == 0) return "french";
+  if (index == 1) return "english";
+  if (index == 2) return "moore";
+  if (index == 3) return "dioula";
+  
+  return "french"; 
+}
 }

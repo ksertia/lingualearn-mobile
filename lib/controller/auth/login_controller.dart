@@ -1,103 +1,76 @@
-import 'dart:async';
-import 'dart:developer';
-import 'package:dio/dio.dart';
-import 'package:fasolingo/controller/my_controller.dart';
-import 'package:fasolingo/helpers/services/auth_services.dart';
-import 'package:fasolingo/helpers/services/error_handling.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/utils/app_snackbar.dart';
-import 'package:fasolingo/helpers/my_widgets/my_form_validator.dart';
+import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/views/apps/home/home_page.dart';
+import 'package:dio/dio.dart';
+import '../../models/user_model.dart';
+import '../../helpers/storage/local_storage.dart';
+import '../../helpers/utils/app_snackbar.dart';
+import '../../helpers/services/auth_services.dart';
 
-class LoginController extends MyController {
-  MyFormValidator basicValidator = MyFormValidator();
-  GlobalKey<FormState> formKey = GlobalKey();
-  bool showPassword = false, loading = false, isChecked = false;
+class LoginController extends GetxController {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final TextEditingController email = TextEditingController();
+  final TextEditingController password = TextEditingController();
+  
   RxBool isLoading = false.obs;
+  bool showPassword = false;
+  bool isChecked = false;
 
-  TextEditingController email = TextEditingController();
-  TextEditingController fullName = TextEditingController();
-  TextEditingController password = TextEditingController();
+  void onChangeShowPassword() { showPassword = !showPassword; update(); }
+  void onChangeCheckBox(bool? value) { isChecked = value ?? false; update(); }
 
-  final firstName = LocalStorage.getUserName ?? '';
-  RxInt timerSeconds = 3.obs;
+  Future<void> onLogin() async {
+    if (!formKey.currentState!.validate()) return;
+    isLoading.value = true;
 
-  void onChangeShowPassword() {
-    showPassword = !showPassword;
-    update();
-  }
-
-  void onChangeCheckBox(bool? value) {
-    isChecked = value ?? isChecked;
-    update();
-  }
-
-  Future<void> startTimerAndLoadData() async {
-    isLoading(true);
-    await Future.delayed(const Duration(milliseconds: 300));
-    isLoading(false);
-  }
-
-  //=================== Connexion classique
-  Future<void> onLogin({String? email, required String password}) async {
-    isLoading(true);
     try {
-      final response = await AuthService.loginUser({
-        "email": email,
-        "password": password,
-      });
+      final Map<String, dynamic> credentials = {
+        "loginInfo": email.text.trim(),
+        "password": password.text,
+      };
 
-      if (response != null && response['token'] != null) {
-        if (isChecked) {
-          LocalStorage.setAlwaysLoggedIn(true);
-        } else {
-          LocalStorage.setAlwaysLoggedIn(false);
-        }
-        await LocalStorage.setAuthToken(response['token']);
-        await LocalStorage.setEmail(email ?? "");
-        await LocalStorage.setPassword(password);
-        await LocalStorage.setUserID(response['user']['id']);
-        await LocalStorage.setUserName(
-            "${response['user']['firstName']} ${response['user']['lastName']}");
-        log("=================== Login réussi, redirection...");
-        isLoading(false);
+      final response = await AuthService.loginUser(credentials);
 
-        if (LocalStorage.isAppLink() &&
-            LocalStorage.getAppLinkStationID() != null) {
-          final stationId = LocalStorage.getAppLinkStationID()!;
-          LocalStorage.setAppLink(false);
-          LocalStorage.setAppLinkStationID('');
-          Get.offAllNamed('/stationDetails',
-              arguments: {'stationId': stationId});
-        } else {
-          Get.to(() => HomeScreen());
+      if (response != null && response['success'] == true) {
+        final apiData = response['data'];
+        final String token = apiData['tokens']['accessToken'];
+        final userJson = apiData['user'];
+
+        if (userJson != null) {
+          final user = UserModel.fromJson(userJson);
+
+          await LocalStorage.setAuthToken(token);
+          await LocalStorage.setUserID(userJson['id'] ?? ""); 
+          String fullName = "${user.firstName ?? ''} ${user.lastName ?? ''}".trim();
+          await LocalStorage.setUserName(fullName.isEmpty ? "Utilisateur" : fullName);
+          LocalStorage.setAlwaysLoggedIn(isChecked);
+
+          final session = Get.find<SessionController>();
+
+          isLoading.value = false;
+
+          if (session.vientDeLaDecouverte) {
+            print("🚀 Redirection : Mode Découverte activé");
+            Get.offAllNamed('/niveau');
+          } else {
+            print("👋 Redirection : Premier accès direct");
+            Get.offAllNamed('/bienvenue');
+          }
         }
       } else {
-        isLoading(false);
-        appSnackbar(
-          heading: "Erreur",
-          message: "Identifiants invalides ou réponse inattendue.",
-        );
+        isLoading.value = false;
+        appSnackbar(heading: "Échec", message: "Identifiants incorrects.");
       }
-    } on DioException catch (e) {
-      isLoading(false);
-      letMeHandleAllErrors(e);
+    } catch (e) {
+      isLoading.value = false;
+      appSnackbar(heading: "Erreur", message: "Une erreur est survenue.");
     }
   }
 
-  //=================== Connexion via empreinte digitale
-
-  void goToForgotPassword() {
-    Get.toNamed('/auth/forgot_password');
-  }
-
-  void gotoRegister() {
-    Get.offAndToNamed('/auth/register');
-  }
-
-  void gotoLogin() {
-    Get.offAndToNamed('/auth/login');
+  @override
+  void onClose() {
+    email.dispose();
+    password.dispose();
+    super.onClose();
   }
 }

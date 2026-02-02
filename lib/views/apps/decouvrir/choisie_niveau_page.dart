@@ -1,3 +1,5 @@
+import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
+import 'package:fasolingo/models/langue/langue_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,38 +11,15 @@ class ChoisieNiveauPage extends StatefulWidget {
 }
 
 class _ChoisieNiveauPageState extends State<ChoisieNiveauPage> {
-  String selectedLevel = "";
-
-  final List<Map<String, dynamic>> levels = [
-    {
-      "id": "beginner",
-      "title": "Débutant",
-      "desc": "Je ne connais pas encore cette langue.",
-      "icon": Icons.child_care,
-    },
-    {
-      "id": "intermediate",
-      "title": "Intermédiaire",
-      "desc": "Je connais quelques bases.",
-      "icon": Icons.menu_book,
-    },
-    {
-      "id": "advanced",
-      "title": "Avancé",
-      "desc": "Je veux me perfectionner.",
-      "icon": Icons.psychology,
-    },
-    {
-      "id": "test",
-      "title": "Passer un test",
-      "desc": "Évaluez votre niveau automatiquement.",
-      "icon": Icons.assignment_turned_in,
-    },
-  ];
+  final languagesController = Get.find<LanguagesController>();
+  String selectedLevelId = "";
 
   @override
   Widget build(BuildContext context) {
     const Color primaryColor = Color.fromARGB(255, 0, 0, 153);
+    
+    final List<LevelModel> backendLevels = 
+        languagesController.selectedLanguage.value?.levels ?? [];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -51,9 +30,9 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Sélectionne ton niveau',
-          style: TextStyle(
+        title: Text(
+          'Apprendre le ${languagesController.selectedLanguage.value?.name ?? "..."}',
+          style: const TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -76,45 +55,38 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              "Cela nous aidera à adapter les leçons pour vous.",
+              "Nous adapterons les leçons de ${languagesController.selectedLanguage.value?.name} pour vous.",
               style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
             ),
             const SizedBox(height: 35),
+            
             Expanded(
-              child: ListView.separated(
-                itemCount: levels.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 16),
+              child: backendLevels.isEmpty 
+                ? const Center(child: Text("Aucun niveau disponible pour cette langue"))
+                : ListView.separated(
+                itemCount: backendLevels.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 16),
                 itemBuilder: (context, index) {
-                  final level = levels[index];
-                  bool isSelected = selectedLevel == level['id'];
+                  final level = backendLevels[index];
+                  bool isSelected = selectedLevelId == level.id;
 
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeInOut,
                     child: InkWell(
-                      onTap: () => setState(() => selectedLevel = level['id']!),
+                      onTap: () => setState(() => selectedLevelId = level.id),
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(15), 
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? primaryColor.withOpacity(0.05)
-                              : Colors.white,
+                          color: isSelected ? primaryColor.withOpacity(0.05) : Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: isSelected
-                                ? primaryColor
-                                : Colors.grey.shade200,
+                            color: isSelected ? primaryColor : Colors.grey.shade200,
                             width: 2,
                           ),
                           boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                      color: primaryColor.withOpacity(0.1),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4))
-                                ]
+                              ? [BoxShadow(color: primaryColor.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))]
                               : [],
                         ),
                         child: Row(
@@ -122,13 +94,11 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: isSelected
-                                    ? primaryColor
-                                    : Colors.grey.shade100,
+                                color: isSelected ? primaryColor : Colors.grey.shade100,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                level['icon'],
+                                Icons.stairs_outlined, 
                                 color: isSelected ? Colors.white : Colors.grey,
                                 size: 26,
                               ),
@@ -139,32 +109,24 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    level['title']!,
+                                    level.name,
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: isSelected
-                                          ? primaryColor
-                                          : Colors.black87,
+                                      color: isSelected ? primaryColor : Colors.black87,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    level['desc']!,
-                                    style: TextStyle(
-                                        color: Colors.grey.shade600,
-                                        fontSize: 14),
+                                    level.description, 
+                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                                   ),
                                 ],
                               ),
                             ),
                             Icon(
-                              isSelected
-                                  ? Icons.check_circle
-                                  : Icons.radio_button_off,
-                              color: isSelected
-                                  ? primaryColor
-                                  : Colors.grey.shade300,
+                              isSelected ? Icons.check_circle : Icons.radio_button_off,
+                              color: isSelected ? primaryColor : Colors.grey.shade300,
                             ),
                           ],
                         ),
@@ -174,6 +136,7 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage> {
                 },
               ),
             ),
+            
             Padding(
               padding: const EdgeInsets.only(bottom: 40, top: 20),
               child: Container(
@@ -181,34 +144,24 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage> {
                 height: 60,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: selectedLevel.isNotEmpty
-                      ? [
-                          BoxShadow(
-                              color: primaryColor.withOpacity(0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 6))
-                        ]
+                  boxShadow: selectedLevelId.isNotEmpty
+                      ? [BoxShadow(color: primaryColor.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6))]
                       : [],
                 ),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     disabledBackgroundColor: Colors.grey.shade300,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  onPressed: selectedLevel.isEmpty
+                  onPressed: selectedLevelId.isEmpty
                       ? null
-                      : () => Get.offAllNamed('/HomeScreen'),
+                      : () {
+                          Get.offAllNamed('/HomeScreen');
+                        },
                   child: const Text(
                     "C'EST PARTI !",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      letterSpacing: 1.2,
-                    ),
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
               ),

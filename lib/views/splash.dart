@@ -16,7 +16,7 @@ class _SplashCreeState extends State<SplashCree> {
   final List<Map<String, String>> _pages = [
     {
       "image": "assets/images/app/splash1.jpg",
-      "title": "Bienvenue sur Fasolingo",
+      "title": "Bienvenue sur LinguaLearn",
       "subtitle": "L'application pour maîtriser nos langues locales facilement.",
     },
     {

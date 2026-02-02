@@ -23,7 +23,7 @@ class _AppBottomNavBarState extends State<AppBottomNavBar>
 final items = [
       _NavItem(
         icon: LucideIcons.layoutDashboard, 
-        label: 'Dashboard',
+        label: 'Accueil',
         index: 0,
       ),
       _NavItem(
@@ -37,7 +37,7 @@ final items = [
         index: 2,
       ),
       _NavItem(
-        icon: LucideIcons.user, 
+        icon: LucideIcons.settings, 
         label: 'Paramètres',
         index: 3,
       ),
@@ -55,7 +55,7 @@ final items = [
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: items.map((item) {
