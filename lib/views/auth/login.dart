@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -148,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                       label: "Facebook",
                       icon: Icons.facebook,
                       iconColor: Colors.blue,
-                      onTap: () {},
+                      onTap: () => Get.toNamed('stepsscreens'),
                     ),
                   ],
                 ),
