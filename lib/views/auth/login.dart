@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controller/auth/login_controller.dart'; 
+import '../../controller/auth/login_controller.dart';
 
 class LoginPage extends GetView<LoginController> {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-   // Au lieu de Get.find, utilise put si tu n'utilises pas de bindings
-final controller = Get.put(LoginController());
+    // Au lieu de Get.find, utilise put si tu n'utilises pas de bindings
+    final controller = Get.put(LoginController());
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -57,13 +57,16 @@ final controller = Get.put(LoginController());
                   builder: (_) => TextFormField(
                     controller: controller.password,
                     obscureText: !controller.showPassword,
-                    validator: (value) => value!.isEmpty ? "Mot de passe requis" : null,
+                    validator: (value) =>
+                        value!.isEmpty ? "Mot de passe requis" : null,
                     decoration: InputDecoration(
                       labelText: "Mot de passe",
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          controller.showPassword ? Icons.visibility : Icons.visibility_off,
+                          controller.showPassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: controller.onChangeShowPassword,
                       ),
@@ -87,7 +90,6 @@ final controller = Get.put(LoginController());
                   ),
                 ),
 
-
                 // Se souvenir de moi
                 GetBuilder<LoginController>(
                   builder: (_) => Row(
@@ -98,11 +100,13 @@ final controller = Get.put(LoginController());
                         activeColor: const Color.fromARGB(255, 0, 0, 153),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4)),
-                        onChanged: (value) => controller.onChangeCheckBox(value),
+                        onChanged: (value) =>
+                            controller.onChangeCheckBox(value),
                       ),
                       const Text(
                         "Se souvenir de moi",
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w400),
                       ),
                     ],
                   ),
@@ -115,21 +119,27 @@ final controller = Get.put(LoginController());
                   width: double.infinity,
                   height: 55,
                   child: Obx(() => ElevatedButton(
-  style: ElevatedButton.styleFrom(
-    backgroundColor: const Color.fromARGB(255, 0, 0, 153),
-    elevation: 0,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  ),
-  onPressed: controller.isLoading.value 
-      ? null 
-      : () => controller.onLogin(), // On appelle la logique centralisée
-  child: controller.isLoading.value
-      ? const CircularProgressIndicator(color: Colors.white)
-      : const Text(
-          "Se connecter",
-          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 0, 0, 153),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : () => controller
+                                .onLogin(), // On appelle la logique centralisée
+                        child: controller.isLoading.value
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
+                            : const Text(
+                                "Se connecter",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                      )),
                 ),
 
                 const SizedBox(height: 15),
