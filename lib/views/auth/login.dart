@@ -25,6 +25,7 @@ class LoginPage extends GetView<LoginController> {
                     height: 150,
                     errorBuilder: (context, error, stackTrace) =>
                         const Icon(Icons.login, size: 100, color: Colors.blue)),
+
                 const Text(
                   "Bienvenue sur Lingualearn",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -51,34 +52,25 @@ class LoginPage extends GetView<LoginController> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Champ Mot de passe avec GetBuilder pour l'oeil
-                GetBuilder<LoginController>(
-                  builder: (_) => TextFormField(
-                    controller: controller.password,
-                    obscureText: !controller.showPassword,
-                    validator: (value) =>
-                        value!.isEmpty ? "Mot de passe requis" : null,
-                    decoration: InputDecoration(
-                      labelText: "Mot de passe",
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          controller.showPassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-                        onPressed: controller.onChangeShowPassword,
+                TextFormField(
+                  obscureText: _showPassword,
+                  decoration: InputDecoration(
+                    labelText: "Mot de passe",
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _showPassword ? Icons.visibility_off : Icons.visibility,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
+                      onPressed: () =>
+                          setState(() => _showPassword = !_showPassword),
                     ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
                   ),
                 ),
-
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -90,23 +82,25 @@ class LoginPage extends GetView<LoginController> {
                   ),
                 ),
 
-                // Se souvenir de moi
-                GetBuilder<LoginController>(
-                  builder: (_) => Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Checkbox(
-                        value: controller.isChecked,
-                        activeColor: const Color.fromARGB(255, 0, 0, 153),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4)),
-                        onChanged: (value) =>
-                            controller.onChangeCheckBox(value),
-                      ),
-                      const Text(
-                        "Se souvenir de moi",
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w400),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Checkbox(
+                      value: _isRememberMe,
+                      activeColor: const Color.fromARGB(255, 0, 0, 153),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)),
+                      onChanged: (value) {
+                        setState(() {
+                          _isRememberMe = value!;
+                        });
+                      },
+                    ),
+                    const Text(
+                      "Se souvenir de moi",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
                       ),
                     ],
                   ),
@@ -118,28 +112,25 @@ class LoginPage extends GetView<LoginController> {
                 SizedBox(
                   width: double.infinity,
                   height: 55,
-                  child: Obx(() => ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 0, 0, 153),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                        onPressed: controller.isLoading.value
-                            ? null
-                            : () => controller
-                                .onLogin(), // On appelle la logique centralisée
-                        child: controller.isLoading.value
-                            ? const CircularProgressIndicator(
-                                color: Colors.white)
-                            : const Text(
-                                "Se connecter",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                      )),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 0, 0, 153),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {}
+                    },
+                    child: const Text(
+                      "Se connecter",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 15),
@@ -160,7 +151,7 @@ class LoginPage extends GetView<LoginController> {
                       label: "Facebook",
                       icon: Icons.facebook,
                       iconColor: Colors.blue,
-                      onTap: () => Get.toNamed('/stepsscreens'),
+                      onTap: () {},
                     ),
                   ],
                 ),
@@ -193,9 +184,9 @@ class LoginPage extends GetView<LoginController> {
 
   Widget _socialButton(
       {required String label,
-      required IconData icon,
-      required Color iconColor,
-      required VoidCallback onTap}) {
+        required IconData icon,
+        required Color iconColor,
+        required VoidCallback onTap}) {
     return Expanded(
       child: ElevatedButton.icon(
         onPressed: onTap,
