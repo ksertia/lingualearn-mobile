@@ -145,7 +145,7 @@ class LoginPage extends GetView<LoginController> {
                         label: "Facebook",
                         icon: Icons.facebook,
                         iconColor: Colors.blue,
-                        onTap: ()  => Get.toNamed('/parcoursselectionpage'),),
+                        onTap: ()  => Get.toNamed(''),),
                   ],
                 ),
               ],

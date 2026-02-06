@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import '../../../../widgets/stepsscreens/custom_app_bar.dart';
 import '../../../../widgets/stepsscreens/parcours_item.dart';
 //import '../widgets/stepsscreens/custom_app_bar.dart';
 //import '../widgets/stepsscreens/parcours_item.dart';
 
 class StepsScreensPages extends StatelessWidget {
+
   const StepsScreensPages({super.key});
 
   @override
