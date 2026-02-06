@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:fasolingo/controller/apps/session_controller.dart';
+import 'package:fasolingo/helpers/storage/local_storage.dart';
 import '../../../models/module_model.dart';
 import '../../../widgets/module_card.dart';
 import '../../../widgets/timeline_dot.dart';
-import '../../../helpers/storage/local_storage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,12 +14,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String lastName = "Utilisateur";
+  String firstName = "Utilisateur";
+  final SessionController session = Get.find<SessionController>();
 
   final List<ModuleModel> modules = [
     ModuleModel(
       id: '1',
-      title: 'Etape 1',
+      title: 'Étape 1',
       subtitle: 'Bases : Salutations',
       completedLessons: 5,
       totalLessons: 5,
@@ -26,7 +28,7 @@ class _HomePageState extends State<HomePage> {
     ),
     ModuleModel(
       id: '2',
-      title: 'Etape 2',
+      title: 'Étape 2',
       subtitle: 'Présentations',
       completedLessons: 2,
       totalLessons: 5,
@@ -34,7 +36,7 @@ class _HomePageState extends State<HomePage> {
     ),
     ModuleModel(
       id: '3',
-      title: 'Etape 3',
+      title: 'Étape 3',
       subtitle: 'Expressions courantes',
       completedLessons: 0,
       totalLessons: 5,
@@ -48,19 +50,25 @@ class _HomePageState extends State<HomePage> {
     _loadUserData();
   }
 
-  void _loadUserData() async {
-    String? storedName = await LocalStorage.getUserName();
-    if (storedName != null) {
-      setState(() {
-        lastName = storedName.split(' ')[0];
-      });
-    }
+  void _loadUserData() {
+    String fullName = LocalStorage.getUserName() ?? "Utilisateur";
+    setState(() {
+      firstName = fullName;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+
+    String greeting = "Bonjour";
+    if (session.langueChoisie.toLowerCase().contains("mooré")) {
+      greeting = "Ne y windiga";
+    } else if (session.langueChoisie.toLowerCase().contains("dioula")) {
+      greeting = "I ni sogoma";
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA), 
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
@@ -68,12 +76,15 @@ class _HomePageState extends State<HomePage> {
           'LinguaLearn',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(Icons.notifications_none, color: Colors.black),
-        //     onPressed: () {},
-        //   ),
-        // ],
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 15),
+            child: CircleAvatar(
+              backgroundColor: Colors.orange.shade100,
+              child: Text(firstName[0], style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+            ),
+          )
+        ],
       ),
       body: Column(
         children: [
@@ -91,11 +102,14 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Ne y windiga, $lastName ! 🇧🇫",
+                  "$greeting, $firstName ! 🇧🇫",
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
-                const Text("Prêt pour ta leçon de Mooré ?", style: TextStyle(color: Colors.grey)),
+                Text(
+                  "Prêt pour ta leçon de ${session.langueChoisie.isEmpty ? 'langue locale' : session.langueChoisie} ?",
+                  style: const TextStyle(color: Colors.grey, fontSize: 16),
+                ),
                 const SizedBox(height: 20),
                 
                 Row(
@@ -110,6 +124,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
+          // --- LISTE DES MODULES (TIMELINE) ---
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(20, 25, 20, 40),
@@ -122,13 +137,14 @@ class _HomePageState extends State<HomePage> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // La ligne verticale (Timeline)
                       Column(
                         children: [
                           TimelineDot(status: module.status),
                           if (!isLast)
                             Expanded(
                               child: Container(
-                                width: 2,
+                                width: 3,
                                 color: module.status == ModuleStatus.completed 
                                     ? Colors.green 
                                     : Colors.grey.shade300,
@@ -138,6 +154,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(width: 15),
                       
+                      // La carte du module
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 30),
@@ -145,9 +162,16 @@ class _HomePageState extends State<HomePage> {
                             module: module,
                             onTap: () {
                               if (module.status != ModuleStatus.locked) {
-                                // Get.toNamed('/module-detail', arguments: module);
+                                // Action vers les leçons du module
+                                print("Ouverture du module: ${module.title}");
                               } else {
-                                Get.snackbar("Verrouillé", "Termine le module précédent !");
+                                Get.snackbar(
+                                  "Module Verrouillé", 
+                                  "Termine l'étape précédente pour débloquer celle-ci !",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.black87,
+                                  colorText: Colors.white,
+                                );
                               }
                             },
                           ),
@@ -166,20 +190,20 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildStatItem(IconData icon, String value, String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 20),
+          Icon(icon, color: color, size: 22),
           const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
             ],
           ),
         ],

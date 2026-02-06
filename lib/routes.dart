@@ -9,7 +9,13 @@ import 'package:fasolingo/views/apps/decouvrir/step_mascotte.dart';
 import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
 import 'package:fasolingo/views/apps/home/home_page.dart';
 import 'package:fasolingo/views/apps/home/parcours_page.dart';
+import 'package:fasolingo/views/apps/home/screens/Detaillepage.dart';
+import 'package:fasolingo/views/apps/home/screens/Etapes2.dart';
+import 'package:fasolingo/views/apps/home/screens/Revision.dart';
+import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
+
 import 'package:fasolingo/views/apps/lexique/lexique_page.dart';
+
 import 'package:fasolingo/views/apps/profile/edit_profile.dart';
 import 'package:fasolingo/views/apps/profile/profile.dart';
 import 'package:fasolingo/views/apps/progres/progres_page.dart';
@@ -59,9 +65,17 @@ getPageRoute() {
      GetPage(name: '/intro', page: () => const IntroPage()),
      GetPage(name: '/step', page: () => const StepMascotte()),
      GetPage(name: '/selection', page: () => const LanguageSelectionPage()),
+
+    GetPage(name: '/stepsscreens', page: () => const StepsScreensPages()),
+    GetPage(name: '/detaillepage', page: () => const DetaillePage()),
+    GetPage(name: '/etapes2pages', page: () => const Etapes2Pages()),
+    GetPage(name: '/lesson1', page: () => const RevisionPage()),
+    GetPage(name: '/lesson2', page: () => const DetaillePage()),
+
      GetPage(name: '/bienvenue', page: () => const BienvenuPage()),
      GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
     GetPage(name: '/quiz_intro_screen', page: () => const QuizIntroScreen()),
+
 
 
 
@@ -102,6 +116,7 @@ getPageRoute() {
         name: '/maintenance',
         page: () => const MaintenancePage(),
         middlewares: [AuthMiddleware()]),
+
 
     ///---------------- Maps ----------------///
   ];

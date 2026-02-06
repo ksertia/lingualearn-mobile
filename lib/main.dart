@@ -27,31 +27,49 @@ import 'helpers/theme/theme_customizer.dart';
 import 'widgets/bottom_bar/navigation_provider.dart';
 
 Future<void> main() async {
-  Get.put(SessionController());
-  WidgetsFlutterBinding.ensureInitialized();
+  // 1. Indispensable pour l'asynchrone
+  WidgetsFlutterBinding.ensureInitialized(); 
+  
+  // 2. Initialisation PRIORITAIRE du stockage (on attend que ce soit fini)
+  await GetStorage.init();
+  await LocalStorage.init(); 
+  
+  // 3. Configuration des outils système
   setPathUrlStrategy();
-  await GetStorage.init();
-  await LocalStorage.init();
-  await GetStorage.init();
   initLogger();
+  
+  // 4. Initialisation des services dépendant du stockage
   APIService.initializeAPIService(
       devBaseUrl: AppConstant.baseURl, prodBaseUrl: AppConstant.baseURl);
+  
   AppStyle.init();
+  
+  // Logs de vérification
   log("GetToken ${LocalStorage.getAuthToken()}");
   log("GetUserID ${LocalStorage.getUserID()}");
+
+  // Gestion du thème au démarrage
   if (LocalStorage.getTheme() == "Dark") {
     LocalStorage.setTheme("Dark");
   } else {
     LocalStorage.setTheme("Light");
   }
+  
   LocalStorage.setAppLink(false);
+  
+  // 5. Initialisation finale avant le lancement
   await ThemeCustomizer.init();
+  
+  // Injection du controller principal
+  Get.put(SessionController());
+
   await SystemChrome.setPreferredOrientations(
     <DeviceOrientation>[
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ],
   );
+
   if (!kIsWeb) {
     LocalNotification().initialize();
   }
@@ -92,7 +110,7 @@ class _MyAppState extends State<MyApp> {
             darkTheme: AppTheme.darkTheme,
             defaultTransition: Transition.native,
             navigatorKey: NavigationService.navigatorKey,
-            initialRoute: "/splash",
+            initialRoute: "/splash", // Ta page d'onboarding/splash
             themeMode: LocalStorage.getTheme() == "Dark"
                 ? ThemeMode.dark
                 : ThemeMode.light,

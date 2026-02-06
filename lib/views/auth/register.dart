@@ -10,7 +10,6 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // On injecte le controller
 final controller = Get.put(RegisterController());
   int currentStep = 0;
 
@@ -19,7 +18,6 @@ final controller = Get.put(RegisterController());
       if (currentStep < 1) {
         setState(() => currentStep++);
       } else {
-        // Étape finale : on appelle la logique d'inscription du controller (API)
         controller.onRegister();
       }
     }
@@ -62,7 +60,7 @@ final controller = Get.put(RegisterController());
               Expanded(
                 child: SingleChildScrollView(
                   child: Form(
-                    key: controller.formKey, // Utilisation de la clé du controller
+                    key: controller.formKey, 
                     child: currentStep == 0 ? buildStep1() : buildStep2(),
                   ),
                 ),
@@ -114,7 +112,6 @@ final controller = Get.put(RegisterController());
     );
   }
 
-  /// --- ÉTAPE 1 : INFOS PERSOS ---
   Widget buildStep1() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +151,6 @@ final controller = Get.put(RegisterController());
     );
   }
 
-  /// --- ÉTAPE 2 : SÉCURITÉ ---
   Widget buildStep2() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,7 +190,6 @@ final controller = Get.put(RegisterController());
     );
   }
 
-  /// --- WIDGETS UTILITAIRES ---
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),

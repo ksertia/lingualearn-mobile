@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controller/auth/login_controller.dart'; 
+import '../../controller/auth/login_controller.dart';
 
 class LoginPage extends GetView<LoginController> {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-   // Au lieu de Get.find, utilise put si tu n'utilises pas de bindings
-final controller = Get.put(LoginController());
+    final controller = Get.put(LoginController());
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -16,7 +15,7 @@ final controller = Get.put(LoginController());
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 25),
           child: Form(
-            key: controller.formKey, // Utilisation de la clé du controller
+            key: controller.formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -24,7 +23,7 @@ final controller = Get.put(LoginController());
                 Image.asset("assets/images/logo/login.png",
                     height: 150,
                     errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.login, size: 100, color: Colors.blue)),
+                    const Icon(Icons.login, size: 100, color: Colors.blue)),
                 const Text(
                   "Bienvenue sur Lingualearn",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -36,7 +35,6 @@ final controller = Get.put(LoginController());
                 ),
                 const SizedBox(height: 20),
 
-                // Champ Email
                 TextFormField(
                   controller: controller.email,
                   validator: (value) => value!.isEmpty ? "Email requis" : null,
@@ -52,7 +50,6 @@ final controller = Get.put(LoginController());
                 ),
                 const SizedBox(height: 20),
 
-                // Champ Mot de passe avec GetBuilder pour l'oeil
                 GetBuilder<LoginController>(
                   builder: (_) => TextFormField(
                     controller: controller.password,
@@ -87,7 +84,6 @@ final controller = Get.put(LoginController());
                   ),
                 ),
 
-
                 // Se souvenir de moi
                 GetBuilder<LoginController>(
                   builder: (_) => Row(
@@ -110,26 +106,25 @@ final controller = Get.put(LoginController());
 
                 const SizedBox(height: 10),
 
-                // Bouton Se connecter avec Obx pour le loader
                 SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: Obx(() => ElevatedButton(
-  style: ElevatedButton.styleFrom(
-    backgroundColor: const Color.fromARGB(255, 0, 0, 153),
-    elevation: 0,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  ),
-  onPressed: controller.isLoading.value 
-      ? null 
-      : () => controller.onLogin(), // On appelle la logique centralisée
-  child: controller.isLoading.value
-      ? const CircularProgressIndicator(color: Colors.white)
-      : const Text(
-          "Se connecter",
-          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 0, 0, 153),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () => controller.onLogin(), 
+                    child: controller.isLoading.value
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                      "Se connecter",
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  )),
                 ),
 
                 const SizedBox(height: 15),
@@ -150,7 +145,7 @@ final controller = Get.put(LoginController());
                         label: "Facebook",
                         icon: Icons.facebook,
                         iconColor: Colors.blue,
-                        onTap: () {}),
+                        onTap: ()  => Get.toNamed('/stepsscreens'),),
                   ],
                 ),
               ],
@@ -182,9 +177,9 @@ final controller = Get.put(LoginController());
 
   Widget _socialButton(
       {required String label,
-      required IconData icon,
-      required Color iconColor,
-      required VoidCallback onTap}) {
+        required IconData icon,
+        required Color iconColor,
+        required VoidCallback onTap}) {
     return Expanded(
       child: ElevatedButton.icon(
         onPressed: onTap,
