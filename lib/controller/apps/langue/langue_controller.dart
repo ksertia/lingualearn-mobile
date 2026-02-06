@@ -46,7 +46,6 @@ class LanguagesController extends GetxController {
   Future<bool> saveLevelSelection() async {
     final session = Get.find<SessionController>();
     
-    // Récupération sécurisée de l'ID utilisateur
     final String userId = session.userId.value.isNotEmpty 
         ? session.userId.value 
         : (session.user?.id ?? "");
@@ -54,7 +53,6 @@ class LanguagesController extends GetxController {
     final String? languageId = selectedLanguage.value?.id;
     final String? levelId = selectedLevel.value?.id;
 
-    // Vérification avant de lancer l'appel
     if (userId.isEmpty || languageId == null || levelId == null) {
       print("⚠️ Données incomplètes : User=$userId, Lang=$languageId, Level=$levelId");
       _showErrorSnackbar("Sélection incomplète", "Veuillez choisir une langue et un niveau.");
@@ -87,10 +85,7 @@ class LanguagesController extends GetxController {
       if (levelOk) {
         print("✅ SUCCÈS TOTAL : Profil mis à jour sur le backend.");
         
-        // On met à jour la session locale pour que le Splash ne re-déclenche pas la sélection
-        session.langueChoisie.value = selectedLanguage.value!.name;
-        // Si tu as une variable 'niveauChoisi' dans SessionController, mets-la à jour ici aussi.
-        
+        session.langueChoisie.value = selectedLanguage.value!.name;        
         return true;
       } else {
         print("❌ Échec lors de la sauvegarde du niveau.");
@@ -107,7 +102,6 @@ class LanguagesController extends GetxController {
     }
   }
 
-  // Cette fonction peut être appelée si tu as un bouton "Confirmer" global
   Future<void> confirmAndGoToHome() async {
     if (isLoading.value) return;
 

@@ -9,7 +9,7 @@ class ChoisieNiveauPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final languagesController = Get.find<LanguagesController>();
-    
+
     const Color primaryColor = Color.fromARGB(255, 0, 0, 153);
 
     return Scaffold(
@@ -56,76 +56,101 @@ class ChoisieNiveauPage extends StatelessWidget {
               const SizedBox(height: 35),
               Expanded(
                 child: backendLevels.isEmpty
-                    ? const Center(child: Text("Aucun niveau disponible pour le moment."))
+                    ? const Center(
+                        child: Text("Aucun niveau disponible pour le moment."))
                     : ListView.separated(
                         itemCount: backendLevels.length,
                         physics: const BouncingScrollPhysics(),
-                        separatorBuilder: (context, index) => const SizedBox(height: 16),
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 16),
                         itemBuilder: (context, index) {
                           final level = backendLevels[index];
-                          
+
                           return Obx(() {
-                            bool isSelected = languagesController.selectedLevel.value?.id == level.id;
+                            bool isSelected =
+                                languagesController.selectedLevel.value?.id ==
+                                    level.id;
 
                             return InkWell(
-                              onTap: () => languagesController.selectLevel(level),
+                              onTap: () =>
+                                  languagesController.selectLevel(level),
                               borderRadius: BorderRadius.circular(20),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 250),
                                 padding: const EdgeInsets.all(18),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? primaryColor.withOpacity(0.05) : Colors.white,
+                                  color: isSelected
+                                      ? primaryColor.withOpacity(0.05)
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: isSelected ? primaryColor : Colors.grey.shade200,
+                                    color: isSelected
+                                        ? primaryColor
+                                        : Colors.grey.shade200,
                                     width: 2.5,
                                   ),
-                                  boxShadow: isSelected ? [
-                                    BoxShadow(
-                                        color: primaryColor.withOpacity(0.1),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4))
-                                  ] : [],
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                              color:
+                                                  primaryColor.withOpacity(0.1),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 4))
+                                        ]
+                                      : [],
                                 ),
                                 child: Row(
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
-                                        color: isSelected ? primaryColor : Colors.grey.shade100,
+                                        color: isSelected
+                                            ? primaryColor
+                                            : Colors.grey.shade100,
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
                                         Icons.trending_up_rounded,
-                                        color: isSelected ? Colors.white : Colors.grey,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.grey,
                                         size: 24,
                                       ),
                                     ),
                                     const SizedBox(width: 15),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             level.name,
                                             style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
-                                              color: isSelected ? primaryColor : Colors.black87,
+                                              color: isSelected
+                                                  ? primaryColor
+                                                  : Colors.black87,
                                             ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
                                             level.description,
                                             style: TextStyle(
-                                                color: Colors.grey.shade600, fontSize: 13, height: 1.3),
+                                                color: Colors.grey.shade600,
+                                                fontSize: 13,
+                                                height: 1.3),
                                           ),
                                         ],
                                       ),
                                     ),
                                     Icon(
-                                      isSelected ? Icons.check_circle_rounded : Icons.radio_button_off_rounded,
-                                      color: isSelected ? primaryColor : Colors.grey.shade300,
+                                      isSelected
+                                          ? Icons.check_circle_rounded
+                                          : Icons.radio_button_off_rounded,
+                                      color: isSelected
+                                          ? primaryColor
+                                          : Colors.grey.shade300,
                                     ),
                                   ],
                                 ),
@@ -135,11 +160,11 @@ class ChoisieNiveauPage extends StatelessWidget {
                         },
                       ),
               ),
-              
               Padding(
                 padding: const EdgeInsets.only(bottom: 40, top: 20),
                 child: Obx(() {
-                  bool hasLevelSelected = languagesController.selectedLevel.value != null;
+                  bool hasLevelSelected =
+                      languagesController.selectedLevel.value != null;
                   bool isApiLoading = languagesController.isLoading.value;
 
                   return SizedBox(
@@ -149,41 +174,44 @@ class ChoisieNiveauPage extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
                         disabledBackgroundColor: Colors.grey.shade300,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                         elevation: (hasLevelSelected) ? 6 : 0,
                       ),
- onPressed: (!hasLevelSelected || isApiLoading)
-    ? null
-    : () async {
-        // Double check de sécurité avant l'appel API
-        if (languagesController.selectedLanguage.value == null) {
-          Get.snackbar(
-            "Oups", 
-            "Veuillez recommencer la sélection de la langue.",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
-          Get.offAllNamed('/selection'); // On le renvoie au début
-          return;
-        }
+                      onPressed: (!hasLevelSelected || isApiLoading)
+                          ? null
+                          : () async {
+                              // Double check de sécurité avant l'appel API
+                              if (languagesController.selectedLanguage.value ==
+                                  null) {
+                                Get.snackbar(
+                                  "Oups",
+                                  "Veuillez recommencer la sélection de la langue.",
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                );
+                                Get.offAllNamed('/selection');
+                                return;
+                              }
 
-        // --- SAUVEGARDE SUR LE SERVEUR ---
-        bool success = await languagesController.saveLevelSelection();
-        
-        if (success) {
-          // Tout est bon, le serveur a enregistré Langue + Niveau
-          Get.offAllNamed('/HomeScreen');
-        } else {
-          // Le contrôleur affiche déjà l'erreur, mais on peut logguer ici
-          print("⚠️ Échec de la synchronisation finale avec le backend");
-        }
-      },
+                              // --- SAUVEGARDE SUR LE SERVEUR ---
+                              bool success = await languagesController
+                                  .saveLevelSelection();
+
+                              if (success) {
+                                Get.offAllNamed('/HomeScreen');
+                              } else {
+                                print(
+                                    "⚠️ Échec de la synchronisation finale avec le backend");
+                              }
+                            },
                       child: isApiLoading
                           ? const SizedBox(
                               height: 25,
                               width: 25,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 3),
                             )
                           : const Text(
                               "C'EST PARTI !",

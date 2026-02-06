@@ -1,6 +1,6 @@
 import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/models/user_model.dart'; // Assure-toi que l'import est correct
+import 'package:fasolingo/models/user_model.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,14 +22,11 @@ class _SplashCreeState extends State<SplashCree> {
     _checkStatus();
   }
 
-  // --- LOGIQUE DE REDIRECTION SYNCHRONISÉE ---
   void _checkStatus() async {
-    // Petit délai pour laisser le temps à l'UI de s'initialiser
     await Future.delayed(const Duration(milliseconds: 800));
 
     String? token = LocalStorage.getAuthToken();
 
-    // 1. Si pas de token, on affiche l'onboarding
     if (token == null || token.isEmpty || token == "null") {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -40,18 +37,13 @@ class _SplashCreeState extends State<SplashCree> {
     try {
       final session = Get.find<SessionController>();
 
-      // 2. On récupère le profil complet depuis le backend
-      // On utilise l'instance Dio du SessionController qui a déjà le Token
       final response = await session.dio.get('/users/me');
 
       if (response.statusCode == 200) {
-        // On utilise notre factory UserModel.fromJson qui analyse langue et niveau
         final fullUser = UserModel.fromJson(response.data['data']);
         
-        // Mise à jour de la session globale avec les données fraîches
         session.updateUser(fullUser, token);
 
-        // 3. AIGUILLAGE AUTOMATIQUE (Identique au LoginController)
         if (fullUser.selectedLanguageId == null) {
           print("➡️ Splash : Direction Bienvenue");
           Get.offAllNamed('/bienvenue');
@@ -65,12 +57,10 @@ class _SplashCreeState extends State<SplashCree> {
           Get.offAllNamed('/HomeScreen');
         }
       } else {
-        // Token expiré ou invalide
         if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
       debugPrint("🚨 Erreur Splash (API me) : $e");
-      // En cas d'erreur réseau, on affiche l'onboarding par défaut
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -95,7 +85,6 @@ class _SplashCreeState extends State<SplashCree> {
 
   @override
   Widget build(BuildContext context) {
-    // Écran de chargement pendant la vérification API (Splash technique)
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
@@ -109,7 +98,6 @@ class _SplashCreeState extends State<SplashCree> {
 
     final session = Get.find<SessionController>();
 
-    // Affichage de l'Onboarding (Splash visuel) si non connecté
     return Scaffold(
       body: Stack(
         children: [

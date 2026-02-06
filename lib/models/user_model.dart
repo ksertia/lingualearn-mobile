@@ -25,7 +25,6 @@ class UserModel {
     this.selectedLevelId,
   });
 
-  // Pour mettre à jour l'utilisateur localement après un choix de langue
   UserModel copyWith({
     String? selectedLanguageId,
     String? selectedLevelId,
@@ -45,17 +44,14 @@ class UserModel {
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // 1. On cible la partie 'user' car le JSON global contient 'user' et 'currentLanguage'
     final userData = json['user'] ?? json;
     final profileData = userData['profile'] ?? {};
     
-    // 2. Logique pour extraire le niveau actif (celui qui a un progrès commencé)
     String? foundLevelId;
     final currentLang = json['currentLanguage'];
     
     if (currentLang != null && currentLang['levels'] != null) {
       final levels = currentLang['levels'] as List;
-      // On cherche le niveau où userProgress n'est pas vide
       final activeLevel = levels.firstWhere(
         (l) => (l['userProgress'] as List).isNotEmpty,
         orElse: () => null,
@@ -73,7 +69,6 @@ class UserModel {
       accountType: userData['accountType'] ?? "learner",
       parentId: userData['parentId'],
       
-      // Récupération depuis la structure du backend reçue précédemment
       selectedLanguageId: currentLang?['id'], 
       selectedLevelId: foundLevelId,
     );

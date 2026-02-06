@@ -36,7 +36,6 @@ class LanguageLevelService {
   // --- RÉCUPÉRATION DES LANGUES ---
   Future<List<LanguageModel>> fetchLanguages() async {
     try {
-      // CORRECTION : Ta capture montre "/langues" et non "/languages"
       final response = await _dio.get('/languages'); 
       if (response.statusCode == 200) {
         final dynamic responseData = response.data['data'];
@@ -55,7 +54,6 @@ class LanguageLevelService {
   // --- SAUVEGARDE DE LA LANGUE ---
   Future<bool> selectLanguageForUser({required String userId, required String languageId}) async {
     try {
-      // Ici, le backend utilise l'anglais selon ta capture
       final String path = '/users/$userId/languages/$languageId/select';
       print("🚀 Requête Langue : $path");
       
@@ -72,7 +70,6 @@ class LanguageLevelService {
   // --- RÉCUPÉRATION DES NIVEAUX ---
   Future<List<dynamic>> fetchLevels() async {
     try {
-      // À vérifier si c'est /levels ou /niveaux sur ton swagger
       final response = await _dio.get('/levels'); 
       if (response.statusCode == 200) {
         return response.data['data'] as List<dynamic>;

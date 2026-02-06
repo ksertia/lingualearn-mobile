@@ -234,8 +234,6 @@ class LanguageSelectionPage extends StatelessWidget {
       onPressed: (!isSelected || isApiLoading)
           ? null
           : () {
-              // On passe à l'étape suivante sans appeler l'API
-              // La sauvegarde Langue + Niveau se fera sur la page finale
               Get.toNamed(session.vientDeLaDecouverte
                   ? '/decouvrir'
                   : '/niveau');
