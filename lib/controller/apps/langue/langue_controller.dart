@@ -1,5 +1,5 @@
 import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/services/langue/langue_service.dart'; 
+import 'package:fasolingo/helpers/services/langue/langue_service.dart';
 import 'package:fasolingo/models/langue/langue_model.dart';
 import 'package:get/get.dart';
 
@@ -15,12 +15,12 @@ class LanguagesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadAllLanguages(); 
+    loadAllLanguages();
   }
 
   void selectLanguage(LanguageModel lang) {
     selectedLanguage.value = lang;
-    selectedLevel.value = null; 
+    selectedLevel.value = null;
     print("📍 Langue sélectionnée localement : ${lang.name}");
   }
 
@@ -41,61 +41,59 @@ class LanguagesController extends GetxController {
     }
   }
 
-  /// --- LOGIQUE DE SAUVEGARDE COMPLÈTE ---
-
   Future<bool> saveLevelSelection() async {
     final session = Get.find<SessionController>();
-    
-    final String userId = session.userId.value.isNotEmpty 
-        ? session.userId.value 
+
+    final String userId = session.userId.value.isNotEmpty
+        ? session.userId.value
         : (session.user?.id ?? "");
 
     final String? languageId = selectedLanguage.value?.id;
     final String? levelId = selectedLevel.value?.id;
 
     if (userId.isEmpty || languageId == null || levelId == null) {
-      print("⚠️ Données incomplètes : User=$userId, Lang=$languageId, Level=$levelId");
-      _showErrorSnackbar("Sélection incomplète", "Veuillez choisir une langue et un niveau.");
+      print(
+          "⚠️ Données incomplètes : User=$userId, Lang=$languageId, Level=$levelId");
+      _showErrorSnackbar(
+          "Sélection incomplète", "Veuillez choisir une langue et un niveau.");
       return false;
     }
 
     try {
       isLoading(true);
 
-      // ÉTAPE 1 : Sauvegarder la langue sur le serveur
-      print("⏳ Étape 1/2 : Sauvegarde de la langue ($languageId) sur le serveur...");
+      print(
+          "⏳ Étape 1/2 : Sauvegarde de la langue ($languageId) sur le serveur...");
       bool langOk = await _languageService.selectLanguageForUser(
-        userId: userId, 
-        languageId: languageId
-      );
+          userId: userId, languageId: languageId);
 
       if (!langOk) {
         print("❌ Échec lors de la sauvegarde de la langue.");
-        _showErrorSnackbar("Erreur Serveur", "Impossible de sauvegarder votre choix de langue.");
+        _showErrorSnackbar("Erreur Serveur",
+            "Impossible de sauvegarder votre choix de langue.");
         return false;
       }
 
-      // ÉTAPE 2 : Sauvegarder le niveau sur le serveur
       print("⏳ Étape 2/2 : Sauvegarde du niveau ($levelId) sur le serveur...");
       bool levelOk = await _languageService.selectLevelForUser(
-        userId: userId, 
-        levelId: levelId
-      );
+          userId: userId, levelId: levelId);
 
       if (levelOk) {
         print("✅ SUCCÈS TOTAL : Profil mis à jour sur le backend.");
-        
-        session.langueChoisie.value = selectedLanguage.value!.name;        
+
+        session.selectedLanguageId.value = languageId;
+        session.selectedLevelId.value = levelId;
         return true;
       } else {
         print("❌ Échec lors de la sauvegarde du niveau.");
-        _showErrorSnackbar("Erreur Serveur", "La langue est sauvée mais pas le niveau.");
+        _showErrorSnackbar(
+            "Erreur Serveur", "La langue est sauvée mais pas le niveau.");
         return false;
       }
-
     } catch (e) {
       print("❌ Erreur critique lors de la synchronisation : $e");
-      _showErrorSnackbar("Erreur de connexion", "Le serveur ne répond pas correctement.");
+      _showErrorSnackbar(
+          "Erreur de connexion", "Le serveur ne répond pas correctement.");
       return false;
     } finally {
       isLoading(false);
@@ -107,13 +105,13 @@ class LanguagesController extends GetxController {
 
     bool isSaved = await saveLevelSelection();
     if (isSaved) {
-      Get.offAllNamed('/home'); 
+      Get.offAllNamed('/home');
     }
   }
 
   void _showErrorSnackbar(String title, String message) {
     Get.snackbar(
-      title, 
+      title,
       message,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Get.theme.colorScheme.errorContainer,

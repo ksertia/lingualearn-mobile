@@ -8,12 +8,15 @@ class SessionController extends GetxController {
   var token = "".obs;
   var userId = "".obs; 
   var isLoggedIn = false.obs;
-  var langueChoisie = "".obs;
+  
+  // --- AJOUTS CRITIQUES ICI ---
+  // On utilise des RxString pour que le Splash puisse les observer facilement
+  var selectedLanguageId = "".obs;
+  var selectedLevelId = "".obs;
 
   UserModel? user;
   bool vientDeLaDecouverte = false;
 
-  // 1. Déclarer Dio proprement
   late Dio dio;
 
   @override
@@ -22,19 +25,17 @@ class SessionController extends GetxController {
     _initDio();
   }
 
-  // 2. Initialiser Dio avec l'URL de base et le Token
   void _initDio() {
     dio = Dio(BaseOptions(
-      baseUrl: AppConstant.baseURl,  // Ton URL de base
+      baseUrl: AppConstant.baseURl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
     ));
 
-    // Cet intercepteur ajoute le token automatiquement à chaque appel
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
         String? storedToken = LocalStorage.getAuthToken();
-        if (storedToken != null && storedToken.isNotEmpty) {
+        if (storedToken != null && storedToken.isNotEmpty && storedToken != "null") {
           options.headers['Authorization'] = 'Bearer $storedToken';
         }
         return handler.next(options);
@@ -42,14 +43,19 @@ class SessionController extends GetxController {
     ));
   }
 
-  // Fonction appelée lors du Login réussi
+  // Fonction appelée lors du Login OU du Splash (quand le profil est chargé)
   void updateUser(UserModel newUser, String newToken) {
     user = newUser;
     userId.value = newUser.id;
     token.value = newToken;   
     isLoggedIn.value = true;
     
-    print(" ✅ SESSION INITIALISÉE : ID = ${userId.value}");
+    // --- ON SYNCHRONISE LES CHOIX DU SERVEUR ---
+    // On convertit les String? du modèle en "" (vide) si null pour les RxString
+    selectedLanguageId.value = newUser.selectedLanguageId ?? "";
+    selectedLevelId.value = newUser.selectedLevelId ?? "";
+    
+    print("✅ SESSION MAJ : Langue = ${selectedLanguageId.value}, Niveau = ${selectedLevelId.value}");
     update(); 
   }
 
@@ -62,6 +68,8 @@ class SessionController extends GetxController {
     userId.value = "";
     token.value = "";
     isLoggedIn.value = false;
+    selectedLanguageId.value = "";
+    selectedLevelId.value = "";
     print("📴 Session vidée");
     update();
   }

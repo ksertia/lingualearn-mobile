@@ -28,9 +28,7 @@ class _SplashCreeState extends State<SplashCree> {
     String? token = LocalStorage.getAuthToken();
 
     if (token == null || token.isEmpty || token == "null") {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
       return;
     }
 
@@ -39,31 +37,50 @@ class _SplashCreeState extends State<SplashCree> {
 
       final response = await session.dio.get('/users/me');
 
-      if (response.statusCode == 200) {
-        final fullUser = UserModel.fromJson(response.data['data']);
-        
-        session.updateUser(fullUser, token);
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        UserModel loggedInUser = UserModel.fromJson(response.data['data']);
 
-        if (fullUser.selectedLanguageId == null) {
-          print("➡️ Splash : Direction Bienvenue");
+        print("🔍 Splash : Vérification des listes sur le serveur...");
+        
+        final langRes = await session.dio.get('/users/${loggedInUser.id}/languages');
+        List userLangs = langRes.data['data'] ?? [];
+
+        var vraieLangueLocale = userLangs.firstWhere(
+          (l) => l['language']['code'] != 'fr', 
+          orElse: () => null
+        );
+
+        final levelRes = await session.dio.get('/users/${loggedInUser.id}/levels');
+        List userLevels = levelRes.data['data'] ?? [];
+
+        if (vraieLangueLocale != null) {
+          loggedInUser = loggedInUser.copyWith(
+            selectedLanguageId: vraieLangueLocale['languageId']
+          );
+        }
+        session.updateUser(loggedInUser, token);
+
+        if (vraieLangueLocale == null) {
+          print("➡️ Splash : Direction Bienvenue (Aucune langue locale)");
           Get.offAllNamed('/bienvenue');
         } 
-        else if (fullUser.selectedLevelId == null) {
-          print("➡️ Splash : Direction Sélection du niveau");
+        else if (userLevels.isEmpty) {
+          print("➡️ Splash : Direction Sélection du niveau (Langue ok, niveau vide)");
           Get.offAllNamed('/selection');
         } 
         else {
-          print("✅ Splash : Direction Accueil");
+          print("✅ Splash : Direction Accueil (Utilisateur totalement configuré)");
           Get.offAllNamed('/HomeScreen');
         }
       } else {
         if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
-      debugPrint("🚨 Erreur Splash (API me) : $e");
+      debugPrint("🚨 Erreur Splash (Check Lists) : $e");
       if (mounted) setState(() => _isLoading = false);
     }
   }
+
 
   final List<Map<String, String>> _pages = [
     {

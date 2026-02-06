@@ -35,48 +35,74 @@ class LoginController extends GetxController {
         "password": password.text,
       };
 
-      // Appel au service d'authentification
       final response = await AuthService.loginUser(credentials);
 
       if (response != null && response['success'] == true) {
-        final apiData = response['data']; // Contient 'user', 'tokens' et 'currentLanguage'
+        final apiData = response['data'];
         final String accessToken = apiData['tokens']['accessToken'];
+        final session = Get.find<SessionController>();
 
-        // 1. CRÉATION DE L'UTILISATEUR VIA LE MODÈLE
-        // On passe 'apiData' car notre factory UserModel.fromJson va chercher 'currentLanguage' dedans
-        final loggedInUser = UserModel.fromJson(apiData);
-
-        // 2. STOCKAGE PERSISTANT (LocalStorage)
         await LocalStorage.setAuthToken(accessToken);
+
+        print("⏳ Récupération du profil via /users/me...");
+        final profileRes = await session.dio.get('/users/me');
+        
+        UserModel loggedInUser;
+        if (profileRes.statusCode == 200 && profileRes.data['success'] == true) {
+          loggedInUser = UserModel.fromJson(profileRes.data['data']);
+        } else {
+          loggedInUser = UserModel.fromJson(apiData);
+        }
+
+        print("🔍 Vérification des listes de vérité sur le serveur...");
+        
+        List userLangs = [];
+        List userLevels = [];
+
+        try {
+          final langRes = await session.dio.get('/users/${loggedInUser.id}/languages');
+          userLangs = langRes.data['data'] ?? [];
+        } catch (e) {
+          print("ℹ️ Info : Pas de langues trouvées (404 ou vide), c'est un nouveau.");
+        }
+
+        try {
+          final levelRes = await session.dio.get('/users/${loggedInUser.id}/levels');
+          userLevels = levelRes.data['data'] ?? [];
+        } catch (e) {
+          print("ℹ️ Info : Aucun niveau trouvé (404 ou vide).");
+        }
+
         await LocalStorage.setUserID(loggedInUser.id);
         await LocalStorage.setEmail(loggedInUser.email);
-        
         String fullName = "${loggedInUser.firstName} ${loggedInUser.lastName}".trim();
         await LocalStorage.setUserName(fullName.isEmpty ? "Apprenant" : fullName);
         LocalStorage.setAlwaysLoggedIn(isChecked);
 
-        // 3. MISE À JOUR DE LA SESSION GLOBALE
-        final session = Get.find<SessionController>();
-        session.updateUser(loggedInUser, accessToken);
+        var vraieLangueLocale = userLangs.firstWhere(
+          (l) => l['language']['code'] != 'fr', 
+          orElse: () => null
+        );
 
+        if (vraieLangueLocale != null) {
+          loggedInUser = loggedInUser.copyWith(
+            selectedLanguageId: vraieLangueLocale['languageId']
+          );
+        }
+        
+        session.updateUser(loggedInUser, accessToken);
         isLoading.value = false;
 
-        // 4. NAVIGATION INTELLIGENTE
-        // On utilise les champs calculés par le UserModel pour décider où aller
-        
-        if (loggedInUser.selectedLanguageId == null) {
-          // Cas A : L'utilisateur n'a jamais choisi de langue (ex: Mooré, Dioula...)
-          print("➡️ Direction : Bienvenue (Nouveau profil)");
-          Get.offAllNamed('/bienvenue'); 
+        if (vraieLangueLocale == null) {
+          print("➡️ Direction : Bienvenue (Liste vide ou 404)");
+          Get.offAllNamed('/bienvenue');
         } 
-        else if (loggedInUser.selectedLevelId == null) {
-          // Cas B : Langue choisie mais pas encore de niveau/progrès (Basique, Intermédiaire...)
-          print("➡️ Direction : Sélection du niveau (Incomplet)");
-          Get.offAllNamed('/selection'); // Assure-toi que cette route correspond à ton choix de niveau
+        else if (userLevels.isEmpty) {
+          print("➡️ Direction : Sélection du niveau");
+          Get.offAllNamed('/selection');
         } 
         else {
-          // Cas C : Profil complet, l'utilisateur a déjà commencé son apprentissage
-          print("✅ Direction : Home (Déjà configuré)");
+          print("✅ Direction : HomeScreen");
           Get.offAllNamed('/HomeScreen');
         }
 
@@ -89,10 +115,7 @@ class LoginController extends GetxController {
     } catch (e) {
       isLoading.value = false;
       print("❌ Erreur Critique Login: $e");
-      appSnackbar(
-        heading: "Erreur", 
-        message: "Impossible de se connecter. Vérifiez votre connexion réseau."
-      );
+      appSnackbar(heading: "Erreur", message: "Problème de connexion au serveur.");
     }
   }
 

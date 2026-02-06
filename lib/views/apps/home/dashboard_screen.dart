@@ -59,13 +59,18 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+String greeting = "Bonjour";
+// On récupère le nom de la langue depuis l'objet utilisateur en session
+String langue = session.user?.selectedLanguageId ?? ""; 
 
-    String greeting = "Bonjour";
-    if (session.langueChoisie.toLowerCase().contains("mooré")) {
-      greeting = "Ne y windiga";
-    } else if (session.langueChoisie.toLowerCase().contains("dioula")) {
-      greeting = "I ni sogoma";
-    }
+// Note : Si ton API ne renvoie que l'ID, il vaut mieux comparer les IDs directement
+// ou s'assurer que le nom est stocké. 
+// Si tu as accès au nom de la langue choisie :
+if (langue.toLowerCase().contains("mooré")) {
+  greeting = "Ne y windiga";
+} else if (langue.toLowerCase().contains("dioula")) {
+  greeting = "I ni sogoma";
+}
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -107,7 +112,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  "Prêt pour ta leçon de ${session.langueChoisie.isEmpty ? 'langue locale' : session.langueChoisie} ?",
+                  "Prêt pour ta leçon de ${langue.isEmpty ? 'langue locale' : langue} ?",
                   style: const TextStyle(color: Colors.grey, fontSize: 16),
                 ),
                 const SizedBox(height: 20),
