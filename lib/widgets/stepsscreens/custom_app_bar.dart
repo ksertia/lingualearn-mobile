@@ -1,44 +1,41 @@
-// lib/widgets/custom_app_bar.dart
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
-  const CustomAppBar({super.key, required this.title});
+  const CustomAppBar({
+    super.key,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.orange,
-        border: const Border(bottom: BorderSide(color: Colors.black, width: 2)),
+    // La couleur orange de ta ligne 5
+    const Color orangeAccent = Color(0xFFFF8C00);
+
+    return AppBar(
+      // Toute la barre devient orange ici
+      backgroundColor: orangeAccent,
+      elevation: 0,
+      // L'icône de retour devient noire ou blanche pour être visible sur l'orange
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
+        onPressed: () => Navigator.of(context).pop(),
       ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
-            Expanded(
-              child: Center(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 48), // Pour équilibrer le bouton retour
-          ],
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.black, // Texte en noir comme sur ton exemple
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
         ),
       ),
+      centerTitle: true,
+      // Ajout d'une bordure noire fine tout autour comme sur ton image
+      shape: Border.all(color: Colors.black, width: 1),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(80);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
