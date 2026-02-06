@@ -7,7 +7,6 @@ class LoginPage extends GetView<LoginController> {
 
   @override
   Widget build(BuildContext context) {
-    // Au lieu de Get.find, utilise put si tu n'utilises pas de bindings
     final controller = Get.put(LoginController());
 
     return Scaffold(
@@ -16,7 +15,7 @@ class LoginPage extends GetView<LoginController> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 25),
           child: Form(
-            key: controller.formKey, // Utilisation de la clé du controller
+            key: controller.formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -36,7 +35,6 @@ class LoginPage extends GetView<LoginController> {
                 ),
                 const SizedBox(height: 20),
 
-                // Champ Email
                 TextFormField(
                   controller: controller.email,
                   validator: (value) => value!.isEmpty ? "Email requis" : null,
@@ -52,7 +50,6 @@ class LoginPage extends GetView<LoginController> {
                 ),
                 const SizedBox(height: 20),
 
-                // Champ Mot de passe avec GetBuilder pour l'oeil
                 GetBuilder<LoginController>(
                   builder: (_) => TextFormField(
                     controller: controller.password,
@@ -87,7 +84,6 @@ class LoginPage extends GetView<LoginController> {
                   ),
                 ),
 
-
                 // Se souvenir de moi
                 GetBuilder<LoginController>(
                   builder: (_) => Row(
@@ -110,7 +106,6 @@ class LoginPage extends GetView<LoginController> {
 
                 const SizedBox(height: 10),
 
-                // Bouton Se connecter avec Obx pour le loader
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -122,7 +117,7 @@ class LoginPage extends GetView<LoginController> {
                     ),
                     onPressed: controller.isLoading.value
                         ? null
-                        : () => controller.onLogin(), // On appelle la logique centralisée
+                        : () => controller.onLogin(), 
                     child: controller.isLoading.value
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text(
