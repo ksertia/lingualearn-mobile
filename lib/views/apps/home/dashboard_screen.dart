@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   final List<ModuleModel> modules = [
     ModuleModel(
       id: '1',
-      title: 'Étape 1',
+      title: 'Module 1',
       subtitle: 'Bases : Salutations',
       completedLessons: 5,
       totalLessons: 5,
@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
     ),
     ModuleModel(
       id: '2',
-      title: 'Étape 2',
+      title: 'Module 2',
       subtitle: 'Présentations',
       completedLessons: 2,
       totalLessons: 5,
@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
     ),
     ModuleModel(
       id: '3',
-      title: 'Étape 3',
+      title: 'Module 3',
       subtitle: 'Expressions courantes',
       completedLessons: 0,
       totalLessons: 5,
@@ -167,6 +167,7 @@ if (langue.toLowerCase().contains("mooré")) {
                             module: module,
                             onTap: () {
                               if (module.status != ModuleStatus.locked) {
+                                Get.toNamed('/parcoursselectionpage', arguments: module.id);
                                 // Action vers les leçons du module
                                 print("Ouverture du module: ${module.title}");
                               } else {

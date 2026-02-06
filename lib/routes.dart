@@ -11,6 +11,8 @@ import 'package:fasolingo/views/apps/home/parcours_page.dart';
 import 'package:fasolingo/views/apps/home/screens/Detaillepage.dart';
 import 'package:fasolingo/views/apps/home/screens/Etapes2.dart';
 import 'package:fasolingo/views/apps/home/screens/Revision.dart';
+import 'package:fasolingo/views/apps/home/screens/lesson_selection_screen.dart';
+import 'package:fasolingo/views/apps/home/screens/parcours.dart';
 import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
 
 import 'package:fasolingo/views/apps/lexique/lexique_page.dart';
@@ -67,11 +69,17 @@ getPageRoute() {
 
     GetPage(name: '/stepsscreens', page: () => const StepsScreensPages()),
     GetPage(name: '/detaillepage', page: () => const DetaillePage()),
-    GetPage(name: '/etapes2pages', page: () => const Etapes2Pages()),
-    GetPage(name: '/lesson1', page: () => const RevisionPage()),
+    //GetPage(name: '/etapes2pages', page: () => const Etapes2Pages()),
+    GetPage(name: '/lessonselectionscreen', page: () => const LessonSelectionScreen()),
     GetPage(name: '/lesson2', page: () => const DetaillePage()),
+    GetPage(name: '/parcoursselectionpage', page: () => const ParcoursSelectionPage()),
+    //GetPage(name: '/parcoursselectionpage', page: () => const ParcoursSelectionPage()),
 
-     GetPage(name: '/bienvenue', page: () => const BienvenuPage()),
+
+
+
+
+    GetPage(name: '/bienvenue', page: () => const BienvenuPage()),
      GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
 
 
