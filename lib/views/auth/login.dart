@@ -144,7 +144,7 @@ final controller = Get.put(LoginController());
                         label: "Google",
                         icon: Icons.g_mobiledata,
                         iconColor: Colors.red,
-                        onTap: () {}),
+                        onTap: () => Get.toNamed('/quiz_intro_screen'),),
                     const SizedBox(width: 15),
                     _socialButton(
                         label: "Facebook",

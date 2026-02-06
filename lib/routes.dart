@@ -1,3 +1,4 @@
+import 'package:fasolingo/views/Quiz/quiz_intro_screen.dart';
 import 'package:fasolingo/views/apps/change_language.dart';
 import 'package:fasolingo/views/apps/decouvrir/bienvenu_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/choisie_niveau_page.dart';
@@ -60,7 +61,7 @@ getPageRoute() {
      GetPage(name: '/selection', page: () => const LanguageSelectionPage()),
      GetPage(name: '/bienvenue', page: () => const BienvenuPage()),
      GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
-
+    GetPage(name: '/quiz_intro_screen', page: () => const QuizIntroScreen()),
 
 
 
