@@ -73,6 +73,8 @@ getPageRoute() {
     GetPage(name: '/lessonselectionscreen', page: () => const LessonSelectionScreen()),
     GetPage(name: '/lesson2', page: () => const DetaillePage()),
     GetPage(name: '/parcoursselectionpage', page: () => const ParcoursSelectionPage()),
+    //GetPage(name: '/parcoursselectionpage', page: () => const ParcoursSelectionPage()),
+
 
 
 
