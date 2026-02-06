@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'package:fasolingo/controller/apps/settings/settings_controller.dart';
 import 'package:fasolingo/helpers/constant/images.dart';
-import 'package:fasolingo/helpers/extensions/string.dart';
 import 'package:fasolingo/helpers/my_widgets/my_text.dart';
-import 'package:fasolingo/helpers/services/navigation_service.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/helpers/theme/app_notifier.dart';
 import 'package:fasolingo/helpers/utils/ui_mixins.dart';
@@ -24,16 +22,19 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen>
     with SingleTickerProviderStateMixin, UIMixin {
+  // Injection du controller
   final controller = Get.put(SettingsController());
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: true, // Permet le retour arrière standard
       child: Consumer<AppNotifier>(
         builder: (_, value, child) => Scaffold(
+          backgroundColor: contentTheme.background,
           body: Obx(() {
-            if (controller.isLoading.value) {
+            // Affiche le loader seulement si on n'a pas encore de données utilisateur
+            if (controller.isLoading.value && controller.user.value == null) {
               return const AppLoader();
             }
 
@@ -41,6 +42,7 @@ class _SettingScreenState extends State<SettingScreen>
               children: [
                 Platform.isIOS ? 70.verticalSpace : 60.verticalSpace,
                 
+                // --- SECTION PROFIL DYNAMIQUE ---
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
                   child: _buildProfileSection(),
@@ -64,9 +66,10 @@ class _SettingScreenState extends State<SettingScreen>
                       15.verticalSpace,
                       Divider(color: contentTheme.kE6E6E6, thickness: 1.0),
                       
+                      // BOUTON DECONNEXION
                       _buildSettingsItem(
                         icon: Images.logout,
-                        title: 'logout',
+                        title: 'logout'.tr, // Utilisation de .tr pour la traduction
                         onTap: () => _handleLogout(context),
                       ),
 
@@ -92,12 +95,19 @@ class _SettingScreenState extends State<SettingScreen>
     );
   }
 
+  // Widget de la section Profil avec Avatar dynamique
   Widget _buildProfileSection() {
     final user = controller.user.value;
+    
+    // Génération de l'initiale pour l'avatar par défaut
+    String initial = "U";
+    if (user?.firstName != null && user!.firstName!.isNotEmpty) {
+      initial = user.firstName![0].toUpperCase();
+    }
 
     return Row(
       children: [
-        CircleAvatar(
+CircleAvatar(
           radius: 35.sp,
           backgroundColor: contentTheme.primary.withOpacity(0.1),
           backgroundImage: AssetImage(Images.avatars[2]),
@@ -155,6 +165,7 @@ class _SettingScreenState extends State<SettingScreen>
     );
   }
 
+  // Widget pour le réglage de la langue
   Widget _buildLanguageSetting() {
     return InkWell(
       onTap: () => Get.toNamed('/selectLanguageScreen'), 
@@ -173,7 +184,7 @@ class _SettingScreenState extends State<SettingScreen>
               ),
             ),
             MyText.bodyMedium(
-              _getCurrentLanguageName(),
+              _getCurrentLanguageName().tr,
               color: contentTheme.primary,
               fontWeight: 500,
             ),
@@ -185,6 +196,7 @@ class _SettingScreenState extends State<SettingScreen>
     );
   }
 
+  // Widget pour le Dark Mode
   Widget _buildDarkModeSetting() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15.h),
@@ -216,10 +228,12 @@ class _SettingScreenState extends State<SettingScreen>
     );
   }
 
+  // Gestion de la déconnexion
   Future<void> _handleLogout(BuildContext context) async {
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
       builder: (_) => LogoutDeleteBottomSheet(
         title: 'logout',
@@ -232,14 +246,14 @@ class _SettingScreenState extends State<SettingScreen>
     }
   }
 
-String _getCurrentLanguageName() {
-  int index = controller.selectedLanguageIndex.value;
-  
-  if (index == 0) return "french";
-  if (index == 1) return "english";
-  if (index == 2) return "moore";
-  if (index == 3) return "dioula";
-  
-  return "french"; 
-}
+  String _getCurrentLanguageName() {
+    int index = controller.selectedLanguageIndex.value;
+    switch (index) {
+      case 0: return "french";
+      case 1: return "english";
+      case 2: return "moore";
+      case 3: return "dioula";
+      default: return "french";
+    }
+  }
 }

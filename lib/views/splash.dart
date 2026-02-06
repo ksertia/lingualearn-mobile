@@ -1,6 +1,8 @@
 import 'package:fasolingo/controller/apps/session_controller.dart';
+import 'package:fasolingo/helpers/storage/local_storage.dart';
+import 'package:fasolingo/models/user_model.dart'; // Assure-toi que l'import est correct
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; 
+import 'package:get/get.dart';
 
 class SplashCree extends StatefulWidget {
   const SplashCree({super.key});
@@ -12,6 +14,66 @@ class SplashCree extends StatefulWidget {
 class _SplashCreeState extends State<SplashCree> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkStatus();
+  }
+
+  // --- LOGIQUE DE REDIRECTION SYNCHRONISÉE ---
+  void _checkStatus() async {
+    // Petit délai pour laisser le temps à l'UI de s'initialiser
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    String? token = LocalStorage.getAuthToken();
+
+    // 1. Si pas de token, on affiche l'onboarding
+    if (token == null || token.isEmpty || token == "null") {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+      return;
+    }
+
+    try {
+      final session = Get.find<SessionController>();
+
+      // 2. On récupère le profil complet depuis le backend
+      // On utilise l'instance Dio du SessionController qui a déjà le Token
+      final response = await session.dio.get('/users/me');
+
+      if (response.statusCode == 200) {
+        // On utilise notre factory UserModel.fromJson qui analyse langue et niveau
+        final fullUser = UserModel.fromJson(response.data['data']);
+        
+        // Mise à jour de la session globale avec les données fraîches
+        session.updateUser(fullUser, token);
+
+        // 3. AIGUILLAGE AUTOMATIQUE (Identique au LoginController)
+        if (fullUser.selectedLanguageId == null) {
+          print("➡️ Splash : Direction Bienvenue");
+          Get.offAllNamed('/bienvenue');
+        } 
+        else if (fullUser.selectedLevelId == null) {
+          print("➡️ Splash : Direction Sélection du niveau");
+          Get.offAllNamed('/selection');
+        } 
+        else {
+          print("✅ Splash : Direction Accueil");
+          Get.offAllNamed('/HomeScreen');
+        }
+      } else {
+        // Token expiré ou invalide
+        if (mounted) setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      debugPrint("🚨 Erreur Splash (API me) : $e");
+      // En cas d'erreur réseau, on affiche l'onboarding par défaut
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   final List<Map<String, String>> _pages = [
     {
@@ -33,8 +95,21 @@ class _SplashCreeState extends State<SplashCree> {
 
   @override
   Widget build(BuildContext context) {
+    // Écran de chargement pendant la vérification API (Splash technique)
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Color.fromARGB(255, 255, 127, 0),
+          ),
+        ),
+      );
+    }
+
     final session = Get.find<SessionController>();
 
+    // Affichage de l'Onboarding (Splash visuel) si non connecté
     return Scaffold(
       body: Stack(
         children: [
@@ -67,7 +142,7 @@ class _SplashCreeState extends State<SplashCree> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (_currentPage == _pages.length - 1) ...[
-                  Image.asset("assets/images/logo/login.png", height: 350),
+                  Image.asset("assets/images/logo/login.png", height: 150),
                   const SizedBox(height: 10),
                 ],
                 Text(
@@ -92,17 +167,16 @@ class _SplashCreeState extends State<SplashCree> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 255, 127, 0),
-                        foregroundColor: Colors.black,
+                        foregroundColor: Colors.white,
                       ),
                       onPressed: () {
-                        session.vientDeLaDecouverte = true; 
+                        session.vientDeLaDecouverte = true;
                         Get.toNamed('/intro');
                       },
                       child: const Text("Découvrir"),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -111,14 +185,13 @@ class _SplashCreeState extends State<SplashCree> {
                         foregroundColor: Colors.black,
                       ),
                       onPressed: () {
-                        session.vientDeLaDecouverte = false; 
+                        session.vientDeLaDecouverte = false;
                         Get.toNamed('/register');
                       },
                       child: const Text("S'inscrire"),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(
@@ -126,7 +199,7 @@ class _SplashCreeState extends State<SplashCree> {
                         side: const BorderSide(color: Colors.white),
                       ),
                       onPressed: () {
-                        session.vientDeLaDecouverte = false; 
+                        session.vientDeLaDecouverte = false;
                         Get.toNamed('/login');
                       },
                       child: const Text(
@@ -153,7 +226,8 @@ class _SplashCreeState extends State<SplashCree> {
   }
 
   Widget _buildDot(int index) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       height: 8,
       width: _currentPage == index ? 24 : 8,
       margin: const EdgeInsets.only(right: 5),
