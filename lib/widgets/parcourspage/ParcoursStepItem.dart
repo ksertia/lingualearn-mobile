@@ -7,8 +7,8 @@ class ParcoursStepItem extends StatelessWidget {
   final Color color;
   final bool isCompleted;
   final bool isActive;
-  final String imagePath;
-  final VoidCallback? onTap; // 1. ON DÉCLARE LA VARIABLE
+  final VoidCallback? onTap;
+  final IconData? icon;
 
   const ParcoursStepItem({
     super.key,
@@ -18,20 +18,20 @@ class ParcoursStepItem extends StatelessWidget {
     required this.color,
     this.isCompleted = false,
     this.isActive = false,
-    required this.imagePath,
-    this.onTap, // 2. ON L'AJOUTE AU CONSTRUCTEUR
+    this.onTap,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell( // 3. ON ENVELOPPE POUR RENDRE CLIQUABLE
+    return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         child: Row(
           children: [
-            // Indicateur d'état (Cercle)
+            // Cercle d'état
             Container(
               width: 55,
               height: 55,
@@ -49,19 +49,21 @@ class ParcoursStepItem extends StatelessWidget {
               child: Center(
                 child: isCompleted
                     ? const Icon(Icons.check, color: Colors.white, size: 28)
+                    : (icon != null
+                    ? Icon(icon, color: isActive ? Colors.white : Colors.grey, size: 28)
                     : Text(number,
                     style: TextStyle(
                         color: isActive ? Colors.white : Colors.grey,
                         fontSize: 20,
-                        fontWeight: FontWeight.bold)),
+                        fontWeight: FontWeight.bold))),
               ),
             ),
             const SizedBox(width: 15),
 
-            // Carte de contenu
+            // Carte de contenu (Numéro et points supprimés ici)
             Expanded(
               child: Container(
-                padding: const EdgeInsets.all(15),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -70,22 +72,16 @@ class ParcoursStepItem extends StatelessWidget {
                           ? color.withOpacity(0.5)
                           : Colors.grey.shade200),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("$number. $title",
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
-                          Text(subtitle,
-                              style: const TextStyle(
-                                  color: Colors.grey, fontSize: 14)),
-                        ],
-                      ),
-                    ),
-
+                    Text(title, // Suppression de "$number. "
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text(subtitle,
+                        style: const TextStyle(
+                            color: Colors.grey, fontSize: 14)),
                   ],
                 ),
               ),

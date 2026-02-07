@@ -5,26 +5,23 @@ import '../../../../widgets/stepsscreens/custom_app_bar.dart';
 import '../../../../widgets/stepsscreens/parcours_item.dart';
 //import '../widgets/stepsscreens/custom_app_bar.dart';
 //import '../widgets/stepsscreens/parcours_item.dart';
-
 class StepsScreensPages extends StatelessWidget {
-
   const StepsScreensPages({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF00008B);
-    const Color cyanAccent = Color(0xFF00CED1);
-    const Color orangeAccent = Color(0xFFFF8C00);
+    const Color primaryBlue = Color(0xFF00CED1);
+    const Color cyanAccent = Color(0xFFFF8C00);
+    const Color orangeAccent = Color(0xFF00008B);
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: const CustomAppBar(title: "Module 1: Introduction à la Science"),
       body: Stack(
         children: [
-          // LIGNE VERTICALE CORRIGÉE
           Positioned(
-            left: 56, // Ajusté pour être bien au centre des icônes
-            top: 130, // ON AUGMENTE LE TOP pour que la ligne commence SOUS le premier cercle
+            left: 56,
+            top: 130,
             bottom: 100,
             child: Container(
               width: 3,
@@ -46,33 +43,36 @@ class StepsScreensPages extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
 
-                // Étape 1
+                // ✅ Étape 1 : EN COURS → ICÔNE ✔
                 ParcoursItem(
-                  label: "Étape 1: ",
+                  label: "Étape 1:",
                   status: "En cours",
                   mainColor: primaryBlue,
-                  icon: Icons.play_arrow_rounded,
-                  onTap: () => Navigator.pushNamed(context, '/lessonselectionscreen'),
+                  icon: Icons.check, // ✔ AU LIEU DE ▶
+                  onTap: () =>
+                      Navigator.pushNamed(context, '/lessonselectionscreen'),
                 ),
 
                 const SizedBox(height: 30),
 
-                // Étape 2
+                // ▶ Étape 2 : EN COURS (icône play + cercle bleu)
+                // Étape 2 : EN COURS → ▶ ORANGE
                 ParcoursItem(
                   label: "Étape 2: Grammaires",
-                  status: "Verrouillé",
-                  mainColor: cyanAccent,
-                  icon: Icons.lock_outline,
-                  onTap: () => Navigator.pushNamed(context, '/etapes2pages'),
+                  status: "En cours",
+                  mainColor: cyanAccent, // ✅ ORANGE
+                  icon: Icons.play_arrow_rounded,
+                  onTap: () =>
+                      Navigator.pushNamed(context, '/etapes2pages'),
                 ),
 
                 const SizedBox(height: 30),
 
-                // Étape 3
+                // 🔒 Étape 3 : Verrouillée
                 ParcoursItem(
                   label: "Étape 3: Vocabulaires",
                   status: "Verrouillé",
-                  mainColor: orangeAccent,
+                  mainColor: Colors.grey,
                   icon: Icons.lock_outline,
                   onTap: () => print("Étape 3 verrouillée"),
                 ),

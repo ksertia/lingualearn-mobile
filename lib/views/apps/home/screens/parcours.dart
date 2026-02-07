@@ -1,27 +1,15 @@
-import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import '../../../../widgets/parcourspage/ParcoursStepItem.dart';
 import '../../../../widgets/stepsscreens/custom_app_bar.dart';
-//import '../stepsscreens/stepsscreens.dart'; // IMPORT de ta page d'étapes
 
 class ParcoursSelectionPage extends StatelessWidget {
   const ParcoursSelectionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF00008B);
-    const Color cyanAccent = Color(0xFF00CED1);
+    const Color primaryBlue = Color(0xFF00CED1);
     const Color orangeAccent = Color(0xFFFF8C00);
-
-    // Fonction pratique pour éviter de répéter Navigator.push
-    void goToSteps(BuildContext context) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const StepsScreensPages()),
-      );
-    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -31,6 +19,7 @@ class ParcoursSelectionPage extends StatelessWidget {
           Expanded(
             child: Stack(
               children: [
+                // Ligne verticale
                 Positioned(
                   left: 48, top: 40, bottom: 40,
                   child: Container(width: 2, color: Colors.grey.shade200),
@@ -45,53 +34,41 @@ class ParcoursSelectionPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 30),
 
+                    // PARCOURS 1 : Terminé
                     ParcoursStepItem(
                       number: "1",
                       title: "Parcours 1",
-                      subtitle: "Commencez ici",
+                      subtitle: "Terminé avec succès",
                       color: primaryBlue,
                       isCompleted: true,
-                      imagePath: 'assets/rocket.png',
-                        onTap: ()  => Get.toNamed('/stepsscreens'),
+                      onTap: () => Get.toNamed('/stepsscreens'),
                     ),
 
+                    // PARCOURS 2 : En cours
                     ParcoursStepItem(
                       number: "2",
                       title: "Parcours 2",
-                      subtitle: "Renseignez vos détails",
-                      color: cyanAccent,
-                      isCompleted: true,
-                      imagePath: 'assets/clipboard.png',
-                        onTap: () {}
+                      subtitle: "En cours",
+                      color: orangeAccent,
+                      isActive: true,
+                      isCompleted: false,
+                      icon: Icons.play_arrow_rounded,
+                      onTap: () {},
                     ),
 
+                    // PARCOURS 3 (Ancien Parcours 4) : Verrouillé
                     ParcoursStepItem(
                       number: "3",
                       title: "Parcours 3",
-                      subtitle: "Vérifiez vos informations",
-                      color: orangeAccent,
-                      isActive: true,
-                      imagePath: 'assets/search.png',
-                        onTap: () {}
-                    ),
-
-                    ParcoursStepItem(
-                      number: "4",
-                      title: "Parcours 4",
-                      subtitle: "Terminez le processus",
+                      subtitle: "Verouillé",
                       color: Colors.grey,
-                      imagePath: 'assets/trophy.png',
-                        onTap: () {}
+                      icon: Icons.lock_outline,
+                      onTap: () {},
                     ),
                   ],
                 ),
               ],
             ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(20),
-
           ),
         ],
       ),
