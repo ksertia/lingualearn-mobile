@@ -1,52 +1,96 @@
 import 'dart:convert';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
+import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/models/parcoure/parcour_model.dart';
-import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
 
 class StepsService {
-  // On utilise ta constante globale ici
-  final String baseUrl = AppConstant.baseURl;
-
-  Future<List<StepModel>> getSteps({
-    required String token,
-    required String languageId,
-    required String levelId,
-    required String moduleId,
-    required String pathId,
-  }) async {
+  static Future<List<StepModel>> getStepsByPath(String pathId) async {
     try {
-      final url = Uri.parse(
-        '$baseUrl/languages/$languageId/levels/$levelId/modules/$moduleId/paths/$pathId/steps'
-      );
+      final session = Get.find<SessionController>();
+      final String? userId = session.userId.value.isNotEmpty
+          ? session.userId.value
+          : session.user?.id;
 
-      final response = await http.get(
-        url,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        
-        // Vérification du flag "success" renvoyé par ton API
-        if (responseData['success'] == true) {
-          final List<dynamic> stepsList = responseData['data']['steps'];
-          
-          // Transformation du JSON en liste d'objets StepModel
-          return stepsList.map((json) => StepModel.fromJson(json)).toList();
-        } else {
-          throw Exception(responseData['message'] ?? "Échec de la récupération des étapes");
-        }
-      } else {
-        // Gestion des erreurs serveurs (401, 404, 500, etc.)
-        throw Exception("Erreur serveur : ${response.statusCode}");
+      if (userId == null || userId.isEmpty) {
+        print("🚨 [StepsService] userId manquant dans la session !");
+        return [];
       }
+
+      final String url = '/users/$userId/paths/$pathId/steps';
+      
+      print("🚀 [Steps API] Appel URL : $url");
+      print("🔑 [Steps API] UserId: $userId");
+      print("🔑 [Steps API] PathId: $pathId");
+      print("🔑 [Steps API] Token présent: ${session.token.value.isNotEmpty}");
+
+      final response = await session.dio.get(url);
+      
+      print("📊 [Steps API] Status Code: ${response.statusCode}");
+      print("📊 [Steps API] Response Data: ${response.data}");
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final List? stepsRaw = data['data'];
+
+          if (stepsRaw == null) return [];
+
+          return stepsRaw.map((json) {
+            return StepModel.fromJson(Map<String, dynamic>.from(json));
+          }).toList();
+        }
+      }
+      
+      return [];
     } catch (e) {
-      // Log de l'erreur pour le debug
-      print("Erreur dans StepsService : $e");
-      rethrow; // On renvoie l'erreur pour qu'elle soit gérée par le Controller
+      print("🚨 [StepsService] Erreur API : $e");
+      return [];
+    }
+  }
+
+  // Nouvelle méthode pour charger les étapes d'un parcours spécifique
+  static Future<List<StepModel>> getStepsBySpecificPath(String moduleId, String pathId) async {
+    try {
+      final session = Get.find<SessionController>();
+      final String? userId = session.userId.value.isNotEmpty
+          ? session.userId.value
+          : session.user?.id;
+
+      if (userId == null || userId.isEmpty) {
+        print("🚨 [StepsService] userId manquant dans la session !");
+        return [];
+      }
+
+      final String url = '/users/$userId/modules/$moduleId/paths/$pathId/steps';
+      
+      print("🚀 [Steps API] Appel URL spécifique : $url");
+      print("🔑 [Steps API] UserId: $userId");
+      print("🔑 [Steps API] ModuleId: $moduleId");
+      print("🔑 [Steps API] PathId spécifique: $pathId");
+      print("🔑 [Steps API] Token présent: ${session.token.value.isNotEmpty}");
+
+      final response = await session.dio.get(url);
+      
+      print("📊 [Steps API] Status Code: ${response.statusCode}");
+      print("📊 [Steps API] Response Data: ${response.data}");
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final List? stepsRaw = data['data'];
+
+          if (stepsRaw == null) return [];
+
+          return stepsRaw.map((json) {
+            return StepModel.fromJson(Map<String, dynamic>.from(json));
+          }).toList();
+        }
+      }
+      
+      return [];
+    } catch (e) {
+      print("🚨 [StepsService] Erreur API getStepsBySpecificPath: $e");
+      return [];
     }
   }
 }

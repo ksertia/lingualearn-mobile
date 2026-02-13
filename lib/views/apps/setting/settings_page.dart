@@ -1,4 +1,3 @@
-// Ne pas importer `dart:io` (non supporté sur le Web)
 import 'package:fasolingo/controller/apps/settings/settings_controller.dart';
 import 'package:fasolingo/helpers/constant/images.dart';
 import 'package:fasolingo/helpers/my_widgets/my_text.dart';
@@ -33,7 +32,6 @@ class _SettingScreenState extends State<SettingScreen>
         builder: (_, value, child) => Scaffold(
           backgroundColor: contentTheme.background,
           body: Obx(() {
-            // Affiche le loader seulement si on n'a pas encore de données utilisateur
             if (controller.isLoading.value && controller.user.value == null) {
               return const AppLoader();
             }
@@ -74,7 +72,7 @@ class _SettingScreenState extends State<SettingScreen>
                         final disabling = controller.isLoading.value;
                         return _buildSettingsItem(
                           icon: Images.logout,
-                          title: 'logout'.tr, // Utilisation de .tr pour la traduction
+                          title: 'logout'.tr, 
                           onTap: disabling ? null : () => _handleLogout(context),
                         );
                       }),

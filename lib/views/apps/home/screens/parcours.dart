@@ -72,12 +72,44 @@ class ParcoursSelectionPage extends StatelessWidget {
 
                   final path = controller.paths[index - 1];
 
-                  bool isCompleted = false;
-                  bool isActive = (index == 1) ? true : path.isActive;
+                  // 🔍 LOGS DEBUG - Données des parcours
+                  debugPrint("=== PATH ${index - 1} ===");
+                  debugPrint("ID: ${path.id}");
+                  debugPrint("Title: ${path.title}");
+                  debugPrint("Status: ${path.status}");
+                  debugPrint("Progress: ${path.progress}");
+                  debugPrint("ProgressPercentage: ${path.progressPercentage}");
+                  debugPrint("IsActive: ${path.isActive}");
+                  debugPrint("==================");
 
-                  if (index > 1) {
-                    isActive = false;
+                  // Utiliser les vrais statuts du backend
+                  String pathStatus = path.status ?? "locked";
+                  bool isCompleted = pathStatus == "completed";
+                  bool isUnlocked = pathStatus == "unlocked" || pathStatus == "completed";
+                  
+                  // 🔧 FALLBACK AMÉLIORÉ: Logique basée sur l'index des parcours
+                  if (pathStatus == "locked") {
+                    bool allPathsLocked = controller.paths.every((p) => (p.status ?? "locked") == "locked");
+                    
+                    if (allPathsLocked) {
+                      // Si tous les parcours sont locked, débloquer selon l'ordre séquentiel
+                      if (index == 1) {
+                        // Premier parcours toujours débloqué
+                        pathStatus = "unlocked";
+                        isUnlocked = true;
+                        print("🔓 [FALLBACK] Premier parcours débloqué automatiquement");
+                      } else {
+                        // Parcours suivants restent locked pour progression séquentielle
+                        pathStatus = "locked";
+                        isUnlocked = false;
+                      }
+                    }
                   }
+                  
+                  bool isActive = isUnlocked;
+
+                  // 📊 LOG du statut calculé
+                  print("Path ${index}: Status='$pathStatus' → isCompleted=$isCompleted, isActive=$isActive");
 
                   return ParcoursStepItem(
                     number: "${path.index + 1}",

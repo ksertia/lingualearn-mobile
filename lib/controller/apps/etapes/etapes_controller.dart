@@ -23,36 +23,28 @@ class StepsController extends GetxController {
   }
 
   Future<void> fetchSteps() async {
-    // Sécurité : si les IDs sont vides, on ne fait rien
-    if (moduleId.isEmpty || pathId.isEmpty) {
-      print("🚨 [StepsController] moduleId ou pathId manquant dans les arguments");
+    // Sécurité : si pathId est vide, on ne fait rien
+    if (pathId.isEmpty) {
+      print("🚨 [StepsController] pathId manquant dans les arguments");
       return;
     }
 
     try {
       isLoading.value = true;
       
-      // 2. On prépare les données requises par ton service
-      // On utilise .value pour les RxString du SessionController
-      String token = session.token.value;
-      String languageId = session.user?.selectedLanguageId ?? "";
-      String levelId = session.user?.selectedLevelId ?? "";
-
-      // 3. Appel de ton service avec TOUS les paramètres requis
-      List<StepModel> results = await _stepsService.getSteps(
-        token: token,
-        languageId: languageId,
-        levelId: levelId,
-        moduleId: moduleId,
-        pathId: pathId,
-      );
+      print("🔍 [StepsController] Chargement des étapes pour pathId: $pathId");
+      
+      // Utiliser l'endpoint qui fonctionne pour charger les étapes d'un parcours
+      List<StepModel> results = await StepsService.getStepsByPath(pathId);
       
       if (results.isNotEmpty) {
         // Tri par index (important pour l'ordre pédagogique)
         results.sort((a, b) => a.index.compareTo(b.index));
         steps.assignAll(results);
+        print("🏠 [Steps] ${results.length} étapes reçues pour le parcours $pathId");
       } else {
         steps.clear();
+        print("⚠️ [Steps] Aucune étape trouvée pour pathId: $pathId");
       }
     } catch (e) {
       print("🚨 [StepsController] Erreur lors du chargement : $e");

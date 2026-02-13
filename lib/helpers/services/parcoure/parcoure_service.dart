@@ -9,20 +9,31 @@ class LearningPathService {
   static Future<List<LearningPathModel>> getPathsByModule(String moduleId) async {
     try {
       final session = Get.find<SessionController>();
-      String langId = session.selectedLanguageId.value;
-      String levelId = session.selectedLevelId.value;
+      final String? userId = session.userId.value.isNotEmpty
+          ? session.userId.value
+          : session.user?.id;
 
-      final String url = '/languages/$langId/levels/$levelId/modules/$moduleId/paths';
+      if (userId == null || userId.isEmpty) {
+        print("🚨 [LearningPathService] userId manquant dans la session !");
+        return [];
+      }
+
+      final String url = '/users/$userId/paths?moduleId=$moduleId';
       
       print("🚀 [Path API] Appel URL : $url");
+      print("🔑 [Path API] UserId: $userId");
+      print("🔑 [Path API] ModuleId: $moduleId");
+      print("🔑 [Path API] Token présent: ${session.token.value.isNotEmpty}");
 
       final response = await session.dio.get(url);
+      
+      print("📊 [Path API] Status Code: ${response.statusCode}");
+      print("📊 [Path API] Response Data: ${response.data}");
 
       if (response.statusCode == 200 && response.data != null) {
-        // On vérifie la structure de manière ultra-sécurisée
         final data = response.data;
         if (data['success'] == true && data['data'] != null) {
-          final List? pathsRaw = data['data']['paths'];
+          final List? pathsRaw = data['data'];
 
           if (pathsRaw == null) return [];
 
@@ -61,6 +72,51 @@ class LearningPathService {
       return [];
     } catch (e) {
       print("🚨 [LearningPathService] Erreur API getPathsByUser: $e");
+      return [];
+    }
+  }
+
+  // Nouvelle méthode pour charger les parcours d'un module spécifique
+  static Future<List<LearningPathModel>> getPathsBySpecificModule(String moduleId) async {
+    try {
+      final session = Get.find<SessionController>();
+      final String? userId = session.userId.value.isNotEmpty
+          ? session.userId.value
+          : session.user?.id;
+
+      if (userId == null || userId.isEmpty) {
+        print("🚨 [LearningPathService] userId manquant dans la session !");
+        return [];
+      }
+
+      final String url = '/users/$userId/modules/$moduleId/paths';
+      
+      print("🚀 [Path API] Appel URL spécifique : $url");
+      print("🔑 [Path API] UserId: $userId");
+      print("🔑 [Path API] ModuleId spécifique: $moduleId");
+      print("🔑 [Path API] Token présent: ${session.token.value.isNotEmpty}");
+
+      final response = await session.dio.get(url);
+      
+      print("📊 [Path API] Status Code: ${response.statusCode}");
+      print("📊 [Path API] Response Data: ${response.data}");
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final List? pathsRaw = data['data'];
+
+          if (pathsRaw == null) return [];
+
+          return pathsRaw.map((json) {
+            return LearningPathModel.fromJson(Map<String, dynamic>.from(json));
+          }).toList();
+        }
+      }
+      
+      return [];
+    } catch (e) {
+      print("🚨 [LearningPathService] Erreur API getPathsBySpecificModule: $e");
       return [];
     }
   }

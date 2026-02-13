@@ -8,23 +8,21 @@ class ModuleService {
 
   static Future<List<ModuleModel>> getAllModules() async {
     try {
-      // Utiliser d'abord les RxString dans la session (mis à jour après sélection),
-      // puis fallback sur les valeurs présentes dans `session.user`.
-      final String? langId = session.selectedLanguageId.value.isNotEmpty
-          ? session.selectedLanguageId.value
-          : session.user?.selectedLanguageId;
-      final String? levelId = session.selectedLevelId.value.isNotEmpty
-          ? session.selectedLevelId.value
-          : session.user?.selectedLevelId;
+      // Utiliser l'userId de la session
+      final String? userId = session.userId.value.isNotEmpty
+          ? session.userId.value
+          : session.user?.id;
 
-      if (langId == null || langId.isEmpty || levelId == null || levelId.isEmpty) {
-        print("🚨 [ModuleService] languageId ou levelId manquant dans la session !");
+      if (userId == null || userId.isEmpty) {
+        print(" [ModuleService] userId manquant dans la session !");
         return [];
       }
 
-      final String url = '/languages/$langId/levels/$levelId/modules';
+      final String url = '/users/$userId/modules';
 
-      print("🚀 [Module API] Appel URL : $url");
+      print(" [Module API] Appel URL : $url");
+      print(" [Module API] UserId: $userId");
+      print(" [Module API] Token présent: ${session.token.value.isNotEmpty}");
       final response = await session.dio.get(url);
 
       if (response.statusCode == 200) {

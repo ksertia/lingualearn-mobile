@@ -79,27 +79,64 @@ class StepsScreensPages extends StatelessWidget {
                       itemCount: controller.steps.length,
                       itemBuilder: (context, index) {
                         final step = controller.steps[index];
-                        bool isUnlocked = (index == 0) ? true : step.isActive;
-                        bool isCompleted = false; 
+
+                        // LOGS DEBUG - Données des étapes
+                        debugPrint("=== STEP $index ===");
+                        debugPrint("ID: ${step.id}");
+                        debugPrint("Title: ${step.title}");
+                        debugPrint("Status: ${step.status}");
+                        debugPrint("Progress: ${step.progress}");
+                        debugPrint("ProgressPercentage: ${step.progressPercentage}");
+                        debugPrint("IsActive: ${step.isActive}");
+                        debugPrint("==================");
+
+                        // Utiliser les vrais statuts du backend
+                        String stepStatus = step.status ?? "locked";
+                        bool isCompleted = stepStatus == "completed";
+                        bool isUnlocked = stepStatus == "unlocked" || stepStatus == "completed";
+                        
+                        // FALLBACK AMÉLIORÉ: Logique basée sur l'index des étapes
+                        if (stepStatus == "locked") {
+                          bool allStepsLocked = controller.steps.every((s) => (s.status ?? "locked") == "locked");
+                          
+                          if (allStepsLocked) {
+                            // Si toutes les étapes sont locked, débloquer selon l'ordre séquentiel
+                            if (index == 0) {
+                              // Première étape toujours débloquée
+                              stepStatus = "unlocked";
+                              isUnlocked = true;
+                              print(" [FALLBACK] Première étape débloquée automatiquement");
+                            } else {
+                              // Étapes suivantes restent locked pour progression séquentielle
+                              stepStatus = "locked";
+                              isUnlocked = false;
+                            }
+                          }
+                        }
+                        
+                        bool isActive = isUnlocked;
+
+                        // LOG du statut calculé
+                        print("Step ${index + 1}: Status='$stepStatus' → isCompleted=$isCompleted, isActive=$isActive");
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 30),
                           child: ParcoursItem(
                             label: "Étape ${index + 1}: ${step.title}",
-                            status: isUnlocked 
+                            status: isActive 
                                 ? (isCompleted ? "Terminé" : "En cours") 
                                 : "Verrouillé",
-                            mainColor: isUnlocked 
+                            mainColor: isActive 
                                 ? (isCompleted ? primaryBlue : orangeAccent) 
                                 : colorLocked,
-                            icon: !isUnlocked 
+                            icon: !isActive 
                                 ? Icons.lock_outline 
                                 : (isCompleted ? Icons.check : Icons.play_arrow_rounded),
-                            onTap: isUnlocked
+                            onTap: isActive
                                 ? () => Get.toNamed('/lessonselectionscreen', arguments: step.id)
                                 : () {
                                     Get.snackbar(
-                                      "🔒 Verrouillé",
+                                      " Verrouillé",
                                       "Complète les étapes précédentes pour débloquer celle-ci.",
                                       snackPosition: SnackPosition.BOTTOM,
                                       backgroundColor: Colors.black87,

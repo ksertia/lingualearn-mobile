@@ -42,25 +42,145 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF0F7FF),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        title: const Text(
-          'LinguaLearn ✨',
-          style: TextStyle(color: colorProBlue, fontWeight: FontWeight.w900, fontSize: 22),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 15),
-            child: CircleAvatar(
-              backgroundColor: colorProBlue.withOpacity(0.1),
-              child: Text(
-                firstName.isNotEmpty ? firstName[0].toUpperCase() : "U",
-                style: const TextStyle(color: colorProBlue, fontWeight: FontWeight.bold),
-              ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white,
+                const Color(0xFFF8FBFF),
+              ],
             ),
-          )
-        ],
+            boxShadow: [
+              BoxShadow(
+                color: colorProBlue.withOpacity(0.08),
+                offset: const Offset(0, 2),
+                blurRadius: 12,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            toolbarHeight: 70,
+            leadingWidth: 0,
+            leading: const SizedBox.shrink(),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colorProBlue.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.school_rounded,
+                    color: colorProBlue,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'LinguaLearn',
+                        style: TextStyle(
+                          color: colorProBlue,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 20,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      Text(
+                        'Apprendre • Progresser • Réussir',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: primaryBlue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: primaryBlue.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.stars_rounded,
+                            color: primaryBlue,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            '1250',
+                            style: TextStyle(
+                              color: primaryBlue,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () => _showSettingsBottomSheet(context, firstName, langueNom),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorProBlue.withOpacity(0.2),
+                              offset: const Offset(0, 2),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 20,
+                          backgroundColor: colorProBlue,
+                          child: Text(
+                            firstName.isNotEmpty ? firstName[0].toUpperCase() : "U",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 15),
+            ],
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -89,15 +209,7 @@ class HomePage extends StatelessWidget {
                   "Prêt pour ton aventure en $langueNom ?",
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 16, fontWeight: FontWeight.w500),
                 ),
-                const SizedBox(height: 25),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildKidStat(Icons.local_fire_department, "3", "Jours", Colors.orange),
-                    _buildKidStat(Icons.stars, "1250", "XP", colorProBlue),
-                    _buildKidStat(Icons.emoji_events, "Bronze", "Ligue", primaryBlue),
-                  ],
-                ),
+                const SizedBox(height: 15),
               ],
             ),
           ),
@@ -135,11 +247,43 @@ class HomePage extends StatelessWidget {
                     final module = controller.filteredModules[index];
                     bool isLast = index == controller.filteredModules.length - 1;
 
-                    // Utiliser les helpers du controller pour déterminer l'état
-                    bool isUnlocked = controller.isUnlocked(module.id);
-                    bool isCompleted = controller.isCompleted(module.id);
-                    // Si le backend ne fournit rien, autoriser le premier module par défaut
-                    if (!isUnlocked && index == 0) isUnlocked = true;
+                    // 🔍 LOGS DEBUG - Données des modules
+                    debugPrint("=== MODULE $index ===");
+                    debugPrint("ID: ${module.id}");
+                    debugPrint("Title: ${module.title}");
+                    debugPrint("Description: ${module.description}");
+                    debugPrint("Status: ${module.status}");
+                    debugPrint("Progress: ${module.progressPercentage}%");
+                    debugPrint("Index: ${module.index}");
+                    debugPrint("IsActive: ${module.isActive}");
+                    if (module.progress != null) {
+                      debugPrint("Progress Object - Status: ${module.progress!.status}");
+                      debugPrint("Progress Object - Percentage: ${module.progress!.progressPercentage}");
+                      debugPrint("Progress Object - CompletedAt: ${module.progress!.completedAt}");
+                      debugPrint("Progress Object - UnlockedAt: ${module.progress!.unlockedAt}");
+                    } else {
+                      debugPrint("Progress Object: null");
+                    }
+                    debugPrint("==================");
+
+                    // Utiliser directement le statut du backend au lieu des helpers
+                    String moduleStatus = module.status ?? "locked";
+                    
+                    // FALLBACK: Si tous les statuts sont null, débloquer le premier module
+                    if (moduleStatus == "locked" && index == 0) {
+                      bool allModulesLocked = controller.filteredModules.every((m) => (m.status ?? "locked") == "locked");
+                      if (allModulesLocked) {
+                        moduleStatus = "unlocked";
+                        print(" [FALLBACK] Premier module débloqué automatiquement (tous les statuts sont null)");
+                      }
+                    }
+                    
+                    bool isCompleted = moduleStatus == "completed";
+                    bool isUnlocked = moduleStatus == "unlocked" || moduleStatus == "completed";
+                    bool isLocked = moduleStatus == "locked";
+
+                    // LOG du statut calculé
+                    print("Module ${index + 1}: Status='$moduleStatus' → isCompleted=$isCompleted, isUnlocked=$isUnlocked");
 
                     return IntrinsicHeight(
                       child: Row(
@@ -147,7 +291,7 @@ class HomePage extends StatelessWidget {
                         children: [
                           Column(
                             children: [
-                              _buildTimelineIcon(isUnlocked, isCompleted),
+                              _buildTimelineIcon(moduleStatus),
                               if (!isLast)
                                 Expanded(
                                   child: Container(
@@ -165,7 +309,7 @@ class HomePage extends StatelessWidget {
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 40),
-                              child: _buildKidCard(controller, module, isUnlocked, isCompleted, index),
+                              child: _buildKidCard(controller, module, moduleStatus, index),
                             ),
                           ),
                         ],
@@ -181,20 +325,23 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineIcon(bool isUnlocked, bool isCompleted) {
+  Widget _buildTimelineIcon(String moduleStatus) {
     IconData iconData = Icons.lock_rounded;
     Color iconColor = colorLocked;
 
-    if (isUnlocked) {
-      iconData = isCompleted ? Icons.check_circle_rounded : Icons.play_circle_filled_rounded;
-      iconColor = isCompleted ? primaryBlue : orangeAccent;
+    if (moduleStatus == "completed") {
+      iconData = Icons.check_circle_rounded;
+      iconColor = primaryBlue;
+    } else if (moduleStatus == "unlocked") {
+      iconData = Icons.play_circle_filled_rounded;
+      iconColor = orangeAccent;
     }
 
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: [
-          if (isUnlocked)
+          if (moduleStatus != "locked")
             BoxShadow(color: iconColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))
         ],
       ),
@@ -202,12 +349,14 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildKidCard(HomeController controller, ModuleModel module, bool isUnlocked, bool isCompleted, int index) {
-    Color mainColor = isUnlocked ? (isCompleted ? primaryBlue : orangeAccent) : colorLocked;
+  Widget _buildKidCard(HomeController controller, ModuleModel module, String moduleStatus, int index) {
+    Color mainColor = moduleStatus == "completed" ? primaryBlue : moduleStatus == "unlocked" ? orangeAccent : colorLocked;
+    bool isUnlocked = moduleStatus == "unlocked" || moduleStatus == "completed";
+    bool isCompleted = moduleStatus == "completed";
 
     return GestureDetector(
       onTap: !isUnlocked
-        ? () => Get.snackbar("🔒 Verrouillé", "Termine le module précédent !")
+        ? () => Get.snackbar("", "Termine le module précédent !")
         : () async {
             final res = await Get.toNamed('/parcoursselectionpage', arguments: module.id);
             if (res == true || res == 'completed' || res == 'finished') {
@@ -245,7 +394,7 @@ class HomePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isUnlocked ? (isCompleted ? "TERMINÉ" : "EN COURS") : "VERROUILLÉ",
+                      moduleStatus == "completed" ? "TERMINÉ" : moduleStatus == "unlocked" ? "EN COURS" : "VERROUILLÉ",
                       style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: mainColor),
                     ),
                     Text(
@@ -308,6 +457,247 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _showSettingsBottomSheet(BuildContext context, String firstName, String langueNom) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.75,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(25),
+              topRight: Radius.circular(25),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              
+              // Header
+              Container(
+                padding: const EdgeInsets.all(25),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundColor: colorProBlue,
+                      child: Text(
+                        firstName.isNotEmpty ? firstName[0].toUpperCase() : "U",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 24,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            firstName,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              color: colorProBlue,
+                            ),
+                          ),
+                          Text(
+                            "Apprenant en $langueNom",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const Divider(height: 1),
+
+              // Settings options
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  children: [
+                    _buildSettingsItem(
+                      icon: Icons.person_outline,
+                      title: "Profil",
+                      subtitle: "Modifier vos informations",
+                      onTap: () {},
+                    ),
+                    _buildSettingsItem(
+                      icon: Icons.language_outlined,
+                      title: "Langue d'apprentissage",
+                      subtitle: langueNom,
+                      onTap: () {},
+                    ),
+                    _buildSettingsItem(
+                      icon: Icons.notifications_outlined,
+                      title: "Notifications",
+                      subtitle: "Gérer les rappels",
+                      onTap: () {},
+                    ),
+                    _buildSettingsItem(
+                      icon: Icons.bar_chart_outlined,
+                      title: "Statistiques",
+                      subtitle: "Voir vos progrès",
+                      onTap: () {},
+                    ),
+                    _buildSettingsItem(
+                      icon: Icons.help_outline,
+                      title: "Aide & Support",
+                      subtitle: "FAQ et contact",
+                      onTap: () {},
+                    ),
+                    _buildSettingsItem(
+                      icon: Icons.info_outline,
+                      title: "À propos",
+                      subtitle: "Version et informations",
+                      onTap: () {},
+                    ),
+                    const SizedBox(height: 20),
+                    _buildSettingsItem(
+                      icon: Icons.logout,
+                      title: "Déconnexion",
+                      subtitle: "Se déconnecter de l'app",
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _showLogoutDialog(context);
+                      },
+                      isDestructive: true,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSettingsItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isDestructive 
+              ? Colors.red.withOpacity(0.1) 
+              : colorProBlue.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          icon,
+          color: isDestructive ? Colors.red : colorProBlue,
+          size: 22,
+        ),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+          color: isDestructive ? Colors.red : Colors.black87,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          color: Colors.grey.shade600,
+          fontSize: 13,
+        ),
+      ),
+      trailing: Icon(
+        Icons.chevron_right,
+        color: Colors.grey.shade400,
+      ),
+      onTap: onTap,
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Text(
+            'Déconnexion',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: colorProBlue,
+            ),
+          ),
+          content: const Text(
+            'Êtes-vous sûr de vouloir vous déconnecter ?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Annuler',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // TODO: Implement logout logic
+                Get.snackbar(
+                  "Déconnexion",
+                  "Fonctionnalité à implémenter",
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Déconnecter',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

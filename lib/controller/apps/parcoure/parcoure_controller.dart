@@ -20,7 +20,7 @@ class ParcoursSelectionController extends GetxController {
       }
     } catch (e) {
       moduleId = "";
-      print("🚨 [ParcoursController] Erreur argument : $e");
+      print(" [ParcoursController] Erreur argument : $e");
     }
 
     fetchPaths();
@@ -32,17 +32,21 @@ class ParcoursSelectionController extends GetxController {
     try {
       isLoading.value = true;
       
-      List<LearningPathModel> results = await LearningPathService.getPathsByModule(moduleId);
+      print(" [ParcoursController] Chargement des parcours pour moduleId: $moduleId");
+      
+      // Utiliser l'endpoint spécifique pour charger les parcours d'un module donné
+      List<LearningPathModel> results = await LearningPathService.getPathsBySpecificModule(moduleId);
       
       if (results.isNotEmpty) {
-
         results.sort((a, b) => (a.index).compareTo(b.index));
         paths.assignAll(results);
+        print(" [ParcoursController] ${results.length} parcours reçus pour le module $moduleId");
       } else {
         paths.clear();
+        print(" [ParcoursController] Aucun parcours trouvé pour le module $moduleId");
       }
     } catch (e) {
-      print("🚨 [ParcoursController] Erreur lors du chargement : $e");
+      print(" [ParcoursController] Erreur lors du chargement : $e");
     } finally {
       isLoading.value = false;
     }

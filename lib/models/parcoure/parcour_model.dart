@@ -91,6 +91,9 @@ class StepModel {
   final int index;
   final int estimatedMinutes;
   final bool isActive;
+  final String? status; // 'locked' | 'unlocked' | 'completed'
+  final Map<String, dynamic>? progress;
+  final String? progressPercentage;
 
   StepModel({
     required this.id,
@@ -100,6 +103,9 @@ class StepModel {
     required this.index,
     required this.estimatedMinutes,
     required this.isActive,
+    this.status,
+    this.progress,
+    this.progressPercentage,
   });
 
   factory StepModel.fromJson(Map<String, dynamic> json) {
@@ -111,6 +117,9 @@ class StepModel {
       index: _toInt(json['index']),
       estimatedMinutes: _toInt(json['estimatedMinutes']),
       isActive: json['isActive'] == true,
+      status: json['status']?.toString(),
+      progress: json['progress'] != null ? Map<String, dynamic>.from(json['progress']) : null,
+      progressPercentage: json['progressPercentage']?.toString(),
     );
   }
 
