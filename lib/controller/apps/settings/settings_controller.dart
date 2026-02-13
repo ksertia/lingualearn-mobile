@@ -77,19 +77,17 @@ class SettingsController extends GetxController {
         // Vider le LocalStorage (Token, UserID, etc.)
         await LocalStorage.removeLoggedInUser();
         
-        // Vider la Session en mémoire vive (Get.find)
+        // Vider la Session en mémoire vive complètement
         final session = Get.find<SessionController>();
-        session.user = null;
-        // session.isLoggedIn = false;
-        // session.langueChoisie = "";
+        session.clearSession();
 
         print("➡️ [Logout] Nettoyage local terminé. Redirection...");
         
         // 3. Message de succès
         appSnackbar(heading: "Déconnexion", message: "À bientôt !");
 
-        // 4. Retour à l'écran de login et effacement de l'historique
-        Get.offAllNamed('/auth/login');
+        // 4. Retour à l'écran de login - navigation simple
+        Get.offAllNamed('/login');
       } else {
         appSnackbar(heading: "Erreur", message: "Le serveur n'a pas pu valider la déconnexion.");
       }

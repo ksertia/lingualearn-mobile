@@ -54,56 +54,43 @@ class LoginController extends GetxController {
           loggedInUser = UserModel.fromJson(apiData);
         }
 
-        print("🔍 Vérification des listes de vérité sur le serveur...");
+        print("🔍 Vérification de l'état de l'utilisateur...");
         
-        List userLangs = [];
-        List userLevels = [];
-
-        try {
-          final langRes = await session.dio.get('/users/${loggedInUser.id}/languages');
-          userLangs = langRes.data['data'] ?? [];
-        } catch (e) {
-          print("ℹ️ Info : Pas de langues trouvées (404 ou vide), c'est un nouveau.");
-        }
-
-        try {
-          final levelRes = await session.dio.get('/users/${loggedInUser.id}/levels');
-          userLevels = levelRes.data['data'] ?? [];
-        } catch (e) {
-          print("ℹ️ Info : Aucun niveau trouvé (404 ou vide).");
-        }
+        // Pas besoin de refaire les appels API pour les langues/niveaux
+        // On se fie au modèle utilisateur qui contient selectedLanguageId/selectedLevelId
 
         await LocalStorage.setUserID(loggedInUser.id);
         await LocalStorage.setEmail(loggedInUser.email);
         String fullName = "${loggedInUser.firstName} ${loggedInUser.lastName}".trim();
         await LocalStorage.setUserName(fullName.isEmpty ? "Apprenant" : fullName);
         LocalStorage.setAlwaysLoggedIn(isChecked);
-
-        var vraieLangueLocale = userLangs.firstWhere(
-          (l) => l['language']['code'] != 'fr', 
-          orElse: () => null
-        );
-
-        if (vraieLangueLocale != null) {
-          loggedInUser = loggedInUser.copyWith(
-            selectedLanguageId: vraieLangueLocale['languageId']
-          );
-        }
         
         session.updateUser(loggedInUser, accessToken);
         isLoading.value = false;
 
-        if (vraieLangueLocale == null) {
-          print("➡️ Direction : Bienvenue (Liste vide ou 404)");
-          Get.offAllNamed('/bienvenue');
-        } 
-        else if (userLevels.isEmpty) {
+        // Délai pour permettre au SessionController de se mettre à jour complètement
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Décider de la redirection selon l'état de l'utilisateur
+        // Priorité 1 : Si l'utilisateur a déjà une langue ET un niveau sélectionnés
+        if (loggedInUser.selectedLanguageId != null && 
+            loggedInUser.selectedLanguageId!.isNotEmpty &&
+            loggedInUser.selectedLevelId != null &&
+            loggedInUser.selectedLevelId!.isNotEmpty) {
+          print("✅ Direction : HomeScreen (utilisateur retournant avec langue+niveau)");
+          // Navigation simple sans effacer la pile (le middleware va le faire)
+          Get.offAllNamed('/HomeScreen');
+        }
+        // Priorité 2 : Si l'utilisateur a une langue sélectionnée mais pas de niveau
+        else if (loggedInUser.selectedLanguageId != null && 
+                 loggedInUser.selectedLanguageId!.isNotEmpty) {
           print("➡️ Direction : Sélection du niveau");
           Get.offAllNamed('/selection');
-        } 
+        }
+        // Priorité 3 : Nouvel utilisateur (pas de langue)
         else {
-          print("✅ Direction : HomeScreen");
-          Get.offAllNamed('/HomeScreen');
+          print("➡️ Direction : Bienvenue (nouvel utilisateur)");
+          Get.offAllNamed('/bienvenue');
         }
 
       } else {

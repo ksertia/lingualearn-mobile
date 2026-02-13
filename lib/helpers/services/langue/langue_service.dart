@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:fasolingo/helpers/constant/app_constant.dart';
+import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/models/langue/langue_model.dart';
 import 'package:get/get.dart'; 
 import 'package:fasolingo/controller/apps/session_controller.dart';
@@ -20,13 +21,25 @@ class LanguageLevelService {
 
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        final session = Get.find<SessionController>();
-        
-        if (session.token.value.isNotEmpty) {
-          options.headers['Authorization'] = 'Bearer ${session.token.value}';
-          print("🔑 Token injecté : ${session.token.value.substring(0, 10)}...");
-        } else {
-          print("⚠️ Attention : Aucun token trouvé dans la session !");
+        try {
+          final session = Get.find<SessionController>();
+          
+          // Essayer d'obtenir le token depuis la session
+          String? tokenToUse = session.token.value.isNotEmpty 
+              ? session.token.value 
+              : null;
+          
+          // Si pas de token en session, essayer le stockage local
+          tokenToUse ??= LocalStorage.getAuthToken();
+          
+          if (tokenToUse != null && tokenToUse.isNotEmpty && tokenToUse != "null") {
+            options.headers['Authorization'] = 'Bearer $tokenToUse';
+            print("🔑 Token injecté : ${tokenToUse.substring(0, 10)}...");
+          } else {
+            print("⚠️ Attention : Aucun token trouvé !");
+          }
+        } catch (e) {
+          print("⚠️ Erreur lors de la récupération du token : $e");
         }
         return handler.next(options);
       },
@@ -34,9 +47,9 @@ class LanguageLevelService {
   }
 
   // --- RÉCUPÉRATION DES LANGUES ---
-  Future<List<LanguageModel>> fetchLanguages() async {
+  Future<List<LanguageModel>> fetchLanguages({required String userId}) async {
     try {
-      final response = await _dio.get('/languages'); 
+      final response = await _dio.get('/users/$userId/languages'); 
       if (response.statusCode == 200) {
         final dynamic responseData = response.data['data'];
         if (responseData == null || responseData is! List) return [];
@@ -68,9 +81,12 @@ class LanguageLevelService {
   }
 
   // --- RÉCUPÉRATION DES NIVEAUX ---
-  Future<List<dynamic>> fetchLevels() async {
+  Future<List<dynamic>> fetchLevels({required String userId, String? languageId}) async {
     try {
-      final response = await _dio.get('/levels'); 
+      // Endpoint: /users/{userId}/level with optional languageId query
+      final response = await _dio.get(
+        '/users/$userId/levels'
+      );
       if (response.statusCode == 200) {
         return response.data['data'] as List<dynamic>;
       }
@@ -97,6 +113,20 @@ class LanguageLevelService {
     } on DioException catch (e) {
       print("❌ Erreur Dio Level Select (${e.response?.statusCode}) : ${e.response?.data}");
       return false;
+    }
+  }
+
+  // --- RÉCUPÉRATION DES MODULES ---
+  Future<List<dynamic>> fetchModules({required String userId}) async {
+    try {
+      final response = await _dio.get('/users/$userId/modules'); 
+      if (response.statusCode == 200) {
+        return response.data['data'] as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print("❌ Erreur Fetch Modules : $e");
+      return [];
     }
   }
 }

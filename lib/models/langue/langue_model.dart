@@ -1,4 +1,4 @@
-// 1. Modèle pour les Niveaux
+//  Modèle pour les Niveaux
 class LevelModel {
   final String id;
   final String languageId;
@@ -36,7 +36,6 @@ class LevelModel {
   }
 }
 
-// 2. Modèle pour les Langues
 class LanguageModel {
   final String id;
   final String code;

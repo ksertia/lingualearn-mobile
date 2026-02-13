@@ -2,21 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../../../widgets/lessons/custom_lesson_app_bar.dart';
 import '../../../../widgets/lessons/lesson_card_item.dart';
-//import '../widgets/lesson_card_item.dart';
-//import '../widgets/custom_lesson_app_bar.dart';
 
 class LessonSelectionScreen extends StatelessWidget {
   const LessonSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const Color scaffoldBg = Color(0xFF0F111E);
     const Color accentBlue = Color(0xFF2196F3);
     const Color accentOrange = Color(0xFFFF8C00);
 
     return Scaffold(
-      backgroundColor: scaffoldBg,
-      appBar: const CustomLessonAppBar(title: "Étapes 1"),
+      backgroundColor: Colors.white, // ✅ PAGE BLANCHE
+      appBar: const CustomLessonAppBar(title: "Étape 1"),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -25,7 +22,7 @@ class LessonSelectionScreen extends StatelessWidget {
             child: Text(
               "Beginner",
               style: TextStyle(
-                color: Colors.white,
+                color: Colors.black, // ✅ TEXTE NOIR
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -53,14 +50,14 @@ class LessonSelectionScreen extends StatelessWidget {
                 ),
                 LessonCardItem(
                   number: "3",
-                  title: "Presentation",
+                  title: "Présentation",
                   subtitle: "10 Exp",
                   color: Colors.redAccent,
                   onTap: () {},
                 ),
                 LessonCardItem(
                   number: "4",
-                  title: "Quiz ",
+                  title: "Quiz",
                   subtitle: "10 Exp",
                   color: Colors.grey,
                   isLocked: true,

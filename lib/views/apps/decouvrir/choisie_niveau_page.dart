@@ -3,12 +3,29 @@ import 'package:fasolingo/models/langue/langue_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ChoisieNiveauPage extends StatelessWidget {
+class ChoisieNiveauPage extends StatefulWidget {
   const ChoisieNiveauPage({super.key});
 
   @override
+  State<ChoisieNiveauPage> createState() => _ChoisieNiveauPageState();
+}
+
+class _ChoisieNiveauPageState extends State<ChoisieNiveauPage> {
+  late final LanguagesController languagesController;
+
+  @override
+  void initState() {
+    super.initState();
+    languagesController = Get.find<LanguagesController>();
+    // Charger les niveaux pour la langue sélectionnée
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      languagesController.loadLanguageLevels();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final languagesController = Get.find<LanguagesController>();
+    final languagesController = this.languagesController;
 
     const Color primaryColor = Color.fromARGB(255, 0, 0, 153);
 
@@ -32,8 +49,9 @@ class ChoisieNiveauPage extends StatelessWidget {
             )),
       ),
       body: Obx(() {
-        final List<LevelModel> backendLevels =
-            languagesController.selectedLanguage.value?.levels ?? [];
+        // Utiliser uniquement les niveaux récupérés depuis l'API
+        final List<dynamic> backendLevels =
+            languagesController.languageLevels;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -56,8 +74,12 @@ class ChoisieNiveauPage extends StatelessWidget {
               const SizedBox(height: 35),
               Expanded(
                 child: backendLevels.isEmpty
+                  ? (languagesController.isLoadingLevels.value
                     ? const Center(
-                        child: Text("Aucun niveau disponible pour le moment."))
+                      child: CircularProgressIndicator(),
+                      )
+                    : const Center(
+                      child: Text("Aucun niveau disponible pour le moment.")))
                     : ListView.separated(
                         itemCount: backendLevels.length,
                         physics: const BouncingScrollPhysics(),
@@ -67,13 +89,25 @@ class ChoisieNiveauPage extends StatelessWidget {
                           final level = backendLevels[index];
 
                           return Obx(() {
-                            bool isSelected =
-                                languagesController.selectedLevel.value?.id ==
-                                    level.id;
+                            final selected = languagesController.selectedLevel.value;
+                            String? selectedId;
+                            if (selected == null) selectedId = null;
+                            else if (selected is Map) selectedId = selected['id']?.toString();
+                            else selectedId = selected?.id?.toString();
+
+                            final String levelId = (level is Map) ? (level['id']?.toString() ?? '') : (level.id?.toString() ?? '');
+                            bool isSelected = selectedId != null && selectedId == levelId;
+
+                            // Accès sûr aux propriétés du niveau (Map JSON ou modèle Dart)
+                            final String levelName = (level is Map)
+                                ? (level['name']?.toString() ?? '')
+                                : (level.name?.toString() ?? '');
+                            final String levelDescription = (level is Map)
+                                ? (level['description']?.toString() ?? '')
+                                : (level.description?.toString() ?? '');
 
                             return InkWell(
-                              onTap: () =>
-                                  languagesController.selectLevel(level),
+                              onTap: () => languagesController.selectLevel(level),
                               borderRadius: BorderRadius.circular(20),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 250),
@@ -124,7 +158,7 @@ class ChoisieNiveauPage extends StatelessWidget {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            level.name,
+                                            levelName,
                                             style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
@@ -135,7 +169,7 @@ class ChoisieNiveauPage extends StatelessWidget {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            level.description,
+                                            levelDescription,
                                             style: TextStyle(
                                                 color: Colors.grey.shade600,
                                                 fontSize: 13,

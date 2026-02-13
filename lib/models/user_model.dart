@@ -7,7 +7,6 @@ class UserModel {
   final String? username;
   final String accountType;
   final String? parentId;
-  
   final String? selectedLanguageId;
   final String? selectedLevelId;
 

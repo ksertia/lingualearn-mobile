@@ -1,14 +1,17 @@
+import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart'; 
 import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
 import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/models/modules/modul_model.dart';
+import 'package:fasolingo/models/langue/langue_model.dart';
 
-// Palette de couleurs harmonisée
-const Color colorProBlue = Color(0xFF00008B); // Bleu Profond (Structure & Titres)
-const Color colorKidGreen = Color(0xFF32CD32); // Vert Éclatant (DÉVERROUILLÉ)
-const Color colorLocked = Color(0xFFBDC3C7);   // Gris Souris (VERROUILLÉ)
+const Color colorProBlue = Color(0xFF00008B);
+const Color primaryBlue = Color(0xFF00CED1);
+const Color colorLocked = Color(0xFFBDC3C7);
+const Color orangeAccent = Colors.orange;
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -17,14 +20,23 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final HomeController controller = Get.put(HomeController());
     final SessionController session = Get.find<SessionController>();
+    final LanguagesController langController = Get.put(LanguagesController());
 
     String firstName = LocalStorage.getUserName() ?? "Champion";
     String greeting = "Salut";
-    String langue = session.user?.selectedLanguageId ?? "";
 
-    if (langue.toLowerCase().contains("mooré")) {
+    String langueId = session.selectedLanguageId.value.isNotEmpty 
+        ? session.selectedLanguageId.value 
+        : (session.user?.selectedLanguageId ?? "");
+
+    final LanguageModel? selectedLang = langController.allLanguages.firstWhereOrNull(
+      (l) => l.id == langueId
+    );
+    String langueNom = selectedLang?.name ?? "ta langue";
+
+    if (langueNom.toLowerCase().contains("mooré")) {
       greeting = "Ne y windiga";
-    } else if (langue.toLowerCase().contains("dioula")) {
+    } else if (langueNom.toLowerCase().contains("dioula")) {
       greeting = "I ni sogoma";
     }
 
@@ -52,7 +64,6 @@ class HomePage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // --- HEADER ---
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -75,7 +86,7 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  "Prêt pour ton aventure en $langue ?",
+                  "Prêt pour ton aventure en $langueNom ?",
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 25),
@@ -84,18 +95,35 @@ class HomePage extends StatelessWidget {
                   children: [
                     _buildKidStat(Icons.local_fire_department, "3", "Jours", Colors.orange),
                     _buildKidStat(Icons.stars, "1250", "XP", colorProBlue),
-                    _buildKidStat(Icons.emoji_events, "Bronze", "Ligue", colorKidGreen),
+                    _buildKidStat(Icons.emoji_events, "Bronze", "Ligue", primaryBlue),
                   ],
                 ),
               ],
             ),
           ),
 
-          // --- TIMELINE ---
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator(color: colorKidGreen));
+                return _buildShimmerLoading();
+              }
+
+              if (controller.filteredModules.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.info_outline, size: 50, color: Colors.grey),
+                      const SizedBox(height: 10),
+                      const Text("Aucun module trouvé."),
+                      const SizedBox(height: 15),
+                      ElevatedButton(
+                        onPressed: () => controller.loadModules(), 
+                        child: const Text("Réessayer")
+                      )
+                    ],
+                  ),
+                );
               }
 
               return RefreshIndicator(
@@ -106,9 +134,12 @@ class HomePage extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final module = controller.filteredModules[index];
                     bool isLast = index == controller.filteredModules.length - 1;
-                    
-                    // Logique : les deux premiers sont déverrouillés pour l'exemple
-                    bool isUnlocked = index <= 1; 
+
+                    // Utiliser les helpers du controller pour déterminer l'état
+                    bool isUnlocked = controller.isUnlocked(module.id);
+                    bool isCompleted = controller.isCompleted(module.id);
+                    // Si le backend ne fournit rien, autoriser le premier module par défaut
+                    if (!isUnlocked && index == 0) isUnlocked = true;
 
                     return IntrinsicHeight(
                       child: Row(
@@ -116,14 +147,14 @@ class HomePage extends StatelessWidget {
                         children: [
                           Column(
                             children: [
-                              _buildTimelineIcon(isUnlocked),
+                              _buildTimelineIcon(isUnlocked, isCompleted),
                               if (!isLast)
                                 Expanded(
                                   child: Container(
                                     width: 6,
                                     margin: const EdgeInsets.symmetric(vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: isUnlocked ? colorKidGreen.withOpacity(0.3) : colorLocked.withOpacity(0.2),
+                                      color: isUnlocked ? (isCompleted ? primaryBlue : orangeAccent).withOpacity(0.3) : colorLocked.withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
@@ -134,7 +165,7 @@ class HomePage extends StatelessWidget {
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 40),
-                              child: _buildKidCard(module, isUnlocked, index),
+                              child: _buildKidCard(controller, module, isUnlocked, isCompleted, index),
                             ),
                           ),
                         ],
@@ -150,42 +181,47 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineIcon(bool isUnlocked) {
+  Widget _buildTimelineIcon(bool isUnlocked, bool isCompleted) {
+    IconData iconData = Icons.lock_rounded;
+    Color iconColor = colorLocked;
+
+    if (isUnlocked) {
+      iconData = isCompleted ? Icons.check_circle_rounded : Icons.play_circle_filled_rounded;
+      iconColor = isCompleted ? primaryBlue : orangeAccent;
+    }
+
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: [
           if (isUnlocked)
-            BoxShadow(color: colorKidGreen.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))
+            BoxShadow(color: iconColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))
         ],
       ),
-      child: Icon(
-        isUnlocked ? Icons.check_circle_rounded : Icons.lock_rounded,
-        color: isUnlocked ? colorKidGreen : colorLocked,
-        size: 42,
-      ),
+      child: Icon(iconData, color: iconColor, size: 42),
     );
   }
 
-  Widget _buildKidCard(ModuleModel module, bool isUnlocked, int index) {
+  Widget _buildKidCard(HomeController controller, ModuleModel module, bool isUnlocked, bool isCompleted, int index) {
+    Color mainColor = isUnlocked ? (isCompleted ? primaryBlue : orangeAccent) : colorLocked;
+
     return GestureDetector(
-      onTap: !isUnlocked 
-        ? () => Get.snackbar("Oups ! 🔒", "Finis les leçons précédentes pour débloquer celle-ci !") 
-        : () => Get.toNamed('/parcoursselectionpage', arguments: module.id),
+      onTap: !isUnlocked
+        ? () => Get.snackbar("🔒 Verrouillé", "Termine le module précédent !")
+        : () async {
+            final res = await Get.toNamed('/parcoursselectionpage', arguments: module.id);
+            if (res == true || res == 'completed' || res == 'finished') {
+              controller.onModuleCompleted(module.id);
+            }
+          },
       child: Container(
         decoration: BoxDecoration(
           color: isUnlocked ? Colors.white : const Color(0xFFF2F2F2),
           borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-            color: isUnlocked ? colorKidGreen.withOpacity(0.5) : colorLocked.withOpacity(0.3),
-            width: 2
-          ),
+          border: Border.all(color: mainColor.withOpacity(0.5), width: 2),
           boxShadow: [
-            BoxShadow(
-              color: isUnlocked ? colorKidGreen.withOpacity(0.3) : Colors.transparent, // 
-              offset: const Offset(0, 8),
-              blurRadius: 0,
-            ),
+            if (isUnlocked)
+              BoxShadow(color: mainColor.withOpacity(0.2), offset: const Offset(0, 8), blurRadius: 0),
           ],
         ),
         child: Padding(
@@ -195,16 +231,12 @@ class HomePage extends StatelessWidget {
               Container(
                 height: 55, width: 55,
                 decoration: BoxDecoration(
-                  color: isUnlocked ? colorKidGreen.withOpacity(0.1) : Colors.white,
+                  color: mainColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Center(
                   child: Text("${index + 1}", 
-                    style: TextStyle(
-                      fontSize: 22, 
-                      fontWeight: FontWeight.bold, 
-                      color: isUnlocked ? colorKidGreen : colorLocked
-                    )),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: mainColor)),
                 ),
               ),
               const SizedBox(width: 15),
@@ -213,33 +245,24 @@ class HomePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+                      isUnlocked ? (isCompleted ? "TERMINÉ" : "EN COURS") : "VERROUILLÉ",
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: mainColor),
+                    ),
+                    Text(
                       module.title.toUpperCase(),
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900, 
-                        fontSize: 17, 
-                        color: isUnlocked ? colorProBlue : colorLocked // Titre gris si verrouillé
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: isUnlocked ? colorProBlue : colorLocked),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      isUnlocked 
-                        ? (module.description ?? "Découvre les secrets de la langue !") 
-                        : "Termine les étapes précédentes...",
-                      maxLines: 2,
+                      isUnlocked ? module.description : "Termine les étapes précédentes...",
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: isUnlocked ? Colors.blueGrey : colorLocked,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500
-                      ),
+                      style: TextStyle(color: isUnlocked ? Colors.blueGrey : colorLocked, fontSize: 13),
                     ),
                   ],
                 ),
               ),
-              Icon(
-                isUnlocked ? Icons.chevron_right_rounded : Icons.lock_outline_rounded,
-                color: isUnlocked ? colorKidGreen : colorLocked,
-              ),
+              Icon(isUnlocked ? Icons.chevron_right_rounded : Icons.lock_outline_rounded, color: mainColor),
             ],
           ),
         ),
@@ -250,10 +273,7 @@ class HomePage extends StatelessWidget {
   Widget _buildKidStat(IconData icon, String val, String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(15),
-      ),
+      decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(15)),
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
@@ -266,6 +286,27 @@ class HomePage extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(25, 35, 25, 40),
+      itemCount: 5,
+      itemBuilder: (context, index) => Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 40),
+          child: Row(
+            children: [
+              const CircleAvatar(radius: 20, backgroundColor: Colors.white),
+              const SizedBox(width: 20),
+              Expanded(child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(25)))),
+            ],
+          ),
+        ),
       ),
     );
   }

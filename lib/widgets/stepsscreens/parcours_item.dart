@@ -32,10 +32,11 @@ class ParcoursItem extends StatelessWidget {
               offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(color: mainColor.withOpacity(0.1)),
+          // ❌ BORDURE COLORÉE SUPPRIMÉE
         ),
         child: Row(
           children: [
+            // 🔵 Cercle coloré
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -45,6 +46,7 @@ class ParcoursItem extends StatelessWidget {
               child: Icon(icon, color: Colors.white, size: 28),
             ),
             const SizedBox(width: 20),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

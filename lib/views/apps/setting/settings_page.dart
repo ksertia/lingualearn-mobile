@@ -1,4 +1,4 @@
-import 'dart:io';
+// Ne pas importer `dart:io` (non supporté sur le Web)
 import 'package:fasolingo/controller/apps/settings/settings_controller.dart';
 import 'package:fasolingo/helpers/constant/images.dart';
 import 'package:fasolingo/helpers/my_widgets/my_text.dart';
@@ -38,9 +38,12 @@ class _SettingScreenState extends State<SettingScreen>
               return const AppLoader();
             }
 
-            return Column(
+            final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+            return Stack(
               children: [
-                Platform.isIOS ? 70.verticalSpace : 60.verticalSpace,
+                Column(
+                  children: [
+                    isIOS ? 70.verticalSpace : 60.verticalSpace,
                 
                 // --- SECTION PROFIL DYNAMIQUE ---
                 Padding(
@@ -67,11 +70,14 @@ class _SettingScreenState extends State<SettingScreen>
                       Divider(color: contentTheme.kE6E6E6, thickness: 1.0),
                       
                       // BOUTON DECONNEXION
-                      _buildSettingsItem(
-                        icon: Images.logout,
-                        title: 'logout'.tr, // Utilisation de .tr pour la traduction
-                        onTap: () => _handleLogout(context),
-                      ),
+                      Obx(() {
+                        final disabling = controller.isLoading.value;
+                        return _buildSettingsItem(
+                          icon: Images.logout,
+                          title: 'logout'.tr, // Utilisation de .tr pour la traduction
+                          onTap: disabling ? null : () => _handleLogout(context),
+                        );
+                      }),
 
                       15.verticalSpace,
                       Divider(color: contentTheme.kE6E6E6, thickness: 1.0),
@@ -88,7 +94,20 @@ class _SettingScreenState extends State<SettingScreen>
                   ),
                 ),
               ],
-            );
+            ),
+
+            // Overlay pendant la déconnexion
+            if (controller.isLoading.value)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.35),
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              ),
+          ],
+        );
           }),
         ),
       ),
