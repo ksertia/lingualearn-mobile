@@ -18,7 +18,7 @@ class QuizFailedScreen extends StatelessWidget {
             const Text("Score insuffisant"),
             const SizedBox(height: 20),
             ElevatedButton(onPressed: () {}, child: const Text("Recommencer le quizz")),
-            TextButton(onPressed: () {}, child: const Text("Revoir la leçon")),
+            TextButton(onPressed: () {}, child: const Text("Revoir les leçons")),
           ],
         ),
       ),

@@ -15,7 +15,7 @@ import 'package:fasolingo/views/apps/home/screens/Revision.dart';
 import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
 
 import 'package:fasolingo/views/apps/lexique/lexique_page.dart';
-
+import 'package:fasolingo/models/quiz/quiz_model.dart';
 import 'package:fasolingo/views/apps/profile/edit_profile.dart';
 import 'package:fasolingo/views/apps/profile/profile.dart';
 import 'package:fasolingo/views/apps/progres/progres_page.dart';

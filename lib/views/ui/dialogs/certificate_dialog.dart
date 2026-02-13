@@ -18,13 +18,13 @@ class CertificateDialog extends StatelessWidget {
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           const Text(
-            "Vous avez complété toutes les leçons.",
+            "Vous avez complété toutes les étapes.",
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Partager le certificat"),
+            child: const Text("Voir le certificat"),
           ),
         ],
       ),
