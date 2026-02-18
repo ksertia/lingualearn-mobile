@@ -35,49 +35,62 @@ class LoginController extends GetxController {
         "password": password.text,
       };
 
-      // Appel au service d'authentification
       final response = await AuthService.loginUser(credentials);
 
       if (response != null && response['success'] == true) {
-        final apiData = response['data']; // Contient 'user', 'tokens' et 'currentLanguage'
+        final apiData = response['data'];
         final String accessToken = apiData['tokens']['accessToken'];
+        final session = Get.find<SessionController>();
 
-        // 1. CRÉATION DE L'UTILISATEUR VIA LE MODÈLE
-        // On passe 'apiData' car notre factory UserModel.fromJson va chercher 'currentLanguage' dedans
-        final loggedInUser = UserModel.fromJson(apiData);
-
-        // 2. STOCKAGE PERSISTANT (LocalStorage)
         await LocalStorage.setAuthToken(accessToken);
+
+        print("⏳ Récupération du profil via /users/me...");
+        final profileRes = await session.dio.get('/users/me');
+        
+        UserModel loggedInUser;
+        if (profileRes.statusCode == 200 && profileRes.data['success'] == true) {
+          loggedInUser = UserModel.fromJson(profileRes.data['data']);
+        } else {
+          loggedInUser = UserModel.fromJson(apiData);
+        }
+
+        print("🔍 Vérification de l'état de l'utilisateur...");
+        
+        // Pas besoin de refaire les appels API pour les langues/niveaux
+        // On se fie au modèle utilisateur qui contient selectedLanguageId/selectedLevelId
+
         await LocalStorage.setUserID(loggedInUser.id);
         await LocalStorage.setEmail(loggedInUser.email);
-        
         String fullName = "${loggedInUser.firstName} ${loggedInUser.lastName}".trim();
         await LocalStorage.setUserName(fullName.isEmpty ? "Apprenant" : fullName);
         LocalStorage.setAlwaysLoggedIn(isChecked);
-
-        // 3. MISE À JOUR DE LA SESSION GLOBALE
-        final session = Get.find<SessionController>();
+        
         session.updateUser(loggedInUser, accessToken);
-
         isLoading.value = false;
 
-        // 4. NAVIGATION INTELLIGENTE
-        // On utilise les champs calculés par le UserModel pour décider où aller
-        
-        if (loggedInUser.selectedLanguageId == null) {
-          // Cas A : L'utilisateur n'a jamais choisi de langue (ex: Mooré, Dioula...)
-          print("➡️ Direction : Bienvenue (Nouveau profil)");
-          Get.offAllNamed('/bienvenue'); 
-        } 
-        else if (loggedInUser.selectedLevelId == null) {
-          // Cas B : Langue choisie mais pas encore de niveau/progrès (Basique, Intermédiaire...)
-          print("➡️ Direction : Sélection du niveau (Incomplet)");
-          Get.offAllNamed('/selection'); // Assure-toi que cette route correspond à ton choix de niveau
-        } 
-        else {
-          // Cas C : Profil complet, l'utilisateur a déjà commencé son apprentissage
-          print("✅ Direction : Home (Déjà configuré)");
+        // Délai pour permettre au SessionController de se mettre à jour complètement
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Décider de la redirection selon l'état de l'utilisateur
+        // Priorité 1 : Si l'utilisateur a déjà une langue ET un niveau sélectionnés
+        if (loggedInUser.selectedLanguageId != null && 
+            loggedInUser.selectedLanguageId!.isNotEmpty &&
+            loggedInUser.selectedLevelId != null &&
+            loggedInUser.selectedLevelId!.isNotEmpty) {
+          print("✅ Direction : HomeScreen (utilisateur retournant avec langue+niveau)");
+          // Navigation simple sans effacer la pile (le middleware va le faire)
           Get.offAllNamed('/HomeScreen');
+        }
+        // Priorité 2 : Si l'utilisateur a une langue sélectionnée mais pas de niveau
+        else if (loggedInUser.selectedLanguageId != null && 
+                 loggedInUser.selectedLanguageId!.isNotEmpty) {
+          print("➡️ Direction : Sélection du niveau");
+          Get.offAllNamed('/selection');
+        }
+        // Priorité 3 : Nouvel utilisateur (pas de langue)
+        else {
+          print("➡️ Direction : Bienvenue (nouvel utilisateur)");
+          Get.offAllNamed('/bienvenue');
         }
 
       } else {
@@ -89,10 +102,7 @@ class LoginController extends GetxController {
     } catch (e) {
       isLoading.value = false;
       print("❌ Erreur Critique Login: $e");
-      appSnackbar(
-        heading: "Erreur", 
-        message: "Impossible de se connecter. Vérifiez votre connexion réseau."
-      );
+      appSnackbar(heading: "Erreur", message: "Problème de connexion au serveur.");
     }
   }
 

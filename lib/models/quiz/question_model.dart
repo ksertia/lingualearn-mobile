@@ -1,38 +1,39 @@
+
 class QuestionModel {
   final String id;
-  final String questionText;
-  final List<String> options;
+  final String question;
+  final List<String> answers;
   final int correctIndex;
-  final String? explanation;
 
   QuestionModel({
     required this.id,
-    required this.questionText,
-    required this.options,
+    required this.question,
+    required this.answers,
     required this.correctIndex,
-    this.explanation,
   });
 
+  /// Vérifie si la réponse sélectionnée est correcte
+  bool isCorrect(int selectedIndex) {
+    return selectedIndex == correctIndex;
+  }
+
+  /// Création depuis JSON (utile pour API)
   factory QuestionModel.fromJson(Map<String, dynamic> json) {
     return QuestionModel(
       id: json['id'] ?? '',
-      questionText: json['questionText'] ?? '',
-      options: (json['options'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList() ??
-          [],
+      question: json['question'] ?? '',
+      answers: List<String>.from(json['answers'] ?? []),
       correctIndex: json['correctIndex'] ?? 0,
-      explanation: json['explanation'],
     );
   }
 
+  /// Conversion vers JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'questionText': questionText,
-      'options': options,
+      'question': question,
+      'answers': answers,
       'correctIndex': correctIndex,
-      'explanation': explanation,
     };
   }
 }

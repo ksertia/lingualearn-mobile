@@ -14,4 +14,10 @@ class NavigationProvider with ChangeNotifier {
   void goToLexique() => setCurrentIndex(1);
   void goToProgres() => setCurrentIndex(2);
   void goToSettings() => setCurrentIndex(3);
+  
+  /// Réinitialise l'index de navigation à 0 (accueil/dashboard)
+  void resetIndex() {
+    _currentIndex = 0;
+    notifyListeners();
+  }
 }

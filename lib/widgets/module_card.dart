@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/module_model.dart';
+import '../models/modules/modul_model.dart'; // Vérifie bien le chemin ici
+
+// On définit l'enum ici si elle n'est plus dans le modèle
+enum ModuleStatus { completed, inProgress, locked }
 
 class ModuleCard extends StatelessWidget {
   final ModuleModel module;
@@ -13,23 +16,20 @@ class ModuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double progress =
-        module.completedLessons / module.totalLessons;
+    // Valeurs par défaut car l'API ne les fournit pas encore
+    const int completedLessons = 0;
+    const int totalLessons = 5;
+    const double progress = completedLessons / totalLessons;
+    const ModuleStatus status = ModuleStatus.inProgress; 
 
     return InkWell(
-      onTap: onTap, // ✅ TOUS CLIQUABLES
+      onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 20,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: module.status == ModuleStatus.inProgress
-              ? Border.all(color: Color.fromARGB(255, 0, 0, 153), width: 2)
-              : null,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -41,40 +41,39 @@ class ModuleCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// TITRE
+            /// TITRE (Vient de l'API)
             Text(
               module.title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 4),
 
-            /// SOUS-TITRE
+            /// SOUS-TITRE (On utilise 'description' de l'API)
             Text(
-              module.subtitle,
+              module.description,
               style: TextStyle(color: Colors.grey.shade600),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
 
             const SizedBox(height: 12),
 
-            /// PROGRESSION
+            /// PROGRESSION (Factice pour l'instant)
             Row(
               children: [
                 Expanded(
                   child: LinearProgressIndicator(
                     value: progress.clamp(0.0, 1.0),
                     backgroundColor: Colors.grey.shade300,
-                    color: Color.fromARGB(255, 0, 206, 209),
+                    color: const Color.fromARGB(255, 0, 206, 209),
                     minHeight: 6,
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  '${module.completedLessons} / ${module.totalLessons}',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                const Text(
+                  '$completedLessons / $totalLessons',
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -82,35 +81,21 @@ class ModuleCard extends StatelessWidget {
             const SizedBox(height: 16),
 
             /// STATUT
-            _buildStatus(),
+            _buildStatus(status),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatus() {
-    switch (module.status) {
+  Widget _buildStatus(ModuleStatus status) {
+    switch (status) {
       case ModuleStatus.completed:
-        return _statusChip(
-          'Terminé',
-          Icons.check,
-          Color.fromARGB(255, 0, 206, 209),
-        );
-
+        return _statusChip('Terminé', Icons.check, const Color.fromARGB(255, 0, 206, 209));
       case ModuleStatus.inProgress:
-        return _actionButton(
-          'Continuer',
-          Icons.arrow_forward,
-          Color.fromARGB(255, 255, 127, 0),
-        );
-
+        return _actionButton('Continuer', Icons.arrow_forward, const Color.fromARGB(255, 255, 127, 0));
       case ModuleStatus.locked:
-        return _statusChip(
-          'Verrouillé',
-          Icons.lock,
-          Color.fromARGB(255, 192, 192, 192),
-        );
+        return _statusChip('Verrouillé', Icons.lock, const Color.fromARGB(255, 192, 192, 192));
     }
   }
 
@@ -118,20 +103,11 @@ class ModuleCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(30),
-      ),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(30)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           const SizedBox(width: 6),
           Icon(icon, color: Colors.white, size: 18),
         ],
@@ -143,22 +119,13 @@ class ModuleCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(30),
-      ),
+      decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(30)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: color, size: 18),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
         ],
       ),
     );

@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:fasolingo/widgets/quiz/circular_score.dart';
-import 'package:fasolingo/widgets/quiz/confetti_widget.dart';
-import 'package:fasolingo/widgets/quiz/stars_animation.dart';
+import 'package:fasolingo/widgets/quiz/confetti_widget.dart'; // Ton widget de confettis
 
 class QuizResultScreen extends StatelessWidget {
   final int correctAnswers;
   final int total;
   final int totalXP;
-
-  final Color bleuFonce = const Color(0xFF000099);
-  final Color orange = const Color(0xFFFF7F00);
-  final Color grisClair = const Color(0xFFC0C0C0);
-  final Color blanc = const Color(0xFFFFFFFF);
 
   const QuizResultScreen({
     super.key,
@@ -20,64 +13,114 @@ class QuizResultScreen extends StatelessWidget {
     required this.totalXP,
   });
 
+  // Ta palette officielle
+  static const Color bleuFonce = Color(0xFF000099);   // (0, 0, 153)
+  static const Color orange = Color(0xFFFF7F00);      // (255, 127, 0)
+  static const Color blanc = Color(0xFFFFFFFF);      // (255, 255, 255)
+
   @override
   Widget build(BuildContext context) {
-    final double score = correctAnswers / total;
-    final bool isPassed = score >= 0.7;
-    int stars = score == 1.0 ? 3 : (score >= 0.85 ? 2 : (score >= 0.7 ? 1 : 0));
+    final double percentage = (correctAnswers / total) * 100;
+    final bool isSuccess = percentage >= 70;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: blanc,
       body: Stack(
         children: [
-          if (isPassed) const ConfettiWidget(),
+          // 1. Confettis si réussite
+          if (isSuccess) const Positioned.fill(child: ConfettiWidget()),
+
           SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 50),
+                const Spacer(),
+
+                // 2. Titre Dynamique
                 Text(
-                  isPassed ? "SUCCÈS !" : "ESSAYE ENCORE",
-                  style: TextStyle(
-                    fontSize: 28,
-                    // Changé FontWeight.black par FontWeight.w900 pour éviter l'avertissement
+                  isSuccess ? "FÉLICITATIONS !" : "CONTINUE TES EFFORTS",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 26,
                     fontWeight: FontWeight.w900,
                     color: bleuFonce,
                     letterSpacing: 1.5,
                   ),
                 ),
-                const Spacer(),
-                CircularScore(value: score),
-                const SizedBox(height: 30),
-                StarsAnimation(stars: stars),
                 const SizedBox(height: 40),
 
+                // 3. Cercle de Progression (Score)
+                Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 180,
+                        height: 180,
+                        child: CircularProgressIndicator(
+                          value: correctAnswers / total,
+                          strokeWidth: 15,
+                          backgroundColor: bleuFonce.withOpacity(0.1),
+                          color: isSuccess ? bleuFonce : orange,
+                          strokeCap: StrokeCap.round,
+                        ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "${percentage.toInt()}%",
+                            style: const TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.w900,
+                              color: bleuFonce,
+                            ),
+                          ),
+                          Text(
+                            "$correctAnswers / $total",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: bleuFonce.withOpacity(0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                // 4. Badge XP gagnés
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   decoration: BoxDecoration(
-                    color: blanc,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: grisClair.withOpacity(0.5)),
+                    color: orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(50),
+                    border: Border.all(color: orange.withOpacity(0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.bolt, color: orange),
+                      const Icon(Icons.bolt, color: orange, size: 28),
                       const SizedBox(width: 8),
                       Text(
                         "+$totalXP XP GAGNÉS",
-                        style: TextStyle(
-                          color: bleuFonce,
-                          fontWeight: FontWeight.bold,
+                        style: const TextStyle(
                           fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: orange,
                         ),
                       ),
                     ],
                   ),
                 ),
+
                 const Spacer(),
 
+                // 5. Bouton Continuer (Ton Bleu Officiel)
                 Padding(
-                  padding: const EdgeInsets.all(30),
+                  padding: const EdgeInsets.all(24.0),
                   child: SizedBox(
                     width: double.infinity,
                     height: 60,
@@ -85,11 +128,20 @@ class QuizResultScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: bleuFonce,
                         foregroundColor: blanc,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: const Text("CONTINUER", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      child: const Text(
+                        "CONTINUER",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
                     ),
                   ),
                 ),

@@ -7,8 +7,6 @@ class UserModel {
   final String? username;
   final String accountType;
   final String? parentId;
-  
-  // Champs de session (Langue et Niveau)
   final String? selectedLanguageId;
   final String? selectedLevelId;
 
@@ -43,36 +41,35 @@ class UserModel {
     );
   }
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    final userData = json['user'] ?? json;
-    final profileData = userData['profile'] ?? {};
-    
-    String? foundLevelId;
-    final currentLang = json['currentLanguage'];
-    
-    if (currentLang != null && currentLang['levels'] != null) {
-      final levels = currentLang['levels'] as List;
-      final activeLevel = levels.firstWhere(
-        (l) => (l['userProgress'] as List).isNotEmpty,
-        orElse: () => null,
-      );
-      foundLevelId = activeLevel?['id'];
+factory UserModel.fromJson(Map<String, dynamic> json) {
+  final userData = json['user'] ?? json;
+  final profileData = userData['profile'] ?? {};
+  
+  final currentLang = json['currentLanguage'];
+  
+  String? foundLevelId;
+  
+  if (currentLang != null && currentLang['levels'] != null) {
+    final levels = currentLang['levels'] as List;
+    if (levels.isNotEmpty) {
+      foundLevelId = levels[0]['id']; 
     }
-
-    return UserModel(
-      id: userData['id'] ?? "",
-      firstName: profileData['firstName'] ?? userData['username'] ?? "Utilisateur",
-      lastName: profileData['lastName'] ?? "",
-      email: userData['email'] ?? "",
-      phone: userData['phone'] ?? "",
-      username: userData['username'],
-      accountType: userData['accountType'] ?? "learner",
-      parentId: userData['parentId'],
-      
-      selectedLanguageId: currentLang?['id'], 
-      selectedLevelId: foundLevelId,
-    );
   }
+
+  return UserModel(
+    id: userData['id'] ?? "",
+    firstName: profileData['firstName'] ?? userData['username'] ?? "Apprenant",
+    lastName: profileData['lastName'] ?? "",
+    email: userData['email'] ?? "",
+    phone: userData['phone'] ?? "",
+    username: userData['username'],
+    accountType: userData['accountType'] ?? "learner",
+    parentId: userData['parentId'],
+    
+    selectedLanguageId: currentLang != null ? currentLang['id'] : null, 
+    selectedLevelId: foundLevelId,
+  );
+}
 
   Map<String, dynamic> toJson() {
     return {

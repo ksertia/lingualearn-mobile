@@ -1,83 +1,77 @@
-// lib/widgets/parcours_item.dart
 import 'package:flutter/material.dart';
 
 class ParcoursItem extends StatelessWidget {
   final String label;
   final String status;
-  final Color statusColor;
+  final Color mainColor;
   final IconData icon;
-  final double progress;
-  final String countText;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   const ParcoursItem({
     super.key,
     required this.label,
     required this.status,
-    required this.statusColor,
+    required this.mainColor,
     required this.icon,
-    required this.progress,
-    required this.countText,
-    this.onTap,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            border: Border.all(width: 2, color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          // ❌ BORDURE COLORÉE SUPPRIMÉE
+        ),
+        child: Row(
+          children: [
+            // 🔵 Cercle coloré
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: mainColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 28),
+            ),
+            const SizedBox(width: 20),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(icon, color: statusColor),
-                      const SizedBox(width: 20),
-                      Text(
-                        '$label:',
-                        style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        status,
-                        style: TextStyle(color: statusColor, fontSize: 17),
-                      ),
-                    ],
-                  ),
                   Text(
-                    countText,
+                    label,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2D3436),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    status,
                     style: TextStyle(
-                        color: statusColor,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold),
+                      fontSize: 14,
+                      color: mainColor,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 15),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 10,
-                  backgroundColor: Colors.grey.shade200,
-                  valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
