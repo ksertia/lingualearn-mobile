@@ -1,7 +1,7 @@
 import 'package:fasolingo/controller/apps/etapes/etapes_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shimmer/shimmer.dart'; // N'oublie pas d'ajouter shimmer dans ton pubspec.yaml
+import 'package:shimmer/shimmer.dart'; 
 import '../../../../widgets/stepsscreens/custom_app_bar.dart';
 import '../../../../widgets/stepsscreens/parcours_item.dart';
 

@@ -10,45 +10,76 @@ class StepMascotte extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.grey),
-          onPressed: () => Get.toNamed('/intro'),
+        leading: Container(
+          margin: const EdgeInsets.only(left: 10, top: 10),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black54, size: 20),
+            onPressed: () => Get.back(),
+          ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 20.0),
+      body: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 30.0),
         child: Column(
           children: [
-            const Spacer(), 
+            const Spacer(),
 
             Stack(
               alignment: Alignment.bottomCenter,
               children: [
                 Container(
-                  margin: const EdgeInsets.only(bottom: 20),
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  margin: const EdgeInsets.only(bottom: 25),
+                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey.shade300, width: 2),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                    border: Border.all(color: Colors.orange.shade100, width: 2),
                   ),
                   child: const Text(
-                    "Salut 👋 moi c’est LinguaLearn ! Prêt à découvrir l’application ?",
+                    "Salut 👋 moi c’est LinguaLearn !\nPrêt à découvrir l’application ?",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF2D3436),
+                      height: 1.4,
                     ),
                   ),
                 ),
                 Positioned(
-                  bottom: 11,
-                  child: Icon(Icons.arrow_drop_down, 
-                    color: Colors.grey.shade300, 
-                    size: 30
+                  bottom: 10,
+                  child: RotationTransition(
+                    turns: const AlwaysStoppedAnimation(45 / 360),
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.orange.shade100, width: 2),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 24,
+                  child: Container(
+                    width: 40,
+                    height: 20,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -57,34 +88,47 @@ class StepMascotte extends StatelessWidget {
             const SizedBox(height: 10),
 
             Lottie.asset(
-              'assets/lottie/Sad mascot.json',
-              width: 220,
-              height: 220,
+              'assets/lottie/Sad mascot.json', 
+              width: 250,
+              height: 250,
+              fit: BoxFit.contain,
             ),
 
-            const Spacer(flex: 2), 
+            const Spacer(flex: 2),
 
-            ElevatedButton(
-              onPressed: () => Get.toNamed('/selection'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 255, 127, 0),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 60),
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.orange.withOpacity(0.4),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-              child: const Text(
-                "CONTINUER",
-                style: TextStyle(
-                  fontSize: 18, 
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+              child: ElevatedButton(
+                onPressed: () => Get.toNamed('/laguedecouvert'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF8F00),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 65),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  "C'EST PARTI !",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
           ],
         ),
       ),

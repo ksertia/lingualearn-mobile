@@ -3,6 +3,7 @@ import 'package:fasolingo/views/apps/decouvrir/bienvenu_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/choisie_niveau_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/intro_page.dart';
+import 'package:fasolingo/views/apps/decouvrir/langue_decouvert.dart';
 import 'package:fasolingo/views/apps/decouvrir/selection_langues_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/step_mascotte.dart';
 import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
@@ -18,7 +19,9 @@ import 'package:fasolingo/views/apps/profile/edit_profile.dart';
 import 'package:fasolingo/views/apps/profile/profile.dart';
 import 'package:fasolingo/views/apps/progres/progres_page.dart';
 import 'package:fasolingo/views/apps/setting/settings_page.dart';
+import 'package:fasolingo/views/apps/setting/widget/detail_subscription.dart';
 import 'package:fasolingo/views/apps/setting/widget/select_language.dart';
+import 'package:fasolingo/views/apps/setting/widget/subsciption_plan.dart';
 import 'package:fasolingo/views/auth/forget_password/enter_phone_number.dart';
 import 'package:fasolingo/views/auth/forget_password/new_password.dart';
 import 'package:fasolingo/views/auth/forget_password/otpcode.dart';
@@ -72,6 +75,10 @@ getPageRoute() {
     GetPage(name: '/stepsscreens', page: () => const StepsScreensPages()),
     GetPage(name: '/lessonselectionscreen', page: () => const LessonSelectionScreen()),
     GetPage(name: '/parcoursselectionpage', page: () =>  ParcoursSelectionPage()),
+    GetPage(name: '/subscription_details', page: () =>  SubscriptionDetailsPage()),
+    GetPage(name: '/subscription_plans', page: () =>  SubscriptionPlansPage()),
+    GetPage(name: '/laguedecouvert', page: () =>  LanguageDcouvertPage()),
+
 
 
 

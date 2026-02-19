@@ -14,7 +14,7 @@ class SplashCree extends StatefulWidget {
 class _SplashCreeState extends State<SplashCree> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  bool _isLoading = true;
+  bool _isLoading = true; 
 
   @override
   void initState() {
@@ -22,65 +22,57 @@ class _SplashCreeState extends State<SplashCree> {
     _checkStatus();
   }
 
-  void _checkStatus() async {
-    await Future.delayed(const Duration(milliseconds: 800));
+void _checkStatus() async {
+    await Future.delayed(const Duration(milliseconds: 1000));
 
-    String? token = LocalStorage.getAuthToken();
+    String? storedToken = LocalStorage.getAuthToken();
 
-    if (token == null || token.isEmpty || token == "null") {
+    if (storedToken == null || storedToken.isEmpty || storedToken == "null") {
       if (mounted) setState(() => _isLoading = false);
       return;
     }
 
     try {
       final session = Get.find<SessionController>();
+      
+      // ✅ CORRECTION ICI : On utilise .value car c'est un RxString
+      session.token.value = storedToken; 
 
       final response = await session.dio.get('/users/me');
 
       if (response.statusCode == 200 && response.data['success'] == true) {
         UserModel loggedInUser = UserModel.fromJson(response.data['data']);
-
-        print("🔍 Splash : Vérification des listes sur le serveur...");
         
-        final langRes = await session.dio.get('/users/${loggedInUser.id}/languages');
-        List userLangs = langRes.data['data'] ?? [];
+        // Mise à jour globale (userId, token, selectedLanguageId, etc.)
+        session.updateUser(loggedInUser, storedToken);
 
-        var vraieLangueLocale = userLangs.firstWhere(
-          (l) => l['language']['code'] != 'fr', 
-          orElse: () => null
-        );
+        print("🔍 Splash : Analyse de l'état...");
 
-        final levelRes = await session.dio.get('/users/${loggedInUser.id}/levels');
-        List userLevels = levelRes.data['data'] ?? [];
-
-        if (vraieLangueLocale != null) {
-          loggedInUser = loggedInUser.copyWith(
-            selectedLanguageId: vraieLangueLocale['languageId']
-          );
-        }
-        session.updateUser(loggedInUser, token);
-
-        if (vraieLangueLocale == null) {
-          print("➡️ Splash : Direction Bienvenue (Aucune langue locale)");
-          Get.offAllNamed('/bienvenue');
+        // On utilise directement les valeurs du modèle reçu
+        if (loggedInUser.selectedLanguageId != null && 
+            loggedInUser.selectedLanguageId!.isNotEmpty &&
+            loggedInUser.selectedLevelId != null && 
+            loggedInUser.selectedLevelId!.isNotEmpty) {
+          
+          Get.offAllNamed('/HomeScreen');
         } 
-        else if (userLevels.isEmpty) {
-          print("➡️ Splash : Direction Sélection du niveau (Langue ok, niveau vide)");
+        else if (loggedInUser.selectedLanguageId != null && 
+                 loggedInUser.selectedLanguageId!.isNotEmpty) {
+          
           Get.offAllNamed('/selection');
         } 
         else {
-          print("✅ Splash : Direction Accueil (Utilisateur totalement configuré)");
-          Get.offAllNamed('/HomeScreen');
+          Get.offAllNamed('/bienvenue');
         }
+
       } else {
         if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
-      debugPrint("🚨 Erreur Splash (Check Lists) : $e");
+      debugPrint("🚨 Erreur Splash : $e");
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
 
   final List<Map<String, String>> _pages = [
     {
@@ -102,6 +94,7 @@ class _SplashCreeState extends State<SplashCree> {
 
   @override
   Widget build(BuildContext context) {
+    // Écran de chargement pendant la vérification du token et du profil
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
@@ -115,6 +108,7 @@ class _SplashCreeState extends State<SplashCree> {
 
     final session = Get.find<SessionController>();
 
+    // Design de l'Onboarding si l'utilisateur n'est pas connecté
     return Scaffold(
       body: Stack(
         children: [
@@ -167,52 +161,20 @@ class _SplashCreeState extends State<SplashCree> {
                 ),
                 const SizedBox(height: 20),
                 if (_currentPage == _pages.length - 1) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 255, 127, 0),
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        session.vientDeLaDecouverte = true;
-                        Get.toNamed('/intro');
-                      },
-                      child: const Text("Découvrir"),
-                    ),
-                  ),
+                  _buildButton("Découvrir", const Color.fromARGB(255, 255, 127, 0), Colors.white, () {
+                    session.vientDeLaDecouverte = true;
+                    Get.toNamed('/intro');
+                  }),
                   const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                      ),
-                      onPressed: () {
-                        session.vientDeLaDecouverte = false;
-                        Get.toNamed('/register');
-                      },
-                      child: const Text("S'inscrire"),
-                    ),
-                  ),
+                  _buildButton("S'inscrire", Colors.white, Colors.black, () {
+                    session.vientDeLaDecouverte = false;
+                    Get.toNamed('/register');
+                  }),
                   const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white),
-                      ),
-                      onPressed: () {
-                        session.vientDeLaDecouverte = false;
-                        Get.toNamed('/login');
-                      },
-                      child: const Text(
-                        "Se connecter",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
+                  _buildOutlinedButton("Se connecter", () {
+                    session.vientDeLaDecouverte = false;
+                    Get.toNamed('/login');
+                  }),
                 ],
                 const SizedBox(height: 30),
                 Row(
@@ -226,6 +188,30 @@ class _SplashCreeState extends State<SplashCree> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // --- Helpers de Widgets ---
+
+  Widget _buildButton(String text, Color bg, Color fg, VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: bg, foregroundColor: fg),
+        onPressed: onPressed,
+        child: Text(text),
+      ),
+    );
+  }
+
+  Widget _buildOutlinedButton(String text, VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white)),
+        onPressed: onPressed,
+        child: Text(text, style: const TextStyle(color: Colors.white)),
       ),
     );
   }
