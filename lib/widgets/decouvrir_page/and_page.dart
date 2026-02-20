@@ -60,25 +60,33 @@ class StepSuccess extends StatelessWidget {
 
             const SizedBox(height: 30),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: ElevatedButton(
-                onPressed: ()=> 
-                  Get.toNamed('/register'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:  const Color.fromARGB(192,255, 127, 0),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 60),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: ElevatedButton(
+                    onPressed: ()=> 
+                      Get.toNamed('/register'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:  const Color.fromARGB(192,255, 127, 0),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 60),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      elevation: 5,
+                    ),
+                    child: const Text(
+                      "CRÉER MON COMPTE",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  elevation: 5,
                 ),
-                child: const Text(
-                  "CRÉER MON COMPTE",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
+                
+                const SizedBox(height: 30),
+                
+                TextButton(onPressed: () => Get.toNamed('/login'), child: const Text("Retour à la connexion", style: TextStyle(color: Colors.black54)))
+              ],
             ),
           ],
         ),
