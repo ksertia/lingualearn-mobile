@@ -4,7 +4,6 @@ import 'quiz_question_screen.dart';
 class QuizIntroScreen extends StatelessWidget {
   const QuizIntroScreen({super.key});
 
-  // Ta palette officielle
   static const Color bleuFonce = Color(0xFF000099);
   static const Color cyanTurquoise = Color(0xFF00CED1);
   static const Color orangeVif = Color(0xFFFF7F00);
@@ -18,87 +17,125 @@ class QuizIntroScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           "PRÊT POUR LE TEST ?",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.2),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.2,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 18),
           onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: Colors.transparent, // AppBar plus moderne
+        backgroundColor: Colors.transparent,
         foregroundColor: bleuFonce,
         centerTitle: true,
         elevation: 0,
       ),
 
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // ===== ILLUSTRATION CENTRALE =====
-              Center(
-                child: Image.asset(
-                  'assets/images/quiz_hero.png', // Image stylisée (ex: un perso qui réfléchit)
-                  height: 200,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.psychology, size: 120, color: orangeVif),
-                ),
-              ),
-              const SizedBox(height: 30),
+        child: Column(
+          children: [
 
-              const Text(
-                "Quiz récapitulatif",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  color: bleuFonce,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                "Vérifie tes connaissances sur ce module avant de passer à la suite !",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 15, color: Colors.grey, height: 1.5),
-              ),
-              const SizedBox(height: 40),
-
-              // ===== CARTES INFOS HARMONISÉES =====
-              Row(
+            // ===== CONTENU PRINCIPAL AVEC PADDING =====
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0, vertical: 20.0),
+              child: Column(
                 children: [
-                  _buildInfoCard(
-                    "5 Questions",
-                    'assets/images/quiz/clipboard.png', // Remplace par ton image
-                    const Color(0xFFE8F0FE),
+
+                  const SizedBox(height: 20),
+
+                  const Text(
+                    "Quiz récapitulatif",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      color: bleuFonce,
+                    ),
                   ),
-                  const SizedBox(width: 12),
-                  _buildInfoCard(
-                    "2 minutes",
-                    'assets/images/quiz/super-intelligence.png', // Remplace par ton image
-                    const Color(0xFFFFF4E5),
+
+                  const SizedBox(height: 12),
+
+                  const Text(
+                    "Vérifie tes connaissances sur ce module avant de passer à la suite !",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.grey,
+                      height: 1.5,
+                    ),
                   ),
-                  const SizedBox(width: 12),
-                  _buildInfoCard(
-                    "Objectif 70%",
-                    'assets/images/quiz/light-bulb.png', // Remplace par ton image
-                    const Color(0xFFE0F7F8),
+
+                  const SizedBox(height: 40),
+
+                  Row(
+                    children: [
+                      _buildInfoCard(
+                        "5 Questions",
+                        'assets/images/quiz/clipboard.png',
+                        const Color(0xFFE8F0FE),
+                      ),
+                      const SizedBox(width: 12),
+                      _buildInfoCard(
+                        "2 minutes",
+                        'assets/images/quiz/super-intelligence.png',
+                        const Color(0xFFFFF4E5),
+                      ),
+                      const SizedBox(width: 12),
+                      _buildInfoCard(
+                        "Objectif 70%",
+                        'assets/images/quiz/light-bulb.png',
+                        const Color(0xFFE0F7F8),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // ===== IMAGE FULL WIDTH ENTRE CARDS ET BOUTONS =====
+            ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: Image.asset(
+                'assets/images/quiz/creative.jpg',
+                width: double.infinity,
+                height: 190,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 190,
+                    width: double.infinity,
+                    color: Colors.grey.shade200,
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      size: 80,
+                      color: Colors.grey,
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 40),
+          ],
         ),
       ),
 
-      // ================= BOUTONS FIXÉS EN BAS =================
+      // ===== BOUTONS =====
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(24.0),
         decoration: BoxDecoration(
           color: blancPure,
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
           ],
         ),
         child: SafeArea(
@@ -108,11 +145,16 @@ class QuizIntroScreen extends StatelessWidget {
               _buildPrimaryButton(
                 context,
                 "C'EST PARTI !",
-                    () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizQuestionScreen())),
+                    () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const QuizQuestionScreen(),
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
               _buildSecondaryButton(
-                "Revoir la leçon",
+                "Revoir les étapes",
                     () => Navigator.pop(context),
               ),
             ],
@@ -122,7 +164,7 @@ class QuizIntroScreen extends StatelessWidget {
     );
   }
 
-  // ================= INFO CARD (Version Image) =================
+  // ===== INFO CARD =====
   Widget _buildInfoCard(String text, String imagePath, Color bgColor) {
     return Expanded(
       child: Column(
@@ -134,12 +176,12 @@ class QuizIntroScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: bgColor,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.black.withOpacity(0.03)),
             ),
             child: Image.asset(
               imagePath,
               fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => Icon(Icons.bolt, color: bleuFonce),
+              errorBuilder: (context, error, stackTrace) =>
+              const Icon(Icons.bolt, color: bleuFonce),
             ),
           ),
           const SizedBox(height: 10),
@@ -157,8 +199,9 @@ class QuizIntroScreen extends StatelessWidget {
     );
   }
 
-  // ================= BOUTON PRINCIPAL (Bleu Foncé) =================
-  Widget _buildPrimaryButton(BuildContext context, String label, VoidCallback onPressed) {
+  // ===== BOUTON PRINCIPAL =====
+  Widget _buildPrimaryButton(
+      BuildContext context, String label, VoidCallback onPressed) {
     return SizedBox(
       width: double.infinity,
       height: 60,
@@ -167,18 +210,21 @@ class QuizIntroScreen extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: bleuFonce,
           foregroundColor: blancPure,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          elevation: 0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18)),
         ),
         child: Text(
           label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.1),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
     );
   }
 
-  // ================= BOUTON SECONDAIRE (Orange) =================
+  // ===== BOUTON SECONDAIRE =====
   Widget _buildSecondaryButton(String label, VoidCallback onPressed) {
     return SizedBox(
       width: double.infinity,
@@ -187,11 +233,16 @@ class QuizIntroScreen extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: orangeVif, width: 2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18)),
         ),
         child: Text(
           label.toUpperCase(),
-          style: const TextStyle(fontSize: 15, color: orangeVif, fontWeight: FontWeight.w800),
+          style: const TextStyle(
+            fontSize: 15,
+            color: orangeVif,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ),
     );

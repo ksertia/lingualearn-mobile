@@ -19,12 +19,12 @@ class LogoutDeleteBottomSheet extends StatelessWidget with UIMixin {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
         color: contentTheme.bottomBarColor,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.r),
-          topRight: Radius.circular(20.r),
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
       ),
       child: Column(
@@ -35,7 +35,7 @@ class LogoutDeleteBottomSheet extends StatelessWidget with UIMixin {
           MyText.titleMedium(
             title,
             fontWeight: 700,
-            fontSize: 16.sp,
+            fontSize: 16,
             color: contentTheme.black,
             textAlign: TextAlign.center,
           ),
@@ -43,7 +43,7 @@ class LogoutDeleteBottomSheet extends StatelessWidget with UIMixin {
           MyText.titleMedium(
             subTitle,
             fontWeight: 400,
-            fontSize: 14.sp,
+            fontSize: 14,
             color: contentTheme.black,
             textAlign: TextAlign.center,
           ),
@@ -63,7 +63,7 @@ class LogoutDeleteBottomSheet extends StatelessWidget with UIMixin {
                   child: MyText.bodyLarge(
                     'no'.tr(),
                     fontWeight: 700,
-                    fontSize: 14.sp,
+                    fontSize: 14,
                     color: contentTheme.onPrimary,
                   ),
                 ),
@@ -80,7 +80,7 @@ class LogoutDeleteBottomSheet extends StatelessWidget with UIMixin {
                   child: MyText.bodyLarge(
                     'yes'.tr(),
                     fontWeight: 700,
-                    fontSize: 14.sp,
+                    fontSize: 14,
                     color: contentTheme.white,
                   ),
                 ),

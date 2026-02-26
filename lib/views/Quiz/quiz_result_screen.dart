@@ -1,3 +1,4 @@
+import 'package:fasolingo/views/Quiz/quizFinalExamenFinal.dart';
 import 'package:flutter/material.dart';
 import 'package:fasolingo/widgets/quiz/confetti_widget.dart'; // Ton widget de confettis
 
@@ -133,7 +134,14 @@ class QuizResultScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ExamTestScreen(),
+                          ),
+                        );
+                      },
                       child: const Text(
                         "CONTINUER",
                         style: TextStyle(

@@ -1,4 +1,5 @@
 import 'package:fasolingo/controller/apps/discovery_controller.dart';
+import 'package:fasolingo/models/langue/decouvert_langue.dart'; 
 import 'package:fasolingo/widgets/decouvrir_page/and_page.dart';
 import 'package:fasolingo/widgets/decouvrir_page/audio_page.dart';
 import 'package:fasolingo/widgets/decouvrir_page/choise_page.dart';
@@ -12,6 +13,8 @@ class DiscoveryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final LanguageDiscover language = Get.arguments;
+    
     final DiscoveryController controller = Get.put(DiscoveryController());
 
     return Scaffold(
@@ -19,27 +22,39 @@ class DiscoveryPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
+        title: Text(
+          "Découvrir le ${language.name}",
+          style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         leading: Obx(
           () => controller.currentPage.value == 0
               ? IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
                   onPressed: () => Get.back(),
                 )
-              : const SizedBox.shrink(),
+              : IconButton(
+                  icon: const Icon(Icons.close, color: Colors.black),
+                  onPressed: () => Get.back(),
+                ),
         ),
-        title: Obx(() => ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: controller.progress,
-                minHeight: 10,
-                backgroundColor: Colors.grey[300],
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color.fromARGB(255, 0, 0, 153)),
-              ),
-            )),
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Obx(() => ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: controller.progress,
+                    minHeight: 10,
+                    backgroundColor: Colors.grey[300],
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color.fromARGB(255, 0, 0, 153)),
+                  ),
+                )),
+          ),
+          
           Expanded(
             child: PageView(
               controller: controller.pageController,
@@ -75,17 +90,16 @@ class DiscoveryPage extends StatelessWidget {
               ],
             ),
           ),
+
           Obx(
-            () => controller.currentPage.value < 3
+            () => controller.currentPage.value < 6 
                 ? Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 30),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Visibility(
-                          visible: controller.currentPage.value > 0,
-                          child: OutlinedButton(
+                        if (controller.currentPage.value > 0)
+                          OutlinedButton(
                             onPressed: () => controller.previousPage(),
                             style: OutlinedButton.styleFrom(
                               shape: RoundedRectangleBorder(
@@ -98,8 +112,10 @@ class DiscoveryPage extends StatelessWidget {
                             child: const Text("Précédent",
                                 style: TextStyle(
                                     color: Color.fromARGB(255, 0, 0, 153))),
-                          ),
-                        ),
+                          )
+                        else
+                          const SizedBox.shrink(),
+
                         ElevatedButton(
                           onPressed: () => controller.nextPage(),
                           style: ElevatedButton.styleFrom(
@@ -111,8 +127,7 @@ class DiscoveryPage extends StatelessWidget {
                                 horizontal: 40, vertical: 15),
                           ),
                           child: Text(
-                            controller.currentPage.value ==
-                                    controller.totalPages - 1
+                            controller.currentPage.value == 5
                                 ? "FINIR"
                                 : "Suivant",
                             style: const TextStyle(color: Colors.white),
@@ -121,7 +136,7 @@ class DiscoveryPage extends StatelessWidget {
                       ],
                     ),
                   )
-                : const SizedBox.shrink(),
+                : const SizedBox.shrink(), 
           ),
         ],
       ),
