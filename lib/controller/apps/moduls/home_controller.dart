@@ -87,8 +87,7 @@ class HomeController extends GetxController {
     await loadModules();
   }
 
-  /// Marque un module comme complété, affiche un popup de réussite
-  /// et débloque automatiquement le module suivant (si présent).
+
   Future<void> onModuleCompleted(String moduleId) async {
     try {
       final idx = filteredModules.indexWhere((m) => m.id == moduleId);
@@ -97,7 +96,6 @@ class HomeController extends GetxController {
       final m = filteredModules[idx];
       final now = DateTime.now().toUtc();
 
-      // Construire un nouvel objet ModuleProgress marquant la complétion
       final completedProgress = ModuleProgress(
         id: m.progress?.id,
         userId: m.progress?.userId,
@@ -112,7 +110,6 @@ class HomeController extends GetxController {
         lastAccessedAt: now,
       );
 
-      // Remplacer le module courant par une copie marquée comme complétée
       final updated = ModuleModel(
         id: m.id,
         levelId: m.levelId,

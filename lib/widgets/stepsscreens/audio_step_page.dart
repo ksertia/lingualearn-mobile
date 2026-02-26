@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:get/get.dart';
 
-class LessonSelectionScreen extends StatefulWidget {
-  const LessonSelectionScreen({super.key});
+class AudioStepPage extends StatefulWidget {
+  final dynamic data;
+ const AudioStepPage({super.key, this.data});
 
   @override
-  State<LessonSelectionScreen> createState() => _LessonSelectionScreenState();
+  State<AudioStepPage> createState() => _AudioStepPageState();
 }
 
-class _LessonSelectionScreenState extends State<LessonSelectionScreen> {
+class _AudioStepPageState extends State<AudioStepPage> {
   int currentPhraseIndex = 0;
   final List<Map<String, dynamic>> lessonData = [
     {

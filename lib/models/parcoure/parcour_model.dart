@@ -91,7 +91,7 @@ class StepModel {
   final int index;
   final int estimatedMinutes;
   final bool isActive;
-  final String? status; // 'locked' | 'unlocked' | 'completed'
+  final String? status;
   final Map<String, dynamic>? progress;
   final String? progressPercentage;
 

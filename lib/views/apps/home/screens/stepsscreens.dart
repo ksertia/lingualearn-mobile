@@ -1,4 +1,5 @@
 import 'package:fasolingo/controller/apps/etapes/etapes_controller.dart';
+import 'package:fasolingo/views/apps/home/StepContentScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart'; 
@@ -132,17 +133,23 @@ class StepsScreensPages extends StatelessWidget {
                             icon: !isActive 
                                 ? Icons.lock_outline 
                                 : (isCompleted ? Icons.check : Icons.play_arrow_rounded),
-                            onTap: isActive
-                                ? () => Get.toNamed('/lessonselectionscreen', arguments: step.id)
-                                : () {
-                                    Get.snackbar(
-                                      " Verrouillé",
-                                      "Complète les étapes précédentes pour débloquer celle-ci.",
-                                      snackPosition: SnackPosition.BOTTOM,
-                                      backgroundColor: Colors.black87,
-                                      colorText: Colors.white,
-                                    );
-                                  },
+    onTap: isActive
+    ? () => Get.to(
+          () => StepContentScreen(
+            stepData: step, 
+            index: index, 
+          ),
+          transition: Transition.rightToLeft,
+        )
+    : () {
+        Get.snackbar(
+          "Verrouillé",
+          "Complète les étapes précédentes pour débloquer celle-ci.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.black87,
+          colorText: Colors.white,
+        );
+      },
                           ),
                         );
                       },

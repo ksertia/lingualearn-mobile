@@ -20,6 +20,9 @@ class LanguagesController extends GetxController {
   Rxn<LanguageModel> selectedLanguage = Rxn<LanguageModel>();
   Rxn<dynamic> selectedLevel = Rxn<dynamic>();
 
+  // Variable pour stocker la progression complète
+  Rxn<Map<String, dynamic>> progressionData = Rxn<Map<String, dynamic>>();
+
   @override
   void onInit() {
     super.onInit();
@@ -31,7 +34,6 @@ class LanguagesController extends GetxController {
       isLoading(true);
       final session = Get.find<SessionController>();
       
-      // Attendre que le userId soit disponible
       if (session.userId.value.isEmpty) {
         print("⏳ Attente du userId...");
         await Future.delayed(const Duration(milliseconds: 500));
@@ -49,10 +51,8 @@ class LanguagesController extends GetxController {
         return;
       }
 
-      // Charger les langues de l'utilisateur
       await loadAllLanguages();
       
-      // Si l'utilisateur a déjà des langues, c'est un retournant
       if (allLanguages.isNotEmpty) {
         isNewUser(false);
         hasExistingLanguages(true);
@@ -71,14 +71,11 @@ class LanguagesController extends GetxController {
   }
 
   Future<void> selectLanguage(LanguageModel lang) async {
-    // Simplement marquer la langue comme sélectionnée localement.
     selectedLanguage.value = lang;
     selectedLevel.value = null;
     print("📍 Langue sélectionnée localement : ${lang.name}");
   }
 
-  /// Appelé par le bouton "Sélectionner la langue" : envoie la sélection au serveur
-  /// puis navigue vers la page de niveau. Ne charge pas les niveaux ici.
   Future<void> confirmLanguageSelection() async {
     final session = Get.find<SessionController>();
     final String userId = session.userId.value.isNotEmpty
@@ -114,7 +111,6 @@ class LanguagesController extends GetxController {
     }
   }
 
-  /// Ajouter une langue + niveau à la liste de sélection (max 2)
   Future<bool> addLanguageLevelToList() async {
     final String? languageId = selectedLanguage.value?.id;
     String? levelId;
@@ -133,14 +129,12 @@ class LanguagesController extends GetxController {
       return false;
     }
 
-    // Vérifier si on a moins de 2 langues
     if (selectedLanguageLevels.length >= 2) {
       _showErrorSnackbar(
           "Limite atteinte", "Vous pouvez sélectionner maximum 2 langues.");
       return false;
     }
 
-    // Vérifier si la langue est déjà sélectionnée
     final isAlreadySelected =
         selectedLanguageLevels.any((item) => item['languageId'] == languageId);
     if (isAlreadySelected) {
@@ -152,7 +146,6 @@ class LanguagesController extends GetxController {
     try {
       isLoading(true);
 
-      // Sauvegarder la langue + niveau sur le serveur
       final session = Get.find<SessionController>();
       final String userId = session.userId.value.isNotEmpty
           ? session.userId.value
@@ -163,8 +156,7 @@ class LanguagesController extends GetxController {
         return false;
       }
 
-      print(
-          "⏳ [1/2] Sauvegarde langue $languageName ($languageId)...");
+      print("⏳ [1/2] Sauvegarde langue $languageName ($languageId)...");
       bool langOk = await _languageService.selectLanguageForUser(
           userId: userId, languageId: languageId);
 
@@ -183,7 +175,6 @@ class LanguagesController extends GetxController {
         return false;
       }
 
-      // Ajouter à la liste locale
       selectedLanguageLevels.add({
         'languageId': languageId,
         'levelId': levelId,
@@ -193,7 +184,6 @@ class LanguagesController extends GetxController {
       print(
           "✅ $languageName ajoutée ! Sélections : ${selectedLanguageLevels.length}/2");
 
-      // Réinitialiser la sélection pour la prochaine langue
       selectedLanguage.value = null;
       selectedLevel.value = null;
       languageLevels.clear();
@@ -208,7 +198,6 @@ class LanguagesController extends GetxController {
     }
   }
 
-  /// Retirer une langue de la liste de sélection
   Future<void> removeLanguageFromList(String languageId) async {
     try {
       isLoading(true);
@@ -246,13 +235,39 @@ class LanguagesController extends GetxController {
     }
   }
 
+  /// Récupère le nom d'un niveau à partir de son ID
+  Future<String> getLevelNameById(String levelId) async {
+    for (var level in languageLevels) {
+      String levelIdFromList;
+      if (level is Map) {
+        levelIdFromList = level['id']?.toString() ?? '';
+      } else {
+        levelIdFromList = level.id?.toString() ?? '';
+      }
+      
+      if (levelIdFromList == levelId) {
+        if (level is Map) {
+          return level['name']?.toString() ?? 'Niveau';
+        } else {
+          return level.name?.toString() ?? 'Niveau';
+        }
+      }
+    }
+    
+    for (var lang in allLanguages) {
+      for (var level in lang.levels) {
+        if (level.id == levelId) {
+          return level.name;
+        }
+      }
+    }
+    
+    return 'Niveau';
+  }
+
   Future<void> selectLevel(dynamic level) async {
-    // Simplement marquer le niveau sélectionné localement.
     selectedLevel.value = level;
     print("📍 Niveau sélectionné localement : ${level is Map ? (level['name'] ?? '') : (level?.name ?? '')}");
-
-    // Ne pas appeler l'API automatiquement ici — l'utilisateur doit appuyer sur le bouton "C'EST PARTI !"
-    // La sauvegarde effective se fait via `saveLevelSelection()` appelé par le bouton.
   }
 
   Future<void> loadAllLanguages() async {
@@ -345,11 +360,9 @@ class LanguagesController extends GetxController {
     }
   }
 
-  /// Confirmer et aller à l'accueil
   Future<void> confirmAndGoToHome() async {
     if (isLoading.value) return;
 
-    // Vérifier qu'au moins une langue est sélectionnée
     if (selectedLanguageLevels.isEmpty && selectedLanguage.value == null) {
       _showErrorSnackbar("Attention", "Sélectionnez au moins une langue.");
       return;
@@ -358,17 +371,14 @@ class LanguagesController extends GetxController {
     try {
       isLoading(true);
 
-      // Si l'utilisateur a une sélection en cours et pas encore ajoutée
       if (selectedLanguage.value != null &&
           selectedLevel.value != null &&
           selectedLanguageLevels.isEmpty) {
         await addLanguageLevelToList();
       }
 
-      // Charger les modules
       await loadModules();
 
-      // Navigation
       if (isNewUser.value) {
         print("➡️ Nouvel utilisateur → HomeScreen");
         Get.offAllNamed('/HomeScreen');
@@ -384,7 +394,6 @@ class LanguagesController extends GetxController {
     }
   }
 
-  /// Navigation rapide aux modules (utilisateur retournant)
   Future<void> quickGoToHome() async {
     if (isLoading.value) return;
 
@@ -422,6 +431,39 @@ class LanguagesController extends GetxController {
       print("❌ Erreur lors du chargement des modules : $e");
     } finally {
       isLoadingModules(false);
+    }
+  }
+
+  /// Charge la progression complète (inclut les niveaux) via l'API
+  Future<Map<String, dynamic>?> loadProgression() async {
+    try {
+      isLoading(true);
+      final session = Get.find<SessionController>();
+      final String userId = session.userId.value.isNotEmpty
+          ? session.userId.value
+          : (session.user?.id ?? "");
+      
+      final String languageId = session.selectedLanguageId.value;
+
+      if (userId.isEmpty || languageId.isEmpty) {
+        print("⚠️ userId ou languageId vide, impossible de charger la progression");
+        return null;
+      }
+      
+      print("📂 Chargement de la progression pour: userId=$userId, languageId=$languageId");
+      final result = await _languageService.fetchProgression(userId: userId, languageId: languageId);
+      
+      if (result != null) {
+        progressionData.value = result;
+        print("✅ Progression chargée avec succès");
+      }
+      
+      return result;
+    } catch (e) {
+      print("❌ Erreur lors du chargement de la progression : $e");
+      return null;
+    } finally {
+      isLoading(false);
     }
   }
 

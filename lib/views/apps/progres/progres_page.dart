@@ -1,150 +1,291 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
+import 'package:fasolingo/controller/apps/session_controller.dart';
 
-class ProgresPage extends StatelessWidget {
+class ProgresPage extends StatefulWidget {
   const ProgresPage({super.key});
+
+  @override
+  State<ProgresPage> createState() => _ProgresPageState();
+}
+
+class _ProgresPageState extends State<ProgresPage> {
+  String languageName = 'Langue';
+  String levelName = 'Niveau';
+  bool isLoadingProgression = true;
+  
+  // Données depuis le backend
+  int totalXp = 0;
+  int totalTimeSpent = 0;
+  int quizScore = 0;
+  double globalProgress = 0;
+  int completedModules = 0;
+  int inProgressModules = 0;
+  int lockedModules = 0;
+  int totalModules = 0;
+  int currentLevelXp = 0;
+  int targetXp = 1000;
+  
+  // Liste des MODULES depuis le backend
+  List<Map<String, dynamic>> modules = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProgressionData();
+  }
+
+  Future<void> _loadProgressionData() async {
+    try {
+      final langController = Get.find<LanguagesController>();
+      final session = Get.find<SessionController>();
+      
+      // Charger la progression via l'API
+      final progression = await langController.loadProgression();
+      
+      if (progression != null && mounted) {
+        // Extraire les infos de la progression depuis le backend
+        if (progression['language'] != null) {
+          languageName = progression['language']['name']?.toString() ?? 'Langue';
+        }
+        
+        // overallProgress - statistiques globales
+        if (progression['overallProgress'] != null) {
+          final overall = progression['overallProgress'];
+          totalXp = overall['totalXp'] ?? 0;
+          totalTimeSpent = overall['totalTimeMinutes'] ?? 0;
+          globalProgress = double.tryParse(overall['overallProgress']?.toString() ?? '0') ?? 0;
+          currentLevelXp = totalXp % targetXp;
+        }
+        
+        // Vider les listes
+        modules.clear();
+        
+        // levels - compter les modules par statut et récupérer les modules
+        if (progression['levels'] != null) {
+          final levels = progression['levels'] as List;
+          
+          // Chercher le niveau actuel
+          for (var level in levels) {
+            if (level['id']?.toString() == session.selectedLevelId.value) {
+              levelName = level['name']?.toString() ?? 'Niveau';
+              
+              // Utiliser les données de progression du niveau
+              if (level['userProgress'] != null) {
+                final levelProgress = level['userProgress'];
+                globalProgress = double.tryParse(levelProgress['progressPercentage']?.toString() ?? '0') ?? 0;
+                currentLevelXp = levelProgress['totalXp'] ?? 0;
+              }
+              
+              // Récupérer les MODULES
+              if (level['modules'] != null) {
+                final levelModules = level['modules'] as List;
+                for (var module in levelModules) {
+                  totalModules++;
+                  
+                  String moduleStatus = 'locked';
+                  double moduleProgressPercent = 0;
+                  
+                  if (module['userProgress'] != null) {
+                    final moduleProgress = module['userProgress'];
+                    moduleStatus = moduleProgress['status']?.toString() ?? 'locked';
+                    moduleProgressPercent = double.tryParse(moduleProgress['progressPercentage']?.toString() ?? '0') ?? 0;
+                    
+                    if (moduleStatus == 'completed') {
+                      completedModules++;
+                    } else if (moduleStatus == 'unlocked' || moduleStatus == 'started') {
+                      inProgressModules++;
+                    } else {
+                      lockedModules++;
+                    }
+                    
+                    // Quiz score
+                    if (moduleProgress['quizScore'] != null) {
+                      quizScore = moduleProgress['quizScore'] is int 
+                          ? moduleProgress['quizScore'] 
+                          : (moduleProgress['quizScore'] as double).toInt();
+                    }
+                  } else {
+                    lockedModules++;
+                  }
+                  
+                  modules.add({
+                    'title': module['title'] ?? 'Module',
+                    'description': module['description'] ?? '',
+                    'status': moduleStatus,
+                    'progressPercentage': moduleProgressPercent,
+                  });
+                }
+              }
+              break;
+            }
+          }
+        }
+        
+        setState(() {
+          isLoadingProgression = false;
+        });
+      } else {
+        setState(() {
+          isLoadingProgression = false;
+        });
+      }
+    } catch (e) {
+      print("❌ Erreur chargement progression: $e");
+      if (mounted) {
+        setState(() {
+          isLoadingProgression = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FE),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildHeader(),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionTitle("Statistiques clés"),
-                  const SizedBox(height: 15),
-                  _buildQuickStats(),
-                  const SizedBox(height: 30),
-                  _buildSectionTitle("Maîtrise des compétences"),
-                  const SizedBox(height: 15),
-                  _buildSkillsGrid(),
-                  const SizedBox(height: 30),
-                  _buildSectionTitle("Parcours d'apprentissage"),
-                  const SizedBox(height: 15),
-                  _buildTimeline(),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Header avec dégradé et profil
-Widget _buildHeader() {
-  return Container(
-    padding: const EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 30),
-    decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Color(0xFF000099), Color(0xFF4444FF)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(30),
-        bottomRight: Radius.circular(30),
-      ),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Ma Progression",
-                  style: TextStyle(
-                    color: Colors.white, 
-                    fontSize: 24, 
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.1
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
+      body: isLoadingProgression
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _loadProgressionData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
                   children: [
-                    // Badge Langue
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withOpacity(0.3)),
-                      ),
-                      child: Text(
-                        "Dioula",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    // Badge Niveau
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.orangeAccent.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.orangeAccent.withOpacity(0.5)),
-                      ),
-                      child: const Text(
-                        "Niveau : Basique",
-                        style: TextStyle(
-                          color: Colors.orangeAccent,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    _buildHeader(),
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle("Statistiques clés"),
+                          const SizedBox(height: 15),
+                          _buildQuickStats(),
+                          const SizedBox(height: 30),
+                          _buildSectionTitle("Maîtrise des compétences"),
+                          const SizedBox(height: 15),
+                          _buildSkillsGrid(),
+                          const SizedBox(height: 30),
+                          _buildSectionTitle("Parcours d'apprentissage"),
+                          const SizedBox(height: 15),
+                          _buildModulesList(),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-            // Icône Notification stylisée
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.notifications_none_rounded, color: Colors.white),
             ),
-          ],
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 30),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF000099), Color(0xFF4444FF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        const SizedBox(height: 35),
-        _buildLevelProgressBar(),
-      ],
-    ),
-  );
-}
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Ma Progression",
+                    style: TextStyle(
+                      color: Colors.white, 
+                      fontSize: 24, 
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.1
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white.withOpacity(0.3)),
+                        ),
+                        child: Text(
+                          languageName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.orangeAccent.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.orangeAccent.withOpacity(0.5)),
+                        ),
+                        child: Text(
+                          levelName,
+                          style: const TextStyle(
+                            color: Colors.orangeAccent,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+              ),
+            ],
+          ),
+          const SizedBox(height: 35),
+          _buildLevelProgressBar(),
+        ],
+      ),
+    );
+  }
 
   Widget _buildLevelProgressBar() {
+    final progressValue = targetXp > 0 ? currentLevelXp / targetXp : 0.0;
+    
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text("Progression du niveau", style: TextStyle(color: Colors.white70, fontSize: 12)),
-            Text("750 / 1000 XP", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+          children: [
+            const Text("Progression du niveau", style: TextStyle(color: Colors.white70, fontSize: 12)),
+            Text("$currentLevelXp / $targetXp XP", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
           ],
         ),
         const SizedBox(height: 8),
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: LinearProgressIndicator(
-            value: 0.75,
+            value: progressValue.clamp(0.0, 1.0),
             minHeight: 10,
             backgroundColor: Colors.white.withOpacity(0.2),
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.greenAccent),
@@ -154,16 +295,31 @@ Widget _buildHeader() {
     );
   }
 
-  // Statistiques en cartes
   Widget _buildQuickStats() {
+    String timeDisplay;
+    if (totalTimeSpent >= 60) {
+      final hours = totalTimeSpent ~/ 60;
+      final mins = totalTimeSpent % 60;
+      timeDisplay = mins > 0 ? "${hours}h ${mins}m" : "${hours}h";
+    } else {
+      timeDisplay = "${totalTimeSpent}m";
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _statCard("Série", "7 jrs", Icons.local_fire_department, Colors.orange),
-        _statCard("XP Total", "12.5k", Icons.stars, Colors.blue),
-        _statCard("Classement", "12", Icons.emoji_events, Colors.purple),
+        _statCard("XP Total", _formatXp(totalXp), Icons.stars, Colors.blue),
+        _statCard("Quiz", "$quizScore%", Icons.quiz, Colors.purple),
+        _statCard("Temps", timeDisplay, Icons.timer, Colors.green),
       ],
     );
+  }
+
+  String _formatXp(int xp) {
+    if (xp >= 1000) {
+      return "${(xp / 1000).toStringAsFixed(1)}k";
+    }
+    return xp.toString();
   }
 
   Widget _statCard(String label, String value, IconData icon, Color color) {
@@ -189,12 +345,16 @@ Widget _buildHeader() {
   }
 
   Widget _buildSkillsGrid() {
+    double lecturePercent = totalModules > 0 ? completedModules / totalModules : 0.0;
+    double ecoutePercent = totalModules > 0 ? (completedModules + inProgressModules) / totalModules : 0.0;
+    double parlerPercent = totalModules > 0 ? completedModules / totalModules : 0.0;
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _skillCircle("Lecture", 0.8, Colors.blue),
-        _skillCircle("Écoute", 0.45, Colors.red),
-        _skillCircle("Parler", 0.6, Colors.green),
+        _skillCircle("Lecture", lecturePercent, Colors.blue),
+        _skillCircle("Écoute", ecoutePercent, Colors.red),
+        _skillCircle("Parler", parlerPercent, Colors.green),
       ],
     );
   }
@@ -225,7 +385,23 @@ Widget _buildHeader() {
     );
   }
 
-  Widget _buildTimeline() {
+  Widget _buildModulesList() {
+    if (modules.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Center(
+          child: Text(
+            "Aucun module disponible",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -240,33 +416,51 @@ Widget _buildHeader() {
         ],
       ),
       child: Column(
-        children: [
-          _timelineItem("Module 1", "Complété", "done"),
-          _timelineItem("Module 2", "En cours", "loading"),
-          _timelineItem("Module 3", "Verrouillé", "locked", isLast: true),
-        ],
+        children: modules.asMap().entries.map((entry) {
+          final index = entry.key;
+          final module = entry.value;
+          final isLast = index == modules.length - 1;
+          
+          return _moduleItem(
+            module['title'] ?? 'Module',
+            _getStatusText(module['status'] ?? 'locked'),
+            module['status'] ?? 'locked',
+            isLast: isLast,
+          );
+        }).toList(),
       ),
     );
   }
 
-  Widget _timelineItem(String title, String status, String type, {bool isLast = false}) {
+  String _getStatusText(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'Complété';
+      case 'unlocked':
+      case 'started':
+        return 'En cours';
+      default:
+        return 'Verrouillé';
+    }
+  }
+
+  Widget _moduleItem(String title, String status, String type, {bool isLast = false}) {
     IconData icon;
     Color color;
 
-    switch (type) {
-      case "done":
+    switch (type.toLowerCase()) {
+      case "completed":
         icon = Icons.check_circle;
         color = Colors.green;
         break;
-      case "loading":
+      case "unlocked":
+      case "started":
         icon = Icons.play_circle_filled;
         color = const Color(0xFF4444FF);
         break;
-      case "locked":
       default:
         icon = Icons.lock_outline;
         color = Colors.grey;
-        break;
     }
 
     return Row(

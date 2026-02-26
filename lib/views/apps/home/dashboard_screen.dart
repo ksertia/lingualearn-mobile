@@ -534,18 +534,10 @@ class HomePage extends StatelessWidget {
               ),
 
               const Divider(height: 1),
-
-              // Settings options
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   children: [
-                    _buildSettingsItem(
-                      icon: Icons.person_outline,
-                      title: "Profil",
-                      subtitle: "Modifier vos informations",
-                      onTap: () {},
-                    ),
                     _buildSettingsItem(
                       icon: Icons.language_outlined,
                       title: "Langue d'apprentissage",
@@ -563,29 +555,6 @@ class HomePage extends StatelessWidget {
                       title: "Statistiques",
                       subtitle: "Voir vos progrès",
                       onTap: () {},
-                    ),
-                    _buildSettingsItem(
-                      icon: Icons.help_outline,
-                      title: "Aide & Support",
-                      subtitle: "FAQ et contact",
-                      onTap: () {},
-                    ),
-                    _buildSettingsItem(
-                      icon: Icons.info_outline,
-                      title: "À propos",
-                      subtitle: "Version et informations",
-                      onTap: () {},
-                    ),
-                    const SizedBox(height: 20),
-                    _buildSettingsItem(
-                      icon: Icons.logout,
-                      title: "Déconnexion",
-                      subtitle: "Se déconnecter de l'app",
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        _showLogoutDialog(context);
-                      },
-                      isDestructive: true,
                     ),
                   ],
                 ),

@@ -129,4 +129,18 @@ class LanguageLevelService {
       return [];
     }
   }
+
+  // --- RÉCUPÉRATION DE LA PROGRESSION (inclut les niveaux) ---
+  Future<Map<String, dynamic>?> fetchProgression({required String userId, required String languageId}) async {
+    try {
+      final response = await _dio.get('/progression/user/$userId/language/$languageId');
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return response.data['data'] as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      print("❌ Erreur Fetch Progression : $e");
+      return null;
+    }
+  }
 }
