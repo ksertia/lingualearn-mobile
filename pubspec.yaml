@@ -33,6 +33,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  confetti: ^0.7.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -132,6 +133,7 @@ flutter:
     - assets/avatar/
     - assets/lottie/
     - assets/img/8e4b0793efdb04971f43cf916a5f151e.jpg
+    - assets/images/quiz/
 
 
 

@@ -9,7 +9,6 @@ import 'package:fasolingo/views/apps/decouvrir/step_mascotte.dart';
 import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
 import 'package:fasolingo/views/apps/home/home_page.dart';
 import 'package:fasolingo/views/apps/home/parcours_page.dart';
-import 'package:fasolingo/views/apps/home/screens/lesson_selection_screen.dart';
 import 'package:fasolingo/views/apps/home/screens/parcours.dart';
 import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
 
@@ -28,6 +27,7 @@ import 'package:fasolingo/views/auth/forget_password/otpcode.dart';
 import 'package:fasolingo/views/auth/login.dart';
 import 'package:fasolingo/views/auth/register.dart';
 import 'package:fasolingo/views/splash.dart';
+import 'package:fasolingo/widgets/stepsscreens/quiz_step_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'helpers/services/auth_services.dart';
@@ -73,14 +73,14 @@ getPageRoute() {
      GetPage(name: '/selection', page: () => const LanguageSelectionPage()),
 
     GetPage(name: '/stepsscreens', page: () => const StepsScreensPages()),
-    GetPage(name: '/lessonselectionscreen', page: () => const LessonSelectionScreen()),
     GetPage(name: '/parcoursselectionpage', page: () =>  ParcoursSelectionPage()),
     GetPage(name: '/subscription_details', page: () =>  SubscriptionDetailsPage()),
     GetPage(name: '/subscription_plans', page: () =>  SubscriptionPlansPage()),
     GetPage(name: '/laguedecouvert', page: () =>  LanguageDcouvertPage()),
 
 
-
+    GetPage(name: '/quiz_intro_screen', page: () => const QuizStepPage(),
+    ),
 
 
 

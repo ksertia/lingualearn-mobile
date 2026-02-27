@@ -139,7 +139,7 @@ class LoginPage extends GetView<LoginController> {
                         label: "Google",
                         icon: Icons.g_mobiledata,
                         iconColor: Colors.red,
-                        onTap: () {}),
+                        onTap: () => Get.toNamed(''),),
                     const SizedBox(width: 15),
                     _socialButton(
                         label: "Facebook",
