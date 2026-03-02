@@ -100,19 +100,36 @@ class LanguageLevelService {
   // --- SAUVEGARDE DU NIVEAU ---
   Future<bool> selectLevelForUser({
     required String userId,
+    required String languageId,
     required String levelId,
   }) async {
-    try {
-      final String path = '/users/$userId/levels/$levelId/select'; 
-      
-      print("🚀 Requête Niveau : $path");
-      final response = await _dio.post(path);
+    final String path = '/users/$userId/levels/$levelId/select';
+    int attempts = 0;
 
-      print("✅ Réponse Niveau (${response.statusCode}) : ${response.data}");
-      return (response.statusCode == 201 || response.statusCode == 200);
-    } on DioException catch (e) {
-      print("❌ Erreur Dio Level Select (${e.response?.statusCode}) : ${e.response?.data}");
-      return false;
+    while (true) {
+      try {
+        print("🚀 Requête Niveau : $path (tentative ${attempts + 1})");
+        final response = await _dio.post(
+          path,
+          data: {
+            'languageId': languageId,
+          },
+        );
+
+        print("✅ Réponse Niveau (${response.statusCode}) : ${response.data}");
+        return (response.statusCode == 201 || response.statusCode == 200);
+      } on DioException catch (e) {
+        final int? status = e.response?.statusCode;
+        print("❌ Erreur Dio Level Select ($status) : ${e.response?.data}");
+
+        if (status == 500 && attempts == 0) {
+          // backend may need a moment after language creation, retry once
+          attempts++;
+          await Future.delayed(const Duration(milliseconds: 500));
+          continue;
+        }
+        return false;
+      }
     }
   }
 

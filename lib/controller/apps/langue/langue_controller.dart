@@ -165,9 +165,12 @@ class LanguagesController extends GetxController {
         return false;
       }
 
+      // Attendre que le serveur finisse de traiter la langue avant de sauvegarder le niveau
+      await Future.delayed(const Duration(milliseconds: 500));
+
       print("⏳ [2/2] Sauvegarde niveau pour $languageName...");
       bool levelOk = await _languageService.selectLevelForUser(
-          userId: userId, levelId: levelId);
+          userId: userId, languageId: languageId, levelId: levelId);
 
       if (!levelOk) {
         _showErrorSnackbar(
@@ -322,24 +325,13 @@ class LanguagesController extends GetxController {
     try {
       isLoading(true);
 
-      print(
-          "⏳ Étape 1/2 : Sauvegarde de la langue ($languageId) sur le serveur...");
-      bool langOk = await _languageService.selectLanguageForUser(
-          userId: userId, languageId: languageId);
-
-      if (!langOk) {
-        print("❌ Échec lors de la sauvegarde de la langue.");
-        _showErrorSnackbar("Erreur Serveur",
-            "Impossible de sauvegarder votre choix de langue.");
-        return false;
-      }
-
-      print("⏳ Étape 2/2 : Sauvegarde du niveau ($levelId) sur le serveur...");
+      // La langue devrait déjà être enregistrée dans confirmLanguageSelection.
+      print("⏳ Sauvegarde du niveau ($levelId) sur le serveur...");
       bool levelOk = await _languageService.selectLevelForUser(
-          userId: userId, levelId: levelId);
+          userId: userId, languageId: languageId, levelId: levelId);
 
       if (levelOk) {
-        print("✅ SUCCÈS TOTAL : Profil mis à jour sur le backend.");
+        print("✅ Niveau sauvegardé avec succès.");
 
         session.selectedLanguageId.value = languageId;
         session.selectedLevelId.value = levelId;
@@ -347,7 +339,7 @@ class LanguagesController extends GetxController {
       } else {
         print("❌ Échec lors de la sauvegarde du niveau.");
         _showErrorSnackbar(
-            "Erreur Serveur", "La langue est sauvée mais pas le niveau.");
+            "Erreur Serveur", "Impossible de sauvegarder votre niveau.");
         return false;
       }
     } catch (e) {
