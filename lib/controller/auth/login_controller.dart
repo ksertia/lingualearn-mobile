@@ -56,8 +56,6 @@ class LoginController extends GetxController {
 
         print("🔍 Vérification de l'état de l'utilisateur...");
         
-        // Pas besoin de refaire les appels API pour les langues/niveaux
-        // On se fie au modèle utilisateur qui contient selectedLanguageId/selectedLevelId
 
         await LocalStorage.setUserID(loggedInUser.id);
         await LocalStorage.setEmail(loggedInUser.email);
@@ -68,26 +66,22 @@ class LoginController extends GetxController {
         session.updateUser(loggedInUser, accessToken);
         isLoading.value = false;
 
-        // Délai pour permettre au SessionController de se mettre à jour complètement
         await Future.delayed(const Duration(milliseconds: 100));
 
-        // Décider de la redirection selon l'état de l'utilisateur
-        // Priorité 1 : Si l'utilisateur a déjà une langue ET un niveau sélectionnés
+
         if (loggedInUser.selectedLanguageId != null && 
             loggedInUser.selectedLanguageId!.isNotEmpty &&
             loggedInUser.selectedLevelId != null &&
             loggedInUser.selectedLevelId!.isNotEmpty) {
           print("✅ Direction : HomeScreen (utilisateur retournant avec langue+niveau)");
-          // Navigation simple sans effacer la pile (le middleware va le faire)
+
           Get.offAllNamed('/HomeScreen');
         }
-        // Priorité 2 : Si l'utilisateur a une langue sélectionnée mais pas de niveau
         else if (loggedInUser.selectedLanguageId != null && 
                  loggedInUser.selectedLanguageId!.isNotEmpty) {
           print("➡️ Direction : Sélection du niveau");
           Get.offAllNamed('/selection');
         }
-        // Priorité 3 : Nouvel utilisateur (pas de langue)
         else {
           print("➡️ Direction : Bienvenue (nouvel utilisateur)");
           Get.offAllNamed('/bienvenue');

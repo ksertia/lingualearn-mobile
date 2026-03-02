@@ -419,25 +419,25 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildKidStat(IconData icon, String val, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(15)),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 6),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(val, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
-              Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildKidStat(IconData icon, String val, String label, Color color) {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  //     decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(15)),
+  //     child: Row(
+  //       children: [
+  //         Icon(icon, color: color, size: 20),
+  //         const SizedBox(width: 6),
+  //         Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(val, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
+  //             Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey)),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildShimmerLoading() {
     return ListView.builder(
@@ -477,7 +477,6 @@ class HomePage extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Handle bar
               Container(
                 margin: const EdgeInsets.only(top: 12),
                 width: 40,
@@ -488,7 +487,6 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               
-              // Header
               Container(
                 padding: const EdgeInsets.all(25),
                 child: Row(
@@ -612,61 +610,61 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Text(
-            'Déconnexion',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: colorProBlue,
-            ),
-          ),
-          content: const Text(
-            'Êtes-vous sûr de vouloir vous déconnecter ?',
-            style: TextStyle(fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Annuler',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // TODO: Implement logout logic
-                Get.snackbar(
-                  "Déconnexion",
-                  "Fonctionnalité à implémenter",
-                  snackPosition: SnackPosition.BOTTOM,
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                'Déconnecter',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void _showLogoutDialog(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(15),
+  //         ),
+  //         title: const Text(
+  //           'Déconnexion',
+  //           style: TextStyle(
+  //             fontWeight: FontWeight.w700,
+  //             color: colorProBlue,
+  //           ),
+  //         ),
+  //         content: const Text(
+  //           'Êtes-vous sûr de vouloir vous déconnecter ?',
+  //           style: TextStyle(fontSize: 16),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.of(context).pop(),
+  //             child: Text(
+  //               'Annuler',
+  //               style: TextStyle(
+  //                 color: Colors.grey.shade600,
+  //                 fontWeight: FontWeight.w600,
+  //               ),
+  //             ),
+  //           ),
+  //           ElevatedButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //               // TODO: Implement logout logic
+  //               Get.snackbar(
+  //                 "Déconnexion",
+  //                 "Fonctionnalité à implémenter",
+  //                 snackPosition: SnackPosition.BOTTOM,
+  //               );
+  //             },
+  //             style: ElevatedButton.styleFrom(
+  //               backgroundColor: Colors.red,
+  //               foregroundColor: Colors.white,
+  //               shape: RoundedRectangleBorder(
+  //                 borderRadius: BorderRadius.circular(8),
+  //               ),
+  //             ),
+  //             child: const Text(
+  //               'Déconnecter',
+  //               style: TextStyle(fontWeight: FontWeight.w600),
+  //             ),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 }
