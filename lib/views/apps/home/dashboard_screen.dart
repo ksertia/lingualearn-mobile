@@ -11,8 +11,9 @@ import 'package:fasolingo/models/langue/langue_model.dart';
 
 const Color colorProBlue = Color(0xFF00008B);
 const Color primaryBlue = Color(0xFF00CED1);
-const Color colorLocked = Color(0xFFBDC3C7);
-const Color orangeAccent = Colors.orange;
+const Color colorCompleted = Color(0xFF81C784); // Vert clair pour terminé
+const Color orangeAccent = Color(0xFFFF9800); // Orange pour en cours
+const Color colorLocked = Color(0xFF9E9E9E); // Gris pour verrouillé
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -378,7 +379,7 @@ class HomePage extends StatelessWidget {
 
     if (moduleStatus == "completed") {
       iconData = Icons.check_circle_rounded;
-      iconColor = primaryBlue;
+      iconColor = colorCompleted;
     } else if (moduleStatus == "unlocked") {
       iconData = Icons.play_circle_filled_rounded;
       iconColor = orangeAccent;
@@ -406,7 +407,7 @@ Widget _buildKidCard(HomeController controller, ModuleModel module, String modul
   
   Color mainColor;
   if (status == "completed") {
-    mainColor = primaryBlue;
+    mainColor = colorCompleted;
   } else if (status == "unlocked" || status == "en cours") {
     mainColor = orangeAccent;
   } else {

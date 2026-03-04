@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
 import 'package:fasolingo/controller/apps/session_controller.dart';
+import 'package:fasolingo/helpers/storage/local_storage.dart';
 
 class ProgresPage extends StatefulWidget {
   const ProgresPage({super.key});
@@ -15,7 +17,6 @@ class _ProgresPageState extends State<ProgresPage> {
   String levelName = 'Niveau';
   bool isLoadingProgression = true;
   
-  // Données depuis le backend
   int totalXp = 0;
   int totalTimeSpent = 0;
   int quizScore = 0;
@@ -27,7 +28,6 @@ class _ProgresPageState extends State<ProgresPage> {
   int currentLevelXp = 0;
   int targetXp = 1000;
   
-  // Liste des MODULES depuis le backend
   List<Map<String, dynamic>> modules = [];
 
   @override
@@ -65,33 +65,73 @@ class _ProgresPageState extends State<ProgresPage> {
         // levels - compter les modules par statut et récupérer les modules
         if (progression['levels'] != null) {
           final levels = progression['levels'] as List;
-          
-          // Chercher le niveau actuel
+
+          // Determine selected level id: prefer session, else fallback to 'isCurrent' or highest progress
+          String selectedId = session.selectedLevelId.value;
+          bool foundMatch = false;
+          if (selectedId.isNotEmpty) {
+            for (var lvl in levels) {
+              if (lvl['id']?.toString() == selectedId) {
+                foundMatch = true;
+                break;
+              }
+            }
+          }
+
+          if (!foundMatch) {
+            String? fallbackId;
+            double bestProgress = -1;
+            for (var lvl in levels) {
+              final lp = lvl['userProgress'];
+              if (lp != null) {
+                if (lp['isCurrent'] == true) {
+                  fallbackId = lvl['id']?.toString();
+                  break;
+                }
+                final p = double.tryParse(lp['progressPercentage']?.toString() ?? '0') ?? 0;
+                if (p > bestProgress) {
+                  bestProgress = p;
+                  fallbackId = lvl['id']?.toString();
+                }
+              }
+            }
+            selectedId = fallbackId ?? (levels.isNotEmpty ? levels.first['id']?.toString() ?? "" : "");
+            if (selectedId.isNotEmpty) {
+              // update session and persist so other pages and future launches use the correct level
+              try {
+                final sessionCtrl = Get.find<SessionController>();
+                sessionCtrl.selectedLevelId.value = selectedId;
+                LocalStorage.setSelectedLevelId(selectedId);
+              } catch (_) {}
+            }
+          }
+
+          // Chercher le niveau correspondant au selectedId
           for (var level in levels) {
-            if (level['id']?.toString() == session.selectedLevelId.value) {
+            if (level['id']?.toString() == selectedId) {
               levelName = level['name']?.toString() ?? 'Niveau';
-              
+
               // Utiliser les données de progression du niveau
               if (level['userProgress'] != null) {
                 final levelProgress = level['userProgress'];
                 globalProgress = double.tryParse(levelProgress['progressPercentage']?.toString() ?? '0') ?? 0;
                 currentLevelXp = levelProgress['totalXp'] ?? 0;
               }
-              
+
               // Récupérer les MODULES
               if (level['modules'] != null) {
                 final levelModules = level['modules'] as List;
                 for (var module in levelModules) {
                   totalModules++;
-                  
+
                   String moduleStatus = 'locked';
                   double moduleProgressPercent = 0;
-                  
+
                   if (module['userProgress'] != null) {
                     final moduleProgress = module['userProgress'];
                     moduleStatus = moduleProgress['status']?.toString() ?? 'locked';
                     moduleProgressPercent = double.tryParse(moduleProgress['progressPercentage']?.toString() ?? '0') ?? 0;
-                    
+
                     if (moduleStatus == 'completed') {
                       completedModules++;
                     } else if (moduleStatus == 'unlocked' || moduleStatus == 'started') {
@@ -99,17 +139,17 @@ class _ProgresPageState extends State<ProgresPage> {
                     } else {
                       lockedModules++;
                     }
-                    
+
                     // Quiz score
                     if (moduleProgress['quizScore'] != null) {
-                      quizScore = moduleProgress['quizScore'] is int 
-                          ? moduleProgress['quizScore'] 
+                      quizScore = moduleProgress['quizScore'] is int
+                          ? moduleProgress['quizScore']
                           : (moduleProgress['quizScore'] as double).toInt();
                     }
                   } else {
                     lockedModules++;
                   }
-                  
+
                   modules.add({
                     'title': module['title'] ?? 'Module',
                     'description': module['description'] ?? '',
@@ -182,16 +222,16 @@ class _ProgresPageState extends State<ProgresPage> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 30),
+      padding: const EdgeInsets.only(top: 56, left: 20, right: 20, bottom: 26),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF000099), Color(0xFF4444FF)],
+          colors: [Color(0xFFFFC107), Color(0xFF4DD0E1)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
         ),
       ),
       child: Column(
@@ -206,10 +246,10 @@ class _ProgresPageState extends State<ProgresPage> {
                   const Text(
                     "Ma Progression",
                     style: TextStyle(
-                      color: Colors.white, 
+                      color: Color(0xFF2D2D2D), 
                       fontSize: 24, 
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 1.1
+                      letterSpacing: 0.6
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -218,14 +258,13 @@ class _ProgresPageState extends State<ProgresPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white.withOpacity(0.3)),
                         ),
                         child: Text(
                           languageName,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF2D2D2D),
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
@@ -235,14 +274,13 @@ class _ProgresPageState extends State<ProgresPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.orangeAccent.withOpacity(0.2),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.orangeAccent.withOpacity(0.5)),
                         ),
                         child: Text(
                           levelName,
                           style: const TextStyle(
-                            color: Colors.orangeAccent,
+                            color: Color(0xFF4DD0E1),
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
                           ),
@@ -252,17 +290,18 @@ class _ProgresPageState extends State<ProgresPage> {
                   ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  shape: BoxShape.circle,
+              SizedBox(
+                width: 84,
+                height: 84,
+                child: Lottie.asset(
+                  'assets/lottie/mascot.json',
+                  fit: BoxFit.contain,
+                  repeat: true,
                 ),
-                child: const Icon(Icons.notifications_none_rounded, color: Colors.white),
               ),
             ],
           ),
-          const SizedBox(height: 35),
+          const SizedBox(height: 22),
           _buildLevelProgressBar(),
         ],
       ),
@@ -277,18 +316,18 @@ class _ProgresPageState extends State<ProgresPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("Progression du niveau", style: TextStyle(color: Colors.white70, fontSize: 12)),
-            Text("$currentLevelXp / $targetXp XP", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+            const Text("Progression du niveau", style: TextStyle(color: Color(0xFF2D2D2D), fontSize: 12)),
+            Text("$currentLevelXp / $targetXp XP", style: const TextStyle(color: Color(0xFF2D2D2D), fontWeight: FontWeight.bold, fontSize: 12)),
           ],
         ),
         const SizedBox(height: 8),
         ClipRRect(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           child: LinearProgressIndicator(
             value: progressValue.clamp(0.0, 1.0),
-            minHeight: 10,
-            backgroundColor: Colors.white.withOpacity(0.2),
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.greenAccent),
+            minHeight: 12,
+            backgroundColor: Colors.white.withOpacity(0.6),
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFA726)),
           ),
         ),
       ],
@@ -308,9 +347,9 @@ class _ProgresPageState extends State<ProgresPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _statCard("XP Total", _formatXp(totalXp), Icons.stars, Colors.blue),
-        _statCard("Quiz", "$quizScore%", Icons.quiz, Colors.purple),
-        _statCard("Temps", timeDisplay, Icons.timer, Colors.green),
+        _statCard("XP Total", _formatXp(totalXp), Icons.stars, const Color(0xFF4DD0E1)),
+        _statCard("Quiz", "$quizScore%", Icons.quiz, const Color(0xFFFFB74D)),
+        _statCard("Temps", timeDisplay, Icons.timer, const Color(0xFF81C784)),
       ],
     );
   }
@@ -325,17 +364,21 @@ class _ProgresPageState extends State<ProgresPage> {
   Widget _statCard(String label, String value, IconData icon, Color color) {
     return Container(
       width: Get.width * 0.28,
-      padding: const EdgeInsets.symmetric(vertical: 15),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(colors: [color.withOpacity(0.18), Colors.white]),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 6)),
         ],
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 28),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            child: Icon(icon, color: color, size: 26),
+          ),
           const SizedBox(height: 8),
           Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           Text(label, style: const TextStyle(color: Colors.grey, fontSize: 11)),
@@ -352,9 +395,9 @@ class _ProgresPageState extends State<ProgresPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _skillCircle("Lecture", lecturePercent, Colors.blue),
-        _skillCircle("Écoute", ecoutePercent, Colors.red),
-        _skillCircle("Parler", parlerPercent, Colors.green),
+        _skillCircle("Lecture", lecturePercent, const Color(0xFF4DD0E1)),
+        _skillCircle("Écoute", ecoutePercent, const Color(0xFFFFB74D)),
+        _skillCircle("Parler", parlerPercent, const Color(0xFF81C784)),
       ],
     );
   }
@@ -366,21 +409,21 @@ class _ProgresPageState extends State<ProgresPage> {
           alignment: Alignment.center,
           children: [
             SizedBox(
-              height: 70,
-              width: 70,
+              height: 80,
+              width: 80,
               child: CircularProgressIndicator(
                 value: percent,
-                strokeWidth: 8,
-                backgroundColor: color.withOpacity(0.1),
+                strokeWidth: 10,
+                backgroundColor: color.withOpacity(0.12),
                 valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
             ),
             Text("${(percent * 100).toInt()}%",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ],
         ),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
       ],
     );
   }
@@ -402,33 +445,22 @@ class _ProgresPageState extends State<ProgresPage> {
       );
     }
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: modules.asMap().entries.map((entry) {
-          final index = entry.key;
-          final module = entry.value;
-          final isLast = index == modules.length - 1;
-          
-          return _moduleItem(
+    return Column(
+      children: modules.asMap().entries.map((entry) {
+        final index = entry.key;
+        final module = entry.value;
+        final isLast = index == modules.length - 1;
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _moduleCard(
             module['title'] ?? 'Module',
             _getStatusText(module['status'] ?? 'locked'),
             module['status'] ?? 'locked',
-            isLast: isLast,
-          );
-        }).toList(),
-      ),
+            isCompleted: module['status'] == 'completed',
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -444,79 +476,75 @@ class _ProgresPageState extends State<ProgresPage> {
     }
   }
 
-  Widget _moduleItem(String title, String status, String type, {bool isLast = false}) {
-    IconData icon;
-    Color color;
+  Widget _moduleCard(String title, String status, String type, {bool isCompleted = false}) {
+    // playful card with external circle
+    final bool isActive = type == 'unlocked' || type == 'started';
+    
+    // Couleurs: Terminé=vert clair, En cours=orange, Verrouillé=gris
+    final Color main = isCompleted
+        ? const Color(0xFF81C784)  // Vert clair
+        : isActive
+            ? const Color(0xFFFF9800)  // Orange
+            : const Color(0xFF9E9E9E);  // Gris
 
-    switch (type.toLowerCase()) {
-      case "completed":
-        icon = Icons.check_circle;
-        color = Colors.green;
-        break;
-      case "unlocked":
-      case "started":
-        icon = Icons.play_circle_filled;
-        color = const Color(0xFF4444FF);
-        break;
-      default:
-        icon = Icons.lock_outline;
-        color = Colors.grey;
-    }
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(2),
+    return SizedBox(
+      height: 100,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 36,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: color.withOpacity(0.2), width: 2),
+                gradient: isCompleted
+                    ? const LinearGradient(colors: [Color(0xFFE8F5E9), Color(0xFFB9F6CA)])
+                    : (isActive
+                        ? const LinearGradient(colors: [Color(0xFFFFF3E0), Color(0xFFFFECB3)])
+                        : const LinearGradient(colors: [Color(0xFFF5F5F5), Color(0xFFFFFFFF)])),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 6))],
               ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            if (!isLast)
-              Container(
-                width: 2,
-                height: 40,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [color, Colors.grey.withOpacity(0.2)],
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isActive || isCompleted ? Colors.black87 : Colors.grey.shade700)),
+                        const SizedBox(height: 6),
+                        Text(status, style: TextStyle(fontSize: 13, color: isActive || isCompleted ? main.withOpacity(0.95) : Colors.grey.shade600)),
+                      ],
+                    ),
                   ),
-                ),
+                  Icon(isCompleted ? Icons.check_circle : (isActive ? Icons.play_circle_fill : Icons.lock_outline), color: main, size: 30),
+                ],
               ),
-          ],
-        ),
-        const SizedBox(width: 15),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: type == "locked" ? Colors.grey : Colors.black87,
-                ),
-              ),
-              Text(
-                status,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: color,
-                  fontWeight: type == "loading" ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              const SizedBox(height: 15),
-            ],
+            ),
           ),
-        ),
-      ],
+
+          Positioned(
+            left: 0,
+            top: 18,
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 6))],
+              ),
+              child: Center(
+                child: Icon(isCompleted ? Icons.star : (isActive ? Icons.play_arrow : Icons.lock), color: main, size: 34),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
