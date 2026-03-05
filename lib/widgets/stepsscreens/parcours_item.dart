@@ -20,24 +20,23 @@ class ParcoursItem extends StatelessWidget {
     this.isActive = false,
   });
 
-  // Couleurs basées sur le statut
   Color get _statusColor {
     if (isCompleted) {
-      return const Color(0xFF81C784); // Vert clair
+      return const Color(0xFF81C784);
     } else if (isActive) {
-      return const Color(0xFFFF9800); // Orange
+      return const Color(0xFFFF9800);
     } else {
-      return const Color(0xFF9E9E9E); // Gris
+      return const Color(0xFF9E9E9E);
     }
   }
 
   Color get _cardBackgroundColor {
     if (isCompleted) {
-      return const Color(0xFFE8F5E9); // Vert très clair
+      return const Color(0xFFE8F5E9);
     } else if (isActive) {
-      return const Color(0xFFFFF3E0); // Orange très clair
+      return const Color(0xFFFFF3E0);
     } else {
-      return const Color(0xFFF5F5F5); // Gris très clair
+      return const Color(0xFFF5F5F5);
     }
   }
 
@@ -49,7 +48,6 @@ class ParcoursItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         child: Row(
           children: [
-            // 🔵 Cercle de statut À L'EXTÉRIEUR (à gauche)
             Container(
               width: 65,
               height: 65,
@@ -82,8 +80,6 @@ class ParcoursItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 15),
-
-            // 📝 Carte à l'intérieur
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -108,7 +104,6 @@ class ParcoursItem extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Badge de statut en haut
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,

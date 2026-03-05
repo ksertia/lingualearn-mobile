@@ -67,7 +67,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 🎨 En-tête avec mascotte
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: Row(
@@ -111,7 +110,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
 
                   const SizedBox(height: 32),
 
-                  // 📊 Barre de progression
                   Obx(() {
                     int selected = languagesController.selectedLanguageLevels.length;
                     int max = 2;
@@ -168,7 +166,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
 
                   const SizedBox(height: 32),
 
-                  // 🎯 Langues disponibles
                   Obx(() {
                     if (languagesController.isLoading.value &&
                         languagesController.allLanguages.isEmpty) {
@@ -242,10 +239,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                   }),
 
                   const SizedBox(height: 24),
-
-                  const SizedBox(height: 24),
-
-                  // ✅ Boutons d'action
+                  
                   Obx(() {
                     final hasSelection =
                         languagesController.selectedLanguage.value != null;
@@ -255,7 +249,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
 
                     return Column(
                       children: [
-                        // Bouton Ajouter la langue
                         if (hasSelection && hasLevel)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12),
@@ -272,7 +265,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                             ),
                           ),
 
-                        // Bouton Continuer / Sélectionner
                         _buildActionButton(
                           label: languagesController.selectedLanguageLevels.isEmpty
                               ? "Sélectionner une langue"
@@ -280,19 +272,16 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                           onPressed: isLoading
                               ? null
                               : () async {
-                                  // if user already added languages -> continue to home
                                   if (languagesController.selectedLanguageLevels.isNotEmpty) {
                                     await languagesController.confirmAndGoToHome();
                                     return;
                                   }
 
-                                  // if a language selected but no level yet -> confirm language then go to niveau
                                   if (hasSelection && !hasLevel) {
                                     await languagesController.confirmLanguageSelection();
                                     return;
                                   }
 
-                                  // if both language and level selected -> save and go home
                                   if (hasSelection && hasLevel) {
                                     await languagesController.confirmAndGoToHome();
                                     return;
@@ -315,7 +304,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     );
   }
 
-  /// Carte de langue avec animation
   Widget _buildLanguageCard({
     required dynamic lang,
     required bool isSelected,
@@ -359,7 +347,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
           ),
           child: Row(
             children: [
-              // Drapeau/Icône
               Container(
                 width: 48,
                 height: 36,
@@ -428,7 +415,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     );
   }
 
-  /// Carte de niveau avec gradient
   Widget _buildLevelCard({
     required dynamic level,
     required bool isSelected,
@@ -495,7 +481,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     );
   }
 
-  /// Bouton d'action personnalisé
   Widget _buildActionButton({
     required String label,
     required VoidCallback? onPressed,
@@ -538,7 +523,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     );
   }
 
-  /// Helper pour l'icône du niveau
   IconData _getLevelIcon(int order) {
     switch (order) {
       case 1:
@@ -554,7 +538,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     }
   }
 
-  /// Helper pour les couleurs du niveau
   List<Color> _getLevelColors(int order) {
     switch (order) {
       case 1:
