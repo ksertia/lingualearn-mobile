@@ -63,7 +63,7 @@ class RegisterController extends GetxController {
         await Future.delayed(const Duration(seconds: 2));
          Get.toNamed('/login');
       } else {
-
+        
         appSnackbar(
           heading: "Erreur", 
           message: "Impossible de créer le compte. L'email est peut-être déjà utilisé."

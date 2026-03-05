@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/modules/modul_model.dart'; // Vérifie bien le chemin ici
+import '../models/modules/modul_model.dart';
 
 // On définit l'enum ici si elle n'est plus dans le modèle
 enum ModuleStatus { completed, inProgress, locked }

@@ -1,7 +1,8 @@
 import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shimmer/shimmer.dart'; 
+import 'package:lottie/lottie.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
 import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
@@ -16,6 +17,28 @@ const Color orangeAccent = Colors.orange;
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
+  final Map<int, String> moduleAnimals = const {
+    0: 'assets/lottie/poulet.json',
+    1: 'assets/lottie/elephant.json',
+    2: 'assets/lottie/cat.json',
+    3: 'assets/lottie/Chicken.json',
+    4: 'assets/lottie/dino.json',
+    5: 'assets/lottie/Dog.json',
+    6: 'assets/lottie/Lion.json',
+    7: 'assets/lottie/croco.json',
+    8: 'assets/lottie/tiger.json',
+    9: 'assets/lottie/panda.json',
+    10: 'assets/lottie/koala.json',
+    11: 'assets/lottie/snake.json',
+    12: 'assets/lottie/toucan.json',
+    13: 'assets/lottie/rhino.json',
+    14: 'assets/lottie/leopard.json',
+    15: 'assets/lottie/buffalo.json',
+  };
+
+  String _getAnimal(int index) =>
+      moduleAnimals[index % moduleAnimals.length] ?? 'assets/lottie/Lion.json';
+
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.put(HomeController());
@@ -25,13 +48,12 @@ class HomePage extends StatelessWidget {
     String firstName = LocalStorage.getUserName() ?? "Champion";
     String greeting = "Salut";
 
-    String langueId = session.selectedLanguageId.value.isNotEmpty 
-        ? session.selectedLanguageId.value 
+    String langueId = session.selectedLanguageId.value.isNotEmpty
+        ? session.selectedLanguageId.value
         : (session.user?.selectedLanguageId ?? "");
 
-    final LanguageModel? selectedLang = langController.allLanguages.firstWhereOrNull(
-      (l) => l.id == langueId
-    );
+    final LanguageModel? selectedLang =
+        langController.allLanguages.firstWhereOrNull((l) => l.id == langueId);
     String langueNom = selectedLang?.name ?? "ta langue";
 
     if (langueNom.toLowerCase().contains("mooré")) {
@@ -41,7 +63,6 @@ class HomePage extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F7FF),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: Container(
@@ -71,17 +92,11 @@ class HomePage extends StatelessWidget {
             leading: const SizedBox.shrink(),
             title: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: colorProBlue.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.school_rounded,
-                    color: colorProBlue,
-                    size: 24,
-                  ),
+                Lottie.asset(
+                  'assets/lottie/Happy mascot.json',
+                  width: 60,
+                  height: 60,
+                  repeat: true,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -117,7 +132,8 @@ class HomePage extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: primaryBlue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -148,7 +164,8 @@ class HomePage extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     GestureDetector(
-                      onTap: () => _showSettingsBottomSheet(context, firstName, langueNom),
+                      onTap: () => _showSettingsBottomSheet(
+                          context, firstName, langueNom),
                       child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -164,7 +181,9 @@ class HomePage extends StatelessWidget {
                           radius: 20,
                           backgroundColor: colorProBlue,
                           child: Text(
-                            firstName.isNotEmpty ? firstName[0].toUpperCase() : "U",
+                            firstName.isNotEmpty
+                                ? firstName[0].toUpperCase()
+                                : "U",
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w900,
@@ -182,145 +201,173 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
-              ),
-              boxShadow: [
-                BoxShadow(color: colorProBlue.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10)),
-              ],
-            ),
-            padding: const EdgeInsets.fromLTRB(25, 10, 25, 30),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "$greeting, $firstName ! 🇧🇫",
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF2D3436)),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  "Prêt pour ton aventure en $langueNom ?",
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 15),
-              ],
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/app/plan1.png'),
+            fit: BoxFit.cover,
           ),
-
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return _buildShimmerLoading();
-              }
-
-              if (controller.filteredModules.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.info_outline, size: 50, color: Colors.grey),
-                      const SizedBox(height: 10),
-                      const Text("Aucun module trouvé."),
-                      const SizedBox(height: 15),
-                      ElevatedButton(
-                        onPressed: () => controller.loadModules(), 
-                        child: const Text("Réessayer")
-                      )
-                    ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                      color: colorProBlue.withOpacity(0.05),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10)),
+                ],
+              ),
+              padding: const EdgeInsets.fromLTRB(25, 10, 25, 30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "$greeting, $firstName ! 🇧🇫",
+                    style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF2D3436)),
                   ),
-                );
-              }
+                  const SizedBox(height: 5),
+                  Text(
+                    "Prêt pour ton aventure en $langueNom ?",
+                    style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 15),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return _buildShimmerLoading();
+                }
 
-              return RefreshIndicator(
-                onRefresh: () => controller.onRefresh(),
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(25, 35, 25, 40),
-                  itemCount: controller.filteredModules.length,
-                  itemBuilder: (context, index) {
-                    final module = controller.filteredModules[index];
-                    bool isLast = index == controller.filteredModules.length - 1;
+                if (controller.filteredModules.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.info_outline,
+                            size: 50, color: Colors.grey),
+                        const SizedBox(height: 10),
+                        const Text("Aucun module trouvé."),
+                        const SizedBox(height: 15),
+                        ElevatedButton(
+                            onPressed: () => controller.loadModules(),
+                            child: const Text("Réessayer"))
+                      ],
+                    ),
+                  );
+                }
 
-                    // 🔍 LOGS DEBUG - Données des modules
-                    debugPrint("=== MODULE $index ===");
-                    debugPrint("ID: ${module.id}");
-                    debugPrint("Title: ${module.title}");
-                    debugPrint("Description: ${module.description}");
-                    debugPrint("Status: ${module.status}");
-                    debugPrint("Progress: ${module.progressPercentage}%");
-                    debugPrint("Index: ${module.index}");
-                    debugPrint("IsActive: ${module.isActive}");
-                    if (module.progress != null) {
-                      debugPrint("Progress Object - Status: ${module.progress!.status}");
-                      debugPrint("Progress Object - Percentage: ${module.progress!.progressPercentage}");
-                      debugPrint("Progress Object - CompletedAt: ${module.progress!.completedAt}");
-                      debugPrint("Progress Object - UnlockedAt: ${module.progress!.unlockedAt}");
-                    } else {
-                      debugPrint("Progress Object: null");
-                    }
-                    debugPrint("==================");
+                return RefreshIndicator(
+                  onRefresh: () => controller.onRefresh(),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(25, 35, 25, 40),
+                    itemCount: controller.filteredModules.length,
+                    itemBuilder: (context, index) {
+                      final module = controller.filteredModules[index];
+                      bool isLast =
+                          index == controller.filteredModules.length - 1;
 
-                    // Utiliser directement le statut du backend au lieu des helpers
-                    String moduleStatus = module.status ?? "locked";
-                    
-                    // FALLBACK: Si tous les statuts sont null, débloquer le premier module
-                    if (moduleStatus == "locked" && index == 0) {
-                      bool allModulesLocked = controller.filteredModules.every((m) => (m.status ?? "locked") == "locked");
-                      if (allModulesLocked) {
-                        moduleStatus = "unlocked";
-                        print(" [FALLBACK] Premier module débloqué automatiquement (tous les statuts sont null)");
+                      debugPrint("=== MODULE $index ===");
+                      debugPrint("ID: ${module.id}");
+                      debugPrint("Title: ${module.title}");
+                      debugPrint("Description: ${module.description}");
+                      debugPrint("Status: ${module.status}");
+                      debugPrint("Progress: ${module.progressPercentage}%");
+                      debugPrint("Index: ${module.index}");
+                      debugPrint("IsActive: ${module.isActive}");
+                      if (module.progress != null) {
+                        debugPrint(
+                            "Progress Object - Status: ${module.progress!.status}");
+                        debugPrint(
+                            "Progress Object - Percentage: ${module.progress!.progressPercentage}");
+                        debugPrint(
+                            "Progress Object - CompletedAt: ${module.progress!.completedAt}");
+                        debugPrint(
+                            "Progress Object - UnlockedAt: ${module.progress!.unlockedAt}");
+                      } else {
+                        debugPrint("Progress Object: null");
                       }
-                    }
-                    
-                    bool isCompleted = moduleStatus == "completed";
-                    bool isUnlocked = moduleStatus == "unlocked" || moduleStatus == "completed";
-                    bool isLocked = moduleStatus == "locked";
+                      debugPrint("==================");
 
-                    // LOG du statut calculé
-                    print("Module ${index + 1}: Status='$moduleStatus' → isCompleted=$isCompleted, isUnlocked=$isUnlocked");
+                      String moduleStatus = module.status ?? "locked";
 
-                    return IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            children: [
-                              _buildTimelineIcon(moduleStatus),
-                              if (!isLast)
-                                Expanded(
-                                  child: Container(
-                                    width: 6,
-                                    margin: const EdgeInsets.symmetric(vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: isUnlocked ? (isCompleted ? primaryBlue : orangeAccent).withOpacity(0.3) : colorLocked.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(10),
+                      if (moduleStatus == "locked" && index == 0) {
+                        bool allModulesLocked = controller.filteredModules
+                            .every((m) => (m.status ?? "locked") == "locked");
+                        if (allModulesLocked) {
+                          moduleStatus = "unlocked";
+                          print(
+                              " [FALLBACK] Premier module débloqué automatiquement (tous les statuts sont null)");
+                        }
+                      }
+
+                      bool isCompleted = moduleStatus == "completed";
+                      bool isUnlocked = moduleStatus == "unlocked" ||
+                          moduleStatus == "completed";
+                      bool isLocked = moduleStatus == "locked";
+
+                      print(
+                          "Module ${index + 1}: Status='$moduleStatus' → isCompleted=$isCompleted, isUnlocked=$isUnlocked");
+
+                      return IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              children: [
+                                _buildTimelineIcon(moduleStatus),
+                                if (!isLast)
+                                  Expanded(
+                                    child: Container(
+                                      width: 6,
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: isUnlocked
+                                            ? (isCompleted
+                                                    ? primaryBlue
+                                                    : orangeAccent)
+                                                .withOpacity(0.3)
+                                            : colorLocked.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 40),
-                              child: _buildKidCard(controller, module, moduleStatus, index),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              );
-            }),
-          ),
-        ],
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 40),
+                                child: _buildKidCard(
+                                    controller, module, moduleStatus, index),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -342,102 +389,168 @@ class HomePage extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           if (moduleStatus != "locked")
-            BoxShadow(color: iconColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))
+            BoxShadow(
+                color: iconColor.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 5))
         ],
       ),
       child: Icon(iconData, color: iconColor, size: 42),
     );
   }
 
-  Widget _buildKidCard(HomeController controller, ModuleModel module, String moduleStatus, int index) {
-    Color mainColor = moduleStatus == "completed" ? primaryBlue : moduleStatus == "unlocked" ? orangeAccent : colorLocked;
-    bool isUnlocked = moduleStatus == "unlocked" || moduleStatus == "completed";
-    bool isCompleted = moduleStatus == "completed";
+Widget _buildKidCard(HomeController controller, ModuleModel module, String moduleStatus, int index) {
+  // 1. GESTION DES COULEURS (Fix pour éviter le rouge si débloqué)
+  // On force le statut en minuscule pour éviter les erreurs de casse ("Completed" vs "completed")
+  final String status = moduleStatus.toLowerCase();
+  
+  Color mainColor;
+  if (status == "completed") {
+    mainColor = primaryBlue;
+  } else if (status == "unlocked" || status == "en cours") {
+    mainColor = orangeAccent;
+  } else {
+    mainColor = colorLocked; // C'est ici que ton rouge arrive si le statut est inconnu
+  }
 
-    return GestureDetector(
-      onTap: !isUnlocked
-        ? () => Get.snackbar("", "Termine le module précédent !")
+  bool isUnlocked = status == "unlocked" || status == "completed" || status == "en cours";
+
+  return GestureDetector(
+    onTap: !isUnlocked
+        ? () => Get.snackbar("Oups ! 🔒", "Termine le module précédent pour débloquer celui-ci.")
         : () async {
             final res = await Get.toNamed('/parcoursselectionpage', arguments: module.id);
             if (res == true || res == 'completed' || res == 'finished') {
               controller.onModuleCompleted(module.id);
             }
           },
-      child: Container(
-        decoration: BoxDecoration(
-          color: isUnlocked ? Colors.white : const Color(0xFFF2F2F2),
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: mainColor.withOpacity(0.5), width: 2),
-          boxShadow: [
-            if (isUnlocked)
-              BoxShadow(color: mainColor.withOpacity(0.2), offset: const Offset(0, 8), blurRadius: 0),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Row(
-            children: [
-              Container(
-                height: 55, width: 55,
-                decoration: BoxDecoration(
-                  color: mainColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Center(
-                  child: Text("${index + 1}", 
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: mainColor)),
-                ),
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      moduleStatus == "completed" ? "TERMINÉ" : moduleStatus == "unlocked" ? "EN COURS" : "VERROUILLÉ",
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: mainColor),
-                    ),
-                    Text(
-                      module.title.toUpperCase(),
-                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: isUnlocked ? colorProBlue : colorLocked),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      isUnlocked ? module.description : "Termine les étapes précédentes...",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: isUnlocked ? Colors.blueGrey : colorLocked, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(isUnlocked ? Icons.chevron_right_rounded : Icons.lock_outline_rounded, color: mainColor),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildKidStat(IconData icon, String val, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(15)),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 6),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(val, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
-              Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey)),
-            ],
+    child: Container(
+      height: 120,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: mainColor.withOpacity(0.5), width: 2.5),
+        boxShadow: [
+          BoxShadow(
+            color: mainColor.withOpacity(0.15),
+            offset: const Offset(0, 10),
+            blurRadius: 0,
           ),
         ],
       ),
-    );
-  }
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            // --- 2. LE CONTENU TEXTE (texte à gauche, Lottie positionné à droite) ---
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      // on réserve de l'espace à droite pour le Lottie (évite chevauchement)
+                      padding: const EdgeInsets.only(right: 80),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            status == "completed" ? "BIEN JOUÉ !" : 
+                            isUnlocked ? "EN COURS" : "À DÉBLOQUER",
+                            style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                color: mainColor,
+                                letterSpacing: 1),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            module.title.toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 16,
+                                color: isUnlocked ? colorProBlue : colorLocked),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            isUnlocked ? module.description : "Continue pour découvrir...",
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Lottie positionné à droite, collé vers le bord du container
+            Positioned(
+              right: 8,
+              bottom: 10,
+              child: Container(
+                width: 110,
+                alignment: Alignment.bottomCenter,
+                child: Opacity(
+                  opacity: isUnlocked ? 1.0 : 0.2,
+                  child: ColorFiltered(
+                    colorFilter: isUnlocked
+                        ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply)
+                        : const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+                    child: Transform.scale(
+                      scaleY: -1,
+                      child: Lottie.asset(
+                        _getAnimal(index),
+                        height: 90,
+                        animate: isUnlocked,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // --- ICONES DE STATUT (Cadenas ou Play) ---
+            if (!isUnlocked)
+              Positioned(
+                right: 35,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                    child: const Icon(Icons.lock_rounded, color: Colors.grey, size: 22),
+                  ),
+                ),
+              ),
+
+            if (status == "unlocked" || status == "en cours")
+              Positioned(
+                bottom: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                      color: Colors.white.withAlpha(200),
+                      shape: BoxShape.circle,
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)]),
+                  child: Icon(Icons.play_circle_fill, color: mainColor, size: 35),
+                ),
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
   Widget _buildShimmerLoading() {
     return ListView.builder(
@@ -452,7 +565,12 @@ class HomePage extends StatelessWidget {
             children: [
               const CircleAvatar(radius: 20, backgroundColor: Colors.white),
               const SizedBox(width: 20),
-              Expanded(child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(25)))),
+              Expanded(
+                  child: Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(25)))),
             ],
           ),
         ),
@@ -460,7 +578,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  void _showSettingsBottomSheet(BuildContext context, String firstName, String langueNom) {
+  void _showSettingsBottomSheet(
+      BuildContext context, String firstName, String langueNom) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -477,7 +596,6 @@ class HomePage extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Handle bar
               Container(
                 margin: const EdgeInsets.only(top: 12),
                 width: 40,
@@ -487,8 +605,6 @@ class HomePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              
-              // Header
               Container(
                 padding: const EdgeInsets.all(25),
                 child: Row(
@@ -532,7 +648,6 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
               ),
-
               const Divider(height: 1),
               Expanded(
                 child: ListView(
@@ -578,8 +693,8 @@ class HomePage extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: isDestructive 
-              ? Colors.red.withOpacity(0.1) 
+          color: isDestructive
+              ? Colors.red.withOpacity(0.1)
               : colorProBlue.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
         ),
@@ -609,64 +724,6 @@ class HomePage extends StatelessWidget {
         color: Colors.grey.shade400,
       ),
       onTap: onTap,
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Text(
-            'Déconnexion',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: colorProBlue,
-            ),
-          ),
-          content: const Text(
-            'Êtes-vous sûr de vouloir vous déconnecter ?',
-            style: TextStyle(fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Annuler',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // TODO: Implement logout logic
-                Get.snackbar(
-                  "Déconnexion",
-                  "Fonctionnalité à implémenter",
-                  snackPosition: SnackPosition.BOTTOM,
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                'Déconnecter',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
