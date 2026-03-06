@@ -24,9 +24,10 @@ class _StepQuizState extends State<StepQuiz> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(10.0),
       child: Container(
         width: double.infinity,
+        clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(25),
@@ -39,9 +40,9 @@ class _StepQuizState extends State<StepQuiz> {
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 20),
-            
+
               Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Row(
@@ -68,23 +69,25 @@ class _StepQuizState extends State<StepQuiz> {
               ),
             ),
             
-            const Spacer(),
+            // const SizedBox(height: 15),
 
             Lottie.asset(
               'assets/lottie/Male 01.json',
-              height: 150,
+              height: 100,
             ),
 
-            const Spacer(),
+            // const SizedBox(height: 15),
 
-                Padding(
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Text(
                 widget.question,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
+
+            // const SizedBox(height: 15),
 
             Padding(
               padding: const EdgeInsets.all(15.0),
@@ -93,7 +96,7 @@ class _StepQuizState extends State<StepQuiz> {
                   bool isSelected = selectedIndex == index;
                   
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.only(bottom: 5.0),
                     child: InkWell(
                       onTap: () {
                         setState(() {
