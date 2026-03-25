@@ -61,12 +61,10 @@ dependencies:
   get_storage: ^2.1.1
   http: ^1.4.0
   flutter_launcher_icons: ^0.14.3
-  fluttertoast: ^8.2.4
-
-
-dev_dependencies:
   flutter_test:
     sdk: flutter
+  animated_text_kit: ^4.2.7
+  video_player: ^2.8.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -129,6 +127,7 @@ flutter:
     - assets/lang/
     - assets/images/logo/
     - assets/images/app/
+    - assets/images/video/videos.mp4
     - assets/icon/
     - assets/avatar/
     - assets/lottie/

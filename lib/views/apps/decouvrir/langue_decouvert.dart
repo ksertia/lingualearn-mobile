@@ -1,5 +1,6 @@
 import 'package:fasolingo/controller/apps/langue/decouvert_langue_controller.dart';
 import 'package:fasolingo/models/langue/decouvert_langue.dart';
+import 'package:fasolingo/views/apps/decouvrir/assurance.dart';
 import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -268,7 +269,7 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
           ? null
           : () {
               Get.to(
-                () => const DiscoveryPage(),
+                () => const DecouvertePage(),
                 arguments: _controller.selectedLanguage!,
               );
             },

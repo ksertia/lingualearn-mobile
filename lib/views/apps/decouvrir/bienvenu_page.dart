@@ -318,7 +318,7 @@ class _BienvenuPageState extends State<BienvenuPage>
         );
       },
       onEnd: () {
-        // L'animation sera répétée
+        
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
