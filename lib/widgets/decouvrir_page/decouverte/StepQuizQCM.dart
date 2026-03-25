@@ -7,13 +7,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class StepQuizQCM extends StatefulWidget {
   final String question;
   final List<String> options;
-  final String lottie;
+  final String lottieQuestion; 
+  final String lottieCorrect;
+  final String lottieIncorrect;
+  final String correctOption;
 
   const StepQuizQCM({
     super.key,
     required this.question,
     required this.options,
-    required this.lottie,
+    required this.lottieQuestion,
+    required this.lottieCorrect,
+    required this.lottieIncorrect,
+    required this.correctOption,
   });
 
   @override
@@ -23,91 +29,145 @@ class StepQuizQCM extends StatefulWidget {
 class _StepQuizQCMState extends State<StepQuizQCM> {
   final DiscoveryController controller = Get.find();
   int? selectedIndex;
+  String? currentLottie;
+  
+  bool hasValidated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    currentLottie = widget.lottieQuestion;
+  }
+
+  void _showResultBottomSheet(bool isCorrect) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(20.w),
+          decoration: BoxDecoration(
+            color: isCorrect ? const Color(0xFFD7FFB8) : const Color(0xFFFFDFE0),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25.r)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isCorrect ? Icons.check_circle : Icons.cancel,
+                    color: isCorrect ? const Color(0xFF58CC02) : const Color(0xFFEE2B2B),
+                    size: 30.sp,
+                  ),
+                  SizedBox(width: 10.w),
+                  Text(
+                    isCorrect ? "Bravo 🥳!" : "Désolé 😥!",
+                    style: TextStyle(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.bold,
+                      color: isCorrect ? const Color(0xFF58CC02) : const Color(0xFFEE2B2B),
+                    ),
+                  ),
+                ],
+              ),
+              if (!isCorrect) ...[
+                SizedBox(height: 10.h),
+                Text(
+                  "Bonne réponse :",
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: const Color(0xFFEE2B2B)),
+                ),
+                Text(
+                  widget.correctOption,
+                  style: TextStyle(fontSize: 16.sp, color: const Color(0xFFEE2B2B)),
+                ),
+              ],
+              SizedBox(height: 20.h),
+              SizedBox(
+                width: double.infinity,
+                height: 50.h,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    controller.nextPage();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isCorrect ? const Color(0xFF58CC02) : const Color(0xFFEE2B2B),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    isCorrect ? "CONTINUER" : "D'ACCORD",
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Color _getBorderColor(int index) {
+    String optionText = widget.options[index];
+    bool isSelected = selectedIndex == index;
+
+    if (!hasValidated) {
+      return isSelected ? const Color(0xFF000099) : Colors.grey.shade300;
+    }
+
+    if (isSelected) {
+      if (optionText == widget.correctOption) {
+        return const Color(0xFF58CC02);
+      }
+      return const Color(0xFFEE2B2B);
+    }
+
+    if (optionText == widget.correctOption && hasValidated) {
+      return const Color(0xFF58CC02);
+    }
+
+    return Colors.grey.shade300;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // 1. Zone de contenu scrollable
         SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: 100.h),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 20.h),
-
-              Text(
-                "CHOISIS LA BONNE RÉPONSE",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.black87,
-                  letterSpacing: 0.5,
-                ),
-              ),
-
+              SizedBox(height: 30.h),
+              Text("CHOISIS LA BONNE RÉPONSE", style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: Colors.black54)),
+              
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 10.h),
-                child: Lottie.asset(
-                  widget.lottie,
-                  height: 120.h,
-                  repeat: true,
-                ),
+                child: currentLottie != null 
+                    ? Lottie.asset(currentLottie!, height: 140.h, repeat: true)
+                    : SizedBox(height: 140.h),
               ),
-
-              // --- BOX QUESTION AVEC RETOUR À LA LIGNE ---
+              
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(15.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15.r),
-                    border: Border.all(color: Colors.grey.shade200),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: Colors.grey.shade200)),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF000099),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.volume_up, size: 22, color: Colors.white),
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      // ✅ Expanded règle le problème du bandeau jaune (overflow)
-                      Expanded(
-                        child: Text(
-                          widget.question,
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                          softWrap: true,
-                        ),
-                      ),
+                      const Icon(Icons.volume_up, color: Colors.blueAccent, size: 28),
+                      SizedBox(width: 15.w),
+                      Expanded(child: Text(widget.question, style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold))),
                     ],
                   ),
                 ),
               ),
-
-              SizedBox(height: 20.h),
-
-              // --- GRILLE DES OPTIONS ---
+              SizedBox(height: 25.h),
+              
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: GridView.builder(
@@ -115,55 +175,36 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: widget.options.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10.w,
-                    mainAxisSpacing: 10.h,
-                    childAspectRatio: 2.2,
+                    crossAxisCount: 2, 
+                    crossAxisSpacing: 12.w, 
+                    mainAxisSpacing: 12.h, 
+                    childAspectRatio: 2.1
                   ),
                   itemBuilder: (context, index) {
-                    bool isSelected = selectedIndex == index;
-
                     return InkWell(
-                      onTap: () {
+                      onTap: hasValidated ? null : () { 
                         setState(() {
                           selectedIndex = index;
+                          currentLottie = widget.lottieQuestion;
                         });
-                        controller.selectResponse();
                       },
-                      borderRadius: BorderRadius.circular(15.r),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
+                      child: AnimatedContainer( 
+                        duration: const Duration(milliseconds: 200),
                         alignment: Alignment.center,
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFF000099).withOpacity(0.05)
-                              : Colors.white,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(15.r),
                           border: Border.all(
-                            color: isSelected
-                                ? const Color(0xFF000099)
-                                : Colors.grey.shade300,
-                            width: 2,
+                            color: _getBorderColor(index), 
+                            width: (selectedIndex == index || (hasValidated && widget.options[index] == widget.correctOption)) ? 2.5 : 1.0,
                           ),
                         ),
-                        child: Text(
-                          widget.options[index],
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                            color: isSelected ? const Color(0xFF000099) : Colors.black87,
-                          ),
-                        ),
+                        child: Text(widget.options[index], style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
                       ),
                     );
                   },
                 ),
               ),
-              SizedBox(height: 100.h),
             ],
           ),
         ),
@@ -173,30 +214,26 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
           left: 20.w,
           right: 20.w,
           child: SizedBox(
-            width: double.infinity,
             height: 55.h,
             child: ElevatedButton(
-              onPressed: selectedIndex != null 
-                  ? () {
-                      print("Validé avec l'index: $selectedIndex");
-                    } 
-                  : null, 
+              onPressed: selectedIndex != null && !hasValidated
+                ? () {
+                    bool isCorrect = widget.options[selectedIndex!] == widget.correctOption;
+                    
+                    setState(() {
+                      hasValidated = true; 
+                      currentLottie = isCorrect ? widget.lottieCorrect : widget.lottieIncorrect;
+                    });
+                    
+                    _showResultBottomSheet(isCorrect);
+                  } 
+                : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF9800), 
+                backgroundColor: const Color(0xFFFF9800),
                 disabledBackgroundColor: Colors.grey.shade300,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.r),
-                ),
-                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
               ),
-              child: Text(
-                "VALIDER",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              child: Text("VALIDER", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
           ),
         ),

@@ -112,7 +112,7 @@ class _StepQuizDragState extends State<StepQuizDrag>
                       borderRadius: BorderRadius.circular(15.r),
                       border: Border.all(
                         color: estDejaTrouve
-                            ? Colors.green
+                            ? const Color(0xFF58CC02)
                             : (estMauvais
                                 ? Colors.red
                                 : Colors.grey.shade300),
@@ -142,7 +142,7 @@ class _StepQuizDragState extends State<StepQuizDrag>
                               fontWeight: FontWeight.bold,
                               fontSize: 16.sp,
                               color: estDejaTrouve
-                                  ? Colors.green
+                                  ? const Color(0xFF58CC02)
                                   : (estMauvais
                                       ? Colors.red
                                       : Colors.black87),
@@ -183,10 +183,10 @@ class _StepQuizDragState extends State<StepQuizDrag>
     return Material(
       color: Colors.transparent,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 12.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: const Color(0xFF000099),
-          borderRadius: BorderRadius.circular(30.r),
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             if (isFloating)
               const BoxShadow(
@@ -198,12 +198,14 @@ class _StepQuizDragState extends State<StepQuizDrag>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.volume_up, color: Colors.white),
+            const Icon(Icons.volume_up, 
+            color: Colors.blueAccent,
+            size: 28,),
             SizedBox(width: 10.w),
             Text(
               text,
               style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 17.sp,
                   fontWeight: FontWeight.bold),
             ),
