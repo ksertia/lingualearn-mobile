@@ -4,21 +4,35 @@ import 'package:get/get.dart';
 import 'package:fasolingo/controller/apps/session_controller.dart';
 
 class StepsController extends GetxController {
-  // 1. Récupération des IDs passés par la page précédente
-  // On s'attend à : Get.toNamed('/steps', arguments: {'moduleId': '...', 'pathId': '...'})
-  final String moduleId = Get.arguments['moduleId'] ?? "";
-  final String pathId = Get.arguments['pathId'] ?? "";
-  
+  // Les IDs sont récupérés de façon sûre dans `onInit`
+  late String moduleId;
+  late String pathId;
+
   RxBool isLoading = false.obs;
   RxList<StepModel> steps = <StepModel>[].obs;
 
   // Instances
   final StepsService _stepsService = StepsService();
-  final SessionController session = Get.find<SessionController>();
+  final SessionController? session = Get.isRegistered<SessionController>() ? Get.find<SessionController>() : null;
 
   @override
   void onInit() {
     super.onInit();
+
+    try {
+      if (Get.arguments is Map) {
+        moduleId = (Get.arguments['moduleId'] ?? "").toString();
+        pathId = (Get.arguments['pathId'] ?? "").toString();
+      } else {
+        moduleId = Get.arguments?.toString() ?? "";
+        pathId = "";
+      }
+    } catch (e) {
+      moduleId = "";
+      pathId = "";
+      print("🚨 [StepsController] Erreur argument : $e");
+    }
+
     fetchSteps();
   }
 

@@ -51,49 +51,52 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFF4E6), Colors.white],
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/app/plan51.jpg'),
+            fit: BoxFit.cover,
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: FadeTransition(
-                      opacity: _fadeController,
-                      child: SlideTransition(
-                        position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
-                            .animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack)),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 20),
-                            _buildBackButton(context),
-                            _buildHeader(),
-                            const SizedBox(height: 40),
-                            _buildLanguageListHeader(),
-                            const SizedBox(height: 16),
-                            _buildMainContent(),
-                          ],
+        child: Container(
+          decoration: BoxDecoration(
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: FadeTransition(
+                        opacity: _fadeController,
+                        child: SlideTransition(
+                          position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
+                              .animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 20),
+                              _buildBackButton(context),
+                              _buildHeader(),
+                              const SizedBox(height: 40),
+                              _buildLanguageListHeader(),
+                              const SizedBox(height: 16),
+                              _buildMainContent(),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              if (!_controller.isLoading && _controller.errorMessage == null)
-                Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: _buildPrimaryButton(),
-                ),
-            ],
+                if (!_controller.isLoading && _controller.errorMessage == null)
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: _buildPrimaryButton(),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -123,7 +126,7 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
           const Text(
             "Quelle culture souhaitez-vous découvrir ?",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            style: TextStyle(fontSize: 16, color: Colors.white),
           ),
         ],
       ),

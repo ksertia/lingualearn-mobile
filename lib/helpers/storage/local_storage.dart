@@ -27,6 +27,7 @@ class LocalStorage {
   static const String _notification = "notification";
 
   static const String _vientDeLaDecouverteKey = "vient_de_la_decouverte";
+  static const String _selectedLevelIdKey = "selected_level_id";
 
   static const String _languageIndexKey =
       'app_language_index'; // New key for index
@@ -56,6 +57,16 @@ class LocalStorage {
   // Pour vérifier au moment du login
   static bool getVientDeLaDecouverte() {
     return preferences.getBool(_vientDeLaDecouverteKey) ?? false;
+  }
+
+  // Pour sauvegarder le niveau sélectionné
+  static Future<bool> setSelectedLevelId(String levelId) async {
+    return preferences.setString(_selectedLevelIdKey, levelId);
+  }
+
+  // Pour récupérer le niveau sélectionné
+  static String? getSelectedLevelId() {
+    return preferences.getString(_selectedLevelIdKey);
   }
 
   static Future<void> initData() async {

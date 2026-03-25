@@ -2,7 +2,6 @@ import 'package:fasolingo/views/apps/change_language.dart';
 import 'package:fasolingo/views/apps/decouvrir/bienvenu_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/choisie_niveau_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
-import 'package:fasolingo/views/apps/decouvrir/intro_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/langue_decouvert.dart';
 import 'package:fasolingo/views/apps/decouvrir/selection_langues_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/step_mascotte.dart';
@@ -68,7 +67,6 @@ getPageRoute() {
     GetPage(name: '/otpCode', page: () => const OtpcodePage()),
     GetPage(name: '/newPassword', page: () => const NewPasswordPage()),
      GetPage(name: '/decouvrir', page: () => const DiscoveryPage()),
-     GetPage(name: '/intro', page: () => const IntroPage()),
      GetPage(name: '/step', page: () => const StepMascotte()),
      GetPage(name: '/selection', page: () => const LanguageSelectionPage()),
 

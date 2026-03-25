@@ -5,7 +5,8 @@ import 'package:fasolingo/controller/apps/etapes/etapes_controller.dart';
 import 'package:fasolingo/views/apps/home/StepContentScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shimmer/shimmer.dart'; 
+import 'package:lottie/lottie.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../widgets/stepsscreens/custom_app_bar.dart';
 import '../../../../widgets/stepsscreens/parcours_item.dart';
 
@@ -16,158 +17,191 @@ class StepsScreensPages extends StatelessWidget {
   Widget build(BuildContext context) {
     final StepsController controller = Get.put(StepsController());
 
+  final dynamic _args = Get.arguments;
+  final String moduleLottie = (_args is Map && _args['moduleLottie'] != null) ? _args['moduleLottie'].toString() : 'assets/lottie/Lion.json';
+
     const Color primaryBlue = Color(0xFF00CED1);
-    const Color orangeAccent = Color(0xFFFF8C00);
-    const Color colorLocked = Colors.grey;
+    const Color colorCompleted = Color(0xFF81C784); // Vert clair pour terminé
+    const Color orangeAccent = Color(0xFFFF9800); // Orange pour en cours
+    const Color colorLocked = Color(0xFF9E9E9E); // Gris pour verrouillé
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      extendBodyBehindAppBar: true,
       appBar: const CustomAppBar(title: "Mon Parcours d'Apprentissage"),
-      body: Obx(() {
-        // 1. Gestion de l'état de chargement avec Shimmer
-        if (controller.isLoading.value) {
-          return _buildShimmerEffect(primaryBlue);
-        }
-
-        // 2. Gestion de la liste vide
-        if (controller.steps.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.info_outline, size: 50, color: Colors.grey),
-                const SizedBox(height: 10),
-                const Text("Aucune étape disponible pour le moment."),
-                TextButton(
-                  onPressed: () => controller.onRefresh(),
-                  child: const Text("Réactualiser"),
-                )
-              ],
-            ),
-          );
-        }
-
-        return Stack(
-          children: [
-            // Ligne verticale décorative
-            Positioned(
-              left: 56,
-              top: 30,
-              bottom: 30,
-              child: Container(
-                width: 3,
-                color: primaryBlue.withOpacity(0.2),
-              ),
-            ),
-
-            RefreshIndicator(
-              onRefresh: () => controller.onRefresh(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-                child: Column(
-                  children: [
-                    const Text(
-                      "Prochaines étapes",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: primaryBlue,
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: controller.steps.length,
-                      itemBuilder: (context, index) {
-                        final step = controller.steps[index];
-
-                        // LOGS DEBUG - Données des étapes
-                        debugPrint("=== STEP $index ===");
-                        debugPrint("ID: ${step.id}");
-                        debugPrint("Title: ${step.title}");
-                        debugPrint("Status: ${step.status}");
-                        debugPrint("Progress: ${step.progress}");
-                        debugPrint("ProgressPercentage: ${step.progressPercentage}");
-                        debugPrint("IsActive: ${step.isActive}");
-                        debugPrint("==================");
-
-                        // Utiliser les vrais statuts du backend
-                        String stepStatus = step.status ?? "locked";
-                        bool isCompleted = stepStatus == "completed";
-                        bool isUnlocked = stepStatus == "unlocked" || stepStatus == "completed";
-                        
-                        // FALLBACK AMÉLIORÉ: Logique basée sur l'index des étapes
-                        if (stepStatus == "locked") {
-                          bool allStepsLocked = controller.steps.every((s) => (s.status ?? "locked") == "locked");
-                          
-                          if (allStepsLocked) {
-                            // Si toutes les étapes sont locked, débloquer selon l'ordre séquentiel
-                            if (index == 0) {
-                              // Première étape toujours débloquée
-                              stepStatus = "unlocked";
-                              isUnlocked = true;
-                              print(" [FALLBACK] Première étape débloquée automatiquement");
-                            } else {
-                              // Étapes suivantes restent locked pour progression séquentielle
-                              stepStatus = "locked";
-                              isUnlocked = false;
-                            }
-                          }
-                        }
-                        
-                        bool isActive = isUnlocked;
-
-                        // LOG du statut calculé
-                        print("Step ${index + 1}: Status='$stepStatus' → isCompleted=$isCompleted, isActive=$isActive");
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 30),
-                          child: ParcoursItem(
-                            label: "Étape ${index + 1}: ${step.title}",
-                            status: isActive 
-                                ? (isCompleted ? "Terminé" : "En cours") 
-                                : "Verrouillé",
-                            mainColor: isActive 
-                                ? (isCompleted ? primaryBlue : orangeAccent) 
-                                : colorLocked,
-                            icon: !isActive 
-                                ? Icons.lock_outline 
-                                : (isCompleted ? Icons.check : Icons.play_arrow_rounded),
-    onTap: isActive
-    ? () => Get.to(
-          () => StepContentScreen(
-            stepData: step, 
-            index: index, 
+      body: Container(
+        constraints: const BoxConstraints.expand(),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/app/plan2.png'),
+            fit: BoxFit.cover,
           ),
-          transition: Transition.rightToLeft,
-        )
-    : () {
-        Get.snackbar(
-          "Verrouillé",
-          "Complète les étapes précédentes pour débloquer celle-ci.",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.black87,
-          colorText: Colors.white,
-        );
-      },
-                          ),
-                        );
-                      },
-                    ),
+        ),
+        child: Obx(() {
+            if (controller.isLoading.value) {
+              return _buildShimmerEffect(primaryBlue);
+            }
+
+            if (controller.steps.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.info_outline, size: 50, color: Colors.grey),
+                    const SizedBox(height: 10),
+                    const Text("Aucune étape disponible pour le moment.",style: TextStyle(color: Colors.white),),
+                    TextButton(
+                      onPressed: () => controller.onRefresh(),
+                      child: const Text("Réactualiser",style: TextStyle(color: Colors.orange),),
+                    )
                   ],
                 ),
-              ),
+              );
+            }
+
+            return Stack(
+              children: [
+                Positioned(
+                  left: 56,
+                  top: MediaQuery.of(context).padding.top + 30,
+                  bottom: 30,
+                  child: Container(
+                    width: 3,
+                    color: primaryBlue.withOpacity(0.2),
+                  ),
+                ),
+
+                RefreshIndicator(
+                  onRefresh: () => controller.onRefresh(),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height,
+                      ),
+                      child: Column(
+                      children: [
+SafeArea(
+  top: true,
+  bottom: false,
+  child: Container(
+    width: double.infinity,
+    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(0.95), 
+      borderRadius: BorderRadius.circular(30), 
+      border: Border.all(
+        color: primaryBlue.withOpacity(0.4),
+        width: 2,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.1),
+          blurRadius: 10,
+          offset: const Offset(0, 5), 
+        ),
+      ],
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.max, 
+      children: [
+        Lottie.asset(
+          moduleLottie,
+          height: 45,
+          repeat: true,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            "Mon chemin magique",
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            softWrap: true,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: primaryBlue,
+              letterSpacing: 0.5,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.1),
+                  offset: const Offset(1, 1),
+                  blurRadius: 2,
+                ),
+              ],
             ),
-          ],
-        );
-      }),
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+                        ListView.builder(
+                          padding: const EdgeInsets.only(top: 16),
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: controller.steps.length,
+                          itemBuilder: (context, index) {
+                            final step = controller.steps[index];
+
+                            String stepStatus = step.status ?? "locked";
+                            bool isCompleted = stepStatus == "completed";
+                            bool isUnlocked = stepStatus == "unlocked" || stepStatus == "completed";
+
+                            if (stepStatus == "locked") {
+                              bool allStepsLocked = controller.steps.every((s) => (s.status ?? "locked") == "locked");
+                              if (allStepsLocked && index == 0) {
+                                stepStatus = "unlocked";
+                                isUnlocked = true;
+                              }
+                            }
+
+                            bool isActive = isUnlocked;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                            child: ParcoursItem(
+                                label: "Étape ${index + 1}: ${step.title}",
+                                status: isActive ? (isCompleted ? "Terminé" : "En cours") : "Verrouillé",
+                                mainColor: isActive ? (isCompleted ? colorCompleted : orangeAccent) : colorLocked,
+                                isCompleted: isCompleted,
+                                isActive: isActive,
+                                icon: !isActive ? Icons.lock_outline : (isCompleted ? Icons.check : Icons.play_arrow_rounded),
+                                onTap: isActive
+                                    ? () => Get.to(
+                                          () => StepContentScreen(
+                                            stepData: step,
+                                            index: index,
+                                          ),
+                                          transition: Transition.rightToLeft,
+                                        )
+                                    : () {
+                                        Get.snackbar(
+                                          "Verrouillé",
+                                          "Complète les étapes précédentes pour débloquer celle-ci.",
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: Colors.black87,
+                                          colorText: Colors.white,
+                                        );
+                                      },
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                ),
+              ],
+
+            );
+          }
+          ),
+        ),
     );
   }
 
-  // Widget Shimmer pour l'effet de chargement
   Widget _buildShimmerEffect(Color primaryColor) {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
@@ -184,15 +218,16 @@ class StepsScreensPages extends StatelessWidget {
                 borderRadius: BorderRadius.circular(5),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
-                itemCount: 5, // Affiche 5 squelettes
+                itemCount: 5, 
                 itemBuilder: (_, __) => Padding(
-                  padding: const EdgeInsets.only(bottom: 30),
+                  padding: const EdgeInsets.only(bottom: 10),
                   child: Row(
                     children: [
-                      const CircleAvatar(radius: 25, backgroundColor: Colors.white),
+                      const CircleAvatar(
+                          radius: 25, backgroundColor: Colors.white),
                       const SizedBox(width: 20),
                       Expanded(
                         child: Container(

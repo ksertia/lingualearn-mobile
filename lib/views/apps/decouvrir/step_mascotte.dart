@@ -8,128 +8,154 @@ class StepMascotte extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Container(
-          margin: const EdgeInsets.only(left: 10, top: 10),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            shape: BoxShape.circle,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/app/plan4.jpeg"),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black54, size: 20),
-            onPressed: () => Get.back(),
-          ),
-        ),
-      ),
-      body: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 30.0),
-        child: Column(
-          children: [
-            const Spacer(),
 
-            Stack(
-              alignment: Alignment.bottomCenter,
+          SafeArea(
+            child: Column(
               children: [
-                Container(
-                  margin: const EdgeInsets.only(bottom: 25),
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                    border: Border.all(color: Colors.orange.shade100, width: 2),
-                  ),
-                  child: const Text(
-                    "Salut 👋 moi c’est LinguaLearn !\nPrêt à découvrir l’application ?",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF2D3436),
-                      height: 1.4,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  child: Row(
+                    children: [
+                      _buildBackButton(),                    ],
                   ),
                 ),
-                Positioned(
-                  bottom: 10,
-                  child: RotationTransition(
-                    turns: const AlwaysStoppedAnimation(45 / 360),
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.orange.shade100, width: 2),
-                      ),
-                    ),
-                  ),
+
+                Image.asset(
+                  "assets/images/app/logo.png",
+                  height: 140,
                 ),
-                Positioned(
-                  bottom: 24,
-                  child: Container(
-                    width: 40,
-                    height: 20,
-                    color: Colors.white,
-                  ),
+
+                _buildSpeechBubble(),
+
+                Lottie.asset(
+                  'assets/lottie/Sad mascot.json',
+                  width: 240,
+                  height: 240,
+                  fit: BoxFit.contain,
+                ),
+
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+                  child: _buildActionButton(),
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            const SizedBox(height: 10),
+  Widget _buildBackButton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4))
+        ],
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
+        onPressed: () => Get.back(),
+      ),
+    );
+  }
 
-            Lottie.asset(
-              'assets/lottie/Sad mascot.json', 
-              width: 250,
-              height: 250,
-              fit: BoxFit.contain,
+  Widget _buildSpeechBubble() {
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 30),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: const Color(0xFFFFD54F), width: 3), 
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: const Text(
+            "Salut 👋 moi c’est LinguaLearn !\nPrêt à découvrir l’application ?",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF424242),
             ),
-
-            const Spacer(flex: 2),
-
-            Container(
+          ),
+        ),
+        Positioned(
+          bottom: -12,
+          child: RotationTransition(
+            turns: const AlwaysStoppedAnimation(45 / 360),
+            child: Container(
+              width: 25,
+              height: 25,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.orange.withOpacity(0.4),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () => Get.toNamed('/laguedecouvert'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF8F00),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 65),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  "C'EST PARTI !",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.5,
-                  ),
+                color: Colors.white,
+                border: Border(
+                  right: BorderSide(color: Color(0xFFFFD54F), width: 3),
+                  bottom: BorderSide(color: Color(0xFFFFD54F), width: 3),
                 ),
               ),
             ),
-            const SizedBox(height: 40),
-          ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton() {
+    return Container(
+      width: double.infinity,
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(35),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.withOpacity(0.4),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () => Get.toNamed('/laguedecouvert'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFFF8F00),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(35),
+            side: const BorderSide(color: Colors.white, width: 2),
+          ),
+          elevation: 0,
+        ),
+        child: const Text(
+          "C'EST PARTI !",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.2,
+          ),
         ),
       ),
     );
