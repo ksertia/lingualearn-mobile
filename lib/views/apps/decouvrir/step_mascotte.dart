@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+
 
 class StepMascotte extends StatelessWidget {
   const StepMascotte({super.key});
@@ -79,6 +81,8 @@ class StepMascotte extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Container(
+          width: 400,
+          height: 140,
           margin: const EdgeInsets.symmetric(horizontal: 30),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -93,15 +97,31 @@ class StepMascotte extends StatelessWidget {
               ),
             ],
           ),
-          child: const Text(
-            "Salut 👋 moi c’est LinguaLearn !\nPrêt à découvrir l’application ?",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF424242),
-            ),
+          child: AnimatedTextKit(
+            animatedTexts: [
+              TypewriterAnimatedText(
+                "Salut 👋 moi c’est LinguaLearn !\nPrêt à découvrir l’application ?",
+                textStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF424242),
+                ),
+                speed: const Duration(milliseconds: 40),
+              ),
+            ],
+            totalRepeatCount: 1,
+            displayFullTextOnTap: true,
+            stopPauseOnTap: true,
           ),
+          // child: const Text(
+          //   "Salut 👋 moi c’est LinguaLearn !\nPrêt à découvrir l’application ?",
+          //   textAlign: TextAlign.center,
+          //   style: TextStyle(
+          //     fontSize: 18,
+          //     fontWeight: FontWeight.bold,
+          //     color: Color(0xFF424242),
+          //   ),
+          // ),
         ),
         Positioned(
           bottom: -12,

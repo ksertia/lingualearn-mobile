@@ -76,17 +76,17 @@ void _checkStatus() async {
 
   final List<Map<String, String>> _pages = [
     {
-      "image": "assets/images/app/splash1.jpg",
+      "image": "assets/images/app/splash11.png",
       "title": "Bienvenue sur LinguaLearn",
       "subtitle": "L'application pour maîtriser nos langues locales facilement.",
     },
     {
-      "image": "assets/images/app/splash2.jpg",
+      "image": "assets/images/app/splash22.jpeg",
       "title": "Apprenez partout",
       "subtitle": "Accédez à des cours interactifs et progressez à votre rythme.",
     },
     {
-      "image": "assets/images/app/splash3.jpg",
+      "image": "assets/images/app/splash33.jpeg",
       "title": "Prêt à commencer ?",
       "subtitle": "Rejoignez la communauté et préservez notre patrimoine linguistique.",
     },
@@ -192,7 +192,6 @@ void _checkStatus() async {
     );
   }
 
-  // --- Helpers de Widgets ---
 
 // --- Helpers de Widgets Améliorés ---
 

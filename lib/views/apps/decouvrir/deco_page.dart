@@ -1,10 +1,10 @@
 import 'package:fasolingo/controller/apps/discovery_controller.dart';
-import 'package:fasolingo/models/langue/decouvert_langue.dart'; 
-import 'package:fasolingo/widgets/decouvrir_page/and_page.dart';
-import 'package:fasolingo/widgets/decouvrir_page/audio_page.dart';
-import 'package:fasolingo/widgets/decouvrir_page/choise_page.dart';
-import 'package:fasolingo/widgets/decouvrir_page/memory/frist_page.dart';
-import 'package:fasolingo/widgets/decouvrir_page/memory/remplie_page.dart';
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizDrag.dart';
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizQCM.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fasolingo/models/langue/decouvert_langue.dart';
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,131 +14,223 @@ class DiscoveryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final LanguageDiscover language = Get.arguments;
-    
     final DiscoveryController controller = Get.put(DiscoveryController());
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          "Découvrir le ${language.name}",
-          style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        leading: Obx(
-          () => controller.currentPage.value == 0
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                  onPressed: () => Get.back(),
-                )
-              : IconButton(
-                  icon: const Icon(Icons.close, color: Colors.black),
-                  onPressed: () => Get.back(),
-                ),
-        ),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Obx(() => ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: controller.progress,
-                    minHeight: 10,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color.fromARGB(255, 0, 0, 153)),
-                  ),
-                )),
-          ),
-          
-          Expanded(
-            child: PageView(
-              controller: controller.pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              onPageChanged: (index) => controller.currentPage.value = index,
-              children: const [
-                StepMemorise(
-                  titre: "Cultive ton jardin de mots😃",
-                  texteAMemoriser: "Ne yibeogo, yamba laafi ?",
-                ),
-                StepMemorise(
-                  titre: "Cultive ton jardin de mots😃",
-                  texteAMemoriser: "Ne y tūūma, Wend na sõng-y.",
-                ),
-                StepMemorise(
-                  titre: "Cultive ton jardin de mots😃",
-                  texteAMemoriser: "Yãmb modga woto!",
-                ),
-                StepQuiz(
-                  question: "Comment dit-on 'École' ?",
-                  options: ["School", "House", "Car", "Bread"],
-                ),
-                StepQuizFill(
-                  phraseDebut: "Tu es ",
-                  phraseFin: " école",
-                  options: ["à l'", "au", "la", "dans"],
-                ),
-                StepQuizAudio(
-                  correctWord: "Bonjour",
-                  options: ["Bonjour", "Bonsoir", "Salut", "Merci"],
-                ),
-                StepSuccess(),
-              ],
+    return ScreenUtilInit(
+      designSize: const Size(360, 690),
+      builder: (context, child) => Scaffold(
+        backgroundColor: const Color(0xFFF5F5F5),
+
+        appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFFF8F00),Color(0xFFFF8F00)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
           ),
+          elevation: 0,
+          centerTitle: true,
+          title: Text(
+            "Découvrir le ${language.name}",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          leading: Obx(() => IconButton(
+                icon: Icon(
+                  controller.currentPage.value == 0
+                      ? Icons.arrow_back_ios_new
+                      : Icons.close,
+                  color: Colors.white,
+                  size: 20.sp,
+                ),
+                onPressed: () => Get.back(),
+              )),
+        ),
 
-          Obx(
-            () => controller.currentPage.value < 6 
+        body: Column(
+          children: [
+
+            // PROGRESS BAR
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+              child: Obx(() => ClipRRect(
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: LinearProgressIndicator(
+                      value: controller.progress,
+                      minHeight: 8.h,
+                      backgroundColor: Colors.grey[300],
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFFFF8F00),
+                      ),
+                    ),
+                  )),
+            ),
+
+            // CONTENT
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 15.r,
+                      offset: Offset(0, 5.h),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30.r),
+                  child: PageView(
+                    controller: controller.pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: (index) =>
+                        controller.currentPage.value = index,
+                    children: [
+
+                      StepDiscoveryAudio(
+                        texteOriginal: "Ne yibeogo, yamba laafi ?",
+                        traduction: "Bonjour, comment allez-vous ?",
+                        lottie: 'assets/lottie/Sad mascot.json',
+                      ),
+                      StepDiscoveryAudio(
+                        texteOriginal: "Ne y tūūma, Wend na sõng-y.",
+                        traduction: "Bon travail, que Dieu vous aide.",
+                        lottie: 'assets/lottie/Sad mascot.json',
+                      ),
+                      StepDiscoveryAudio(
+                        texteOriginal: "Yãmb modga woto!",
+                        traduction: "Vous avez fait beaucoup d'efforts !",
+                        lottie: "assets/lottie/Lion.json",
+                      ),
+
+                      StepDiscoveryVideo(
+                        videoTitle: "OBSERVE ATTENTIVEMENT",
+                        videoUrl:
+                            "assets/images/video/videos.mp4",
+                        onVideoFinished: () => controller.nextPage(),
+                      ),
+
+                      const StepQuizQCM(
+                        question: "Comment dit-on 'École'",
+                        options: ["Sukuuri", "Yiri", "Mobilli", "Burindi"],
+                        lottie: 'assets/lottie/Sad mascot.json',
+                      ),
+                      const StepQuizQCM(
+                        question: "Que signifie 'Fofo' ?",
+                        options: ["Merci", "Bonjour", "Au revoir", "Pardon"],
+                        lottie: 'assets/lottie/Sad mascot.json',
+                      ),
+
+                      StepQuizDrag(
+                        choix: [
+                          {
+                            "nom": "Maam",
+                            "traduction": "MERE",
+                            "image": "assets/images/app/mere.png"
+                          },
+                          {
+                            "nom": "Saam",
+                            "traduction": "FRERE",
+                            "image": "assets/images/app/frere.png"
+                          },
+                          {
+                            "nom": "Baam",
+                            "traduction": "PERE",
+                            "image": "assets/images/app/papa.png"
+                          },
+                          {
+                            "nom": "Taam",
+                            "traduction": "SOEUR",
+                            "image": "assets/images/app/soeur.png"
+                          },
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            Obx(() => controller.currentPage.value < 4
                 ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                    padding: EdgeInsets.fromLTRB(20.w, 15.h, 20.w, 25.h),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+
                         if (controller.currentPage.value > 0)
-                          OutlinedButton(
-                            onPressed: () => controller.previousPage(),
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 15),
-                              side: const BorderSide(
-                                  color: Color.fromARGB(255, 0, 0, 153)),
+                          SizedBox(
+                            height: 40.h,
+                            child: OutlinedButton.icon(
+                              onPressed: controller.previousPage,
+                              icon: Icon(Icons.arrow_back_ios, size: 14.sp),
+                              label: Text(
+                                "Précédent",
+                                style: TextStyle(fontSize: 14.sp),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor:  Color(0xFFFF8F00),
+                                side: const BorderSide(
+                                    color: Color(0xFFFF8F00)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                              ),
                             ),
-                            child: const Text("Précédent",
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 0, 0, 153))),
                           )
                         else
                           const SizedBox.shrink(),
 
-                        ElevatedButton(
-                          onPressed: () => controller.nextPage(),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                            backgroundColor:
-                                const Color.fromARGB(255, 0, 0, 153),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 40, vertical: 15),
-                          ),
-                          child: Text(
-                            controller.currentPage.value == 5
-                                ? "FINIR"
-                                : "Suivant",
-                            style: const TextStyle(color: Colors.white),
+                        SizedBox(
+                          height: 40.h,
+                          child: ElevatedButton(
+                            onPressed: controller.nextPage,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFF8F00),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                              padding:
+                                  EdgeInsets.symmetric(horizontal: 25.w),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  controller.currentPage.value == 2
+                                      ? "FINIR"
+                                      : "Suivant",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 14.sp,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
                   )
-                : const SizedBox.shrink(), 
-          ),
-        ],
+                : const SizedBox.shrink()),
+          ],
+        ),
       ),
     );
   }

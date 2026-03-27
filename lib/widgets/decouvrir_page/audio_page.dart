@@ -35,9 +35,9 @@ class _StepQuizAudioState extends State<StepQuizAudio> {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 30),
+            // const SizedBox(height: 20),
 
-                          Padding(
+              Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Row(
                 children: [
@@ -63,7 +63,7 @@ class _StepQuizAudioState extends State<StepQuizAudio> {
               ),
             ),
             
-            const Spacer(),
+            // const SizedBox(height: 15),
 
             GestureDetector(
               onTap: () {
@@ -71,8 +71,8 @@ class _StepQuizAudioState extends State<StepQuizAudio> {
                 Future.delayed(const Duration(seconds: 1), () => setState(() => isPlaying = false));
               },
               child: Container(
-                width: 120,
-                height: 120,
+                width: 100,
+                height: 100,
                 decoration: BoxDecoration(
                   color: Colors.blue.shade50,
                   shape: BoxShape.circle,
@@ -81,23 +81,23 @@ class _StepQuizAudioState extends State<StepQuizAudio> {
                 child: Center(
                   child: Icon(
                     isPlaying ? Icons.graphic_eq_rounded : Icons.play_arrow_rounded,
-                    size: 80,
+                    size: 60,
                     color: Color.fromARGB(255, 0, 0, 153),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             const Text("Appuie pour écouter", style: TextStyle(color: Colors.grey)),
 
-            const Spacer(),
+            const SizedBox(height: 15),
 
             Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 children: widget.options.map((option) {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.only(bottom: 5.0),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
