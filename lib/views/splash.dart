@@ -136,7 +136,7 @@ void _checkStatus() async {
             },
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+            padding: EdgeInsets.symmetric(horizontal: 30, vertical: 40),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -161,17 +161,17 @@ void _checkStatus() async {
                 ),
                 const SizedBox(height: 20),
                 if (_currentPage == _pages.length - 1) ...[
-                  _buildButton("Découvrir", const Color.fromARGB(255, 255, 127, 0), Colors.white, () {
+                  _buildButton("C'est parti !", const Color.fromARGB(255, 255, 127, 0), Colors.white, () {
                     session.vientDeLaDecouverte = true;
-                    Get.toNamed('/intro');
+                    Get.toNamed('/step');
                   }),
                   const SizedBox(height: 8),
-                  _buildButton("S'inscrire", Colors.white, Colors.black, () {
-                    session.vientDeLaDecouverte = false;
-                    Get.toNamed('/register');
-                  }),
+                  // _buildButton("S'inscrire", Colors.white, Colors.black, () {
+                  //   session.vientDeLaDecouverte = false;
+                  //   Get.toNamed('/register');
+                  // }),
                   const SizedBox(height: 8),
-                  _buildOutlinedButton("Se connecter", () {
+                  _buildOutlinedButton("J'ai deja un compte", () {
                     session.vientDeLaDecouverte = false;
                     Get.toNamed('/login');
                   }),
@@ -194,37 +194,85 @@ void _checkStatus() async {
 
   // --- Helpers de Widgets ---
 
+// --- Helpers de Widgets Améliorés ---
+
   Widget _buildButton(String text, Color bg, Color fg, VoidCallback onPressed) {
-    return SizedBox(
+    Color shadowColor = Color.lerp(bg, Colors.black, 0.15)!;
+
+    return Container(
       width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: bg, foregroundColor: fg),
-        onPressed: onPressed,
-        child: Text(text),
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: shadowColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 4), // L'épaisseur de l'effet 3D
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: bg,
+            foregroundColor: fg,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+          onPressed: onPressed,
+          child: Text(text.toUpperCase()), 
+        ),
       ),
     );
   }
-
-  Widget _buildOutlinedButton(String text, VoidCallback onPressed) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white)),
-        onPressed: onPressed,
-        child: Text(text, style: const TextStyle(color: Colors.white)),
-      ),
-    );
-  }
-
+  // --- AJOUTE CE BLOC ICI ---
   Widget _buildDot(int index) {
+    bool isActive = _currentPage == index;
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 300),
       height: 8,
-      width: _currentPage == index ? 24 : 8,
+      width: isActive ? 24 : 8,
       margin: const EdgeInsets.only(right: 5),
       decoration: BoxDecoration(
-        color: _currentPage == index ? Colors.white : Colors.white54,
+        color: isActive ? Colors.white : Colors.white54,
         borderRadius: BorderRadius.circular(5),
+      ),
+    );
+  }
+
+
+  Widget _buildOutlinedButton(String text, VoidCallback onPressed) {
+    return Container(
+      width: double.infinity,
+      height: 55,
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.3), 
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 4),
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor:  Colors.grey, 
+            side: const BorderSide(color: Colors.white, width: 2),
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+          onPressed: onPressed,
+          child: Text(text.toUpperCase()),
+        ),
       ),
     );
   }

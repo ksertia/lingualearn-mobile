@@ -6,6 +6,8 @@ class ParcoursItem extends StatelessWidget {
   final Color mainColor;
   final IconData icon;
   final VoidCallback onTap;
+  final bool isCompleted;
+  final bool isActive;
 
   const ParcoursItem({
     super.key,
@@ -14,61 +16,159 @@ class ParcoursItem extends StatelessWidget {
     required this.mainColor,
     required this.icon,
     required this.onTap,
+    this.isCompleted = false,
+    this.isActive = false,
   });
+
+  Color get _statusColor {
+    if (isCompleted) {
+      return const Color(0xFF81C784);
+    } else if (isActive) {
+      return const Color(0xFFFF9800);
+    } else {
+      return const Color(0xFF9E9E9E);
+    }
+  }
+
+  Color get _cardBackgroundColor {
+    if (isCompleted) {
+      return const Color(0xFFE8F5E9);
+    } else if (isActive) {
+      return const Color(0xFFFFF3E0);
+    } else {
+      return const Color(0xFFF5F5F5);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          // ❌ BORDURE COLORÉE SUPPRIMÉE
-        ),
+        margin: const EdgeInsets.only(bottom: 16),
         child: Row(
           children: [
-            // 🔵 Cercle coloré
             Container(
-              padding: const EdgeInsets.all(12),
+              width: 65,
+              height: 65,
               decoration: BoxDecoration(
-                color: mainColor,
+                gradient: LinearGradient(
+                  colors: [
+                    _statusColor,
+                    _statusColor.withOpacity(0.7),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: Colors.white, size: 28),
-            ),
-            const SizedBox(width: 20),
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2D3436),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    status,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: mainColor,
-                      fontWeight: FontWeight.w500,
-                    ),
+                border: Border.all(
+                  color: _statusColor,
+                  width: 3,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: _statusColor.withOpacity(0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ],
+              ),
+              child: Center(
+                child: isCompleted
+                    ? const Icon(Icons.check, color: Colors.white, size: 30)
+                    : Icon(icon, color: Colors.white, size: 30),
+              ),
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: _cardBackgroundColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: _statusColor.withOpacity(0.4),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _statusColor.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _statusColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isCompleted
+                                      ? Icons.check_circle
+                                      : (isActive
+                                          ? Icons.play_circle
+                                          : Icons.lock),
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  status,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Titre
+                          Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isActive || isCompleted
+                                  ? const Color(0xFF2D3436)
+                                  : Colors.grey.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Flèche à droite
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.arrow_forward_ios,
+                        color: _statusColor,
+                        size: 18,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

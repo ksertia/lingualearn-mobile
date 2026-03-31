@@ -16,7 +16,6 @@ class BienvenuPage extends StatelessWidget {
           children: [
             const Spacer(),
 
-            // --- BULLE DE DIALOGUE (Style Racines) ---
             Stack(
               alignment: Alignment.bottomCenter,
               children: [
