@@ -46,44 +46,61 @@ class LoginController extends GetxController {
 
         print("⏳ Récupération du profil via /users/me...");
         final profileRes = await session.dio.get('/users/me');
-        
+
         UserModel loggedInUser;
+        
         if (profileRes.statusCode == 200 && profileRes.data['success'] == true) {
+          // Utilisez la réponse complète de /users/me
           loggedInUser = UserModel.fromJson(profileRes.data['data']);
+          print("✅ Profil récupéré de /users/me");
         } else {
+          // Fallback sur les données de login
           loggedInUser = UserModel.fromJson(apiData);
+          print("⚠️ Utilisation des données de login");
         }
 
-        print("🔍 Vérification de l'état de l'utilisateur...");
-        
+        // Log détaillé des données critiques
+        print("🔍 VÉRIFICATION DES DONNÉES UTILISATEUR:");
+        print("📊 ID: ${loggedInUser.id}");
+        print("📊 Email: ${loggedInUser.email}");
+        print("📊 Prénom: ${loggedInUser.firstName}");
+        print("📊 Nom: ${loggedInUser.lastName}");
+        print("📊 selectedLanguageId: '${loggedInUser.selectedLanguageId}'");
+        print("📊 selectedLevelId: '${loggedInUser.selectedLevelId}'");
 
+        // Sauvegarde locale
         await LocalStorage.setUserID(loggedInUser.id);
         await LocalStorage.setEmail(loggedInUser.email);
         String fullName = "${loggedInUser.firstName} ${loggedInUser.lastName}".trim();
         await LocalStorage.setUserName(fullName.isEmpty ? "Apprenant" : fullName);
-        LocalStorage.setAlwaysLoggedIn(isChecked);
-        
+        await LocalStorage.setAlwaysLoggedIn(isChecked);
+
+        // Mise à jour de la session
         session.updateUser(loggedInUser, accessToken);
         isLoading.value = false;
 
         await Future.delayed(const Duration(milliseconds: 100));
 
+        // Logique de redirection basée sur les données
+        bool hasLanguage = loggedInUser.selectedLanguageId != null && 
+                           loggedInUser.selectedLanguageId!.isNotEmpty;
+        bool hasLevel = loggedInUser.selectedLevelId != null && 
+                        loggedInUser.selectedLevelId!.isNotEmpty;
+        
+        print("🔀 LOGIQUE DE REDIRECTION:");
+        print("📊 a une langue: $hasLanguage");
+        print("📊 a un niveau: $hasLevel");
 
-        if (loggedInUser.selectedLanguageId != null && 
-            loggedInUser.selectedLanguageId!.isNotEmpty &&
-            loggedInUser.selectedLevelId != null &&
-            loggedInUser.selectedLevelId!.isNotEmpty) {
-          print("✅ Direction : HomeScreen (utilisateur retournant avec langue+niveau)");
-
+        if (hasLanguage && hasLevel) {
+          print("✅ Redirection vers HomeScreen (langue et niveau sélectionnés)");
           Get.offAllNamed('/HomeScreen');
         }
-        else if (loggedInUser.selectedLanguageId != null && 
-                 loggedInUser.selectedLanguageId!.isNotEmpty) {
-          print("➡️ Direction : Sélection du niveau");
+        else if (hasLanguage) {
+          print("➡️ Redirection vers sélection du niveau (langue sélectionnée, niveau manquant)");
           Get.offAllNamed('/selection');
         }
         else {
-          print("➡️ Direction : Bienvenue (nouvel utilisateur)");
+          print("➡️ Redirection vers bienvenue (nouvel utilisateur)");
           Get.offAllNamed('/bienvenue');
         }
 
@@ -98,6 +115,13 @@ class LoginController extends GetxController {
       print("❌ Erreur Critique Login: $e");
       appSnackbar(heading: "Erreur", message: "Problème de connexion au serveur.");
     }
+  }
+
+  /// Clear form fields (for post-reset UX)
+  void clear() {
+    email.clear();
+    password.clear();
+    update();
   }
 
   @override

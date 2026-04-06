@@ -181,7 +181,7 @@ class _BienvenuPageState extends State<BienvenuPage>
         ),
         const SizedBox(height: 8),
         Text(
-          "LINGUALEARN 🌟",
+          "TiBi 🌟",
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w900,

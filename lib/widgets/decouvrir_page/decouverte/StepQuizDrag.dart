@@ -7,10 +7,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class StepQuizDrag extends StatefulWidget {
   final List<Map<String, String>> choix;
+  final String title;
 
   const StepQuizDrag({
     super.key,
     required this.choix,
+    required this.title,
+
   });
 
   @override
@@ -54,7 +57,7 @@ class _StepQuizDragState extends State<StepQuizDrag>
       children: [
         SizedBox(height: 10.h),
         Text(
-          "TIRE LE MOT VERS LA BONNE RÉPONSE",
+          widget.title,
           style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w900,

@@ -77,7 +77,7 @@ void _checkStatus() async {
   final List<Map<String, String>> _pages = [
     {
       "image": "assets/images/app/splash11.png",
-      "title": "Bienvenue sur LinguaLearn",
+      "title": "Bienvenue sur TiBi",
       "subtitle": "L'application pour maîtriser nos langues locales facilement.",
     },
     {

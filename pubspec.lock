@@ -40,7 +40,11 @@ packages:
       sha256: e2eb0491ba5ddb6177742d2da23904574082139b07c1e33b8503b9f46f3e1a37
       url: "https://pub.dev"
     source: hosted
+<<<<<<< HEAD
     version: "2.13.1"
+=======
+    version: "2.13.0"
+>>>>>>> 8618ab3d4d4e43d2d7eab0d02ee846ccb3dfa3d7
   audioplayers:
     dependency: "direct main"
     description:

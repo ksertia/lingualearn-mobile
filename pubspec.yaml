@@ -62,6 +62,12 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+<<<<<<< HEAD
+=======
+  animated_text_kit: ^4.2.7
+  video_player: ^2.8.1
+  audioplayers: ^5.2.1
+>>>>>>> 8618ab3d4d4e43d2d7eab0d02ee846ccb3dfa3d7
 
   integration_test:
     sdk: flutter
@@ -84,6 +90,9 @@ flutter:
     - assets/lottie/
     - assets/img/8e4b0793efdb04971f43cf916a5f151e.jpg
     - assets/images/quiz/
+    - assets/audio/
+    - assets/images/
+    - assets/images/video/video.mp4
 
 flutter_native_splash:
   color: "#ffffff"

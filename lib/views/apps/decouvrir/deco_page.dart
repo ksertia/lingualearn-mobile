@@ -91,16 +91,19 @@ class DiscoveryPage extends StatelessWidget {
                         controller.currentPage.value = index,
                     children: [
                       StepDiscoveryAudio(
+                        title: "RÉPÈTE APRÈS MOI",
                         texteOriginal: "Ne yibeogo, yamba laafi ?",
                         traduction: "Bonjour, comment allez-vous ?",
                         lottie: 'assets/lottie/Sad mascot.json',
                       ),
                       StepDiscoveryAudio(
+                        title: "RÉPÈTE APRÈS MOI",
                         texteOriginal: "Ne y tūūma, Wend na sõng-y.",
                         traduction: "Bon travail, que Dieu vous aide.",
                         lottie: 'assets/lottie/Sad mascot.json',
                       ),
                       StepDiscoveryAudio(
+                        title: "RÉPÈTE APRÈS MOI",
                         texteOriginal: "Yãmb modga woto!",
                         traduction: "Vous avez fait beaucoup d'efforts !",
                         lottie: "assets/lottie/Lion.json",
@@ -111,6 +114,7 @@ class DiscoveryPage extends StatelessWidget {
                         onVideoFinished: () => controller.nextPage(),
                       ),
                       const StepQuizQCM(
+                        title: "CHOISIS LA BONNE RÉPONSE",
                         question: "Comment dire 'Bon travail'",
                         options: ["Sukuuri", "Naaba yiri", "Ne y tūūma", "Burindi"],
                         correctOption: "Ne y tūūma",
@@ -119,6 +123,7 @@ class DiscoveryPage extends StatelessWidget {
                         lottieIncorrect: 'assets/lottie/Sad mascot.json',
                       ),
                       const StepQuizQCM(
+                        title: "CHOISIS LA BONNE RÉPONSE",
                         question: "Comment dit-on 'Bonjour'",
                         options: ["Ne yibeogo", "yambe modga", "Mobilli", "yamba laafi"],
                         correctOption: "Ne yibeogo",
@@ -127,6 +132,7 @@ class DiscoveryPage extends StatelessWidget {
                         lottieIncorrect: 'assets/lottie/Sad mascot.json',
                       ),
                       StepQuizDrag(
+                        title: "TIRE LE MOT VERS LA BONNE RÉPONSE",
                         choix: [
                           {
                             "nom": "Maam",

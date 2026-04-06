@@ -20,7 +20,7 @@ class StepContentScreen extends StatelessWidget {
       case 1:
         return FamilleStepPage(data: stepData);
       case 2:
-        return TextStepPage(data: stepData);
+        return TestStepPage(data: stepData);
       case 3:
         return PdfStepPage(data: stepData);
       case 4:
