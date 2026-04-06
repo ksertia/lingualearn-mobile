@@ -1,96 +1,149 @@
+import 'package:confetti/confetti.dart'; // ✅ Vérifie bien l'import
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:lottie/lottie.dart';
 
 class StepSuccess extends StatelessWidget {
-  const StepSuccess({super.key});
+  final ConfettiController confettiController;
+
+  const StepSuccess({super.key, required this.confettiController});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-
-            Lottie.asset(
-              'assets/lottie/Cute teddy bear with a gift.json',
-              width: 250,
-              repeat: true,
-            ),
-
-            const SizedBox(height: 20),
-
-            const Text(
-              "FÉLICITATIONS !",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-                color:  Color.fromARGB(255, 0, 0, 153),
-                letterSpacing: 1.5,
+    return Stack( // ✅ On utilise un Stack pour mettre les confettis au-dessus
+      children: [
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30.r),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Lottie.asset(
+                'assets/lottie/Happy mascot.json',
+                width: 220.w,
+                repeat: true,
               ),
-            ),
-
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              child: Text(
-                "vous avez terminé votre première leçon avec succès. Es-tu prêt à devenir un pro en langues ?",
+              SizedBox(height: 10.h),
+              Text(
+                "FELICITATION !",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                  height: 1.5,
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF58CC02),
+                  letterSpacing: 1.2,
                 ),
               ),
-            ),
-
-            const SizedBox(height: 30),
-
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: ElevatedButton(
-                    onPressed: ()=> 
-                      Get.toNamed('/register'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:  const Color.fromARGB(192,255, 127, 0),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 60),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50),
+              SizedBox(height: 15.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15.w),
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      color: Colors.black87,
+                      height: 1.6,
+                    ),
+                    children: [
+                      const TextSpan(text: "Tu as un talent naturel. 🌟\n"),
+                      TextSpan(
+                        text: "Inscris-toi maintenant pour enregistrer tes progrès et débloquer tout le parcours d'apprentissage.",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
                       ),
-                      elevation: 5,
-                    ),
-                    child: const Text(
-                      "CRÉER MON COMPTE",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+                    ],
                   ),
                 ),
-                
-                const SizedBox(height: 30),
-                
-                TextButton(onPressed: () => Get.toNamed('/login'), child: const Text("Retour à la connexion", style: TextStyle(color: Colors.black54)))
-              ],
-            ),
-          ],
+              ),
+              SizedBox(height: 40.h),
+              Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 55.h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF8F00).withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () => Get.toNamed('/register'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF8F00),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.r),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        "COMMENCER L'AVENTURE",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+                  TextButton(
+                    onPressed: () => Get.toNamed('/login'),
+                    style: TextButton.styleFrom(
+                      foregroundColor:  const Color.fromARGB(180, 158, 158, 158),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "J'ai déjà un compte",
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(width: 5.w),
+                        Icon(Icons.arrow_forward, size: 16.sp),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
+        
+        // ✅ AJOUT DU WIDGET DE CONFETTIS
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: confettiController,
+            blastDirectionality: BlastDirectionality.explosive, // Explosion dans toutes les directions
+            shouldLoop: false,
+            colors: const [
+              Colors.green,
+              Colors.blue,
+              Colors.pink,
+              Colors.orange,
+              Colors.purple,
+              Colors.yellow,
+            ], 
+            gravity: 0.1, // Chute lente des confettis
+          ),
+        ),
+      ],
     );
   }
 }

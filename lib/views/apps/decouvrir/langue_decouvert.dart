@@ -1,5 +1,6 @@
 import 'package:fasolingo/controller/apps/langue/decouvert_langue_controller.dart';
 import 'package:fasolingo/models/langue/decouvert_langue.dart';
+import 'package:fasolingo/views/apps/decouvrir/assurance.dart';
 import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -52,54 +53,63 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/app/plan51.jpg'),
-            fit: BoxFit.cover,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color.fromARGB(160, 255, 216, 61), 
+              const Color.fromARGB(184, 255, 138, 66), 
+              const Color.fromARGB(152, 107, 203, 120), 
+              const Color.fromARGB(185, 77, 151, 255),
+            ],
+            stops: const [0.0, 0.3, 0.6, 1.0],
           ),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-          ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: FadeTransition(
-                        opacity: _fadeController,
-                        child: SlideTransition(
-                          position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
-                              .animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 20),
-                              _buildBackButton(context),
-                              _buildHeader(),
-                              const SizedBox(height: 40),
-                              _buildLanguageListHeader(),
-                              const SizedBox(height: 16),
-                              _buildMainContent(),
-                            ],
-                          ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: FadeTransition(
+                      opacity: _fadeController,
+                      child: SlideTransition(
+                        position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
+                            .animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 20),
+                            _buildBackButton(context),
+                            _buildHeader(),
+                            const SizedBox(height: 40),
+                            _buildLanguageListHeader(),
+                            const SizedBox(height: 16),
+                            _buildMainContent(),
+                          ],
                         ),
                       ),
                     ),
                   ),
                 ),
-                if (!_controller.isLoading && _controller.errorMessage == null)
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: _buildPrimaryButton(),
-                  ),
-              ],
-            ),
+              ),
+              _buildBottomButton(),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildBottomButton() {
+    if (_controller.isLoading || _controller.errorMessage != null) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: _buildPrimaryButton(),
     );
   }
 
@@ -255,15 +265,14 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
             : [],
       ),
       child: ElevatedButton(
-      onPressed: _controller.selectedLanguageId == null
-    ? null
-    : () {
-        
-        Get.to(
-          () => const DiscoveryPage(),
-          arguments: _controller.selectedLanguage!,
-        );
-      },
+        onPressed: _controller.selectedLanguageId == null
+          ? null
+          : () {
+              Get.to(
+                () => const DecouvertePage(),
+                arguments: _controller.selectedLanguage!,
+              );
+            },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.orange,
           foregroundColor: Colors.white,
@@ -302,3 +311,4 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
     );
   }
 }
+

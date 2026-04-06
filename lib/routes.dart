@@ -1,4 +1,5 @@
 import 'package:fasolingo/views/apps/change_language.dart';
+import 'package:fasolingo/views/apps/decouvrir/assurance.dart';
 import 'package:fasolingo/views/apps/decouvrir/bienvenu_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/choisie_niveau_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
@@ -75,6 +76,7 @@ getPageRoute() {
     GetPage(name: '/subscription_details', page: () =>  SubscriptionDetailsPage()),
     GetPage(name: '/subscription_plans', page: () =>  SubscriptionPlansPage()),
     GetPage(name: '/laguedecouvert', page: () =>  LanguageDcouvertPage()),
+    GetPage(name: '/laguedecouvert', page: () =>  DecouvertePage()),
 
 
     GetPage(name: '/quiz_intro_screen', page: () => const QuizStepPage(),
