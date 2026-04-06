@@ -1,7 +1,7 @@
-import 'package:fasolingo/controller/auth/password/ResetPasswordController.dart';
+import 'package:fasolingo/controller/auth/password/ForgotPasswordController.dart';
+import 'package:fasolingo/controller/auth/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 
 class NewPasswordPage extends StatefulWidget {
   const NewPasswordPage({super.key});
@@ -11,40 +11,17 @@ class NewPasswordPage extends StatefulWidget {
 }
 
 class _NewPasswordPageState extends State<NewPasswordPage> {
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmController = TextEditingController();
-  final ResetPasswordController controller = Get.put(ResetPasswordController());
+  final ForgotPasswordController controller = Get.find<ForgotPasswordController>();
   
   bool _showPassword = false;
-  
-  final String token = Get.arguments ?? "";
 
   void _handleConfirm() async {
-    String password = passwordController.text.trim();
-    String confirm = confirmController.text.trim();
-
-    if (password.isEmpty || confirm.isEmpty) {
-      Get.snackbar("Champs vides", "Veuillez remplir tous les champs",
-          backgroundColor: Colors.orange, colorText: Colors.white);
-      return;
-    }
-
-    if (password != confirm) {
-      Get.snackbar("Erreur", "Les mots de passe ne correspondent pas",
-          backgroundColor: Colors.red, colorText: Colors.white);
-      return;
-    }
-
-    if (password.length < 6) {
-      Get.snackbar("Sécurité", "Le mot de passe doit contenir au moins 6 caractères",
-          backgroundColor: Colors.orange, colorText: Colors.white);
-      return;
-    }
-
-    // Appel au contrôleur
-    bool isSuccess = await controller.resetPassword(token, password);
-    if (isSuccess) {
-      _showSuccessBottomSheet();
+    controller.newPasswordController.text = controller.newPasswordController.text; 
+    
+    await controller.resetPassword();
+    
+    if (!controller.isLoading.value) {
+       _showSuccessBottomSheet();
     }
   }
 
@@ -79,7 +56,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
             ),
             const SizedBox(height: 10),
             const Text(
-              "Votre mot de passe a été réinitialisé. Vous pouvez maintenant vous connecter.",
+              "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter à Fasolingo.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
@@ -87,13 +64,18 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Get.offAllNamed("/login"),
+                onPressed: () {
+                  // Clear login form for fresh UX after reset
+                  final loginCtrl = Get.find<LoginController>();
+                  loginCtrl.clear();
+                  Get.offAllNamed("/login");
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 0, 0, 153),
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
-                child: const Text("Me connecter à nouveau", 
+                child: const Text("Me connecter", 
                   style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
@@ -112,7 +94,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Get.back(),
         ),
       ),
@@ -123,16 +105,21 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
           children: [
             const SizedBox(height: 20),
             const Text(
-              "Réinitialisation",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              "Nouveau mot de passe",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 153)),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              "Créez un nouveau mot de passe sécurisé pour votre compte.",
+              style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 30),
 
             _buildLabel("Nouveau mot de passe"),
             TextFormField(
-              controller: passwordController,
+              controller: controller.newPasswordController, 
               obscureText: !_showPassword,
-              decoration: _buildInputDecoration("Veuillez entrer votre nouveau mot de passe").copyWith(
+              decoration: _buildInputDecoration("Entrez votre mot de passe").copyWith(
                 suffixIcon: IconButton(
                   icon: Icon(_showPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 20),
                   onPressed: () => setState(() => _showPassword = !_showPassword),
@@ -144,9 +131,9 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
 
             _buildLabel("Confirmer le mot de passe"),
             TextFormField(
-              controller: confirmController,
+              controller: controller.confirmPasswordController,
               obscureText: !_showPassword,
-              decoration: _buildInputDecoration("Veuillez confirmer votre nouveau mot de passe"),
+              decoration: _buildInputDecoration("Confirmez votre mot de passe"),
             ),
 
             const Spacer(),
@@ -162,10 +149,10 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                 ),
                 child: controller.isLoading.value 
                   ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Text("Confirmer", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  : const Text("Réinitialiser le mot de passe", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               )),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
           ],
         ),
       ),
@@ -175,7 +162,14 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(text, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 14, 
+          fontWeight: FontWeight.w600,
+          color: Colors.black,
+        ),
+      ),
     );
   }
 
@@ -186,10 +180,23 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
       hintText: hint,
       hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
       contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 16),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color.fromARGB(255, 0, 0, 153), width: 1.5),
+        borderSide: const BorderSide(
+          color: Color.fromARGB(255, 0, 0, 153), 
+          width: 1.5,
+        ),
+      ),
+      
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.red, width: 1),
       ),
     );
   }

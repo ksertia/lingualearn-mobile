@@ -9,7 +9,7 @@ class UserModel {
   final String? parentId;
   final String? selectedLanguageId;
   final String? selectedLevelId;
-
+  
   UserModel({
     required this.id,
     required this.firstName,
@@ -22,7 +22,7 @@ class UserModel {
     this.selectedLanguageId,
     this.selectedLevelId,
   });
-
+  
   UserModel copyWith({
     String? selectedLanguageId,
     String? selectedLevelId,
@@ -40,37 +40,35 @@ class UserModel {
       selectedLevelId: selectedLevelId ?? this.selectedLevelId,
     );
   }
-
-factory UserModel.fromJson(Map<String, dynamic> json) {
-  final userData = json['user'] ?? json;
-  final profileData = userData['profile'] ?? {};
   
-  final currentLang = json['currentLanguage'];
-  
-  String? foundLevelId;
-  
-  if (currentLang != null && currentLang['levels'] != null) {
-    final levels = currentLang['levels'] as List;
-    if (levels.isNotEmpty) {
-      foundLevelId = levels[0]['id']; 
-    }
-  }
-
-  return UserModel(
-    id: userData['id'] ?? "",
-    firstName: profileData['firstName'] ?? userData['username'] ?? "Apprenant",
-    lastName: profileData['lastName'] ?? "",
-    email: userData['email'] ?? "",
-    phone: userData['phone'] ?? "",
-    username: userData['username'],
-    accountType: userData['accountType'] ?? "learner",
-    parentId: userData['parentId'],
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    print("📦 UserModel.fromJson - Données reçues: $json");
     
-    selectedLanguageId: currentLang != null ? currentLang['id'] : null, 
-    selectedLevelId: foundLevelId,
-  );
-}
-
+    // Les données utilisateur sont dans json['user']
+    final userData = json['user'] ?? json;
+    final profileData = userData['profile'] ?? {};
+    
+    // Récupération directe de selectedLanguageId et selectedLevelId depuis userData
+    final String? selectedLanguageId = userData['selectedLanguageId']?.toString();
+    final String? selectedLevelId = userData['selectedLevelId']?.toString();
+    
+    print("✅ Langue sélectionnée (from userData): $selectedLanguageId");
+    print("✅ Niveau sélectionné (from userData): $selectedLevelId");
+    
+    return UserModel(
+      id: userData['id']?.toString() ?? "",
+      firstName: profileData['firstName'] ?? userData['username'] ?? "Apprenant",
+      lastName: profileData['lastName'] ?? "",
+      email: userData['email'] ?? "",
+      phone: userData['phone'] ?? "",
+      username: userData['username'],
+      accountType: userData['accountType'] ?? "learner",
+      parentId: userData['parentId']?.toString(),
+      selectedLanguageId: selectedLanguageId,
+      selectedLevelId: selectedLevelId,
+    );
+  }
+  
   Map<String, dynamic> toJson() {
     return {
       'id': id,

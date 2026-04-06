@@ -1,13 +1,16 @@
+import 'package:fasolingo/widgets/stepsscreens/audio_step_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/auth/login_controller.dart';
 
-class LoginPage extends GetView<LoginController> {
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(LoginController());
+    // Ensure single permanent controller instance
+    Get.put(LoginController(), permanent: true);
+    final controller = Get.find<LoginController>();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -25,7 +28,7 @@ class LoginPage extends GetView<LoginController> {
                     errorBuilder: (context, error, stackTrace) =>
                     const Icon(Icons.login, size: 100, color: Colors.blue)),
                 const Text(
-                  "Bienvenue sur Lingualearn",
+                  "Bienvenue sur TiBi",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
@@ -139,8 +142,10 @@ class LoginPage extends GetView<LoginController> {
                         label: "Google",
                         icon: Icons.g_mobiledata,
                         iconColor: Colors.red,
-                        onTap: () => Get.toNamed(''),),
+                        onTap: ()  => Get.toNamed(''),),
+
                     const SizedBox(width: 15),
+                    
                     _socialButton(
                         label: "Facebook",
                         icon: Icons.facebook,

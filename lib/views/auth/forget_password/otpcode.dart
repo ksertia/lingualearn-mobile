@@ -1,3 +1,4 @@
+import 'package:fasolingo/controller/auth/password/ForgotPasswordController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -15,6 +16,9 @@ class _OtpcodePageState extends State<OtpcodePage> {
   late List<bool> _isFilled;
   late List<bool> _isError;
 
+  // Récupération du controller déjà injecté à la page précédente
+  final ForgotPasswordController controller = Get.find<ForgotPasswordController>();
+
   @override
   void initState() {
     super.initState();
@@ -23,6 +27,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
     _isFilled = List.generate(otpLength, (index) => false);
     _isError = List.generate(otpLength, (index) => false);
 
+    // Ta logique de focus intelligente
     for (int i = 0; i < otpLength; i++) {
       _focusNodes[i].addListener(() {
         if (_focusNodes[i].hasFocus) {
@@ -33,14 +38,11 @@ class _OtpcodePageState extends State<OtpcodePage> {
               break;
             }
           }
-
           if (!canFocus) {
             setState(() => _isError[i] = true);
             _focusNodes[i].unfocus();
             int firstEmpty = _controllers.indexWhere((c) => c.text.isEmpty);
-            if (firstEmpty != -1) {
-              _focusNodes[firstEmpty].requestFocus();
-            }
+            if (firstEmpty != -1) _focusNodes[firstEmpty].requestFocus();
           } else {
             setState(() => _isError[i] = false);
           }
@@ -69,6 +71,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
     }
   }
 
+  // Getter pour récupérer le code final
   String get otpCode => _controllers.map((c) => c.text).join();
 
   @override
@@ -79,43 +82,36 @@ class _OtpcodePageState extends State<OtpcodePage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Get.toNamed('/numberphone'),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Get.back(),
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 40),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 "Vérification OTP",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1E232C),
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E232C)),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
-                "Veuillez saisir le code de 6 chiffres reçu par SMS.",
+                "Veuillez saisir le code de 6 chiffres reçu par SMS ou Email.",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
-              
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
 
+              // Les cases OTP
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(otpLength, (index) {
                   final bool isFocused = _focusNodes[index].hasFocus;
-                  final bool isFilled = _isFilled[index];
-                  final bool isError = _isError[index];
-
-                  Color borderColor = isError 
+                  Color borderColor = _isError[index] 
                       ? Colors.red 
-                      : (isFocused ? Colors.blueAccent : (isFilled ? Colors.green : Colors.grey[300]!));
+                      : (isFocused ? const Color.fromARGB(255, 0, 0, 153) : (_isFilled[index] ? Colors.green : Colors.grey[300]!));
 
                   return SizedBox(
                     width: 45,
@@ -134,62 +130,57 @@ class _OtpcodePageState extends State<OtpcodePage> {
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
                         maxLength: 1,
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        decoration: const InputDecoration(
-                          counterText: '',
-                          border: InputBorder.none,
-                        ),
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        decoration: const InputDecoration(counterText: '', border: InputBorder.none),
                       ),
                     ),
                   );
                 }),
               ),
 
-              SizedBox(height: 50),
+              const SizedBox(height: 60),
 
+              // Bouton CONFIRMER lié au Web Service
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (otpCode.length == otpLength) {
-                      Get.offNamed("/newPassword");
-                    } else {
-                      Get.snackbar(
-                        "Code incomplet", 
-                        "Veuillez remplir toutes les cases",
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.redAccent,
-                        colorText: Colors.white,
-                      );
-                    }
-                  },
+                child: Obx(() => ElevatedButton(
+                  onPressed: controller.isLoading.value 
+                      ? null 
+                      : () {
+                          if (otpCode.length == otpLength) {
+                            // 1. On injecte le code dans le controller GetX
+                            controller.otpController.text = otpCode;
+                            // 2. On lance l'appel API
+                            controller.verifyOtp();
+                          } else {
+                            Get.snackbar("Code incomplet", "Veuillez remplir les 6 cases.");
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 0, 0, 153),
-                    padding: EdgeInsets.symmetric(vertical: 18),
+                    backgroundColor: const Color.fromARGB(255, 0, 0, 153),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text(
-                    'Confirmer',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
+                  child: controller.isLoading.value 
+                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text('Confirmer', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                )),
               ),
             ],
           ),
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.only(bottom: 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text("Je n'ai pas reçu de code ?"),
             TextButton(
-              onPressed: () {
-              },
+              onPressed: controller.isLoading.value ? null : () => controller.requestOtp(),
               child: const Text(
                 "Renvoyer",
-                style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 153),),
+                style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 153)),
               ),
             ),
           ],

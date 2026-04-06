@@ -3,12 +3,14 @@ import 'package:lottie/lottie.dart';
 
 class StepDiscoveryAudio extends StatelessWidget {
   final String texteOriginal;
+  final String title;
   final String traduction;
   final String lottie;
 
   const StepDiscoveryAudio({
     super.key,
     required this.texteOriginal,
+    required this.title,
     required this.traduction,
     required this.lottie,
   });
@@ -39,7 +41,7 @@ class StepDiscoveryAudio extends StatelessWidget {
                       ),
                       SizedBox(width: 12),
                       Text(
-                        "RÉPÈTE APRÈS MOI",
+                        title,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -50,103 +52,103 @@ class StepDiscoveryAudio extends StatelessWidget {
                   ),
                   SizedBox(height: 24),
                   Row(
-  crossAxisAlignment: CrossAxisAlignment.center,
-  children: [
-    SizedBox(
-      width: 120,
-      height: 120,
-      child: Lottie.asset(lottie),
-    ),
-    const SizedBox(width: 8),
-    Flexible(
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color:  Colors.grey,
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.middle,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 10.0),
-                      child: Icon(
-                        Icons.volume_up,
-                        color: Colors.blueAccent,
-                        size: 28,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        height: 120,
+                        child: Lottie.asset(lottie),
                       ),
-                    ),
-                  ),
-                  TextSpan(
-                    text: texteOriginal,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          Positioned(
-            left: -6.5, 
-            top: 22,
-            child: RotationTransition(
-              turns: const AlwaysStoppedAnimation(-45 / 360), 
-              child: Container(
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    left: BorderSide(
-                      color:  Colors.grey,
-                      width: 1.5,
-                    ),
-                    top: BorderSide(
-                      color:  Colors.grey,
-                      width: 1.5,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          
-          Positioned(
-            left: 0,
-            top: 19,
-            child: Container(
-              width: 5,
-              height: 20,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    ),
-  ],
-)
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: Colors.grey,
+                                  width: 1.5,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.08),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.middle,
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 10.0),
+                                        child: Icon(
+                                          Icons.volume_up,
+                                          color: Colors.blueAccent,
+                                          size: 28,
+                                        ),
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: texteOriginal,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: -6.5,
+                              top: 22,
+                              child: RotationTransition(
+                                turns: const AlwaysStoppedAnimation(-45 / 360),
+                                child: Container(
+                                  width: 14,
+                                  height: 14,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border(
+                                      left: BorderSide(
+                                        color: Colors.grey,
+                                        width: 1.5,
+                                      ),
+                                      top: BorderSide(
+                                        color: Colors.grey,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 0,
+                              top: 19,
+                              child: Container(
+                                width: 5,
+                                height: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
