@@ -5,11 +5,7 @@ import 'package:lottie/lottie.dart';
 
 class DiscoveryController extends GetxController {
   var currentPage = 0.obs;
-<<<<<<< HEAD
-  final int totalPages = 8;
-=======
   final int totalPages = 7; 
->>>>>>> f7a79ff9b1e1a9fb04ed679b828aaaa11fd55db5
   late PageController pageController;
   
   late ConfettiController confettiController;

@@ -155,11 +155,7 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
               ),
               
               Padding(
-<<<<<<< HEAD
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-=======
                 padding: EdgeInsets.symmetric(horizontal: 20),
->>>>>>> f7a79ff9b1e1a9fb04ed679b828aaaa11fd55db5
                 child: Container(
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),

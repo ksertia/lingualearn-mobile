@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart'; // IMPORTANT
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:audioplayers/audioplayers.dart';
-
 import 'package:fasolingo/widgets/etap_content/test_qiz.dart';
 import 'package:fasolingo/widgets/etap_content/test_step_image.dart';
 import 'package:fasolingo/controller/apps/discovery_controller.dart';
