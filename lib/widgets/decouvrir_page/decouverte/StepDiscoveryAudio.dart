@@ -69,7 +69,7 @@ class StepDiscoveryAudio extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: const Color(0xFF000099).withOpacity(0.3),
+                color:  Colors.grey,
                 width: 1.5,
               ),
               boxShadow: [
@@ -89,7 +89,7 @@ class StepDiscoveryAudio extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 10.0),
                       child: Icon(
                         Icons.volume_up,
-                        color: const Color(0xFF000099),
+                        color: Colors.blueAccent,
                         size: 28,
                       ),
                     ),
@@ -120,11 +120,11 @@ class StepDiscoveryAudio extends StatelessWidget {
                   color: Colors.white,
                   border: Border(
                     left: BorderSide(
-                      color: const Color(0xFF000099).withOpacity(0.3),
+                      color:  Colors.grey,
                       width: 1.5,
                     ),
                     top: BorderSide(
-                      color: const Color(0xFF000099).withOpacity(0.3),
+                      color:  Colors.grey,
                       width: 1.5,
                     ),
                   ),
@@ -156,7 +156,7 @@ class StepDiscoveryAudio extends StatelessWidget {
             margin: EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF000099).withOpacity(0.5), Color(0xFF000099)],
+                colors: [Colors.grey.withOpacity(0.5), Colors.grey],
               ),
               borderRadius: BorderRadius.circular(2),
             ),
@@ -172,7 +172,7 @@ class StepDiscoveryAudio extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Color(0xFF000099).withOpacity(0.2)),
+                  border: Border.all(color: Colors.grey),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,7 +181,7 @@ class StepDiscoveryAudio extends StatelessWidget {
                       padding:
                           EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Color(0xFF000099).withOpacity(0.1),
+                        color: Colors.grey.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
@@ -189,7 +189,7 @@ class StepDiscoveryAudio extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF000099),
+                              color: Colors.black,
                             )),
                       ),
                     ),

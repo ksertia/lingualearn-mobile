@@ -20,12 +20,11 @@ class DiscoveryPage extends StatelessWidget {
       designSize: const Size(360, 690),
       builder: (context, child) => Scaffold(
         backgroundColor: const Color(0xFFF5F5F5),
-
         appBar: AppBar(
           flexibleSpace: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8F00),Color(0xFFFF8F00)],
+                colors: [Color(0xFFFF8F00), Color(0xFFFF8F00)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -52,11 +51,8 @@ class DiscoveryPage extends StatelessWidget {
                 onPressed: () => Get.back(),
               )),
         ),
-
         body: Column(
           children: [
-
-            // PROGRESS BAR
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
               child: Obx(() => ClipRRect(
@@ -72,7 +68,6 @@ class DiscoveryPage extends StatelessWidget {
                   )),
             ),
 
-            // CONTENT
             Expanded(
               child: Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
@@ -95,7 +90,6 @@ class DiscoveryPage extends StatelessWidget {
                     onPageChanged: (index) =>
                         controller.currentPage.value = index,
                     children: [
-
                       StepDiscoveryAudio(
                         texteOriginal: "Ne yibeogo, yamba laafi ?",
                         traduction: "Bonjour, comment allez-vous ?",
@@ -111,25 +105,27 @@ class DiscoveryPage extends StatelessWidget {
                         traduction: "Vous avez fait beaucoup d'efforts !",
                         lottie: "assets/lottie/Lion.json",
                       ),
-
                       StepDiscoveryVideo(
                         videoTitle: "OBSERVE ATTENTIVEMENT",
-                        videoUrl:
-                            "assets/images/video/videos.mp4",
+                        videoUrl: "assets/images/video/videos.mp4",
                         onVideoFinished: () => controller.nextPage(),
                       ),
-
                       const StepQuizQCM(
-                        question: "Comment dit-on 'École'",
-                        options: ["Sukuuri", "Yiri", "Mobilli", "Burindi"],
-                        lottie: 'assets/lottie/Sad mascot.json',
+                        question: "Comment dire 'Bon travail'",
+                        options: ["Sukuuri", "Naaba yiri", "Ne y tūūma", "Burindi"],
+                        correctOption: "Ne y tūūma",
+                        lottieQuestion: 'assets/lottie/mascot.json',
+                        lottieCorrect: 'assets/lottie/Happy mascot.json',
+                        lottieIncorrect: 'assets/lottie/Sad mascot.json',
                       ),
                       const StepQuizQCM(
-                        question: "Que signifie 'Fofo' ?",
-                        options: ["Merci", "Bonjour", "Au revoir", "Pardon"],
-                        lottie: 'assets/lottie/Sad mascot.json',
+                        question: "Comment dit-on 'Bonjour'",
+                        options: ["Ne yibeogo", "yambe modga", "Mobilli", "yamba laafi"],
+                        correctOption: "Ne yibeogo",
+                        lottieQuestion: 'assets/lottie/mascot.json',
+                        lottieCorrect: 'assets/lottie/Happy mascot.json',
+                        lottieIncorrect: 'assets/lottie/Sad mascot.json',
                       ),
-
                       StepQuizDrag(
                         choix: [
                           {
@@ -160,75 +156,62 @@ class DiscoveryPage extends StatelessWidget {
               ),
             ),
 
-            Obx(() => controller.currentPage.value < 4
-                ? Padding(
-                    padding: EdgeInsets.fromLTRB(20.w, 15.h, 20.w, 25.h),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
 
-                        if (controller.currentPage.value > 0)
-                          SizedBox(
-                            height: 40.h,
-                            child: OutlinedButton.icon(
-                              onPressed: controller.previousPage,
-                              icon: Icon(Icons.arrow_back_ios, size: 14.sp),
-                              label: Text(
-                                "Précédent",
-                                style: TextStyle(fontSize: 14.sp),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor:  Color(0xFFFF8F00),
-                                side: const BorderSide(
-                                    color: Color(0xFFFF8F00)),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.r),
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          const SizedBox.shrink(),
-
+            Obx(() {
+              if (controller.currentPage.value < 4) {
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(20.w, 15.h, 20.w, 25.h),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (controller.currentPage.value > 0)
                         SizedBox(
                           height: 40.h,
-                          child: ElevatedButton(
-                            onPressed: controller.nextPage,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF8F00),
+                          child: OutlinedButton.icon(
+                            onPressed: controller.previousPage,
+                            icon: Icon(Icons.arrow_back_ios, size: 14.sp),
+                            label: Text("Précédent"),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFFFF8F00),
+                              side: const BorderSide(color: Color(0xFFFF8F00)),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                              padding:
-                                  EdgeInsets.symmetric(horizontal: 25.w),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  controller.currentPage.value == 2
-                                      ? "FINIR"
-                                      : "Suivant",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(width: 8.w),
-                                Icon(
-                                  Icons.arrow_forward_ios,
-                                  size: 14.sp,
-                                  color: Colors.white,
-                                ),
-                              ],
+                                  borderRadius: BorderRadius.circular(10.r)),
                             ),
                           ),
+                        )
+                      else
+                        const SizedBox.shrink(),
+
+                      SizedBox(
+                        height: 40.h,
+                        child: ElevatedButton(
+                          onPressed: controller.nextPage,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF8F00),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.r)),
+                            padding: EdgeInsets.symmetric(horizontal: 25.w),
+                          ),
+                          child: Row(
+                            children: [
+                              Text("Suivant",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(width: 8.w),
+                              Icon(Icons.arrow_forward_ios,
+                                  size: 14.sp, color: Colors.white),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink()),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            }),
           ],
         ),
       ),

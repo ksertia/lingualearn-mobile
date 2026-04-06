@@ -4,7 +4,7 @@ import 'package:confetti/confetti.dart';
 
 class DiscoveryController extends GetxController {
   var currentPage = 0.obs;
-  final int totalPages = 7;
+  final int totalPages = 8;
   late PageController pageController;
   
   // AJOUT : Contrôleur de confettis

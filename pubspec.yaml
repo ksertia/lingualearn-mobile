@@ -65,6 +65,7 @@ dependencies:
     sdk: flutter
   animated_text_kit: ^4.2.7
   video_player: ^2.8.1
+  audioplayers: ^5.2.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -133,6 +134,9 @@ flutter:
     - assets/lottie/
     - assets/img/8e4b0793efdb04971f43cf916a5f151e.jpg
     - assets/images/quiz/
+    - assets/audio/
+    - assets/images/
+    - assets/images/video/video.mp4
 
 
 
