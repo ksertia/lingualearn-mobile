@@ -3,8 +3,6 @@ import 'package:fasolingo/models/parcoure/parcour_model.dart';
 import 'package:get/get.dart';
 
 class LearningPathService {
-  // Il est préférable de récupérer la session à l'intérieur de la méthode 
-  // pour éviter des problèmes d'initialisation au démarrage.
   
   static Future<List<LearningPathModel>> getPathsByModule(String moduleId) async {
     try {

@@ -14,8 +14,10 @@ class StepsScreensPages extends StatelessWidget {
   Widget build(BuildContext context) {
     final StepsController controller = Get.put(StepsController());
 
-  final dynamic _args = Get.arguments;
-  final String moduleLottie = (_args is Map && _args['moduleLottie'] != null) ? _args['moduleLottie'].toString() : 'assets/lottie/Lion.json';
+    final dynamic _args = Get.arguments;
+    final String moduleLottie = (_args is Map && _args['moduleLottie'] != null)
+        ? _args['moduleLottie'].toString()
+        : 'assets/lottie/Lion.json';
 
     const Color primaryBlue = Color(0xFF00CED1);
     const Color colorCompleted = Color(0xFF81C784); // Vert clair pour terminé
@@ -34,105 +36,112 @@ class StepsScreensPages extends StatelessWidget {
           ),
         ),
         child: Obx(() {
-            if (controller.isLoading.value) {
-              return _buildShimmerEffect(primaryBlue);
-            }
+          if (controller.isLoading.value) {
+            return _buildShimmerEffect(primaryBlue);
+          }
 
-            if (controller.steps.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.info_outline, size: 50, color: Colors.grey),
-                    const SizedBox(height: 10),
-                    const Text("Aucune étape disponible pour le moment.",style: TextStyle(color: Colors.white),),
-                    TextButton(
-                      onPressed: () => controller.onRefresh(),
-                      child: const Text("Réactualiser",style: TextStyle(color: Colors.orange),),
-                    )
-                  ],
-                ),
-              );
-            }
-
-            return Stack(
-              children: [
-                Positioned(
-                  left: 56,
-                  top: MediaQuery.of(context).padding.top + 30,
-                  bottom: 30,
-                  child: Container(
-                    width: 3,
-                    color: primaryBlue.withOpacity(0.2),
+          if (controller.steps.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.info_outline, size: 50, color: Colors.grey),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Aucune étape disponible pour le moment.",
+                    style: TextStyle(color: Colors.white),
                   ),
-                ),
+                  TextButton(
+                    onPressed: () => controller.onRefresh(),
+                    child: const Text(
+                      "Réactualiser",
+                      style: TextStyle(color: Colors.orange),
+                    ),
+                  )
+                ],
+              ),
+            );
+          }
 
-                RefreshIndicator(
-                  onRefresh: () => controller.onRefresh(),
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: MediaQuery.of(context).size.height,
-                      ),
-                      child: Column(
-                      children: [
-SafeArea(
-  top: true,
-  bottom: false,
-  child: Container(
-    width: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-    decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.95), 
-      borderRadius: BorderRadius.circular(30), 
-      border: Border.all(
-        color: primaryBlue.withOpacity(0.4),
-        width: 2,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          blurRadius: 10,
-          offset: const Offset(0, 5), 
-        ),
-      ],
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.max, 
-      children: [
-        Lottie.asset(
-          moduleLottie,
-          height: 45,
-          repeat: true,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            "Mon chemin magique",
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            softWrap: true,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: primaryBlue,
-              letterSpacing: 0.5,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withOpacity(0.1),
-                  offset: const Offset(1, 1),
-                  blurRadius: 2,
+          return Stack(
+            children: [
+              Positioned(
+                left: 56,
+                top: MediaQuery.of(context).padding.top + 30,
+                bottom: 30,
+                child: Container(
+                  width: 3,
+                  color: primaryBlue.withOpacity(0.2),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-  ),
-),
+              ),
+              RefreshIndicator(
+                onRefresh: () => controller.onRefresh(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height,
+                    ),
+                    child: Column(
+                      children: [
+                        SafeArea(
+                          top: true,
+                          bottom: false,
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(
+                                color: primaryBlue.withOpacity(0.4),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Lottie.asset(
+                                  moduleLottie,
+                                  height: 45,
+                                  repeat: true,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    "Mon chemin magique",
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: true,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: primaryBlue,
+                                      letterSpacing: 0.5,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          offset: const Offset(1, 1),
+                                          blurRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                         ListView.builder(
                           padding: const EdgeInsets.only(top: 16),
                           shrinkWrap: true,
@@ -143,10 +152,12 @@ SafeArea(
 
                             String stepStatus = step.status ?? "locked";
                             bool isCompleted = stepStatus == "completed";
-                            bool isUnlocked = stepStatus == "unlocked" || stepStatus == "completed";
+                            bool isUnlocked = stepStatus == "unlocked" ||
+                                stepStatus == "completed";
 
                             if (stepStatus == "locked") {
-                              bool allStepsLocked = controller.steps.every((s) => (s.status ?? "locked") == "locked");
+                              bool allStepsLocked = controller.steps.every(
+                                  (s) => (s.status ?? "locked") == "locked");
                               if (allStepsLocked && index == 0) {
                                 stepStatus = "unlocked";
                                 isUnlocked = true;
@@ -157,13 +168,23 @@ SafeArea(
 
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 16),
-                            child: ParcoursItem(
+                              child: ParcoursItem(
                                 label: "Étape ${index + 1}: ${step.title}",
-                                status: isActive ? (isCompleted ? "Terminé" : "En cours") : "Verrouillé",
-                                mainColor: isActive ? (isCompleted ? colorCompleted : orangeAccent) : colorLocked,
+                                status: isActive
+                                    ? (isCompleted ? "Terminé" : "En cours")
+                                    : "Verrouillé",
+                                mainColor: isActive
+                                    ? (isCompleted
+                                        ? colorCompleted
+                                        : orangeAccent)
+                                    : colorLocked,
                                 isCompleted: isCompleted,
                                 isActive: isActive,
-                                icon: !isActive ? Icons.lock_outline : (isCompleted ? Icons.check : Icons.play_arrow_rounded),
+                                icon: !isActive
+                                    ? Icons.lock_outline
+                                    : (isCompleted
+                                        ? Icons.check
+                                        : Icons.play_arrow_rounded),
                                 onTap: isActive
                                     ? () => Get.to(
                                           () => StepContentScreen(
@@ -189,13 +210,11 @@ SafeArea(
                     ),
                   ),
                 ),
-                ),
-              ],
-
-            );
-          }
-          ),
-        ),
+              ),
+            ],
+          );
+        }),
+      ),
     );
   }
 
@@ -218,7 +237,7 @@ SafeArea(
             const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
-                itemCount: 5, 
+                itemCount: 5,
                 itemBuilder: (_, __) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Row(

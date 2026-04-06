@@ -11,9 +11,9 @@ import 'package:fasolingo/models/langue/langue_model.dart';
 
 const Color colorProBlue = Color(0xFF00008B);
 const Color primaryBlue = Color(0xFF00CED1);
-const Color colorCompleted = Color(0xFF81C784); // Vert clair pour terminé
-const Color orangeAccent = Color(0xFFFF9800); // Orange pour en cours
-const Color colorLocked = Color(0xFF9E9E9E); // Gris pour verrouillé
+const Color colorCompleted = Color(0xFF81C784); 
+const Color orangeAccent = Color(0xFFFF9800); 
+const Color colorLocked = Color(0xFF9E9E9E); 
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -106,7 +106,7 @@ class HomePage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        'LinguaLearn',
+                        'TiBi',
                         style: TextStyle(
                           color: colorProBlue,
                           fontWeight: FontWeight.w900,

@@ -1,63 +1,102 @@
 import 'package:fasolingo/helpers/constant/app_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
+import 'package:fasolingo/helpers/services/auth_services.dart';
 import 'dart:convert';
 
+
 class ForgotPasswordController extends GetxController {
+  final emailController = TextEditingController();
+  final otpController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
   var isLoading = false.obs;
 
-  Future<void> sendResetEmail(String email) async {
-    if (email.isEmpty || !GetUtils.isEmail(email)) {
-      Get.snackbar("Erreur", "Email invalide",
-          snackPosition: SnackPosition.BOTTOM, 
-          backgroundColor: Colors.red, 
-          colorText: Colors.white);
+
+
+  Future<void> requestOtp() async {
+    String login = emailController.text.trim();
+    if (login.isEmpty) {
+      Get.snackbar("Attention", "Veuillez entrer votre identifiant", 
+          backgroundColor: Colors.orangeAccent, colorText: Colors.white);
       return;
     }
 
-    try {
-      isLoading.value = true;
+    isLoading.value = true;
+    final data = {"loginInfo": login};
+    final response = await AuthService.forgotPassword(data);
+    isLoading.value = false;
 
-      final String rawUrl = "${AppConstant.baseURl}/auth/forgot-password";
-      final url = Uri.parse(rawUrl);
-
-      print("Tentative sur : $url");
-
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "accept": "*/*",
-        },
-        body: jsonEncode({"loginInfo": email.trim()}),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final responseData = jsonDecode(response.body);
-        
-        Get.snackbar("Succès", responseData['message'] ?? "Lien envoyé !",
-            backgroundColor: Colors.green, colorText: Colors.white);
-            
-        Get.toNamed("/newPassword", arguments: email);
-      } else {
-        print("Erreur ${response.statusCode}: ${response.body}");
-        
-        String errorMsg = "Erreur serveur (${response.statusCode})";
-        try {
-          final errorBody = jsonDecode(response.body);
-          errorMsg = errorBody['message'] ?? errorMsg;
-        } catch (_) {}
-
-        Get.snackbar("Erreur", errorMsg,
-            backgroundColor: Colors.red, colorText: Colors.white);
-      }
-    } catch (e) {
-      print("Exception: $e");
-      Get.snackbar("Erreur", "Impossible de joindre le serveur. Vérifiez la connexion.",
-          backgroundColor: Colors.red, colorText: Colors.white);
-    } finally {
-      isLoading.value = false;
+    if (response != null) {
+      Get.toNamed('/otpCode'); 
+    } else {
+      Get.snackbar("Erreur", "Compte introuvable ou erreur serveur.");
     }
+  }
+
+  // --- ÉTAPE 2 : VÉRIFICATION DE L'OTP ---
+  Future<void> verifyOtp() async {
+    String code = otpController.text.trim();
+    if (code.isEmpty) {
+      Get.snackbar("Code requis", "Veuillez saisir le code reçu.");
+      return;
+    }
+
+    isLoading.value = true;
+    final data = {
+      "loginInfo": emailController.text.trim(),
+      "otp": code,
+    };
+    final response = await AuthService.verifyOtp(data);
+    isLoading.value = false;
+
+    if (response != null) {
+      Get.toNamed('/newPassword');
+    } else {
+      Get.snackbar("Erreur", "Le code est incorrect ou a expiré.");
+    }
+  }
+
+  // --- ÉTAPE 3 : RÉINITIALISATION FINALE ---
+  Future<void> resetPassword() async {
+    String pass = newPasswordController.text;
+    String confirm = confirmPasswordController.text;
+
+    if (pass.isEmpty || pass.length < 6) {
+      Get.snackbar("Sécurité", "6 caractères minimum requis.");
+      return;
+    }
+
+    if (pass != confirm) {
+      Get.snackbar("Attention", "Les mots de passe ne sont pas identiques.");
+      return;
+    }
+
+    isLoading.value = true;
+    final data = {
+      "loginInfo": emailController.text.trim(),
+      "otp": otpController.text.trim(),
+      "password": pass,
+    };
+    final response = await AuthService.resetPassword(data);
+    isLoading.value = false;
+
+    if (response != null) {
+      Get.offAllNamed('/login'); 
+      Get.snackbar("Bravo !", "Mot de passe modifié avec succès.", 
+          backgroundColor: Colors.green, colorText: Colors.white);
+    } else {
+      Get.snackbar("Erreur", "Échec de l'opération.");
+    }
+  }
+
+  @override
+  void onClose() {
+    emailController.dispose();
+    otpController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
+    super.onClose();
   }
 }

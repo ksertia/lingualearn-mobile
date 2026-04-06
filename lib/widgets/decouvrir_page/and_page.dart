@@ -1,4 +1,4 @@
-import 'package:confetti/confetti.dart'; // ✅ Vérifie bien l'import
+import 'package:confetti/confetti.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -11,7 +11,7 @@ class StepSuccess extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack( // ✅ On utilise un Stack pour mettre les confettis au-dessus
+    return Stack( 
       children: [
         Container(
           width: double.infinity,
@@ -125,12 +125,11 @@ class StepSuccess extends StatelessWidget {
           ),
         ),
         
-        // ✅ AJOUT DU WIDGET DE CONFETTIS
         Align(
           alignment: Alignment.topCenter,
           child: ConfettiWidget(
             confettiController: confettiController,
-            blastDirectionality: BlastDirectionality.explosive, // Explosion dans toutes les directions
+            blastDirectionality: BlastDirectionality.explosive, 
             shouldLoop: false,
             colors: const [
               Colors.green,
@@ -140,7 +139,7 @@ class StepSuccess extends StatelessWidget {
               Colors.purple,
               Colors.yellow,
             ], 
-            gravity: 0.1, // Chute lente des confettis
+            gravity: 0.1,
           ),
         ),
       ],

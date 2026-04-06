@@ -100,7 +100,7 @@ class StepMascotte extends StatelessWidget {
           child: AnimatedTextKit(
             animatedTexts: [
               TypewriterAnimatedText(
-                "Salut 👋 moi c’est LinguaLearn !\nPrêt à découvrir l’application ?",
+                "Salut 👋 moi c’est TiBi !\nPrêt à découvrir l’application ?",
                 textStyle: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

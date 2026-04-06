@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fasolingo/controller/apps/discovery_controller.dart';
 import 'package:lottie/lottie.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class StepQuizQCM extends StatefulWidget {
   final String question;
+  final String title;
   final List<String> options;
   final String lottieQuestion; 
   final String lottieCorrect;
@@ -15,6 +16,7 @@ class StepQuizQCM extends StatefulWidget {
   const StepQuizQCM({
     super.key,
     required this.question,
+    required this.title,
     required this.options,
     required this.lottieQuestion,
     required this.lottieCorrect,
@@ -47,10 +49,10 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          padding: EdgeInsets.all(20.w),
+          padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: isCorrect ? const Color(0xFFD7FFB8) : const Color(0xFFFFDFE0),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(25.r)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -61,13 +63,13 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
                   Icon(
                     isCorrect ? Icons.check_circle : Icons.cancel,
                     color: isCorrect ? const Color(0xFF58CC02) : const Color(0xFFEE2B2B),
-                    size: 30.sp,
+                    size: 30,
                   ),
-                  SizedBox(width: 10.w),
+                  SizedBox(width: 10),
                   Text(
                     isCorrect ? "Bravo 🥳!" : "Désolé 😥!",
                     style: TextStyle(
-                      fontSize: 20.sp,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: isCorrect ? const Color(0xFF58CC02) : const Color(0xFFEE2B2B),
                     ),
@@ -75,20 +77,20 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
                 ],
               ),
               if (!isCorrect) ...[
-                SizedBox(height: 10.h),
+                SizedBox(height: 10),
                 Text(
                   "Bonne réponse :",
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: const Color(0xFFEE2B2B)),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFFEE2B2B)),
                 ),
                 Text(
                   widget.correctOption,
-                  style: TextStyle(fontSize: 16.sp, color: const Color(0xFFEE2B2B)),
+                  style: TextStyle(fontSize: 16, color: const Color(0xFFEE2B2B)),
                 ),
               ],
-              SizedBox(height: 20.h),
+              SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
-                height: 50.h,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
@@ -96,12 +98,12 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isCorrect ? const Color(0xFF58CC02) : const Color(0xFFEE2B2B),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     elevation: 0,
                   ),
                   child: Text(
                     isCorrect ? "CONTINUER" : "D'ACCORD",
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
               ),
@@ -139,45 +141,45 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
     return Stack(
       children: [
         SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: 100.h),
+          padding: EdgeInsets.only(bottom: 100),
           child: Column(
             children: [
-              SizedBox(height: 30.h),
-              Text("CHOISIS LA BONNE RÉPONSE", style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: Colors.black54)),
+              SizedBox(height: 30),
+              Text(widget.title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.black54)),
               
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 10.h),
+                padding: EdgeInsets.symmetric(vertical: 10),
                 child: currentLottie != null 
-                    ? Lottie.asset(currentLottie!, height: 140.h, repeat: true)
-                    : SizedBox(height: 140.h),
+                    ? Lottie.asset(currentLottie!, height: 140, repeat: true)
+                    : SizedBox(height: 140),
               ),
               
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r), border: Border.all(color: Colors.grey.shade200)),
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
                   child: Row(
                     children: [
                       const Icon(Icons.volume_up, color: Colors.blueAccent, size: 28),
-                      SizedBox(width: 15.w),
-                      Expanded(child: Text(widget.question, style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold))),
+                      SizedBox(width: 15),
+                      Expanded(child: Text(widget.question, style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold))),
                     ],
                   ),
                 ),
               ),
-              SizedBox(height: 25.h),
+              SizedBox(height: 25),
               
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                padding: EdgeInsets.symmetric(horizontal: 20),
                 child: GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: widget.options.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2, 
-                    crossAxisSpacing: 12.w, 
-                    mainAxisSpacing: 12.h, 
+                    crossAxisSpacing: 12, 
+                    mainAxisSpacing: 12, 
                     childAspectRatio: 2.1
                   ),
                   itemBuilder: (context, index) {
@@ -193,13 +195,13 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(15.r),
+                          borderRadius: BorderRadius.circular(15),
                           border: Border.all(
                             color: _getBorderColor(index), 
                             width: (selectedIndex == index || (hasValidated && widget.options[index] == widget.correctOption)) ? 2.5 : 1.0,
                           ),
                         ),
-                        child: Text(widget.options[index], style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                        child: Text(widget.options[index], style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                       ),
                     );
                   },
@@ -210,11 +212,11 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
         ),
 
         Positioned(
-          bottom: 20.h,
-          left: 20.w,
-          right: 20.w,
+          bottom: 20,
+          left: 20,
+          right: 20,
           child: SizedBox(
-            height: 55.h,
+            height: 55,
             child: ElevatedButton(
               onPressed: selectedIndex != null && !hasValidated
                 ? () {
@@ -231,9 +233,9 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF9800),
                 disabledBackgroundColor: Colors.grey.shade300,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               ),
-              child: Text("VALIDER", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+              child: Text("VALIDER", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
           ),
         ),
