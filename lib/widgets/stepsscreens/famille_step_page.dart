@@ -101,11 +101,13 @@ class FamilleStepPage extends StatelessWidget {
                     onPageChanged: (index) => controller.currentPage.value = index,
                     children: [
                       const StepDiscoveryAudio(
+                        title: "RÉPÈTE APRÈS MOI",
                         texteOriginal: "Bonjour papa",
                         traduction: "i ni sogoma baba",
                         lottie: "assets/lottie/elephant.json",
                       ),
                       const StepDiscoveryAudio(
+                        title: "RÉPÈTE APRÈS MOI",
                         texteOriginal: "Bonsoir maman",
                         traduction: "i ni wula baa",
                         lottie: "assets/lottie/elephant.json",
@@ -133,6 +135,7 @@ class FamilleStepPage extends StatelessWidget {
                         onFinished: () => controller.nextPage(),
                       ),
                       const StepQuizQCM(
+                        title: "CHOISIS LA BONNE RÉPONSE",
                         question: "Comment dit-on 'Ainé'",
                         options: ["Soo", "Banbunan", "Koro", "Bilakoro"],
                         correctOption: "Koro",
@@ -141,6 +144,7 @@ class FamilleStepPage extends StatelessWidget {
                         lottieIncorrect: 'assets/lottie/Sad mascot.json',
                       ),
                       const StepQuizQCM(
+                        title: "CHOISIS LA BONNE RÉPONSE",
                         question: "Comment dit-on 'Oncle paternel'",
                         options: ["Fakoroba", "Bako", "Abarika", "Demeni"],
                         correctOption: "Fakoroba",
