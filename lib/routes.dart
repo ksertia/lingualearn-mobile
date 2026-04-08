@@ -7,6 +7,7 @@ import 'package:fasolingo/views/apps/decouvrir/langue_decouvert.dart';
 import 'package:fasolingo/views/apps/decouvrir/selection_langues_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/step_mascotte.dart';
 import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
+import 'package:fasolingo/views/apps/home/home.dart';
 import 'package:fasolingo/views/apps/home/home_page.dart';
 import 'package:fasolingo/views/apps/home/parcours_page.dart';
 import 'package:fasolingo/views/apps/home/screens/parcours.dart';
@@ -61,6 +62,7 @@ class AuthMiddleware extends GetMiddleware {
 getPageRoute() {
   var routes = [
     GetPage(name: '/dashboard', page: () =>  HomePage()),
+    GetPage(name: '/dassh', page: () =>  AcceuilleSreen()),
     GetPage(name: '/splash', page: () => const SplashCree()),
     GetPage(name: '/login', page: () => const LoginPage()),
     GetPage(name: '/register', page: () => const RegisterPage()),

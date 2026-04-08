@@ -19,11 +19,16 @@ class LanguageService {
       );
 
       if (response.statusCode == 200) {
-        // Le corps de la réponse est une liste JSON
-        final List<dynamic> jsonData = jsonDecode(response.body);
+       final decoded = jsonDecode(response.body);
+
+final List<dynamic> jsonData = decoded['data']; 
         
         // On transforme chaque élément en objet LanguageDiscover
-        return jsonData.map((item) => LanguageDiscover.fromJson(item)).toList();
+      return jsonData
+    .map((item) => LanguageDiscover.fromJson(item))
+    .where((lang) => lang.isActive)
+    .toList();
+
       } else {
         // Gestion des erreurs serveurs (404, 500, etc.)
         throw Exception("Erreur serveur : ${response.statusCode}");

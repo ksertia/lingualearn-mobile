@@ -54,8 +54,9 @@ class LanguageLevelService {
         final dynamic responseData = response.data['data'];
         if (responseData == null || responseData is! List) return [];
         return responseData
-            .map((item) => LanguageModel.fromJson(item as Map<String, dynamic>))
-            .toList();
+    .map((item) => LanguageModel.fromJson(item as Map<String, dynamic>))
+    .where((lang) => lang.isActive)
+    .toList();
       }
       return [];
     } on DioException catch (e) {
@@ -83,12 +84,15 @@ class LanguageLevelService {
   // --- RÉCUPÉRATION DES NIVEAUX ---
   Future<List<dynamic>> fetchLevels({required String userId, String? languageId}) async {
     try {
-      // Endpoint: /users/{userId}/level with optional languageId query
       final response = await _dio.get(
         '/users/$userId/levels'
       );
       if (response.statusCode == 200) {
-        return response.data['data'] as List<dynamic>;
+        final levels = response.data['data'] as List<dynamic>;
+      return levels
+    .map((l) => LevelModel.fromJson(l))
+    .where((level) => level.isActive)
+    .toList();
       }
       return [];
     } catch (e) {
@@ -123,7 +127,6 @@ class LanguageLevelService {
         print("❌ Erreur Dio Level Select ($status) : ${e.response?.data}");
 
         if (status == 500 && attempts == 0) {
-          // backend may need a moment after language creation, retry once
           attempts++;
           await Future.delayed(const Duration(milliseconds: 500));
           continue;

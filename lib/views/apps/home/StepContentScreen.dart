@@ -2,7 +2,7 @@ import 'package:fasolingo/widgets/stepsscreens/audio_step_page.dart';
 import 'package:fasolingo/widgets/stepsscreens/pdf_step_page.dart';
 import 'package:fasolingo/widgets/stepsscreens/quiz_step_page.dart';
 import 'package:fasolingo/widgets/stepsscreens/text_step_page.dart';
-import 'package:fasolingo/widgets/stepsscreens/video_step_page.dart';
+import 'package:fasolingo/widgets/stepsscreens/famille_step_page.dart';
 import 'package:flutter/material.dart';
 
 class StepContentScreen extends StatelessWidget {
@@ -18,7 +18,7 @@ class StepContentScreen extends StatelessWidget {
       case 0:
         return AudioStepPage(data: stepData); 
       case 1:
-        return VideoStepPage(data: stepData);
+        return FamilleStepPage(data: stepData);
       case 2:
         return TestStepPage(data: stepData);
       case 3:

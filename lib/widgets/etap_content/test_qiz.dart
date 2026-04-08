@@ -38,7 +38,7 @@ class _TestQizState extends State<TestQiz> {
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
         children: [
-          const Spacer(flex: 1), // Pousse le contenu vers le centre
+          const Spacer(flex: 1),
 
           // --- SECTION AUDIO ---
           if (widget.audioUrl != null) ...[
