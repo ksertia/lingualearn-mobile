@@ -23,9 +23,9 @@ class StepsScreensPages extends StatelessWidget {
         : 'assets/lottie/Lion.json';
 
     const Color primaryBlue = Color(0xFF00CED1);
-    const Color colorCompleted = Color(0xFF81C784); // Vert clair pour terminé
-    const Color orangeAccent = Color(0xFFFF9800); // Orange pour en cours
-    const Color colorLocked = Color(0xFF9E9E9E); // Gris pour verrouillé
+    const Color colorCompleted = Color(0xFF81C784);
+    const Color orangeAccent = Color(0xFFFF9800); 
+    const Color colorLocked = Color(0xFF9E9E9E);
 
     return Scaffold(
       extendBodyBehindAppBar: true,

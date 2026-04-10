@@ -142,7 +142,7 @@ class LoginPage extends StatelessWidget {
                         label: "Google",
                         icon: Icons.g_mobiledata,
                         iconColor: Colors.red,
-                        onTap: ()  => Get.toNamed('/dassh'),),
+                        onTap: ()  => Get.toNamed(''),),
 
                     const SizedBox(width: 15),
                     

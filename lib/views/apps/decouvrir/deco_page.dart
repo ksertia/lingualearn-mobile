@@ -1,8 +1,10 @@
 import 'package:fasolingo/controller/apps/discovery_controller.dart';
+import 'package:fasolingo/models/langue/decouverte_model.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizDrag.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizQCM.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+// Vérifie bien que ce fichier contient la classe LanguageData
 import 'package:fasolingo/models/langue/decouvert_langue.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +15,11 @@ class DiscoveryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LanguageDiscover language = Get.arguments;
+    final dynamic args = Get.arguments;
+    final LanguageData languageData =
+        args is LanguageData ? args : LanguageData(lessons: [], exercises: []);
+
+    final String selectedLanguage = _getSelectedLanguage(languageData);
     final DiscoveryController controller = Get.put(DiscoveryController());
 
     return ScreenUtilInit(
@@ -33,7 +39,7 @@ class DiscoveryPage extends StatelessWidget {
           elevation: 0,
           centerTitle: true,
           title: Text(
-            "Découvrir le ${language.name}",
+            "Découvrir le $selectedLanguage",
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -67,7 +73,6 @@ class DiscoveryPage extends StatelessWidget {
                     ),
                   )),
             ),
-
             Expanded(
               child: Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
@@ -116,7 +121,12 @@ class DiscoveryPage extends StatelessWidget {
                       const StepQuizQCM(
                         title: "CHOISIS LA BONNE RÉPONSE",
                         question: "Comment dire 'Bon travail'",
-                        options: ["Sukuuri", "Naaba yiri", "Ne y tūūma", "Burindi"],
+                        options: [
+                          "Sukuuri",
+                          "Naaba yiri",
+                          "Ne y tūūma",
+                          "Burindi"
+                        ],
                         correctOption: "Ne y tūūma",
                         lottieQuestion: 'assets/lottie/mascot.json',
                         lottieCorrect: 'assets/lottie/Happy mascot.json',
@@ -125,7 +135,12 @@ class DiscoveryPage extends StatelessWidget {
                       const StepQuizQCM(
                         title: "CHOISIS LA BONNE RÉPONSE",
                         question: "Comment dit-on 'Bonjour'",
-                        options: ["Ne yibeogo", "yambe modga", "Mobilli", "yamba laafi"],
+                        options: [
+                          "Ne yibeogo",
+                          "yambe modga",
+                          "Mobilli",
+                          "yamba laafi"
+                        ],
                         correctOption: "Ne yibeogo",
                         lottieQuestion: 'assets/lottie/mascot.json',
                         lottieCorrect: 'assets/lottie/Happy mascot.json',
@@ -161,8 +176,6 @@ class DiscoveryPage extends StatelessWidget {
                 ),
               ),
             ),
-
-
             Obx(() {
               if (controller.currentPage.value < 4) {
                 return Padding(
@@ -176,7 +189,7 @@ class DiscoveryPage extends StatelessWidget {
                           child: OutlinedButton.icon(
                             onPressed: controller.previousPage,
                             icon: Icon(Icons.arrow_back_ios, size: 14.sp),
-                            label: Text("Précédent"),
+                            label: const Text("Précédent"),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFFFF8F00),
                               side: const BorderSide(color: Color(0xFFFF8F00)),
@@ -187,7 +200,6 @@ class DiscoveryPage extends StatelessWidget {
                         )
                       else
                         const SizedBox.shrink(),
-
                       SizedBox(
                         height: 40.h,
                         child: ElevatedButton(
@@ -200,7 +212,7 @@ class DiscoveryPage extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              Text("Suivant",
+                              const Text("Suivant",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold)),
@@ -222,5 +234,17 @@ class DiscoveryPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getSelectedLanguage(LanguageData languageData) {
+    if (languageData.lessons.isNotEmpty &&
+        languageData.lessons.first.language.isNotEmpty) {
+      return languageData.lessons.first.language;
+    }
+    if (languageData.exercises.isNotEmpty &&
+        languageData.exercises.first.language.isNotEmpty) {
+      return languageData.exercises.first.language;
+    }
+    return 'langue';
   }
 }

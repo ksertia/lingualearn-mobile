@@ -17,7 +17,6 @@ class LearningScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-
         Padding(
           padding: const EdgeInsets.all(20),
           child: DefaultTextStyle(

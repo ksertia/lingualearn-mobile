@@ -5,12 +5,10 @@ import 'package:flutter/material.dart';
 class LanguageController extends ChangeNotifier {
   final LanguageService _languageService = LanguageService();
 
-  // --- ÉTAT DE L'INTERFACE ---
   List<LanguageDiscover> languages = [];
   bool isLoading = false;
   String? errorMessage;
   
-  // ID de la langue sélectionnée par l'utilisateur
   String? selectedLanguageId;
 
   // --- GETTER ---

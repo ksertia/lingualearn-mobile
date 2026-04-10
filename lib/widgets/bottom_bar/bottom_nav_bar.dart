@@ -20,90 +20,105 @@ class _AppBottomNavBarState extends State<AppBottomNavBar>
     with SingleTickerProviderStateMixin, UIMixin {
   @override
   Widget build(BuildContext context) {
-final items = [
+    final items = [
       _NavItem(
-        icon: LucideIcons.layoutDashboard, 
+        icon: LucideIcons.layoutDashboard,
         label: 'Accueil',
         index: 0,
       ),
       _NavItem(
-        icon: LucideIcons.bookOpen, 
+        icon: LucideIcons.bookOpen,
         label: 'Lexique',
         index: 1,
       ),
       _NavItem(
-        icon: LucideIcons.trendingUp, 
+        icon: LucideIcons.trendingUp,
         label: 'Progrès',
         index: 2,
       ),
       _NavItem(
-        icon: LucideIcons.settings, 
-        label: 'Paramètres',
+        icon: LucideIcons.personStanding,
+        label: 'Moi',
         index: 3,
       ),
     ];
 
     return Container(
       decoration: BoxDecoration(
+        color: contentTheme.bottomBarColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 18,
+            offset: const Offset(0, -8),
           ),
         ],
       ),
       child: SafeArea(
+        top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: items.map((item) {
               final isActive = widget.currentIndex == item.index;
               return Expanded(
-                child: InkWell(
-                  onTap: () => widget.onTabChange(item.index),
-                  borderRadius: BorderRadius.circular(12),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: isActive
-                          ? const LinearGradient(
-                              colors: [
-                                Color(0xFFDBeafe),
-                                Color(0xFFD1FAE5),
-                              ],
-                            )
-                          : null,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          item.icon,
-                          size: 20,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => widget.onTabChange(item.index),
+                      borderRadius: BorderRadius.circular(28),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
                           color: isActive
-                              ? contentTheme.onPrimary
-                              : contentTheme.textTertiary,
+                              ? Colors.blueAccent.withOpacity(0.14)
+                              : contentTheme.bottomBarColor,
+                          borderRadius: BorderRadius.circular(28),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.label,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isActive
-                                ? contentTheme.onPrimary
-                                : contentTheme.textSecondary,
-                            fontWeight:
-                                isActive ? FontWeight.w600 : FontWeight.normal,
-                          ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              item.icon,
+                              size: 22,
+                              color: isActive
+                                  ? Colors.blueAccent
+                                  : contentTheme.textTertiary,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              item.label,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: isActive
+                                    ? Colors.blueAccent
+                                    : contentTheme.textSecondary,
+                                fontWeight: isActive
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                            if (isActive) const SizedBox(height: 6),
+                            if (isActive)
+                              Container(
+                                width: 28,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
