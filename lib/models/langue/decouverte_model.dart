@@ -5,6 +5,13 @@ class LanguageData {
 
   LanguageData({required this.lessons, required this.exercises});
 
+  // Récupère dynamiquement le nom de la langue pour l'affichage
+  String get language {
+    if (lessons.isNotEmpty) return lessons.first.language;
+    if (exercises.isNotEmpty) return exercises.first.language;
+    return "Langue";
+  }
+
   factory LanguageData.fromJson(Map<String, dynamic> json) {
     return LanguageData(
       lessons: (json['lessons'] as List? ?? [])
@@ -15,7 +22,6 @@ class LanguageData {
           .toList(),
     );
   }
-
 }
 
 // Modèle pour une Section (qu'elle soit leçon ou exercice)
@@ -24,9 +30,9 @@ class Section {
   final String title;
   final String type;
   final String language;
-  final int order; // Ajouté
-  final DateTime createdAt; // Ajouté
-  final DateTime updatedAt; // Ajouté
+  final int order;
+  final DateTime createdAt;
+  final DateTime updatedAt;
   final List<Content> contents;
 
   Section({
@@ -59,16 +65,20 @@ class Section {
 // Modèle pour le contenu à l'intérieur d'une section
 class Content {
   final String id;
+  final String questionType; // Ajouté (ex: "text")
   final String questionValue;
+  final String answerType;   // Ajouté (ex: "text")
   final String answerValue;
-  final int order; // Ajouté (présent dans ton JSON de contenu)
-  final DateTime createdAt; // Ajouté
-  final DateTime updatedAt; // Ajouté
+  final int order;
+  final DateTime createdAt;
+  final DateTime updatedAt;
   final List<Option> options;
 
   Content({
     required this.id,
+    required this.questionType,
     required this.questionValue,
+    required this.answerType,
     required this.answerValue,
     required this.order,
     required this.createdAt,
@@ -79,7 +89,9 @@ class Content {
   factory Content.fromJson(Map<String, dynamic> json) {
     return Content(
       id: json['id'] ?? '',
+      questionType: json['questionType'] ?? 'text',
       questionValue: json['questionValue'] ?? '',
+      answerType: json['answerType'] ?? 'text',
       answerValue: json['answerValue'] ?? '',
       order: json['order'] ?? 0,
       createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
@@ -93,10 +105,10 @@ class Content {
 
 // Modèle pour les options (spécifique aux exercices)
 class Option {
-  final String id; // Ajouté car présent dans le JSON des options
+  final String id;
   final String value;
   final bool isCorrect;
-  final int order; // Ajouté
+  final int order;
 
   Option({
     required this.id,

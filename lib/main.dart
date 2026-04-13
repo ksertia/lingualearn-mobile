@@ -28,22 +28,22 @@ import 'widgets/bottom_bar/navigation_provider.dart';
 
 Future<void> main() async {
   // 1. Indispensable pour l'asynchrone
-  WidgetsFlutterBinding.ensureInitialized(); 
-  
+  WidgetsFlutterBinding.ensureInitialized();
+
   // 2. Initialisation PRIORITAIRE du stockage (on attend que ce soit fini)
   await GetStorage.init();
-  await LocalStorage.init(); 
-  
+  await LocalStorage.init();
+
   // 3. Configuration des outils système
   setPathUrlStrategy();
   initLogger();
-  
+
   // 4. Initialisation des services dépendant du stockage
   APIService.initializeAPIService(
       devBaseUrl: AppConstant.baseURl, prodBaseUrl: AppConstant.baseURl);
-  
+
   AppStyle.init();
-  
+
   // Logs de vérification
   log("GetToken ${LocalStorage.getAuthToken()}");
   log("GetUserID ${LocalStorage.getUserID()}");
@@ -54,12 +54,12 @@ Future<void> main() async {
   } else {
     LocalStorage.setTheme("Light");
   }
-  
+
   LocalStorage.setAppLink(false);
-  
+
   // 5. Initialisation finale avant le lancement
   await ThemeCustomizer.init();
-  
+
   // Injection du controller principal
   Get.put(SessionController());
 
@@ -119,7 +119,10 @@ class _MyAppState extends State<MyApp> {
               NavigationService.registerContext(_);
               return Directionality(
                 textDirection: AppTheme.textDirection,
-                child: child ?? Container(),
+                child: DefaultTextStyle(
+                  style: const TextStyle(decoration: TextDecoration.none),
+                  child: child ?? Container(),
+                ),
               );
             },
             localizationsDelegates: [

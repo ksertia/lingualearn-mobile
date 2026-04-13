@@ -168,10 +168,12 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
           children: [
             const Icon(Icons.cloud_off, size: 50, color: Colors.white),
             const SizedBox(height: 10),
-            Text(_controller.error!, style: const TextStyle(color: Colors.white)),
+            Text(_controller.error!,
+                style: const TextStyle(color: Colors.white)),
             TextButton(
               onPressed: () => _controller.init(),
-              child: const Text("Réessayer", style: TextStyle(color: Colors.orange)),
+              child: const Text("Réessayer",
+                  style: TextStyle(color: Colors.orange)),
             )
           ],
         ),
@@ -193,8 +195,11 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
     bool isSelected = _controller.selectedLanguage == langName;
 
     // Logique d'icône visuelle
-    String displayIcon = langName.toLowerCase().contains("dioula") ? "🌍" : 
-                         langName.toLowerCase().contains("mooré") ? "☀️" : "🌿";
+    String displayIcon = langName.toLowerCase().contains("dioula")
+        ? "🌍"
+        : langName.toLowerCase().contains("mooré")
+            ? "☀️"
+            : "🌿";
 
     return GestureDetector(
       onTap: () => _controller.selectLanguage(langName),
@@ -211,7 +216,9 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
           ),
           boxShadow: [
             BoxShadow(
-              color: isSelected ? Colors.orange.withOpacity(0.15) : Colors.black.withOpacity(0.03),
+              color: isSelected
+                  ? Colors.orange.withOpacity(0.15)
+                  : Colors.black.withOpacity(0.03),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -235,7 +242,8 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
               const SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange),
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.orange),
               )
             else if (isSelected)
               const CircleAvatar(
@@ -258,34 +266,44 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           boxShadow: _controller.selectedLanguage != null
-              ? [BoxShadow(color: Colors.orange.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))]
+              ? [
+                  BoxShadow(
+                      color: Colors.orange.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10))
+                ]
               : [],
         ),
         child: ElevatedButton(
-          onPressed: _controller.selectedLanguage == null || _controller.isLoading
-              ? null
-              : () {
-                  // On passe l'objet languageContent chargé par le controller
-                  Get.to(
-                    () => const DiscoveryPage(),
-                    arguments: _controller.languageContent, 
-                  );
-                },
+          onPressed:
+              _controller.selectedLanguage == null || _controller.isLoading
+                  ? null
+                  : () {
+                      Get.toNamed(
+                        '/decouverte',
+                        arguments: _controller.languageContent,
+                      );
+                    },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.orange,
             foregroundColor: Colors.white,
             disabledBackgroundColor: Colors.grey.shade300,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             elevation: 0,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                _controller.selectedLanguage == null ? "Choisissez une langue" : "C'est parti !",
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                _controller.selectedLanguage == null
+                    ? "Choisissez une langue"
+                    : "C'est parti !",
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
               ),
-              if (_controller.selectedLanguage != null && !_controller.isLoading) ...[
+              if (_controller.selectedLanguage != null &&
+                  !_controller.isLoading) ...[
                 const SizedBox(width: 10),
                 const Icon(Icons.rocket_launch_rounded),
               ]
@@ -301,10 +319,13 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+        ],
       ),
       child: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black87),
+        icon: const Icon(Icons.arrow_back_ios_new,
+            size: 20, color: Colors.black87),
         onPressed: () => Navigator.pop(context),
       ),
     );
