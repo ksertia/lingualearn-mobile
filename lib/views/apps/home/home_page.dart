@@ -1,3 +1,4 @@
+import 'package:fasolingo/views/apps/home/home.dart';
 import 'package:fasolingo/views/apps/lexique/lexique_page.dart';
 import 'package:fasolingo/views/apps/progres/progres_page.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen>
     final navigationProvider = context.watch<NavigationProvider>();
 
     final List<Widget> screens = [
-      HomePage(),
+      AcceuilleSreen(),
       LexiquePage(),
       ProgresPage(),
       SettingScreen(),

@@ -214,29 +214,42 @@ class LanguagesController extends GetxController {
     }
   }
 
-  Future<void> loadLanguageLevels() async {
-    try {
-      isLoadingLevels(true);
-      final session = Get.find<SessionController>();
-      final String userId = session.userId.value.isNotEmpty
-          ? session.userId.value
-          : (session.user?.id ?? "");
+Future<void> loadLanguageLevels() async {
+  try {
+    isLoadingLevels(true);
 
-      if (userId.isEmpty) {
-        print("⚠️ userId vide, impossible de charger les niveaux");
-        isLoadingLevels(false);
-        return;
-      }
-      final String? langId = selectedLanguage.value?.id;
-      final result = await _languageService.fetchLevels(userId: userId, languageId: langId);
-      languageLevels.assignAll(result);
-      print("✅ Niveaux chargés : ${result.length} niveau(x)");
-    } catch (e) {
-      print("❌ Erreur lors du chargement des niveaux : $e");
-    } finally {
-      isLoadingLevels(false);
+    final session = Get.find<SessionController>();
+
+    final String userId = session.userId.value.isNotEmpty
+        ? session.userId.value
+        : (session.user?.id ?? "");
+
+    if (userId.isEmpty) {
+      print("⚠️ userId vide, impossible de charger les niveaux");
+      return;
     }
+
+    // ✅ IMPORTANT : fallback sur la langue sauvegardée en session
+    final String? langId = selectedLanguage.value?.id.isNotEmpty == true
+        ? selectedLanguage.value!.id
+        : session.selectedLanguageId.value;
+
+    print("📌 Langue utilisée pour charger niveaux: $langId");
+
+    final result = await _languageService.fetchLevels(
+      userId: userId,
+      languageId: langId,
+    );
+
+    languageLevels.assignAll(result);
+
+    print("✅ Niveaux chargés : ${result.length} niveau(x)");
+  } catch (e) {
+    print("❌ Erreur lors du chargement des niveaux : $e");
+  } finally {
+    isLoadingLevels(false);
   }
+}
 
   /// Récupère le nom d'un niveau à partir de son ID
   Future<String> getLevelNameById(String levelId) async {

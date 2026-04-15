@@ -28,9 +28,6 @@ class AppTheme {
       ? cookifyLightTheme
       : cookifyDarkTheme;
 
-
-
-
 //---------------------------NEW-----------------------------------------
 
   static ThemeData plantTheme =
@@ -299,7 +296,11 @@ class AppTheme {
     cardColor: Color(0xfff0f0f0),
 
     textTheme: TextTheme(
-        titleLarge: GoogleFonts.poppins(), bodyLarge: GoogleFonts.poppins()),
+            titleLarge: GoogleFonts.poppins(), bodyLarge: GoogleFonts.poppins())
+        .apply(decoration: TextDecoration.none),
+    primaryTextTheme: ThemeData.light()
+        .primaryTextTheme
+        .apply(decoration: TextDecoration.none),
 
     /// Floating Action Theme
     floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -316,8 +317,8 @@ class AppTheme {
     dividerColor: Color(0xffe8e8e8),
 
     /// Bottom AppBar Theme
-   // bottomAppBarTheme:
-       // BottomAppBarTheme(color: Color(0xffeeeeee), elevation: 2),
+    // bottomAppBarTheme:
+    // BottomAppBarTheme(color: Color(0xffeeeeee), elevation: 2),
 
     /// Tab bar Theme
     tabBarTheme: TabBarThemeData(
@@ -414,6 +415,13 @@ class AppTheme {
     cardTheme: CardThemeData(color: Color(0xff222327)),
     cardColor: Color(0xff222327),
 
+    /// Text Theme
+    textTheme:
+        ThemeData.dark().textTheme.apply(decoration: TextDecoration.none),
+    primaryTextTheme: ThemeData.dark()
+        .primaryTextTheme
+        .apply(decoration: TextDecoration.none),
+
     /// Input (Text-Field) Theme
     inputDecorationTheme: InputDecorationTheme(
       focusedBorder: OutlineInputBorder(
@@ -444,8 +452,8 @@ class AppTheme {
         foregroundColor: Colors.white),
 
     /// Bottom AppBar Theme
-   // bottomAppBarTheme:
-        //BottomAppBarTheme(color: Color(0xff464c52), elevation: 2),
+    // bottomAppBarTheme:
+    //BottomAppBarTheme(color: Color(0xff464c52), elevation: 2),
 
     /// Tab bar Theme
     tabBarTheme: TabBarThemeData(

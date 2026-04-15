@@ -1,10 +1,8 @@
-import 'package:fasolingo/controller/apps/langue/decouvert_langue_controller.dart';
-import 'package:fasolingo/models/langue/decouvert_langue.dart';
-import 'package:fasolingo/views/apps/decouvrir/assurance.dart';
-import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
+import 'package:fasolingo/controller/apps/langue/discover_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
+import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
 
 class LanguageDcouvertPage extends StatefulWidget {
   const LanguageDcouvertPage({super.key});
@@ -17,8 +15,9 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late AnimationController _slideController;
-  
-  final LanguageController _controller = LanguageController();
+
+  // Utilisation de notre DiscoverController
+  final DiscoverController _controller = DiscoverController();
 
   @override
   void initState() {
@@ -27,14 +26,16 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     )..forward();
-    
+
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     )..forward();
 
-    _controller.fetchLanguages();
-    
+    // Initialisation : charge les langues au démarrage
+    _controller.init();
+
+    // Ecoute les changements du controller pour rafraîchir l'UI
     _controller.addListener(() {
       if (mounted) setState(() {});
     });
@@ -44,7 +45,7 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
   void dispose() {
     _fadeController.dispose();
     _slideController.dispose();
-    _controller.dispose(); 
+    _controller.dispose();
     super.dispose();
   }
 
@@ -52,17 +53,17 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color.fromARGB(160, 255, 216, 61), 
-              const Color.fromARGB(184, 255, 138, 66), 
-              const Color.fromARGB(152, 107, 203, 120), 
-              const Color.fromARGB(185, 77, 151, 255),
+              Color.fromARGB(160, 255, 216, 61),
+              Color.fromARGB(184, 255, 138, 66),
+              Color.fromARGB(152, 107, 203, 120),
+              Color.fromARGB(185, 77, 151, 255),
             ],
-            stops: const [0.0, 0.3, 0.6, 1.0],
+            stops: [0.0, 0.3, 0.6, 1.0],
           ),
         ),
         child: SafeArea(
@@ -76,8 +77,11 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
                     child: FadeTransition(
                       opacity: _fadeController,
                       child: SlideTransition(
-                        position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
-                            .animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack)),
+                        position: Tween<Offset>(
+                                begin: const Offset(0, 0.1), end: Offset.zero)
+                            .animate(CurvedAnimation(
+                                parent: _slideController,
+                                curve: Curves.easeOutBack)),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -100,16 +104,6 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildBottomButton() {
-    if (_controller.isLoading || _controller.errorMessage != null) {
-      return const SizedBox.shrink();
-    }
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: _buildPrimaryButton(),
     );
   }
 
@@ -156,7 +150,8 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
   }
 
   Widget _buildMainContent() {
-    if (_controller.isLoading) {
+    // Affiche un loader si on n'a pas encore de langues
+    if (_controller.isLoading && _controller.languages.isEmpty) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.only(top: 50),
@@ -165,16 +160,19 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
       );
     }
 
-    if (_controller.errorMessage != null) {
+    // Gestion de l'erreur
+    if (_controller.error != null && _controller.languages.isEmpty) {
       return Center(
         child: Column(
           children: [
-            const Icon(Icons.cloud_off, size: 50, color: Colors.grey),
+            const Icon(Icons.cloud_off, size: 50, color: Colors.white),
             const SizedBox(height: 10),
-            Text(_controller.errorMessage!, textAlign: TextAlign.center),
+            Text(_controller.error!,
+                style: const TextStyle(color: Colors.white)),
             TextButton(
-              onPressed: () => _controller.fetchLanguages(),
-              child: const Text("Réessayer", style: TextStyle(color: Colors.orange)),
+              onPressed: () => _controller.init(),
+              child: const Text("Réessayer",
+                  style: TextStyle(color: Colors.orange)),
             )
           ],
         ),
@@ -186,20 +184,24 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
       physics: const NeverScrollableScrollPhysics(),
       itemCount: _controller.languages.length,
       itemBuilder: (context, index) {
-        final lang = _controller.languages[index];
-        return _buildEnhancedCard(lang);
+        final langName = _controller.languages[index];
+        return _buildEnhancedCard(langName);
       },
     );
   }
 
-  Widget _buildEnhancedCard(LanguageDiscover lang) {
-    bool isSelected = _controller.selectedLanguageId == lang.id;
-    
-    String displayIcon = lang.name.contains("Dioula") ? "🌍" : 
-    lang.name.contains("Mooré") ? "☀️" : "🌿";
+  Widget _buildEnhancedCard(String langName) {
+    bool isSelected = _controller.selectedLanguage == langName;
+
+    // Logique d'icône visuelle
+    String displayIcon = langName.toLowerCase().contains("dioula")
+        ? "🌍"
+        : langName.toLowerCase().contains("mooré")
+            ? "☀️"
+            : "🌿";
 
     return GestureDetector(
-      onTap: () => _controller.selectLanguage(lang.id),
+      onTap: () => _controller.selectLanguage(langName),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         margin: const EdgeInsets.only(bottom: 16),
@@ -213,7 +215,9 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
           ),
           boxShadow: [
             BoxShadow(
-              color: isSelected ? Colors.orange.withOpacity(0.15) : Colors.black.withOpacity(0.03),
+              color: isSelected
+                  ? Colors.orange.withOpacity(0.15)
+                  : Colors.black.withOpacity(0.03),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -224,25 +228,23 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
             Text(displayIcon, style: const TextStyle(fontSize: 30)),
             const SizedBox(width: 20),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    lang.name,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.orange.shade900 : Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    lang.description ?? "Découvrir la langue",
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                  ),
-                ],
+              child: Text(
+                langName,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.orange.shade900 : Colors.black87,
+                ),
               ),
             ),
-            if (isSelected)
+            if (_controller.isLoading && isSelected)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                    strokeWidth: 2, color: Colors.orange),
+              )
+            else if (isSelected)
               const CircleAvatar(
                 radius: 14,
                 backgroundColor: Colors.orange,
@@ -254,44 +256,58 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
     );
   }
 
-  Widget _buildPrimaryButton() {
-    return Container(
-      width: double.infinity,
-      height: 65,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: _controller.selectedLanguageId != null
-            ? [BoxShadow(color: Colors.orange.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))]
-            : [],
-      ),
-      child: ElevatedButton(
-        onPressed: _controller.selectedLanguageId == null
-          ? null
-          : () {
-              Get.to(
-                () => const DecouvertePage(),
-                arguments: _controller.selectedLanguage!,
-              );
-            },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: Colors.grey.shade300,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          elevation: 0,
+  Widget _buildBottomButton() {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Container(
+        width: double.infinity,
+        height: 65,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: _controller.selectedLanguage != null
+              ? [
+                  BoxShadow(
+                      color: Colors.orange.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10))
+                ]
+              : [],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _controller.selectedLanguageId == null ? "Choisissez une langue" : "C'est parti !",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-            ),
-            if (_controller.selectedLanguageId != null) ...[
-              const SizedBox(width: 10),
-              const Icon(Icons.rocket_launch_rounded),
-            ]
-          ],
+        child: ElevatedButton(
+          onPressed:
+              _controller.selectedLanguage == null || _controller.isLoading
+                  ? null
+                  : () {
+                      Get.toNamed(
+                        '/decouverte',
+                        arguments: _controller.languageContent,
+                      );
+                    },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orange,
+            foregroundColor: Colors.white,
+            disabledBackgroundColor: Colors.grey.shade300,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            elevation: 0,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _controller.selectedLanguage == null
+                    ? "Choisissez une langue"
+                    : "C'est parti !",
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+              ),
+              if (_controller.selectedLanguage != null &&
+                  !_controller.isLoading) ...[
+                const SizedBox(width: 10),
+                const Icon(Icons.rocket_launch_rounded),
+              ]
+            ],
+          ),
         ),
       ),
     );
@@ -302,13 +318,15 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+        ],
       ),
       child: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black87),
+        icon: const Icon(Icons.arrow_back_ios_new,
+            size: 20, color: Colors.black87),
         onPressed: () => Navigator.pop(context),
       ),
     );
   }
 }
-

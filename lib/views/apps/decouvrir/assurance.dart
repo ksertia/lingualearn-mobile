@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:ui';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:fasolingo/models/langue/decouverte_model.dart';
 
 class DecouvertePage extends StatefulWidget {
   const DecouvertePage({super.key});
@@ -11,7 +12,8 @@ class DecouvertePage extends StatefulWidget {
   State<DecouvertePage> createState() => _DecouvertePageState();
 }
 
-class _DecouvertePageState extends State<DecouvertePage> with TickerProviderStateMixin {
+class _DecouvertePageState extends State<DecouvertePage>
+    with TickerProviderStateMixin {
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
   late AnimationController _bubbleController;
@@ -48,8 +50,9 @@ class _DecouvertePageState extends State<DecouvertePage> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final dynamic language = Get.arguments;
-    final String langueChoisie = language?.name ?? 'la langue';
+    final dynamic args = Get.arguments;
+    final LanguageData? languageData = args is LanguageData ? args : null;
+    final String langueChoisie = languageData?.language ?? 'la langue';
 
     return Scaffold(
       body: Stack(
@@ -62,7 +65,6 @@ class _DecouvertePageState extends State<DecouvertePage> with TickerProviderStat
               ),
             ),
           ),
-
           SafeArea(
             child: Column(
               children: [
@@ -73,9 +75,7 @@ class _DecouvertePageState extends State<DecouvertePage> with TickerProviderStat
                     child: _buildBackButton(),
                   ),
                 ),
-
                 const Spacer(),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: Row(
@@ -103,26 +103,26 @@ class _DecouvertePageState extends State<DecouvertePage> with TickerProviderStat
                     ],
                   ),
                 ),
-
                 const Spacer(),
-
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 40),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 25, vertical: 40),
                   child: Row(
                     children: [
                       Expanded(
                         child: _buildActionButton(
-                          "NON", 
-                          Colors.redAccent, 
+                          "NON",
+                          Colors.redAccent,
                           () => Get.back(),
                         ),
                       ),
                       const SizedBox(width: 15),
                       Expanded(
                         child: _buildActionButton(
-                          "OUI !", 
-                          const Color(0xFFFF8F00), 
-                          () => Get.toNamed('/decouvrir', arguments: language),
+                          "OUI !",
+                          const Color(0xFFFF8F00),
+                          () => Get.toNamed('/decouvrir',
+                              arguments: languageData),
                         ),
                       ),
                     ],
@@ -231,7 +231,8 @@ class _DecouvertePageState extends State<DecouvertePage> with TickerProviderStat
         ],
       ),
       child: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
+        icon:
+            const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
         onPressed: () => Get.back(),
       ),
     );
@@ -269,7 +270,7 @@ class TrianglePainter extends CustomPainter {
     var paint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
-    
+
     var borderPaint = Paint()
       ..color = borderColor
       ..style = PaintingStyle.stroke

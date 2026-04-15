@@ -8,10 +8,11 @@ class StepQuizQCM extends StatefulWidget {
   final String question;
   final String title;
   final List<String> options;
-  final String lottieQuestion; 
+  final String lottieQuestion;
   final String lottieCorrect;
   final String lottieIncorrect;
   final String correctOption;
+  final VoidCallback? onContinue;
 
   const StepQuizQCM({
     super.key,
@@ -22,6 +23,7 @@ class StepQuizQCM extends StatefulWidget {
     required this.lottieCorrect,
     required this.lottieIncorrect,
     required this.correctOption,
+    this.onContinue,
   });
 
   @override
@@ -32,7 +34,7 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
   final DiscoveryController controller = Get.find();
   int? selectedIndex;
   String? currentLottie;
-  
+
   bool hasValidated = false;
 
   @override
@@ -51,7 +53,8 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
         return Container(
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isCorrect ? const Color(0xFFD7FFB8) : const Color(0xFFFFDFE0),
+            color:
+                isCorrect ? const Color(0xFFD7FFB8) : const Color(0xFFFFDFE0),
             borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
           ),
           child: Column(
@@ -62,7 +65,9 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
                 children: [
                   Icon(
                     isCorrect ? Icons.check_circle : Icons.cancel,
-                    color: isCorrect ? const Color(0xFF58CC02) : const Color(0xFFEE2B2B),
+                    color: isCorrect
+                        ? const Color(0xFF58CC02)
+                        : const Color(0xFFEE2B2B),
                     size: 30,
                   ),
                   SizedBox(width: 10),
@@ -71,7 +76,9 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: isCorrect ? const Color(0xFF58CC02) : const Color(0xFFEE2B2B),
+                      color: isCorrect
+                          ? const Color(0xFF58CC02)
+                          : const Color(0xFFEE2B2B),
                     ),
                   ),
                 ],
@@ -80,11 +87,15 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
                 SizedBox(height: 10),
                 Text(
                   "Bonne réponse :",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFFEE2B2B)),
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFFEE2B2B)),
                 ),
                 Text(
                   widget.correctOption,
-                  style: TextStyle(fontSize: 16, color: const Color(0xFFEE2B2B)),
+                  style:
+                      TextStyle(fontSize: 16, color: const Color(0xFFEE2B2B)),
                 ),
               ],
               SizedBox(height: 20),
@@ -94,16 +105,26 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    controller.nextPage();
+                    if (widget.onContinue != null) {
+                      widget.onContinue!();
+                    } else {
+                      controller.nextPage();
+                    }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isCorrect ? const Color(0xFF58CC02) : const Color(0xFFEE2B2B),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    backgroundColor: isCorrect
+                        ? const Color(0xFF58CC02)
+                        : const Color(0xFFEE2B2B),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
                     elevation: 0,
                   ),
                   child: Text(
                     isCorrect ? "CONTINUER" : "D'ACCORD",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ),
               ),
@@ -145,31 +166,39 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
           child: Column(
             children: [
               SizedBox(height: 30),
-              Text(widget.title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.black54)),
-              
+              Text(widget.title,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black54)),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 10),
-                child: currentLottie != null 
+                child: currentLottie != null
                     ? Lottie.asset(currentLottie!, height: 140, repeat: true)
                     : SizedBox(height: 140),
               ),
-              
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
                   padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.grey.shade200)),
                   child: Row(
                     children: [
-                      const Icon(Icons.volume_up, color: Colors.blueAccent, size: 28),
+                      const Icon(Icons.volume_up,
+                          color: Colors.blueAccent, size: 28),
                       SizedBox(width: 15),
-                      Expanded(child: Text(widget.question, style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold))),
+                      Expanded(
+                          child: Text(widget.question,
+                              style: TextStyle(
+                                  fontSize: 17, fontWeight: FontWeight.bold))),
                     ],
                   ),
                 ),
               ),
               SizedBox(height: 25),
-              
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: GridView.builder(
@@ -177,31 +206,39 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: widget.options.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, 
-                    crossAxisSpacing: 12, 
-                    mainAxisSpacing: 12, 
-                    childAspectRatio: 2.1
-                  ),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 2.1),
                   itemBuilder: (context, index) {
                     return InkWell(
-                      onTap: hasValidated ? null : () { 
-                        setState(() {
-                          selectedIndex = index;
-                          currentLottie = widget.lottieQuestion;
-                        });
-                      },
-                      child: AnimatedContainer( 
+                      onTap: hasValidated
+                          ? null
+                          : () {
+                              setState(() {
+                                selectedIndex = index;
+                                currentLottie = widget.lottieQuestion;
+                              });
+                            },
+                      child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(15),
                           border: Border.all(
-                            color: _getBorderColor(index), 
-                            width: (selectedIndex == index || (hasValidated && widget.options[index] == widget.correctOption)) ? 2.5 : 1.0,
+                            color: _getBorderColor(index),
+                            width: (selectedIndex == index ||
+                                    (hasValidated &&
+                                        widget.options[index] ==
+                                            widget.correctOption))
+                                ? 2.5
+                                : 1.0,
                           ),
                         ),
-                        child: Text(widget.options[index], style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                        child: Text(widget.options[index],
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.bold)),
                       ),
                     );
                   },
@@ -210,7 +247,6 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
             ],
           ),
         ),
-
         Positioned(
           bottom: 20,
           left: 20,
@@ -219,23 +255,31 @@ class _StepQuizQCMState extends State<StepQuizQCM> {
             height: 55,
             child: ElevatedButton(
               onPressed: selectedIndex != null && !hasValidated
-                ? () {
-                    bool isCorrect = widget.options[selectedIndex!] == widget.correctOption;
-                    
-                    setState(() {
-                      hasValidated = true; 
-                      currentLottie = isCorrect ? widget.lottieCorrect : widget.lottieIncorrect;
-                    });
-                    
-                    _showResultBottomSheet(isCorrect);
-                  } 
-                : null,
+                  ? () {
+                      bool isCorrect = widget.options[selectedIndex!] ==
+                          widget.correctOption;
+
+                      setState(() {
+                        hasValidated = true;
+                        currentLottie = isCorrect
+                            ? widget.lottieCorrect
+                            : widget.lottieIncorrect;
+                      });
+
+                      _showResultBottomSheet(isCorrect);
+                    }
+                  : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF9800),
                 disabledBackgroundColor: Colors.grey.shade300,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
               ),
-              child: Text("VALIDER", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              child: Text("VALIDER",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white)),
             ),
           ),
         ),

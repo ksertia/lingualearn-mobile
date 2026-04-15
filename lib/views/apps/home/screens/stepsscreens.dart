@@ -21,7 +21,11 @@ class StepsScreensPages extends StatelessWidget {
 
     const Color primaryBlue = Color(0xFF00CED1);
     const Color colorCompleted = Color(0xFF81C784);
+<<<<<<< HEAD
     const Color orangeAccent = Color(0xFFFF9800);
+=======
+    const Color orangeAccent = Color(0xFFFF9800); 
+>>>>>>> 42be38c695b20eff5a363ccd32d82c626a1a8e7d
     const Color colorLocked = Color(0xFF9E9E9E);
 
     return Scaffold(
