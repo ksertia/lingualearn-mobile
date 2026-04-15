@@ -1,4 +1,4 @@
-import 'package:confetti/confetti.dart'; 
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -11,14 +11,25 @@ class StepSuccess extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack( 
+    return Stack(
       children: [
         Container(
           width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 22.h),
           decoration: BoxDecoration(
-            color: Colors.white,
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFCF1D8), Color(0xFFFFF7EF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.circular(30.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -29,13 +40,37 @@ class StepSuccess extends StatelessWidget {
                 repeat: true,
               ),
               SizedBox(height: 10.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF4E8),
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.emoji_events,
+                        color: const Color(0xFFFFA726), size: 18.sp),
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Niveau validé !',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF8A4F00),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 12.h),
               Text(
-                "FELICITATION !",
+                "Bravo, champion !",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 24.sp,
+                  fontSize: 26.sp,
                   fontWeight: FontWeight.w900,
-                  color: const Color(0xFF58CC02),
+                  color: const Color(0xFF3E2723),
                   letterSpacing: 1.2,
                 ),
               ),
@@ -51,9 +86,11 @@ class StepSuccess extends StatelessWidget {
                       height: 1.6,
                     ),
                     children: [
-                      const TextSpan(text: "Tu as un talent naturel. 🌟\n"),
+                      const TextSpan(
+                          text: "Tu as déjà débloqué un super pouvoir ! ✨\n"),
                       TextSpan(
-                        text: "Inscris-toi maintenant pour enregistrer tes progrès et débloquer tout le parcours d'apprentissage.",
+                        text:
+                            "Inscris-toi pour garder une trace de ta progression et continuer l’aventure avec des défis encore plus fun.",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: Colors.grey[700],
@@ -63,7 +100,16 @@ class StepSuccess extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 40.h),
+              SizedBox(height: 26.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildBadge('✨ +20', 'Étoiles'),
+                  _buildBadge('🏅 +1', 'Badge'),
+                  _buildBadge('💡 top', 'Astuces'),
+                ],
+              ),
+              SizedBox(height: 30.h),
               Column(
                 children: [
                   Container(
@@ -73,16 +119,16 @@ class StepSuccess extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15.r),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFFF8F00).withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
+                          color: const Color(0xFFFFA726).withOpacity(0.32),
+                          blurRadius: 14,
+                          offset: const Offset(0, 7),
                         ),
                       ],
                     ),
                     child: ElevatedButton(
                       onPressed: () => Get.toNamed('/register'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF8F00),
+                        backgroundColor: const Color(0xFFFFA726),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.r),
@@ -102,7 +148,7 @@ class StepSuccess extends StatelessWidget {
                   TextButton(
                     onPressed: () => Get.toNamed('/login'),
                     style: TextButton.styleFrom(
-                      foregroundColor:  const Color.fromARGB(180, 158, 158, 158),
+                      foregroundColor: const Color.fromARGB(180, 158, 158, 158),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -124,12 +170,11 @@ class StepSuccess extends StatelessWidget {
             ],
           ),
         ),
-        
         Align(
           alignment: Alignment.topCenter,
           child: ConfettiWidget(
             confettiController: confettiController,
-            blastDirectionality: BlastDirectionality.explosive, 
+            blastDirectionality: BlastDirectionality.explosive,
             shouldLoop: false,
             colors: const [
               Colors.green,
@@ -138,11 +183,48 @@ class StepSuccess extends StatelessWidget {
               Colors.orange,
               Colors.purple,
               Colors.yellow,
-            ], 
+            ],
             gravity: 0.1,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBadge(String value, String label) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF4E342E),
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: const Color(0xFF8D6E63),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

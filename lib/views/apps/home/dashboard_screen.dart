@@ -11,9 +11,9 @@ import 'package:fasolingo/models/langue/langue_model.dart';
 
 const Color colorProBlue = Color(0xFF00008B);
 const Color primaryBlue = Color(0xFF00CED1);
-const Color colorCompleted = Color(0xFF81C784); 
-const Color orangeAccent = Color(0xFFFF9800); 
-const Color colorLocked = Color(0xFF9E9E9E); 
+const Color colorCompleted = Color(0xFF81C784);
+const Color orangeAccent = Color(0xFFFF9800);
+const Color colorLocked = Color(0xFF9E9E9E);
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -400,112 +400,124 @@ class HomePage extends StatelessWidget {
     );
   }
 
-Widget _buildKidCard(HomeController controller, ModuleModel module, String moduleStatus, int index) {
-  // 1. GESTION DES COULEURS (Fix pour éviter le rouge si débloqué)
-  // On force le statut en minuscule pour éviter les erreurs de casse ("Completed" vs "completed")
-  final String status = moduleStatus.toLowerCase();
-  
-  Color mainColor;
-  if (status == "completed") {
-    mainColor = colorCompleted;
-  } else if (status == "unlocked" || status == "en cours") {
-    mainColor = orangeAccent;
-  } else {
-    mainColor = colorLocked; // C'est ici que ton rouge arrive si le statut est inconnu
-  }
+  Widget _buildKidCard(HomeController controller, ModuleModel module,
+      String moduleStatus, int index) {
+    // 1. GESTION DES COULEURS (Fix pour éviter le rouge si débloqué)
+    // On force le statut en minuscule pour éviter les erreurs de casse ("Completed" vs "completed")
+    final String status = moduleStatus.toLowerCase();
 
-  bool isUnlocked = status == "unlocked" || status == "completed" || status == "en cours";
+    Color mainColor;
+    if (status == "completed") {
+      mainColor = colorCompleted;
+    } else if (status == "unlocked" || status == "en cours") {
+      mainColor = orangeAccent;
+    } else {
+      mainColor =
+          colorLocked; // C'est ici que ton rouge arrive si le statut est inconnu
+    }
 
-  return GestureDetector(
-    onTap: !isUnlocked
-        ? () => Get.snackbar("Oups ! 🔒", "Termine le module précédent pour débloquer celui-ci.")
-        : () async {
-            final res = await Get.toNamed('/parcoursselectionpage', arguments: module.id);
-            if (res == true || res == 'completed' || res == 'finished') {
-              controller.onModuleCompleted(module.id);
-            }
-          },
-    child: Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: mainColor.withOpacity(0.5), width: 2.5),
-        boxShadow: [
-          BoxShadow(
-            color: mainColor.withOpacity(0.15),
-            offset: const Offset(0, 10),
-            blurRadius: 0,
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: Stack(
-          clipBehavior: Clip.hardEdge,
-          children: [
-            // --- 2. LE CONTENU TEXTE (texte à gauche, Lottie positionné à droite) ---
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      // on réserve de l'espace à droite pour le Lottie (évite chevauchement)
-                      padding: const EdgeInsets.only(right: 80),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            status == "completed" ? "BIEN JOUÉ !" : 
-                            isUnlocked ? "EN COURS" : "À DÉBLOQUER",
-                            style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w900,
-                                color: mainColor,
-                                letterSpacing: 1),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            module.title.toUpperCase(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 16,
-                                color: isUnlocked ? colorProBlue : colorLocked),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            isUnlocked ? module.description : "Continue pour découvrir...",
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                          ),
-                        ],
+    bool isUnlocked =
+        status == "unlocked" || status == "completed" || status == "en cours";
+
+    return GestureDetector(
+      onTap: !isUnlocked
+          ? () => Get.snackbar("Oups ! 🔒",
+              "Termine le module précédent pour débloquer celui-ci.")
+          : () async {
+              final res = await Get.toNamed('/parcoursselectionpage',
+                  arguments: module.id);
+              if (res == true || res == 'completed' || res == 'finished') {
+                controller.onModuleCompleted(module.id);
+              }
+            },
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: mainColor.withOpacity(0.5), width: 2.5),
+          boxShadow: [
+            BoxShadow(
+              color: mainColor.withOpacity(0.15),
+              offset: const Offset(0, 10),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              // --- 2. LE CONTENU TEXTE (texte à gauche, Lottie positionné à droite) ---
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        // on réserve de l'espace à droite pour le Lottie (évite chevauchement)
+                        padding: const EdgeInsets.only(right: 80),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              status == "completed"
+                                  ? "BIEN JOUÉ !"
+                                  : isUnlocked
+                                      ? "EN COURS"
+                                      : "À DÉBLOQUER",
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w900,
+                                  color: mainColor,
+                                  letterSpacing: 1),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              module.title.toUpperCase(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 16,
+                                  color:
+                                      isUnlocked ? colorProBlue : colorLocked),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              isUnlocked
+                                  ? module.description
+                                  : "Continue pour découvrir...",
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: Colors.grey[600], fontSize: 13),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            // Lottie positionné à droite, collé vers le bord du container
-            Positioned(
-              right: 8,
-              bottom: 10,
-              child: Container(
-                width: 110,
-                alignment: Alignment.bottomCenter,
-                child: Opacity(
-                  opacity: isUnlocked ? 1.0 : 0.2,
-                  child: ColorFiltered(
-                    colorFilter: isUnlocked
-                        ? const ColorFilter.mode(Colors.transparent, BlendMode.multiply)
-                        : const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
-                    child: Transform.scale(
-                      scaleY: -1,
+              // Lottie positionné à droite, collé vers le bord du container
+              Positioned(
+                right: 8,
+                bottom: 10,
+                child: Container(
+                  width: 110,
+                  alignment: Alignment.bottomCenter,
+                  child: Opacity(
+                    opacity: isUnlocked ? 1.0 : 0.2,
+                    child: ColorFiltered(
+                      colorFilter: isUnlocked
+                          ? const ColorFilter.mode(
+                              Colors.transparent, BlendMode.multiply)
+                          : const ColorFilter.mode(
+                              Colors.grey, BlendMode.srcIn),
                       child: Lottie.asset(
                         _getAnimal(index),
                         height: 90,
@@ -516,42 +528,46 @@ Widget _buildKidCard(HomeController controller, ModuleModel module, String modul
                   ),
                 ),
               ),
-            ),
 
-            // --- ICONES DE STATUT (Cadenas ou Play) ---
-            if (!isUnlocked)
-              Positioned(
-                right: 35,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                    child: const Icon(Icons.lock_rounded, color: Colors.grey, size: 22),
+              // --- ICONES DE STATUT (Cadenas ou Play) ---
+              if (!isUnlocked)
+                Positioned(
+                  right: 35,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                          color: Colors.white, shape: BoxShape.circle),
+                      child: const Icon(Icons.lock_rounded,
+                          color: Colors.grey, size: 22),
+                    ),
                   ),
                 ),
-              ),
 
-            if (status == "unlocked" || status == "en cours")
-              Positioned(
-                bottom: 12,
-                right: 12,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(200),
-                      shape: BoxShape.circle,
-                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)]),
-                  child: Icon(Icons.play_circle_fill, color: mainColor, size: 35),
+              if (status == "unlocked" || status == "en cours")
+                Positioned(
+                  bottom: 12,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(200),
+                        shape: BoxShape.circle,
+                        boxShadow: const [
+                          BoxShadow(color: Colors.black12, blurRadius: 4)
+                        ]),
+                    child: Icon(Icons.play_circle_fill,
+                        color: mainColor, size: 35),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildShimmerLoading() {
     return ListView.builder(

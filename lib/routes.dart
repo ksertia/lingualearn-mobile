@@ -1,3 +1,4 @@
+import 'package:confetti/confetti.dart';
 import 'package:fasolingo/views/apps/change_language.dart';
 import 'package:fasolingo/views/apps/decouvrir/assurance.dart';
 import 'package:fasolingo/views/apps/decouvrir/bienvenu_page.dart';
@@ -28,6 +29,7 @@ import 'package:fasolingo/views/auth/forget_password/otpcode.dart';
 import 'package:fasolingo/views/auth/login.dart';
 import 'package:fasolingo/views/auth/register.dart';
 import 'package:fasolingo/views/splash.dart';
+import 'package:fasolingo/widgets/decouvrir_page/and_page.dart';
 import 'package:fasolingo/widgets/stepsscreens/quiz_step_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -42,12 +44,16 @@ class AuthMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     // Les routes d'authentification sont toujours accessibles
-    if (route == '/login' || route == '/register' || route == '/numberphone' || 
-        route == '/otpCode' || route == '/newPassword' || route == '/splash') {
+    if (route == '/login' ||
+        route == '/register' ||
+        route == '/numberphone' ||
+        route == '/otpCode' ||
+        route == '/newPassword' ||
+        route == '/splash') {
       print("✅ Autorisation route d'auth: $route");
       return null;
     }
-    
+
     // Pour les autres routes, vérifier la session
     final session = Get.find<SessionController>();
     if (session.userId.value.isEmpty || session.token.value.isEmpty) {
@@ -61,53 +67,57 @@ class AuthMiddleware extends GetMiddleware {
 
 getPageRoute() {
   var routes = [
-    GetPage(name: '/dashboard', page: () =>  HomePage()),
-    GetPage(name: '/dassh', page: () =>  AcceuilleSreen()),
+    GetPage(name: '/dashboard', page: () => HomePage()),
+    GetPage(name: '/dassh', page: () => AcceuilleSreen()),
     GetPage(name: '/splash', page: () => const SplashCree()),
     GetPage(name: '/login', page: () => const LoginPage()),
     GetPage(name: '/register', page: () => const RegisterPage()),
     GetPage(name: '/numberphone', page: () => const EnterPhonenumberPagge()),
     GetPage(name: '/otpCode', page: () => const OtpcodePage()),
     GetPage(name: '/newPassword', page: () => const NewPasswordPage()),
-     GetPage(name: '/decouvrir', page: () => const DiscoveryPage()),
-     GetPage(name: '/step', page: () => const StepMascotte()),
-     GetPage(name: '/selection', page: () => const LanguageSelectionPage()),
+    GetPage(name: '/decouvrir', page: () => const DiscoveryPage()),
+    GetPage(name: '/step', page: () => const StepMascotte()),
+    GetPage(name: '/selection', page: () => const LanguageSelectionPage()),
 
     GetPage(name: '/stepsscreens', page: () => const StepsScreensPages()),
-    GetPage(name: '/parcoursselectionpage', page: () =>  ParcoursSelectionPage()),
-    GetPage(name: '/subscription_details', page: () =>  SubscriptionDetailsPage()),
-    GetPage(name: '/subscription_plans', page: () =>  SubscriptionPlansPage()),
-    GetPage(name: '/laguedecouvert', page: () =>  LanguageDcouvertPage()),
-    GetPage(name: '/laguedecouvert', page: () =>  DecouvertePage()),
-
-
-    GetPage(name: '/quiz_intro_screen', page: () => const QuizStepPage(),
+    GetPage(
+        name: '/parcoursselectionpage', page: () => ParcoursSelectionPage()),
+    GetPage(
+        name: '/subscription_details', page: () => SubscriptionDetailsPage()),
+    GetPage(name: '/subscription_plans', page: () => SubscriptionPlansPage()),
+    GetPage(name: '/laguedecouvert', page: () => LanguageDcouvertPage()),
+    GetPage(name: '/decouverte', page: () => const DecouvertePage()),
+    GetPage(
+      name: '/decouvert',
+      page: () => StepSuccess(
+        confettiController: ConfettiController(
+          duration: const Duration(seconds: 2),
+        ),
+      ),
     ),
 
-
+    GetPage(
+      name: '/quiz_intro_screen',
+      page: () => const QuizStepPage(),
+    ),
 
     GetPage(name: '/bienvenue', page: () => const BienvenuPage()),
-     GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
-
-
-
-
-
+    GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
 
     GetPage(
-        name: '/settingScreen', 
+        name: '/settingScreen',
         page: () => SettingScreen(),
         middlewares: [AuthMiddleware()]),
     GetPage(
-        name: '/HomeScreen', 
+        name: '/HomeScreen',
         page: () => HomeScreen(),
         middlewares: [AuthMiddleware()]),
     GetPage(
-        name: '/lexique', 
+        name: '/lexique',
         page: () => LexiquePage(),
         middlewares: [AuthMiddleware()]),
     GetPage(
-        name: '/progres', 
+        name: '/progres',
         page: () => ProgresPage(),
         middlewares: [AuthMiddleware()]),
     GetPage(
@@ -142,7 +152,6 @@ getPageRoute() {
         name: '/maintenance',
         page: () => const MaintenancePage(),
         middlewares: [AuthMiddleware()]),
-
 
     ///---------------- Maps ----------------///
   ];
