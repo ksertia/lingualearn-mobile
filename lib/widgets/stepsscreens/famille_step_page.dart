@@ -2,6 +2,7 @@ import 'package:fasolingo/controller/apps/discovery_controller.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizQCM.dart';
+import 'package:fasolingo/widgets/etapefamille/pdf_etape.dart';
 import 'package:fasolingo/widgets/etapefamille/quiz_clic.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -116,6 +117,10 @@ class FamilleStepPage extends StatelessWidget {
                         videoTitle: "OBSERVE ATTENTIVEMENT",
                         videoUrl: "assets/images/video/videos.mp4",
                         onVideoFinished: () => controller.nextPage(),
+                      ),
+                      StepFamilyPdf(
+                        title: "LES MEMBRES DE LA FAMILLE",
+                        pdfUrl: "assets/pdf/famille.pdf",
                       ),
                       StepFamilyImages(
                         items: [

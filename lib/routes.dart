@@ -92,8 +92,6 @@ getPageRoute() {
 
 
 
-
-
     GetPage(
         name: '/settingScreen', 
         page: () => SettingScreen(),
