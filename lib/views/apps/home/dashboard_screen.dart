@@ -1,4 +1,4 @@
-import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
+ import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
