@@ -1,6 +1,7 @@
 import 'package:fasolingo/controller/apps/discovery_controller.dart';
 import 'package:fasolingo/models/langue/decouverte_model.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryImage.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizDrag.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizQCM.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -32,11 +33,14 @@ class DiscoveryPage extends StatelessWidget {
 
     List<DiscoveryStep> allSteps = [];
 
+
+    // GESTION DES LEÇONS (AUDIO, VIDÉO, IMAGE)
     for (var section in languageData.lessons) {
       for (var content in section.contents) {
         Widget stepWidget;
 
         if (content.questionType == "video") {
+          // Format Vidéo
           stepWidget = StepDiscoveryVideo(
             videoTitle: section.title.toUpperCase(),
             videoUrl: content.questionValue,
@@ -48,7 +52,16 @@ class DiscoveryPage extends StatelessWidget {
               }
             },
           );
-        } else {
+        } 
+        else if (content.questionType == "image") {
+          stepWidget = StepDiscoveryImage(
+            title: section.title.toUpperCase(),
+            imageUrl: content.questionValue,
+            answerText: content.answerValue,
+          );
+        } 
+        else {
+          // Format Audio 
           stepWidget = StepDiscoveryAudio(
             title: section.title.toUpperCase(),
             texteOriginal: content.questionValue,
@@ -56,6 +69,7 @@ class DiscoveryPage extends StatelessWidget {
             lottie: 'assets/lottie/mascot.json',
           );
         }
+
         allSteps.add(
           DiscoveryStep(
             widget: stepWidget,
@@ -65,6 +79,7 @@ class DiscoveryPage extends StatelessWidget {
       }
     }
 
+    // 2. GESTION DES EXERCICES
     for (var section in languageData.exercises) {
       for (var content in section.contents) {
         if (content.options.isNotEmpty) {
@@ -144,10 +159,7 @@ class DiscoveryPage extends StatelessWidget {
           flexibleSpace: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Color(0xFFFF8F00),
-                  Color(0xFFFF8F00),
-                ],
+                colors: [Color(0xFFFF8F00), Color(0xFFFF8F00)],
               ),
             ),
           ),
@@ -176,38 +188,26 @@ class DiscoveryPage extends StatelessWidget {
         ),
         body: Column(
           children: [
-            // =========================
-            // PROGRESS BAR
-            // =========================
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 20.w,
-                vertical: 15.h,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
               child: Obx(() {
                 double progress =
                     (controller.currentPage.value + 1) / allSteps.length;
 
-                return GestureDetector(
-                  onTap: () => Get.toNamed('/decouvert'),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12.r),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 8.h,
-                      backgroundColor: Colors.grey[300],
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFFFF8F00),
-                      ),
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(12.r),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 8.h,
+                    backgroundColor: Colors.grey[300],
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Color(0xFFFF8F00),
                     ),
                   ),
                 );
               }),
             ),
 
-            // =========================
-            // PAGEVIEW
-            // =========================
             Expanded(
               child: Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
@@ -236,26 +236,17 @@ class DiscoveryPage extends StatelessWidget {
               ),
             ),
 
-            // =========================
-            // BOTTOM NAV
-            // =========================
             Obx(() {
               int currentIndex = controller.currentPage.value;
               bool isExercise =
                   allSteps[currentIndex].sectionType == "exercise";
 
-              // Aucun bouton pendant les exercices
               if (isExercise) {
                 return const SizedBox.shrink();
               }
 
               return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  20.w,
-                  15.h,
-                  20.w,
-                  25.h,
-                ),
+                padding: EdgeInsets.fromLTRB(20.w, 15.h, 20.w, 25.h),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -264,16 +255,11 @@ class DiscoveryPage extends StatelessWidget {
                         height: 40.h,
                         child: OutlinedButton.icon(
                           onPressed: controller.previousPage,
-                          icon: Icon(
-                            Icons.arrow_back_ios,
-                            size: 14.sp,
-                          ),
+                          icon: Icon(Icons.arrow_back_ios, size: 14.sp),
                           label: const Text("Précédent"),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFFFF8F00),
-                            side: const BorderSide(
-                              color: Color(0xFFFF8F00),
-                            ),
+                            side: const BorderSide(color: Color(0xFFFF8F00)),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.r),
                             ),
@@ -282,6 +268,7 @@ class DiscoveryPage extends StatelessWidget {
                       )
                     else
                       const SizedBox.shrink(),
+
                     SizedBox(
                       height: 40.h,
                       child: ElevatedButton(
@@ -291,9 +278,7 @@ class DiscoveryPage extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.r),
                           ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 25.w,
-                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 25.w),
                         ),
                         child: Row(
                           children: [

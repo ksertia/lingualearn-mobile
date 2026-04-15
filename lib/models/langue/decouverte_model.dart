@@ -5,7 +5,6 @@ class LanguageData {
 
   LanguageData({required this.lessons, required this.exercises});
 
-  // Récupère dynamiquement le nom de la langue pour l'affichage
   String get language {
     if (lessons.isNotEmpty) return lessons.first.language;
     if (exercises.isNotEmpty) return exercises.first.language;
@@ -24,7 +23,6 @@ class LanguageData {
   }
 }
 
-// Modèle pour une Section (qu'elle soit leçon ou exercice)
 class Section {
   final String id;
   final String title;
@@ -62,12 +60,11 @@ class Section {
   }
 }
 
-// Modèle pour le contenu à l'intérieur d'une section
 class Content {
   final String id;
-  final String questionType; // Ajouté (ex: "text")
+  final String questionType; 
   final String questionValue;
-  final String answerType;   // Ajouté (ex: "text")
+  final String answerType;
   final String answerValue;
   final int order;
   final DateTime createdAt;
@@ -103,7 +100,6 @@ class Content {
   }
 }
 
-// Modèle pour les options (spécifique aux exercices)
 class Option {
   final String id;
   final String value;

@@ -2,7 +2,6 @@ import 'package:fasolingo/controller/apps/langue/discover_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:fasolingo/controller/apps/langue/decouvert_langue_controller.dart';
 import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
 
 class LanguageDcouvertPage extends StatefulWidget {
