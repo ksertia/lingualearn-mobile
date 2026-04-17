@@ -1,7 +1,5 @@
-<<<<<<< HEAD
+
  import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
-=======
->>>>>>> 52150cbfd4a31753dca105811e82ee85151a848d
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';

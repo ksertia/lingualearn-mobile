@@ -18,13 +18,9 @@ class StepsScreensPages extends StatelessWidget {
     final String moduleLottie = (_args is Map && _args['moduleLottie'] != null)
         ? _args['moduleLottie'].toString()
         : 'assets/lottie/Lion.json';
-
     const Color primaryBlue = Color(0xFF00CED1);
     const Color colorCompleted = Color(0xFF81C784);
-<<<<<<< HEAD
 
-=======
->>>>>>> 52150cbfd4a31753dca105811e82ee85151a848d
     const Color orangeAccent = Color(0xFFFF9800);
     const Color colorLocked = Color(0xFF9E9E9E);
 
