@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:fasolingo/controller/apps/discovery_controller.dart';
 import 'package:lottie/lottie.dart';
 
 class QuizQCM extends StatefulWidget {
@@ -10,6 +8,7 @@ class QuizQCM extends StatefulWidget {
   final String lottieCorrect;
   final String lottieIncorrect;
   final String correctOption;
+  final VoidCallback onNext; // <--- AJOUTÉ : Pour communiquer avec StepContentScreen
 
   const QuizQCM({
     super.key,
@@ -19,6 +18,7 @@ class QuizQCM extends StatefulWidget {
     required this.lottieCorrect,
     required this.lottieIncorrect,
     required this.correctOption,
+    required this.onNext, // <--- AJOUTÉ
   });
 
   @override
@@ -26,7 +26,6 @@ class QuizQCM extends StatefulWidget {
 }
 
 class _QuizQCMState extends State<QuizQCM> {
-  final DiscoveryController controller = Get.find();
   int? selectedIndex;
   String? currentLottie;
   bool hasValidated = false;
@@ -90,7 +89,7 @@ class _QuizQCMState extends State<QuizQCM> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    controller.nextPage();
+                    widget.onNext(); // <--- MODIFIÉ : Appelle la fonction passée en paramètre
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isCorrect ? const Color(0xFF58CC02) : const Color(0xFFEE2B2B),
@@ -133,23 +132,19 @@ class _QuizQCMState extends State<QuizQCM> {
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.black54),
               ),
               const SizedBox(height: 20),
-
-              // --- SECTION ROW : MASCOTTE + BULLE DE DIALOGUE ---
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Mascotte Lottie
                     SizedBox(
                       width: 120,
                       height: 120,
-                      child: currentLottie != null 
-                          ? Lottie.asset(currentLottie!) 
+                      child: currentLottie != null
+                          ? Lottie.asset(currentLottie!)
                           : const SizedBox(),
                     ),
                     const SizedBox(width: 8),
-                    // Bulle de texte
                     Flexible(
                       child: Stack(
                         clipBehavior: Clip.none,
@@ -161,13 +156,6 @@ class _QuizQCMState extends State<QuizQCM> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(18),
                               border: Border.all(color: Colors.grey.shade300, width: 1.5),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
                             ),
                             child: Row(
                               children: [
@@ -186,7 +174,6 @@ class _QuizQCMState extends State<QuizQCM> {
                               ],
                             ),
                           ),
-                          // Petit triangle de la bulle
                           Positioned(
                             left: -6.5,
                             top: 22,
@@ -205,22 +192,13 @@ class _QuizQCMState extends State<QuizQCM> {
                               ),
                             ),
                           ),
-                          // Cache pour l'ouverture du triangle
-                          Positioned(
-                            left: 0,
-                            top: 19,
-                            child: Container(width: 5, height: 20, color: Colors.white),
-                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 30),
-
-              // --- LISTE DES OPTIONS ---
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: ListView.separated(
@@ -231,7 +209,6 @@ class _QuizQCMState extends State<QuizQCM> {
                   itemBuilder: (context, index) {
                     bool isSelected = selectedIndex == index;
                     Color color = _getBorderColor(index);
-
                     return InkWell(
                       onTap: hasValidated ? null : () => setState(() => selectedIndex = index),
                       child: AnimatedContainer(
@@ -262,8 +239,6 @@ class _QuizQCMState extends State<QuizQCM> {
             ],
           ),
         ),
-
-        // Bouton Valider
         Positioned(
           bottom: 25,
           left: 20,
@@ -273,13 +248,13 @@ class _QuizQCMState extends State<QuizQCM> {
             child: ElevatedButton(
               onPressed: selectedIndex != null && !hasValidated
                   ? () {
-                      bool isCorrect = widget.options[selectedIndex!] == widget.correctOption;
-                      setState(() {
-                        hasValidated = true;
-                        currentLottie = isCorrect ? widget.lottieCorrect : widget.lottieIncorrect;
-                      });
-                      _showResultBottomSheet(isCorrect);
-                    }
+                bool isCorrect = widget.options[selectedIndex!] == widget.correctOption;
+                setState(() {
+                  hasValidated = true;
+                  currentLottie = isCorrect ? widget.lottieCorrect : widget.lottieIncorrect;
+                });
+                _showResultBottomSheet(isCorrect);
+              }
                   : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF9800),

@@ -21,7 +21,8 @@ class StepsScreensPages extends StatelessWidget {
 
     const Color primaryBlue = Color(0xFF00CED1);
     const Color colorCompleted = Color(0xFF81C784);
-    const Color orangeAccent = Color(0xFFFF9800); 
+
+    const Color orangeAccent = Color(0xFFFF9800);
     const Color colorLocked = Color(0xFF9E9E9E);
 
     return Scaffold(
@@ -79,7 +80,7 @@ class StepsScreensPages extends StatelessWidget {
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: MediaQuery.of(context).size.height,
@@ -157,7 +158,7 @@ class StepsScreensPages extends StatelessWidget {
 
                             if (stepStatus == "locked") {
                               bool allStepsLocked = controller.steps.every(
-                                  (s) => (s.status ?? "locked") == "locked");
+                                      (s) => (s.status ?? "locked") == "locked");
                               if (allStepsLocked && index == 0) {
                                 stepStatus = "unlocked";
                                 isUnlocked = true;
@@ -175,33 +176,39 @@ class StepsScreensPages extends StatelessWidget {
                                     : "Verrouillé",
                                 mainColor: isActive
                                     ? (isCompleted
-                                        ? colorCompleted
-                                        : orangeAccent)
+                                    ? colorCompleted
+                                    : orangeAccent)
                                     : colorLocked,
                                 isCompleted: isCompleted,
                                 isActive: isActive,
                                 icon: !isActive
                                     ? Icons.lock_outline
                                     : (isCompleted
-                                        ? Icons.check
-                                        : Icons.play_arrow_rounded),
-                                onTap: isActive
-                                    ? () => Get.to(
-                                          () => StepContentScreen(
-                                            stepData: step,
-                                            index: index,
-                                          ),
-                                          transition: Transition.rightToLeft,
-                                        )
-                                    : () {
-                                        Get.snackbar(
-                                          "Verrouillé",
-                                          "Complète les étapes précédentes pour débloquer celle-ci.",
-                                          snackPosition: SnackPosition.BOTTOM,
-                                          backgroundColor: Colors.black87,
-                                          colorText: Colors.white,
-                                        );
-                                      },
+                                    ? Icons.check
+                                    : Icons.play_arrow_rounded),
+          onTap: isActive
+          ? () {
+          // On récupère l'ID de l'utilisateur (à adapter selon ton AuthController ou Prefs)
+          // Si tu n'as pas encore de gestionnaire d'utilisateur, mets un ID de test
+          String currentUserId = "cmnehqt4j004fre9xtg45nu91";
+
+          Get.to(
+          () => StepContentScreen(
+          stepId: step.id, // On passe l'ID pour l'appel API
+          userId: currentUserId,
+          ),
+          transition: Transition.rightToLeft,
+          );
+          }
+              : () {
+          Get.snackbar(
+          "Verrouillé",
+          "Complète les étapes précédentes pour débloquer celle-ci.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.black87,
+          colorText: Colors.white,
+          );
+          },
                               ),
                             );
                           },
