@@ -1,5 +1,4 @@
 ﻿import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
@@ -25,11 +24,11 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
 
   bool _hasError = false;
   bool _isLoaded = false;
-
   bool _triedHttpsFallback = false;
   bool _triedPortFallback = false;
 
   double _overlayOpacity = 0.0;
+  bool _dialogShown = false;
 
   @override
   void initState() {
@@ -37,25 +36,18 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
     _initVideo(widget.videoUrl);
   }
 
-  // 🔥 SAME LOGIC AS IMAGE
+  // --- LOGIQUE DE FORMATAGE D'URL ---
   String _formatVideoUrl(String path,
       {bool forceHttps = false, bool forcePort4001 = false}) {
     final trimmed = path.trim();
-
     Uri uri;
 
     if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
       uri = Uri.parse(trimmed);
     } else {
       String base = "http://213.32.120.11:4000";
-
-      if (forcePort4001) {
-        base = base.replaceAll(":4000", ":4001");
-      }
-
-      uri = Uri.parse(
-        base + (trimmed.startsWith("/") ? trimmed : "/$trimmed"),
-      );
+      if (forcePort4001) base = base.replaceAll(":4000", ":4001");
+      uri = Uri.parse(base + (trimmed.startsWith("/") ? trimmed : "/$trimmed"));
     }
 
     if (kIsWeb) {
@@ -63,15 +55,11 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
       if (uri.host == base.host &&
           uri.port == base.port &&
           uri.scheme != base.scheme) {
-        debugPrint(
-          '🎬 VIDEO SCHEME NORMALIZED: ${uri.toString()} -> ${uri.replace(scheme: base.scheme)}',
-        );
         uri = uri.replace(scheme: base.scheme);
       }
     }
 
     final scheme = forceHttps ? "https" : uri.scheme;
-
     int port = uri.port;
     if (forcePort4001) port = 4001;
 
@@ -80,20 +68,11 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
 
   void _initVideo(String url) async {
     _dispose();
-
-    final fixedUrl = _formatVideoUrl(
-      url,
-      forceHttps: false,
-      forcePort4001: false,
-    );
-
-    debugPrint("🎬 VIDEO LOAD: $fixedUrl");
+    final fixedUrl = _formatVideoUrl(url);
 
     try {
       _controller = VideoPlayerController.networkUrl(Uri.parse(fixedUrl));
-
       _controller!.addListener(_videoListener);
-
       await _controller!.initialize();
 
       if (!mounted) return;
@@ -101,70 +80,222 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
       setState(() {
         _hasError = false;
         _isLoaded = true;
+        _dialogShown = false;
+        _overlayOpacity = 0.0;
       });
 
       _controller!.play();
     } catch (e) {
-      debugPrint("🚨 VIDEO ERROR: $e");
       _handleError();
     }
   }
 
-  // 🔥 SAME FALLBACK SYSTEM AS IMAGE
   void _handleError() {
     if (!_triedPortFallback) {
       _triedPortFallback = true;
-
-      final fallback = _formatVideoUrl(
-        widget.videoUrl,
-        forcePort4001: true,
-      );
-
-      _initVideo(fallback);
+      _initVideo(_formatVideoUrl(widget.videoUrl, forcePort4001: true));
       return;
     }
-
     if (!_triedHttpsFallback) {
       _triedHttpsFallback = true;
-
-      final fallback = _formatVideoUrl(
-        widget.videoUrl,
-        forceHttps: true,
-      );
-
-      _initVideo(fallback);
+      _initVideo(_formatVideoUrl(widget.videoUrl, forceHttps: true));
       return;
     }
-
-    setState(() {
-      _hasError = true;
-    });
+    setState(() => _hasError = true);
   }
 
   void _videoListener() {
     final c = _controller;
-
     if (c == null || !c.value.isInitialized) return;
 
     if (c.value.position >= c.value.duration &&
         c.value.duration.inMilliseconds > 0) {
-      c.pause();
-
-      setState(() {
-        _overlayOpacity = 1.0;
-      });
-
-      widget.onVideoFinished();
+      if (!_dialogShown) {
+        _dialogShown = true;
+        c.pause();
+        setState(() => _overlayOpacity = 1.0);
+        _showVictoryDialog();
+      }
     }
+  }
+
+  // --- LE POPUP SUPER LUDIQUE ---
+  void _showVictoryDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.topCenter,
+          children: [
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.85, end: 1.0),
+              duration: const Duration(milliseconds: 450),
+              curve: Curves.easeOutBack,
+              builder: (context, scale, child) => Transform.scale(
+                scale: scale,
+                child: child,
+              ),
+              child: Container(
+                padding: EdgeInsets.fromLTRB(24.w, 56.h, 24.w, 22.h),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF6750A4), Color(0xFF7F3DFF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(32.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.deepPurple.withOpacity(0.22),
+                      blurRadius: 24.r,
+                      offset: Offset(0, 14.h),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Félicitations 🎉",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    Text(
+                      "Tu as terminé cette étape !",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        color: Colors.white70,
+                        height: 1.4,
+                      ),
+                    ),
+                    SizedBox(height: 18.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.emoji_events,
+                            color: Colors.amberAccent, size: 28.sp),
+                        SizedBox(width: 8.w),
+                        Icon(Icons.auto_awesome,
+                            color: Colors.lightGreenAccent, size: 28.sp),
+                        SizedBox(width: 8.w),
+                        Icon(Icons.star, color: Colors.pinkAccent, size: 28.sp),
+                      ],
+                    ),
+                    SizedBox(height: 22.h),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16.w, vertical: 14.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.14),
+                        borderRadius: BorderRadius.circular(18.r),
+                      ),
+                      child: Text(
+                        "Ton aventure continue, clique sur Continuer pour débloquer la suite.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.white.withOpacity(0.92),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: BorderSide(color: Colors.white54),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.r),
+                              ),
+                              padding: EdgeInsets.symmetric(vertical: 14.h),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _replay();
+                            },
+                            child: Text(
+                              "Revoir",
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.amberAccent.shade700,
+                              elevation: 6,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.r),
+                              ),
+                              padding: EdgeInsets.symmetric(vertical: 14.h),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              widget.onVideoFinished();
+                            },
+                            child: Text(
+                              "Continuer",
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: -36.h,
+              child: CircleAvatar(
+                radius: 36.r,
+                backgroundColor: Colors.white,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.7, end: 1.0),
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.elasticOut,
+                  builder: (context, scale, child) => Transform.scale(
+                    scale: scale,
+                    child: child,
+                  ),
+                  child: Icon(Icons.celebration,
+                      color: Color(0xFF7F3DFF), size: 40.sp),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _replay() {
     if (_controller == null) return;
-
     setState(() {
+      _dialogShown = false;
       _overlayOpacity = 0.0;
     });
-
     _controller!.seekTo(Duration.zero);
     _controller!.play();
   }
@@ -189,21 +320,28 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
         Text(
           widget.videoTitle,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 15.h),
         Expanded(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15.r),
             child: Container(
-              color: Colors.black,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(15.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 16.r,
+                    offset: Offset(0, 8.h),
+                  ),
+                ],
+              ),
               child: Stack(
                 children: [
                   Center(child: _buildVideo()),
-                  if (_overlayOpacity > 0) _buildOverlay(),
+                  _buildOverlay(), // Le filtre qui s'active à la fin
                 ],
               ),
             ),
@@ -215,33 +353,19 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
 
   Widget _buildVideo() {
     final c = _controller;
-
     if (_hasError) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.error_outline, color: Colors.white, size: 50.sp),
+          Text("Erreur vidéo", style: TextStyle(color: Colors.white)),
           SizedBox(height: 10.h),
-          Text(
-            "Erreur vidéo",
-            style: TextStyle(color: Colors.white),
-          ),
-          SizedBox(height: 15.h),
           ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _hasError = false;
-                _triedHttpsFallback = false;
-                _triedPortFallback = false;
-              });
-              _initVideo(widget.videoUrl);
-            },
-            child: const Text("Réessayer"),
-          ),
+              onPressed: () => _initVideo(widget.videoUrl),
+              child: const Text("Réessayer")),
         ],
       );
     }
-
     if (c != null && c.value.isInitialized) {
       return SizedBox.expand(
         child: FittedBox(
@@ -254,41 +378,21 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
         ),
       );
     }
-
-    return const CircularProgressIndicator(color: Colors.white);
+    return const Center(child: CircularProgressIndicator(color: Colors.white));
   }
 
   Widget _buildOverlay() {
-    return AnimatedOpacity(
-      opacity: _overlayOpacity,
-      duration: const Duration(milliseconds: 300),
-      child: Container(
-        color: Colors.black54,
-        alignment: Alignment.center,
-        child: GestureDetector(
-          onTap: _replay,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: EdgeInsets.all(20.w),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.replay,
-                  size: 40.sp,
-                  color: Colors.blue,
-                ),
-              ),
-              SizedBox(height: 10.h),
-              const Text(
-                "Revoir la vidéo",
-                style: TextStyle(color: Colors.white),
-              )
-            ],
-          ),
+    return IgnorePointer(
+      // Laisse passer les clics vers le Dialog
+      child: AnimatedOpacity(
+        opacity: _overlayOpacity,
+        duration: const Duration(milliseconds: 300),
+        child: Container(
+          color: Colors.black
+              .withOpacity(0.5), // Assombrit la vidéo derrière le popup
+          alignment: Alignment.center,
+          child: Icon(Icons.star,
+              color: Colors.yellow.withOpacity(0.3), size: 150.sp),
         ),
       ),
     );

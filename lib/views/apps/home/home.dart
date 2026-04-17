@@ -434,7 +434,7 @@ Widget _buildNavigationGrid() {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(height: 6),
-                  Text("5 modules • 24 étapes",
+                  Text("5 modules • 5 étapes",
                       style: TextStyle(color: Colors.grey, fontSize: 13)),
                 ],
               ),
@@ -444,9 +444,9 @@ Widget _buildNavigationGrid() {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildPathStat("2/5", "MODULES"),
-              _buildPathStat("8/24", "PARCOURS"),
-              _buildPathStat("16/48", "ÉTAPES"),
+              _buildPathStat("1/5", "MODULES"),
+              _buildPathStat("1/4", "PARCOURS"),
+              _buildPathStat("1/5", "ÉTAPES"),
             ],
           ),
           const SizedBox(height: 20),

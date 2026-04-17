@@ -14,13 +14,20 @@ class ParcoursSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ParcoursSelectionController controller =
-      Get.put(ParcoursSelectionController());
+        Get.put(ParcoursSelectionController());
 
     final dynamic _args = Get.arguments;
-    final String? moduleLottieArg = (_args is Map && _args['moduleLottie'] != null) ? _args['moduleLottie'].toString() : null;
-    final String backgroundImage = (_args is Map && _args['backgroundImage'] != null) ? _args['backgroundImage'].toString() : 'assets/images/app/plan3.png';
+    final String? moduleLottieArg =
+        (_args is Map && _args['moduleLottie'] != null)
+            ? _args['moduleLottie'].toString()
+            : null;
+    final String backgroundImage =
+        (_args is Map && _args['backgroundImage'] != null)
+            ? _args['backgroundImage'].toString()
+            : 'assets/images/app/plan3.png';
 
-    final Future<List<ModuleModel>> _modulesFuture = ModuleService.getAllModules();
+    final Future<List<ModuleModel>> _modulesFuture =
+        ModuleService.getAllModules();
 
     final List<String> _moduleLotties = const [
       'assets/lottie/poulet.json',
@@ -41,7 +48,8 @@ class ParcoursSelectionPage extends StatelessWidget {
       'assets/lottie/buffalo.json',
     ];
 
-    String _resolveLottieFromModule(List<ModuleModel> modules, String moduleId) {
+    String _resolveLottieFromModule(
+        List<ModuleModel> modules, String moduleId) {
       try {
         final pos = modules.indexWhere((m) => m.id == moduleId);
         if (pos != -1) {
@@ -52,9 +60,9 @@ class ParcoursSelectionPage extends StatelessWidget {
     }
 
     const Color primaryBlue = Color(0xFF00CED1);
-    const Color colorCompleted = Color(0xFF81C784); // Vert clair pour terminé
-    const Color orangeAccent = Color(0xFFFF9800); // Orange pour en cours
-    const Color colorLocked = Color(0xFF9E9E9E); // Gris pour verrouillé
+    const Color colorCompleted = Color(0xFF81C784); 
+    const Color orangeAccent = Color(0xFFFF9800);
+    const Color colorLocked = Color(0xFF9E9E9E);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -85,27 +93,35 @@ class ParcoursSelectionPage extends StatelessWidget {
         return FutureBuilder<List<ModuleModel>>(
           future: _modulesFuture,
           builder: (context, modulesSnap) {
-            final String moduleLottie = moduleLottieArg ?? (modulesSnap.hasData ? _resolveLottieFromModule(modulesSnap.data!, controller.moduleId) : 'assets/lottie/Lion.json');
+            final String moduleLottie = moduleLottieArg ??
+                (modulesSnap.hasData
+                    ? _resolveLottieFromModule(
+                        modulesSnap.data!, controller.moduleId)
+                    : 'assets/lottie/Lion.json');
 
             return Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(backgroundImage),
                   fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.22), BlendMode.darken),
+                  colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.22), BlendMode.darken),
                 ),
               ),
               child: RefreshIndicator(
                 onRefresh: () => controller.fetchPaths(),
                 child: ListView.builder(
-                  padding: const EdgeInsets.only(top: 110, bottom: 20, left: 15, right: 15),
+                  padding: const EdgeInsets.only(
+                      top: 110, bottom: 20, left: 15, right: 15),
                   itemCount: controller.paths.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
                       String title = "MODULE";
                       String description = "";
                       if (modulesSnap.hasData && modulesSnap.data!.isNotEmpty) {
-                        final found = modulesSnap.data!.where((m) => m.id == controller.moduleId).toList();
+                        final found = modulesSnap.data!
+                            .where((m) => m.id == controller.moduleId)
+                            .toList();
                         if (found.isNotEmpty) {
                           title = found.first.title;
                           description = found.first.description;
@@ -113,10 +129,14 @@ class ParcoursSelectionPage extends StatelessWidget {
                       }
 
                       final int total = controller.paths.length;
-                      final int completed = controller.paths.where((p) => (p.status ?? "") == "completed").length;
-                      final double progress = total > 0 ? (completed / total) : 0.0;
+                      final int completed = controller.paths
+                          .where((p) => (p.status ?? "") == "completed")
+                          .length;
+                      final double progress =
+                          total > 0 ? (completed / total) : 0.0;
 
-                      return _buildHeaderCard(title, description, progress, completed, total, moduleLottie);
+                      return _buildHeaderCard(title, description, progress,
+                          completed, total, moduleLottie);
                     }
 
                     final path = controller.paths[index - 1];
@@ -126,46 +146,66 @@ class ParcoursSelectionPage extends StatelessWidget {
                     debugPrint("Title: ${path.title}");
                     debugPrint("Status: ${path.status}");
                     debugPrint("Progress: ${path.progress}");
-                    debugPrint("ProgressPercentage: ${path.progressPercentage}");
+                    debugPrint(
+                        "ProgressPercentage: ${path.progressPercentage}");
                     debugPrint("IsActive: ${path.isActive}");
                     debugPrint("==================");
 
-                    // TA LOGIQUE DE STATUT
                     String pathStatus = path.status ?? "locked";
                     bool isCompleted = pathStatus == "completed";
-                    bool isUnlocked = pathStatus == "unlocked" || pathStatus == "completed";
+                    bool isUnlocked =
+                        pathStatus == "unlocked" || pathStatus == "completed";
 
                     if (pathStatus == "locked") {
-                      bool allPathsLocked = controller.paths.every((p) => (p.status ?? "locked") == "locked");
+                      bool allPathsLocked = controller.paths
+                          .every((p) => (p.status ?? "locked") == "locked");
                       if (allPathsLocked && index == 1) {
                         pathStatus = "unlocked";
                         isUnlocked = true;
-                        print("🔓 [FALLBACK] Premier parcours débloqué automatiquement");
+                        print(
+                            "🔓 [FALLBACK] Premier parcours débloqué automatiquement");
                       }
                     }
 
                     bool isActive = isUnlocked;
-                    print("Path $index: Status='$pathStatus' → isCompleted=$isCompleted, isActive=$isActive");
+                    print(
+                        "Path $index: Status='$pathStatus' → isCompleted=$isCompleted, isActive=$isActive");
 
                     return Align(
-                      alignment: index % 2 == 0 ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment: index % 2 == 0
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
                       child: FractionallySizedBox(
                         widthFactor: 0.92,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 4),
                             child: ParcoursStepItem(
                               number: "${path.index + 1}",
                               title: path.title,
-                              statusText: isCompleted ? 'Terminé' : (isActive ? 'En cours' : 'Verrouillé'),
-                              subtitle: isActive ? path.description : "Verrouillé : Terminez le parcours précédent",
-                              color: isActive ? (isCompleted ? colorCompleted : orangeAccent) : colorLocked,
+                              statusText: isCompleted
+                                  ? 'Terminé'
+                                  : (isActive ? 'En cours' : 'Verrouillé'),
+                              subtitle: isActive
+                                  ? path.description
+                                  : "Verrouillé : Terminez le parcours précédent",
+                              color: isActive
+                                  ? (isCompleted
+                                      ? colorCompleted
+                                      : orangeAccent)
+                                  : colorLocked,
                               isCompleted: isCompleted,
                               isActive: isActive,
-                              icon: !isActive ? Icons.lock_rounded : (isCompleted ? Icons.check : Icons.play_arrow_rounded),
+                              icon: !isActive
+                                  ? Icons.lock_rounded
+                                  : (isCompleted
+                                      ? Icons.check
+                                      : Icons.play_arrow_rounded),
                               onTap: isActive
-                                  ? () => Get.toNamed('/stepsscreens', arguments: {
+                                  ? () =>
+                                      Get.toNamed('/stepsscreens', arguments: {
                                         'moduleId': controller.moduleId,
                                         'pathId': path.id,
                                         'moduleLottie': moduleLottie,
@@ -177,7 +217,8 @@ class ParcoursSelectionPage extends StatelessWidget {
                                         snackPosition: SnackPosition.BOTTOM,
                                         backgroundColor: Colors.black87,
                                         colorText: Colors.white,
-                                        icon: const Icon(Icons.lock, color: Colors.orangeAccent),
+                                        icon: const Icon(Icons.lock,
+                                            color: Colors.orangeAccent),
                                         margin: const EdgeInsets.all(15),
                                       );
                                     },
@@ -190,13 +231,14 @@ class ParcoursSelectionPage extends StatelessWidget {
                 ),
               ),
             );
-                 },
+          },
         );
       }),
     );
   }
 
-  Widget _buildHeaderCard(String title, String description, double progress, int completed, int total, String lottieAsset) {
+  Widget _buildHeaderCard(String title, String description, double progress,
+      int completed, int total, String lottieAsset) {
     final int displayTotal = total <= 0 ? 0 : total;
     final int percent = (progress * 100).clamp(0, 100).toInt();
 
@@ -210,7 +252,12 @@ class ParcoursSelectionPage extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.18), blurRadius: 12, offset: const Offset(0, 6))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.18),
+              blurRadius: 12,
+              offset: const Offset(0, 6))
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -219,31 +266,51 @@ class ParcoursSelectionPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+                Text(title,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800)),
                 const SizedBox(height: 6),
-                Text(description, style: const TextStyle(color: Colors.white70, fontSize: 15), maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(description,
+                    style: const TextStyle(color: Colors.white70, fontSize: 15),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 14),
                 Row(
                   children: [
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(value: progress, backgroundColor: Colors.white24, valueColor: const AlwaysStoppedAnimation<Color>(Colors.white)),
+                        child: LinearProgressIndicator(
+                            value: progress,
+                            backgroundColor: Colors.white24,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white)),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.white24,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text("$percent%", style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: Text("$percent%",
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text("$completed/$displayTotal Parcours", style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+                Text("$completed/$displayTotal Parcours",
+                    style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -283,7 +350,11 @@ class ParcoursSelectionPage extends StatelessWidget {
               const CircleAvatar(radius: 28, backgroundColor: Colors.white),
               const SizedBox(width: 20),
               Expanded(
-                child: Container(height: 90, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
+                child: Container(
+                    height: 90,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20))),
               )
             ],
           ),
