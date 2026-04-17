@@ -102,14 +102,7 @@ getPageRoute() {
     ),
 
     GetPage(name: '/bienvenue', page: () => const BienvenuPage()),
-<<<<<<< HEAD
-     GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
-
-
-
-=======
     GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
->>>>>>> 42be38c695b20eff5a363ccd32d82c626a1a8e7d
 
     GetPage(
         name: '/settingScreen',

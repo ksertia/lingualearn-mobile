@@ -1,13 +1,9 @@
-import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/models/modules/modul_model.dart';
-import 'package:fasolingo/models/langue/langue_model.dart';
 
 const Color colorProBlue = Color(0xFF00008B);
 const Color primaryBlue = Color(0xFF00CED1);
@@ -43,163 +39,37 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.put(HomeController());
-    final SessionController session = Get.find<SessionController>();
-    final LanguagesController langController = Get.put(LanguagesController());
-
-    String firstName = LocalStorage.getUserName() ?? "Champion";
-    String greeting = "Salut";
-
-    String langueId = session.selectedLanguageId.value.isNotEmpty
-        ? session.selectedLanguageId.value
-        : (session.user?.selectedLanguageId ?? "");
-
-    final LanguageModel? selectedLang =
-        langController.allLanguages.firstWhereOrNull((l) => l.id == langueId);
-    String langueNom = selectedLang?.name ?? "ta langue";
-
-    if (langueNom.toLowerCase().contains("mooré")) {
-      greeting = "Ne y windiga";
-    } else if (langueNom.toLowerCase().contains("dioula")) {
-      greeting = "I ni sogoma";
-    }
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                const Color(0xFFF8FBFF),
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: colorProBlue.withOpacity(0.08),
-                offset: const Offset(0, 2),
-                blurRadius: 12,
-                spreadRadius: 0,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.orangeAccent,
+        foregroundColor: Colors.black87,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          onPressed: () => Get.back(),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text(
+              'Liste des modules',
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.w900,
+                fontSize: 20,
               ),
-            ],
-          ),
-          child: AppBar(
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            toolbarHeight: 70,
-            leadingWidth: 0,
-            leading: const SizedBox.shrink(),
-            title: Row(
-              children: [
-                Lottie.asset(
-                  'assets/lottie/Happy mascot.json',
-                  width: 60,
-                  height: 60,
-                  repeat: true,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'TiBi',
-                        style: TextStyle(
-                          color: colorProBlue,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 20,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      Text(
-                        'Apprendre • Progresser • Réussir',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ),
-            actions: [
-              Container(
-                margin: const EdgeInsets.only(right: 8),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: primaryBlue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: primaryBlue.withOpacity(0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.stars_rounded,
-                            color: primaryBlue,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          const Text(
-                            '1250',
-                            style: TextStyle(
-                              color: primaryBlue,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    GestureDetector(
-                      onTap: () => _showSettingsBottomSheet(
-                          context, firstName, langueNom),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: colorProBlue.withOpacity(0.2),
-                              offset: const Offset(0, 2),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        child: CircleAvatar(
-                          radius: 20,
-                          backgroundColor: colorProBlue,
-                          child: Text(
-                            firstName.isNotEmpty
-                                ? firstName[0].toUpperCase()
-                                : "U",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            SizedBox(height: 2),
+            Text(
+              'Choisis le prochain défi',
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
               ),
-              const SizedBox(width: 15),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       body: Container(
@@ -211,42 +81,15 @@ class HomePage extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(40),
-                  bottomRight: Radius.circular(40),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 20, 25, 10),
+              child: Text(
+                'Les modules',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: colorProBlue,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                      color: colorProBlue.withOpacity(0.05),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10)),
-                ],
-              ),
-              padding: const EdgeInsets.fromLTRB(25, 10, 25, 30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "$greeting, $firstName ! 🇧🇫",
-                    style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF2D3436)),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    "Prêt pour ton aventure en $langueNom ?",
-                    style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 15),
-                ],
               ),
             ),
             Expanded(
@@ -283,37 +126,16 @@ class HomePage extends StatelessWidget {
                       bool isLast =
                           index == controller.filteredModules.length - 1;
 
-                      debugPrint("=== MODULE $index ===");
-                      debugPrint("ID: ${module.id}");
-                      debugPrint("Title: ${module.title}");
-                      debugPrint("Description: ${module.description}");
-                      debugPrint("Status: ${module.status}");
-                      debugPrint("Progress: ${module.progressPercentage}%");
-                      debugPrint("Index: ${module.index}");
-                      debugPrint("IsActive: ${module.isActive}");
-                      if (module.progress != null) {
-                        debugPrint(
-                            "Progress Object - Status: ${module.progress!.status}");
-                        debugPrint(
-                            "Progress Object - Percentage: ${module.progress!.progressPercentage}");
-                        debugPrint(
-                            "Progress Object - CompletedAt: ${module.progress!.completedAt}");
-                        debugPrint(
-                            "Progress Object - UnlockedAt: ${module.progress!.unlockedAt}");
-                      } else {
-                        debugPrint("Progress Object: null");
-                      }
-                      debugPrint("==================");
-
-                      String moduleStatus = module.status ?? "locked";
+                      String moduleStatus =
+                          module.status?.toLowerCase() ?? "locked";
 
                       if (moduleStatus == "locked" && index == 0) {
                         bool allModulesLocked = controller.filteredModules
-                            .every((m) => (m.status ?? "locked") == "locked");
+                            .every((m) =>
+                                (m.status?.toLowerCase() ?? "locked") ==
+                                "locked");
                         if (allModulesLocked) {
                           moduleStatus = "unlocked";
-                          print(
-                              " [FALLBACK] Premier module débloqué automatiquement (tous les statuts sont null)");
                         }
                       }
 
@@ -321,9 +143,6 @@ class HomePage extends StatelessWidget {
                       bool isUnlocked = moduleStatus == "unlocked" ||
                           moduleStatus == "completed";
                       bool isLocked = moduleStatus == "locked";
-
-                      print(
-                          "Module ${index + 1}: Status='$moduleStatus' → isCompleted=$isCompleted, isUnlocked=$isUnlocked");
 
                       return IntrinsicHeight(
                         child: Row(
@@ -592,155 +411,6 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  void _showSettingsBottomSheet(
-      BuildContext context, String firstName, String langueNom) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.75,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(25),
-              topRight: Radius.circular(25),
-            ),
-          ),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(25),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: colorProBlue,
-                      child: Text(
-                        firstName.isNotEmpty ? firstName[0].toUpperCase() : "U",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 24,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            firstName,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                              color: colorProBlue,
-                            ),
-                          ),
-                          Text(
-                            "Apprenant en $langueNom",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  children: [
-                    _buildSettingsItem(
-                      icon: Icons.language_outlined,
-                      title: "Langue d'apprentissage",
-                      subtitle: langueNom,
-                      onTap: () {},
-                    ),
-                    _buildSettingsItem(
-                      icon: Icons.notifications_outlined,
-                      title: "Notifications",
-                      subtitle: "Gérer les rappels",
-                      onTap: () {},
-                    ),
-                    _buildSettingsItem(
-                      icon: Icons.bar_chart_outlined,
-                      title: "Statistiques",
-                      subtitle: "Voir vos progrès",
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSettingsItem({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    bool isDestructive = false,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isDestructive
-              ? Colors.red.withOpacity(0.1)
-              : colorProBlue.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(
-          icon,
-          color: isDestructive ? Colors.red : colorProBlue,
-          size: 22,
-        ),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-          color: isDestructive ? Colors.red : Colors.black87,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(
-          color: Colors.grey.shade600,
-          fontSize: 13,
-        ),
-      ),
-      trailing: Icon(
-        Icons.chevron_right,
-        color: Colors.grey.shade400,
-      ),
-      onTap: onTap,
     );
   }
 }
