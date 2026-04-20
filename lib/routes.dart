@@ -101,6 +101,13 @@ getPageRoute() {
     ),
 
     GetPage(name: '/bienvenue', page: () => const BienvenuPage()),
+     GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
+
+
+
+
+    GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
+
     GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
 
     GetPage(
