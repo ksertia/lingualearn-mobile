@@ -10,7 +10,6 @@ import 'package:fasolingo/views/apps/decouvrir/step_mascotte.dart';
 import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
 import 'package:fasolingo/views/apps/home/home.dart';
 import 'package:fasolingo/views/apps/home/home_page.dart';
-import 'package:fasolingo/views/apps/home/parcours_page.dart';
 import 'package:fasolingo/views/apps/home/screens/parcours.dart';
 import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
 

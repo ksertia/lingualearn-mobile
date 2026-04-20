@@ -151,8 +151,12 @@ class StepsScreensPages extends StatelessWidget {
                             final step = controller.steps[index];
 
                             String stepStatus = step.status ?? "locked";
+                            if (stepStatus == "started") {
+                              stepStatus = "unlocked";
+                            }
                             bool isCompleted = stepStatus == "completed";
                             bool isUnlocked = stepStatus == "unlocked" ||
+                                stepStatus == "started" ||
                                 stepStatus == "completed";
 
                             if (stepStatus == "locked") {

@@ -84,10 +84,8 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
             ),
           ),
 
-          // --- DÉCORATIONS FLOTTANTES ---
           ...List.generate(8, (index) => _buildFloatingDecoration(index)),
 
-          // --- CONTENU PRINCIPAL ---
           SafeArea(
             child: Column(
               children: [

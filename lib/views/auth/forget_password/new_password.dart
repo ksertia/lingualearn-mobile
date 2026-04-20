@@ -65,7 +65,6 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Clear login form for fresh UX after reset
                   final loginCtrl = Get.find<LoginController>();
                   loginCtrl.clear();
                   Get.offAllNamed("/login");

@@ -15,8 +15,6 @@ class _OtpcodePageState extends State<OtpcodePage> {
   late List<FocusNode> _focusNodes;
   late List<bool> _isFilled;
   late List<bool> _isError;
-
-  // Récupération du controller déjà injecté à la page précédente
   final ForgotPasswordController controller = Get.find<ForgotPasswordController>();
 
   @override
@@ -71,7 +69,6 @@ class _OtpcodePageState extends State<OtpcodePage> {
     }
   }
 
-  // Getter pour récupérer le code final
   String get otpCode => _controllers.map((c) => c.text).join();
 
   @override
@@ -104,7 +101,6 @@ class _OtpcodePageState extends State<OtpcodePage> {
               ),
               const SizedBox(height: 50),
 
-              // Les cases OTP
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(otpLength, (index) {
@@ -140,7 +136,6 @@ class _OtpcodePageState extends State<OtpcodePage> {
 
               const SizedBox(height: 60),
 
-              // Bouton CONFIRMER lié au Web Service
               SizedBox(
                 width: double.infinity,
                 child: Obx(() => ElevatedButton(
@@ -148,9 +143,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
                       ? null 
                       : () {
                           if (otpCode.length == otpLength) {
-                            // 1. On injecte le code dans le controller GetX
                             controller.otpController.text = otpCode;
-                            // 2. On lance l'appel API
                             controller.verifyOtp();
                           } else {
                             Get.snackbar("Code incomplet", "Veuillez remplir les 6 cases.");

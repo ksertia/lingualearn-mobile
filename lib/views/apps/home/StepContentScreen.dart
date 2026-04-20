@@ -17,7 +17,6 @@ class StepContentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // On utilise Get.put mais Get.find est souvent préférable si déjà injecté
     final StepController controller = Get.put(StepController());
 
     Future.microtask(() => controller.loadStepContent(stepId, userId));
@@ -40,13 +39,11 @@ class StepContentScreen extends StatelessWidget {
               child: Text("Erreur de récupération des données"));
         }
 
-        // Passage de 'data' typé StepData
         return _buildBody(context, data, controller);
       }),
     );
   }
 
-  // MODIFICATION ICI : On remplace 'dynamic data' par 'StepData data'
   Widget _buildBody(
       BuildContext context, StepData data, StepController controller) {
     final String type = data.type;
@@ -84,7 +81,6 @@ class StepContentScreen extends StatelessWidget {
             child: Text("Ce quiz ne contient aucune question."));
       }
 
-      // Utilisation sécurisée de la liste
       final currentQuestion =
           questionsList[controller.currentQuestionIndex.value];
 

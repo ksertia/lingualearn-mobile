@@ -152,6 +152,9 @@ class ParcoursSelectionPage extends StatelessWidget {
                     debugPrint("==================");
 
                     String pathStatus = path.status ?? "locked";
+                    if (pathStatus == "started") {
+                      pathStatus = "unlocked";
+                    }
                     bool isCompleted = pathStatus == "completed";
                     bool isUnlocked =
                         pathStatus == "unlocked" || pathStatus == "completed";

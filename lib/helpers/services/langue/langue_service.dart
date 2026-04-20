@@ -24,12 +24,10 @@ class LanguageLevelService {
         try {
           final session = Get.find<SessionController>();
           
-          // Essayer d'obtenir le token depuis la session
           String? tokenToUse = session.token.value.isNotEmpty 
               ? session.token.value 
               : null;
           
-          // Si pas de token en session, essayer le stockage local
           tokenToUse ??= LocalStorage.getAuthToken();
           
           if (tokenToUse != null && tokenToUse.isNotEmpty && tokenToUse != "null") {
@@ -150,7 +148,6 @@ class LanguageLevelService {
     }
   }
 
-  // --- RÉCUPÉRATION DE LA PROGRESSION (inclut les niveaux) ---
   Future<Map<String, dynamic>?> fetchProgression({required String userId, required String languageId}) async {
     try {
       final response = await _dio.get('/progression/user/$userId/language/$languageId');

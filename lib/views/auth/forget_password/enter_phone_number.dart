@@ -7,8 +7,6 @@ class EnterPhonenumberPagge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // On utilise Get.find si le controller est déjà injecté, 
-    // ou Get.put s'il ne l'est pas encore.
     final ForgotPasswordController controller = Get.put(ForgotPasswordController());
 
     return Scaffold(
@@ -96,7 +94,6 @@ class EnterPhonenumberPagge extends StatelessWidget {
                 child: SizedBox(
                   width: double.infinity,
                   child: Obx(() => ElevatedButton(
-                        // Appel de la méthode requestOtp du controller
                         onPressed: controller.isLoading.value
                             ? null
                             : () => controller.requestOtp(),

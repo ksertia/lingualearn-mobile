@@ -36,9 +36,7 @@ class DiscoverService {
   // Récupère les leçons et exercices
   Future<LanguageData> getContentByLanguage(String language) async {
     try {
-      // Dio gère la concaténation avec l'URL de base
       final response = await _dio.get('/discover/languages/$language');
-      // On passe 'data' directement au model
       return LanguageData.fromJson(response.data['data']);
     } catch (e) {
       rethrow;

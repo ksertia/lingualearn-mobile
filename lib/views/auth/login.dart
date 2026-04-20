@@ -8,7 +8,6 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure single permanent controller instance
     Get.put(LoginController(), permanent: true);
     final controller = Get.find<LoginController>();
 

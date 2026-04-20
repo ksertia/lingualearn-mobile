@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:fasolingo/controller/apps/session_controller.dart';
 
 class StepsController extends GetxController {
-  // Les IDs sont récupérés de façon sûre dans `onInit`
   late String moduleId;
   late String pathId;
 
@@ -37,7 +36,6 @@ class StepsController extends GetxController {
   }
 
   Future<void> fetchSteps() async {
-    // Sécurité : si pathId est vide, on ne fait rien
     if (pathId.isEmpty) {
       print("🚨 [StepsController] pathId manquant dans les arguments");
       return;
@@ -48,11 +46,9 @@ class StepsController extends GetxController {
       
       print("🔍 [StepsController] Chargement des étapes pour pathId: $pathId");
       
-      // Utiliser l'endpoint qui fonctionne pour charger les étapes d'un parcours
       List<StepModel> results = await StepsService.getStepsByPath(pathId);
       
       if (results.isNotEmpty) {
-        // Tri par index (important pour l'ordre pédagogique)
         results.sort((a, b) => a.index.compareTo(b.index));
         steps.assignAll(results);
         print("🏠 [Steps] ${results.length} étapes reçues pour le parcours $pathId");

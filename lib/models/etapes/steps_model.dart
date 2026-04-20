@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-// --- RÉPONSE GLOBALE DE L'API ---
 class StepMasterResponse {
   final bool success;
   final StepData data;
@@ -10,18 +9,16 @@ class StepMasterResponse {
   factory StepMasterResponse.fromJson(Map<String, dynamic> json) {
     return StepMasterResponse(
       success: json['success'] ?? false,
-      // On parse l'objet "data" qui contient "step" et "content"
       data: StepData.fromJson(json['data'] ?? {}),
     );
   }
 }
 
-// --- DONNÉES DE L'ÉTAPE (STEP + CONTENT) ---
 class StepData {
   final String id;
   final String title;
-  final String type;   // 'lesson' ou 'quiz'
-  final String format; // calculé : 'video', 'audio', 'pdf', 'quiz' ou 'text'
+  final String type;   
+  final String format; 
   final Content content;
 
   StepData({
@@ -33,16 +30,13 @@ class StepData {
   });
 
   factory StepData.fromJson(Map<String, dynamic> json) {
-    // On sépare les deux blocs du JSON
     final stepInfo = json['step'] ?? {};
     final contentJson = json['content'] ?? {};
 
-    // On récupère le type (soit depuis stepType, soit depuis contentType)
     final String rawType = stepInfo['stepType'] ?? json['contentType'] ?? 'lesson';
 
     // LOGIQUE DE DÉTECTION DU FORMAT
     String detectedFormat = 'text';
-    // On récupère l'URL et on la décode pour gérer les caractères spéciaux (Cloudinary)
     String? url = contentJson['videoUrl'] != null
         ? Uri.decodeFull(contentJson['videoUrl'])
         : null;
@@ -70,7 +64,6 @@ class StepData {
   }
 }
 
-// --- LE CONTENU (TEXTE, MÉDIA OU QUESTIONS) ---
 class Content {
   final String? text;
   final String? mediaUrl;
@@ -80,7 +73,7 @@ class Content {
 
   factory Content.fromJson(Map<String, dynamic> json, String format) {
     return Content(
-      text: json['content'], // Le champ 'content' contient souvent le texte de la leçon
+      text: json['content'],
       mediaUrl: json['videoUrl'] != null ? Uri.decodeFull(json['videoUrl']) : null,
       questions: json['questions'] != null
           ? (json['questions'] as List)
@@ -91,7 +84,6 @@ class Content {
   }
 }
 
-// --- LES QUESTIONS DU QUIZ ---
 class Question {
   final String text;
   final String type;
@@ -109,7 +101,6 @@ class Question {
     return Question(
       text: json['questionText'] ?? '',
       type: json['questionType'] ?? 'multiple_choice',
-      // On convertit proprement la liste dynamique en List<String>
       options: json['options'] != null
           ? List<String>.from(json['options'])
           : [],

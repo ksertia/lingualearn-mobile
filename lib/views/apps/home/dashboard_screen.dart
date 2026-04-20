@@ -129,6 +129,10 @@ class HomePage extends StatelessWidget {
                       String moduleStatus =
                           module.status?.toLowerCase() ?? "locked";
 
+                      if (moduleStatus == "started") {
+                        moduleStatus = "unlocked";
+                      }
+
                       if (moduleStatus == "locked" && index == 0) {
                         bool allModulesLocked = controller.filteredModules
                             .every((m) =>
@@ -141,6 +145,7 @@ class HomePage extends StatelessWidget {
 
                       bool isCompleted = moduleStatus == "completed";
                       bool isUnlocked = moduleStatus == "unlocked" ||
+                          moduleStatus == "started" ||
                           moduleStatus == "completed";
                       bool isLocked = moduleStatus == "locked";
 
@@ -221,22 +226,23 @@ class HomePage extends StatelessWidget {
 
   Widget _buildKidCard(HomeController controller, ModuleModel module,
       String moduleStatus, int index) {
-    // 1. GESTION DES COULEURS (Fix pour éviter le rouge si débloqué)
-    // On force le statut en minuscule pour éviter les erreurs de casse ("Completed" vs "completed")
     final String status = moduleStatus.toLowerCase();
 
     Color mainColor;
     if (status == "completed") {
       mainColor = colorCompleted;
-    } else if (status == "unlocked" || status == "en cours") {
+    } else if (status == "unlocked" ||
+        status == "started" ||
+        status == "en cours") {
       mainColor = orangeAccent;
     } else {
-      mainColor =
-          colorLocked; // C'est ici que ton rouge arrive si le statut est inconnu
+      mainColor = colorLocked;
     }
 
-    bool isUnlocked =
-        status == "unlocked" || status == "completed" || status == "en cours";
+    bool isUnlocked = status == "unlocked" ||
+        status == "started" ||
+        status == "completed" ||
+        status == "en cours";
 
     return GestureDetector(
       onTap: !isUnlocked
@@ -268,14 +274,12 @@ class HomePage extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.hardEdge,
             children: [
-              // --- 2. LE CONTENU TEXTE (texte à gauche, Lottie positionné à droite) ---
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
                     Expanded(
                       child: Padding(
-                        // on réserve de l'espace à droite pour le Lottie (évite chevauchement)
                         padding: const EdgeInsets.only(right: 80),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,7 +326,6 @@ class HomePage extends StatelessWidget {
                 ),
               ),
 
-              // Lottie positionné à droite, collé vers le bord du container
               Positioned(
                 right: 8,
                 bottom: 10,
@@ -348,7 +351,6 @@ class HomePage extends StatelessWidget {
                 ),
               ),
 
-              // --- ICONES DE STATUT (Cadenas ou Play) ---
               if (!isUnlocked)
                 Positioned(
                   right: 35,

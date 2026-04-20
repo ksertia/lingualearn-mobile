@@ -67,7 +67,7 @@ class HomeController extends GetxController {
     // Priorité: progress.status > module.status > locked
     final status = (m.progress?.status ?? m.status ?? 'locked').toString().toLowerCase();
     if (status == 'completed' || status == 'complete') return 'completed';
-    if (status == 'unlocked' || status == 'deblocked' || status == 'debloque' || status == 'debloqued') return 'unlocked';
+    if (status == 'unlocked' || status == 'started' || status == 'in_progress' || status == 'deblocked' || status == 'debloque' || status == 'debloqued') return 'unlocked';
     return 'locked';
   }
 
