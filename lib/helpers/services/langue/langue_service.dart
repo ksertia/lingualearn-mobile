@@ -41,12 +41,8 @@ class LanguageLevelService {
           
           if (tokenToUse != null && tokenToUse.isNotEmpty && tokenToUse != "null") {
             options.headers['Authorization'] = 'Bearer $tokenToUse';
-            print("🔑 Token injecté : ${tokenToUse.substring(0, 10)}...");
-          } else {
-            print("⚠️ Attention : Aucun token trouvé !");
           }
         } catch (e) {
-          print("⚠️ Erreur lors de la récupération du token : $e");
         }
         return handler.next(options);
       },
@@ -67,7 +63,6 @@ class LanguageLevelService {
       }
       return [];
     } on DioException catch (e) {
-      print("❌ Erreur Fetch Langues : ${e.response?.data ?? e.message}");
       return [];
     }
   }
@@ -76,14 +71,11 @@ class LanguageLevelService {
   Future<bool> selectLanguageForUser({required String userId, required String languageId}) async {
     try {
       final String path = '/users/$userId/languages/$languageId/select';
-      print("🚀 Requête Langue : $path");
       
       final response = await _dio.post(path);
       
-      print("✅ Réponse Langue (${response.statusCode}) : ${response.data}");
       return (response.statusCode == 201 || response.statusCode == 200);
     } on DioException catch (e) {
-      print("❌ Erreur Sélection Langue : ${e.response?.data}");
       return false;
     }
   }
@@ -103,7 +95,6 @@ class LanguageLevelService {
       }
       return [];
     } catch (e) {
-      print("❌ Erreur Fetch Niveaux : $e");
       return [];
     }
   }
@@ -119,7 +110,6 @@ class LanguageLevelService {
 
     while (true) {
       try {
-        print("🚀 Requête Niveau : $path (tentative ${attempts + 1})");
         final response = await _dio.post(
           path,
           data: {
@@ -127,11 +117,9 @@ class LanguageLevelService {
           },
         );
 
-        print("✅ Réponse Niveau (${response.statusCode}) : ${response.data}");
         return (response.statusCode == 201 || response.statusCode == 200);
       } on DioException catch (e) {
         final int? status = e.response?.statusCode;
-        print("❌ Erreur Dio Level Select ($status) : ${e.response?.data}");
 
         if (status == 500 && attempts == 0) {
           attempts++;
@@ -152,7 +140,6 @@ class LanguageLevelService {
       }
       return [];
     } catch (e) {
-      print("❌ Erreur Fetch Modules : $e");
       return [];
     }
   }
@@ -165,7 +152,6 @@ class LanguageLevelService {
       }
       return null;
     } catch (e) {
-      print("❌ Erreur Fetch Progression : $e");
       return null;
     }
   }

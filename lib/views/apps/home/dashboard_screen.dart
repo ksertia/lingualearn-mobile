@@ -1,10 +1,10 @@
 
- import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
+import 'package:fasolingo/helpers/services/module_service.dart';
 import 'package:fasolingo/models/modules/modul_model.dart';
 
 const Color colorProBlue = Color(0xFF00008B);
@@ -128,22 +128,9 @@ class HomePage extends StatelessWidget {
                       bool isLast =
                           index == controller.filteredModules.length - 1;
 
-                      String moduleStatus =
-                          module.status?.toLowerCase() ?? "locked";
-
-                      if (moduleStatus == "started") {
-                        moduleStatus = "unlocked";
-                      }
-
-                      if (moduleStatus == "locked" && index == 0) {
-                        bool allModulesLocked = controller.filteredModules
-                            .every((m) =>
-                                (m.status?.toLowerCase() ?? "locked") ==
-                                "locked");
-                        if (allModulesLocked) {
-                          moduleStatus = "unlocked";
-                        }
-                      }
+                      final String moduleStatus =
+                          (controller.moduleDisplayStatus[module.id] ?? 'locked')
+                              .toLowerCase();
 
                       bool isCompleted = moduleStatus == "completed";
                       bool isUnlocked = moduleStatus == "unlocked" ||
@@ -251,8 +238,20 @@ class HomePage extends StatelessWidget {
           ? () => Get.snackbar("Oups ! 🔒",
               "Termine le module précédent pour débloquer celui-ci.")
           : () async {
+              final userId = controller.session.userId.value.isNotEmpty
+                  ? controller.session.userId.value
+                  : (controller.session.user?.id ?? '');
+
+              if (userId.isNotEmpty && status == 'unlocked') {
+                await ModuleService.startModule(userId: userId, moduleId: module.id);
+              }
+
               final res = await Get.toNamed('/parcoursselectionpage',
-                  arguments: module.id);
+                  arguments: {
+                    'moduleId': module.id,
+                    'userId': userId,
+                    'moduleLottie': _getAnimal(index),
+                  });
               if (res == true || res == 'completed' || res == 'finished') {
                 controller.onModuleCompleted(module.id);
               }

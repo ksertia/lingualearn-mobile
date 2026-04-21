@@ -9,8 +9,9 @@ class LanguagesController extends GetxController {
   RxList<LanguageModel> allLanguages = <LanguageModel>[].obs;
   RxList<dynamic> languageLevels = <dynamic>[].obs;
   RxList<dynamic> modules = <dynamic>[].obs;
-  RxList<Map<String, dynamic>> selectedLanguageLevels = <Map<String, dynamic>>[].obs;
-  
+  RxList<Map<String, dynamic>> selectedLanguageLevels =
+      <Map<String, dynamic>>[].obs;
+
   RxBool isLoading = false.obs;
   RxBool isLoadingLevels = false.obs;
   RxBool isLoadingModules = false.obs;
@@ -33,18 +34,17 @@ class LanguagesController extends GetxController {
     try {
       isLoading(true);
       final session = Get.find<SessionController>();
-      
+
       if (session.userId.value.isEmpty) {
         print("⏳ Attente du userId...");
         await Future.delayed(const Duration(milliseconds: 500));
       }
-      
+
       final String userId = session.userId.value.isNotEmpty
           ? session.userId.value
           : (session.user?.id ?? "");
 
       if (userId.isEmpty) {
-        print("❌ Impossible de charger les langues : userId vide");
         isNewUser(true);
         hasExistingLanguages(false);
         isLoading(false);
@@ -52,18 +52,15 @@ class LanguagesController extends GetxController {
       }
 
       await loadAllLanguages();
-      
+
       if (allLanguages.isNotEmpty) {
         isNewUser(false);
         hasExistingLanguages(true);
-        print("👤 Utilisateur retournant avec ${allLanguages.length} langue(s)");
       } else {
         isNewUser(true);
         hasExistingLanguages(false);
-        print("✨ Nouvel utilisateur");
       }
     } catch (e) {
-      print("❌ Erreur vérification statut : $e");
       isLoading(false);
     } finally {
       isLoading(false);
@@ -73,7 +70,6 @@ class LanguagesController extends GetxController {
   Future<void> selectLanguage(LanguageModel lang) async {
     selectedLanguage.value = lang;
     selectedLevel.value = null;
-    print("📍 Langue sélectionnée localement : ${lang.name}");
   }
 
   Future<void> confirmLanguageSelection() async {
@@ -91,7 +87,6 @@ class LanguagesController extends GetxController {
 
     try {
       isLoading(true);
-      print("⏳ Envoi sélection langue au serveur : $languageId");
       bool saved = await _languageService.selectLanguageForUser(
           userId: userId, languageId: languageId);
 
@@ -101,10 +96,8 @@ class LanguagesController extends GetxController {
       }
 
       session.selectedLanguageId.value = languageId;
-      print("✅ Langue sauvegardée, navigation vers la page niveau");
       Get.toNamed('/niveau');
     } catch (e) {
-      print("❌ Erreur confirmLanguageSelection: $e");
       _showErrorSnackbar("Erreur", "Échec lors de la sauvegarde de la langue.");
     } finally {
       isLoading(false);
@@ -156,7 +149,6 @@ class LanguagesController extends GetxController {
         return false;
       }
 
-      print("⏳ [1/2] Sauvegarde langue $languageName ($languageId)...");
       bool langOk = await _languageService.selectLanguageForUser(
           userId: userId, languageId: languageId);
 
@@ -168,13 +160,11 @@ class LanguagesController extends GetxController {
       // Attendre que le serveur finisse de traiter la langue avant de sauvegarder le niveau
       await Future.delayed(const Duration(milliseconds: 500));
 
-      print("⏳ [2/2] Sauvegarde niveau pour $languageName...");
       bool levelOk = await _languageService.selectLevelForUser(
           userId: userId, languageId: languageId, levelId: levelId);
 
       if (!levelOk) {
-        _showErrorSnackbar(
-            "Erreur", "Langue sauvée mais erreur niveau.");
+        _showErrorSnackbar("Erreur", "Langue sauvée mais erreur niveau.");
         return false;
       }
 
@@ -184,16 +174,12 @@ class LanguagesController extends GetxController {
         'languageName': languageName,
       });
 
-      print(
-          "✅ $languageName ajoutée ! Sélections : ${selectedLanguageLevels.length}/2");
-
       selectedLanguage.value = null;
       selectedLevel.value = null;
       languageLevels.clear();
 
       return true;
     } catch (e) {
-      print("❌ Erreur ajout langue : $e");
       _showErrorSnackbar("Erreur", "Problème lors de l'ajout.");
       return false;
     } finally {
@@ -206,50 +192,46 @@ class LanguagesController extends GetxController {
       isLoading(true);
       selectedLanguageLevels
           .removeWhere((item) => item['languageId'] == languageId);
-      print("🗑️ Langue supprimée de la sélection.");
     } catch (e) {
-      print("❌ Erreur suppression : $e");
+      print("Erreur suppression : $e");
     } finally {
       isLoading(false);
     }
   }
 
-Future<void> loadLanguageLevels() async {
-  try {
-    isLoadingLevels(true);
+  Future<void> loadLanguageLevels() async {
+    try {
+      isLoadingLevels(true);
 
-    final session = Get.find<SessionController>();
+      final session = Get.find<SessionController>();
 
-    final String userId = session.userId.value.isNotEmpty
-        ? session.userId.value
-        : (session.user?.id ?? "");
+      final String userId = session.userId.value.isNotEmpty
+          ? session.userId.value
+          : (session.user?.id ?? "");
 
-    if (userId.isEmpty) {
-      print("⚠️ userId vide, impossible de charger les niveaux");
-      return;
+      if (userId.isEmpty) {
+        return;
+      }
+
+      // ✅ IMPORTANT : fallback sur la langue sauvegardée en session
+      final String? langId = selectedLanguage.value?.id.isNotEmpty == true
+          ? selectedLanguage.value!.id
+          : session.selectedLanguageId.value;
+
+      final result = await _languageService.fetchLevels(
+        userId: userId,
+        languageId: langId,
+      );
+
+      languageLevels.assignAll(result);
+
+      print("Niveaux chargés : ${result.length} niveau(x)");
+    } catch (e) {
+      print("Erreur lors du chargement des niveaux : $e");
+    } finally {
+      isLoadingLevels(false);
     }
-
-    // ✅ IMPORTANT : fallback sur la langue sauvegardée en session
-    final String? langId = selectedLanguage.value?.id.isNotEmpty == true
-        ? selectedLanguage.value!.id
-        : session.selectedLanguageId.value;
-
-    print("📌 Langue utilisée pour charger niveaux: $langId");
-
-    final result = await _languageService.fetchLevels(
-      userId: userId,
-      languageId: langId,
-    );
-
-    languageLevels.assignAll(result);
-
-    print("✅ Niveaux chargés : ${result.length} niveau(x)");
-  } catch (e) {
-    print("❌ Erreur lors du chargement des niveaux : $e");
-  } finally {
-    isLoadingLevels(false);
   }
-}
 
   /// Récupère le nom d'un niveau à partir de son ID
   Future<String> getLevelNameById(String levelId) async {
@@ -260,7 +242,7 @@ Future<void> loadLanguageLevels() async {
       } else {
         levelIdFromList = level.id?.toString() ?? '';
       }
-      
+
       if (levelIdFromList == levelId) {
         if (level is Map) {
           return level['name']?.toString() ?? 'Niveau';
@@ -269,7 +251,7 @@ Future<void> loadLanguageLevels() async {
         }
       }
     }
-    
+
     for (var lang in allLanguages) {
       for (var level in lang.levels) {
         if (level.id == levelId) {
@@ -277,13 +259,14 @@ Future<void> loadLanguageLevels() async {
         }
       }
     }
-    
+
     return 'Niveau';
   }
 
   Future<void> selectLevel(dynamic level) async {
     selectedLevel.value = level;
-    print("📍 Niveau sélectionné localement : ${level is Map ? (level['name'] ?? '') : (level?.name ?? '')}");
+    print(
+        "Niveau sélectionné localement : ${level is Map ? (level['name'] ?? '') : (level?.name ?? '')}");
   }
 
   Future<void> loadAllLanguages() async {
@@ -295,16 +278,16 @@ Future<void> loadLanguageLevels() async {
           : (session.user?.id ?? "");
 
       if (userId.isEmpty) {
-        print("⚠️ userId vide, impossible de charger les langues");
+        print("userId vide, impossible de charger les langues");
         isLoading(false);
         return;
       }
-      
+
       final result = await _languageService.fetchLanguages(userId: userId);
       allLanguages.assignAll(result);
-      print("✅ Langues chargées : ${result.length} langue(s)");
+      print("Langues chargées : ${result.length} langue(s)");
     } catch (e) {
-      print("❌ Erreur dans le controller (loadAllLanguages) : $e");
+      print("Erreur dans le controller (loadAllLanguages) : $e");
     } finally {
       isLoading(false);
     }
@@ -328,8 +311,6 @@ Future<void> loadLanguageLevels() async {
     }
 
     if (userId.isEmpty || languageId == null || levelId == null) {
-      print(
-          "⚠️ Données incomplètes : User=$userId, Lang=$languageId, Level=$levelId");
       _showErrorSnackbar(
           "Sélection incomplète", "Veuillez choisir une langue et un niveau.");
       return false;
@@ -339,24 +320,21 @@ Future<void> loadLanguageLevels() async {
       isLoading(true);
 
       // La langue devrait déjà être enregistrée dans confirmLanguageSelection.
-      print("⏳ Sauvegarde du niveau ($levelId) sur le serveur...");
       bool levelOk = await _languageService.selectLevelForUser(
           userId: userId, languageId: languageId, levelId: levelId);
 
       if (levelOk) {
-        print("✅ Niveau sauvegardé avec succès.");
-
         session.selectedLanguageId.value = languageId;
         session.selectedLevelId.value = levelId;
         return true;
       } else {
-        print("❌ Échec lors de la sauvegarde du niveau.");
+        print("Échec lors de la sauvegarde du niveau.");
         _showErrorSnackbar(
             "Erreur Serveur", "Impossible de sauvegarder votre niveau.");
         return false;
       }
     } catch (e) {
-      print("❌ Erreur critique lors de la synchronisation : $e");
+      print("Erreur critique lors de la synchronisation : $e");
       _showErrorSnackbar(
           "Erreur de connexion", "Le serveur ne répond pas correctement.");
       return false;
@@ -385,14 +363,11 @@ Future<void> loadLanguageLevels() async {
       await loadModules();
 
       if (isNewUser.value) {
-        print("➡️ Nouvel utilisateur → HomeScreen");
         Get.offAllNamed('/HomeScreen');
       } else {
-        print("➡️ Utilisateur retournant → HomeScreen");
         Get.offAllNamed('/HomeScreen');
       }
     } catch (e) {
-      print("❌ Erreur confirmation : $e");
       _showErrorSnackbar("Erreur", "Erreur lors de la confirmation.");
     } finally {
       isLoading(false);
@@ -405,10 +380,8 @@ Future<void> loadLanguageLevels() async {
     try {
       isLoading(true);
       await loadModules();
-      print("➡️ Utilisateur retournant → Direct HomeScreen");
       Get.offAllNamed('/HomeScreen');
     } catch (e) {
-      print("❌ Erreur navigation rapide : $e");
     } finally {
       isLoading(false);
     }
@@ -423,17 +396,14 @@ Future<void> loadLanguageLevels() async {
           : (session.user?.id ?? "");
 
       if (userId.isEmpty) {
-        print("⚠️ userId vide, impossible de charger les modules");
         isLoadingModules(false);
         return;
       }
-      
-      print("📂 Chargement des modules pour l'utilisateur: $userId");
+
       final result = await _languageService.fetchModules(userId: userId);
       modules.assignAll(result);
-      print("✅ Modules chargés : ${result.length} module(s)");
     } catch (e) {
-      print("❌ Erreur lors du chargement des modules : $e");
+      print("Erreur lors du chargement des modules : $e");
     } finally {
       isLoadingModules(false);
     }
@@ -447,25 +417,22 @@ Future<void> loadLanguageLevels() async {
       final String userId = session.userId.value.isNotEmpty
           ? session.userId.value
           : (session.user?.id ?? "");
-      
+
       final String languageId = session.selectedLanguageId.value;
 
       if (userId.isEmpty || languageId.isEmpty) {
-        print("⚠️ userId ou languageId vide, impossible de charger la progression");
         return null;
       }
-      
-      print("📂 Chargement de la progression pour: userId=$userId, languageId=$languageId");
-      final result = await _languageService.fetchProgression(userId: userId, languageId: languageId);
-      
+
+      final result = await _languageService.fetchProgression(
+          userId: userId, languageId: languageId);
+
       if (result != null) {
         progressionData.value = result;
-        print("✅ Progression chargée avec succès");
       }
-      
+
       return result;
     } catch (e) {
-      print("❌ Erreur lors du chargement de la progression : $e");
       return null;
     } finally {
       isLoading(false);

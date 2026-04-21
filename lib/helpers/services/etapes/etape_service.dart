@@ -12,21 +12,12 @@ class StepsService {
           : session.user?.id;
 
       if (userId == null || userId.isEmpty) {
-        print("🚨 [StepsService] userId manquant dans la session !");
         return [];
       }
 
       final String url = '/users/$userId/paths/$pathId/steps';
-      
-      print("🚀 [Steps API] Appel URL : $url");
-      print("🔑 [Steps API] UserId: $userId");
-      print("🔑 [Steps API] PathId: $pathId");
-      print("🔑 [Steps API] Token présent: ${session.token.value.isNotEmpty}");
 
       final response = await session.dio.get(url);
-      
-      print("📊 [Steps API] Status Code: ${response.statusCode}");
-      print("📊 [Steps API] Response Data: ${response.data}");
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data;
@@ -42,8 +33,7 @@ class StepsService {
       }
       
       return [];
-    } catch (e) {
-      print("🚨 [StepsService] Erreur API : $e");
+    } catch (_) {
       return [];
     }
   }
@@ -57,22 +47,12 @@ class StepsService {
           : session.user?.id;
 
       if (userId == null || userId.isEmpty) {
-        print("🚨 [StepsService] userId manquant dans la session !");
         return [];
       }
 
       final String url = '/users/$userId/modules/$moduleId/paths/$pathId/steps';
-      
-      print("🚀 [Steps API] Appel URL spécifique : $url");
-      print("🔑 [Steps API] UserId: $userId");
-      print("🔑 [Steps API] ModuleId: $moduleId");
-      print("🔑 [Steps API] PathId spécifique: $pathId");
-      print("🔑 [Steps API] Token présent: ${session.token.value.isNotEmpty}");
 
       final response = await session.dio.get(url);
-      
-      print("📊 [Steps API] Status Code: ${response.statusCode}");
-      print("📊 [Steps API] Response Data: ${response.data}");
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data;
@@ -88,9 +68,38 @@ class StepsService {
       }
       
       return [];
-    } catch (e) {
-      print("🚨 [StepsService] Erreur API getStepsBySpecificPath: $e");
+    } catch (_) {
       return [];
+    }
+  }
+
+  static Future<bool> startStep({
+    required String userId,
+    required String stepId,
+  }) async {
+    try {
+      final session = Get.find<SessionController>();
+      final response = await session.dio.post(
+        '/users/$userId/steps/$stepId/start',
+      );
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> completeStep({
+    required String userId,
+    required String stepId,
+  }) async {
+    try {
+      final session = Get.find<SessionController>();
+      final response = await session.dio.post(
+        '/users/$userId/steps/$stepId/complete',
+      );
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (_) {
+      return false;
     }
   }
 }

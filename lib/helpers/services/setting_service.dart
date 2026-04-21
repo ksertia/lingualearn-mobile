@@ -2,18 +2,39 @@ import 'package:dio/dio.dart';
 import 'package:fasolingo/helpers/constant/app_constant.dart';
 import 'package:fasolingo/helpers/services/error_handling.dart';
 import 'package:fasolingo/models/user_model.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../storage/local_storage.dart';
 
 class SettingService {
+  static final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: AppConstant.baseURl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  )..interceptors.add(
+      PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseHeader: false,
+        responseBody: true,
+        error: true,
+        compact: true,
+        maxWidth: 90,
+      ),
+    );
+
   /// Récupère le profil complet de l'utilisateur
   static Future<UserModel?> getUserProfile() async {
     try {
       final url = "${AppConstant.baseURl}/auth/profile"; 
       final token = await LocalStorage.getAuthToken();
 
-      print("[Profile API] URL: $url");
-
-      final response = await Dio().get(
+      final response = await _dio.get(
         url,
         options: Options(
           headers: {
@@ -22,13 +43,10 @@ class SettingService {
           },
         ),
       );
-
-      print("[Profile API] StatusCode: ${response.statusCode}");
       
-      // On vérifie le code 200 ET la structure de tes données
+
       if (response.statusCode == 200 && response.data != null) {
-        // Selon ton Swagger, les données sont souvent dans data -> user
-        final dynamic userData = response.data['data']['user']; 
+        final dynamic userData = response.data['data']['user'];
         
         if (userData != null) {
           return UserModel.fromJson(userData);
@@ -36,11 +54,9 @@ class SettingService {
       }
       return null;
     } on DioException catch (e) {
-      print("[Profile API] DioException: ${e.message}");
-      letMeHandleAllErrors(e); // Ton utilitaire de gestion d'erreurs
+      letMeHandleAllErrors(e);
       return null;
-    } catch (e) {
-      print("[Profile API] Erreur inconnue: $e");
+    } catch (_) {
       return null;
     }
   }
@@ -50,38 +66,26 @@ class SettingService {
     try {
       final url = "${AppConstant.baseURl}/auth/logout";
       final token = await LocalStorage.getAuthToken();
-      
-      print("[Logout API] URL: $url");
-      
-      final response = await Dio().post(
+
+      final response = await _dio.post(
         url,
         options: Options(
           headers: {
             "Authorization": "Bearer $token",
-            "accept": "*/*", // Recommandé par Swagger
+            "accept": "*/*",
           },
         ),
       );
-      
-      print("[Logout API] StatusCode: ${response.statusCode}");
-      print("[Logout API] Response: ${response.data}");
-
-      // On valide si le status est 200 OU si le corps dit success: true
       if (response.statusCode == 200) {
         return response.data['success'] == true;
       }
-      
       return false;
     } on DioException catch (e) {
-      print("[Logout API] DioException: ${e.message}");
-      // Si le token est déjà expiré, on considère que c'est un succès local 
-      // pour ne pas bloquer l'utilisateur sur l'écran
       if (e.response?.statusCode == 401) return true;
       
       letMeHandleAllErrors(e);
       return false;
-    } catch (e) {
-      print("[Logout API] Erreur: $e");
+    } catch (_) {
       return false;
     }
   }

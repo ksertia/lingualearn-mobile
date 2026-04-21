@@ -1,10 +1,13 @@
 import 'package:fasolingo/controller/apps/parcoure/parcoure_controller.dart';
+import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 import 'package:fasolingo/helpers/services/module_service.dart';
+import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
 import 'package:fasolingo/models/modules/modul_model.dart';
+import 'package:fasolingo/models/parcoure/parcour_model.dart';
 import '../../../../widgets/parcourspage/ParcoursStepItem.dart';
 import '../../../../widgets/stepsscreens/custom_app_bar.dart';
 
@@ -60,7 +63,7 @@ class ParcoursSelectionPage extends StatelessWidget {
     }
 
     const Color primaryBlue = Color(0xFF00CED1);
-    const Color colorCompleted = Color(0xFF81C784); 
+    const Color colorCompleted = Color(0xFF81C784);
     const Color orangeAccent = Color(0xFFFF9800);
     const Color colorLocked = Color(0xFF9E9E9E);
 
@@ -73,7 +76,7 @@ class ParcoursSelectionPage extends StatelessWidget {
           return _buildShimmerEffect();
         }
 
-        if (controller.paths.isEmpty) {
+        if (controller.items.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -113,12 +116,18 @@ class ParcoursSelectionPage extends StatelessWidget {
                 child: ListView.builder(
                   padding: const EdgeInsets.only(
                       top: 110, bottom: 20, left: 15, right: 15),
-                  itemCount: controller.paths.length + 1,
+                  itemCount: controller.items.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
-                      String title = "MODULE";
-                      String description = "";
-                      if (modulesSnap.hasData && modulesSnap.data!.isNotEmpty) {
+                      String title =
+                          controller.showAllPaths ? "Mes parcours" : "MODULE";
+                      String description = controller.showAllPaths
+                          ? "Parcours adaptés à votre langue et votre niveau"
+                          : "";
+
+                      if (!controller.showAllPaths &&
+                          modulesSnap.hasData &&
+                          modulesSnap.data!.isNotEmpty) {
                         final found = modulesSnap.data!
                             .where((m) => m.id == controller.moduleId)
                             .toList();
@@ -128,8 +137,9 @@ class ParcoursSelectionPage extends StatelessWidget {
                         }
                       }
 
-                      final int total = controller.paths.length;
-                      final int completed = controller.paths
+                      final int total = controller.items.whereType<LearningPathModel>().length;
+                      final int completed = controller.items
+                          .whereType<LearningPathModel>()
                           .where((p) => (p.status ?? "") == "completed")
                           .length;
                       final double progress =
@@ -139,97 +149,137 @@ class ParcoursSelectionPage extends StatelessWidget {
                           completed, total, moduleLottie);
                     }
 
-                    final path = controller.paths[index - 1];
+                    final item = controller.items[index - 1];
 
-                    debugPrint("=== PATH ${index - 1} ===");
-                    debugPrint("ID: ${path.id}");
-                    debugPrint("Title: ${path.title}");
-                    debugPrint("Status: ${path.status}");
-                    debugPrint("Progress: ${path.progress}");
-                    debugPrint(
-                        "ProgressPercentage: ${path.progressPercentage}");
-                    debugPrint("IsActive: ${path.isActive}");
-                    debugPrint("==================");
+                    if (item is ModuleModel) {
+                      return _buildModuleHeader(item);
+                    } else if (item is LearningPathModel) {
+                      final path = item;
 
-                    String pathStatus = path.status ?? "locked";
-                    if (pathStatus == "started") {
-                      pathStatus = "unlocked";
-                    }
-                    bool isCompleted = pathStatus == "completed";
-                    bool isUnlocked =
-                        pathStatus == "unlocked" || pathStatus == "completed";
+                      final String pathStatus = (path.progress != null &&
+                              path.progress!['status'] != null)
+                          ? path.progress!['status'].toString().toLowerCase()
+                          : (path.status ?? 'locked').toString().toLowerCase();
+                      final bool isCompleted = pathStatus == 'completed';
+                      final bool isUnlocked = pathStatus == 'unlocked' ||
+                          pathStatus == 'started' ||
+                          pathStatus == 'in_progress' ||
+                          isCompleted;
+                      final bool isActive = isUnlocked;
 
-                    if (pathStatus == "locked") {
-                      bool allPathsLocked = controller.paths
-                          .every((p) => (p.status ?? "locked") == "locked");
-                      if (allPathsLocked && index == 1) {
-                        pathStatus = "unlocked";
-                        isUnlocked = true;
-                        print(
-                            "🔓 [FALLBACK] Premier parcours débloqué automatiquement");
-                      }
-                    }
-
-                    bool isActive = isUnlocked;
-                    print(
-                        "Path $index: Status='$pathStatus' → isCompleted=$isCompleted, isActive=$isActive");
-
-                    return Align(
-                      alignment: index % 2 == 0
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: FractionallySizedBox(
-                        widthFactor: 0.92,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      return Align(
+                        alignment: controller.items.whereType<LearningPathModel>().toList().indexOf(path) % 2 == 0
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: FractionallySizedBox(
+                          widthFactor: 0.92,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 4, horizontal: 4),
-                            child: ParcoursStepItem(
-                              number: "${path.index + 1}",
-                              title: path.title,
-                              statusText: isCompleted
-                                  ? 'Terminé'
-                                  : (isActive ? 'En cours' : 'Verrouillé'),
-                              subtitle: isActive
-                                  ? path.description
-                                  : "Verrouillé : Terminez le parcours précédent",
-                              color: isActive
-                                  ? (isCompleted
-                                      ? colorCompleted
-                                      : orangeAccent)
-                                  : colorLocked,
-                              isCompleted: isCompleted,
-                              isActive: isActive,
-                              icon: !isActive
-                                  ? Icons.lock_rounded
-                                  : (isCompleted
-                                      ? Icons.check
-                                      : Icons.play_arrow_rounded),
-                              onTap: isActive
-                                  ? () =>
-                                      Get.toNamed('/stepsscreens', arguments: {
-                                        'moduleId': controller.moduleId,
-                                        'pathId': path.id,
-                                        'moduleLottie': moduleLottie,
-                                      })
-                                  : () {
-                                      Get.snackbar(
-                                        "Parcours Verrouillé 🔒",
-                                        "Terminez le parcours précédent pour débloquer celui-ci.",
-                                        snackPosition: SnackPosition.BOTTOM,
-                                        backgroundColor: Colors.black87,
-                                        colorText: Colors.white,
-                                        icon: const Icon(Icons.lock,
-                                            color: Colors.orangeAccent),
-                                        margin: const EdgeInsets.all(15),
-                                      );
-                                    },
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 4, horizontal: 4),
+                              child: ParcoursStepItem(
+                                number: "${controller.items.whereType<LearningPathModel>().toList().indexOf(path) + 1}",
+                                title: path.title,
+                                statusText: isCompleted
+                                    ? 'Terminé'
+                                    : (isActive ? 'En cours' : 'Verrouillé'),
+                                subtitle: isActive
+                                    ? path.description
+                                    : "Verrouillé : Terminez le parcours précédent",
+                                color: isActive
+                                    ? (isCompleted
+                                        ? colorCompleted
+                                        : orangeAccent)
+                                    : colorLocked,
+                                isCompleted: isCompleted,
+                                isActive: isActive,
+                                icon: !isActive
+                                    ? Icons.lock_rounded
+                                    : (isCompleted
+                                        ? Icons.check
+                                        : Icons.play_arrow_rounded),
+                                onTap: isActive
+                                    ? () async {
+                                        final args = Get.arguments;
+                                        final userId = (args is Map &&
+                                                args['userId'] != null)
+                                            ? args['userId'].toString()
+                                            : '';
+
+                                        if (userId.isNotEmpty &&
+                                            pathStatus == 'unlocked') {
+                                          await LearningPathService.startPath(
+                                            userId: userId,
+                                            pathId: path.id,
+                                          );
+                                        }
+
+                                        final res = await Get.toNamed(
+                                          '/stepsscreens',
+                                          arguments: {
+                                            'moduleId': path.moduleId,
+                                            'pathId': path.id,
+                                            'userId': userId,
+                                            'moduleLottie': moduleLottie,
+                                          },
+                                        );
+
+                                        if (res == true ||
+                                            res == 'completed' ||
+                                            res == 'finished') {
+                                          await controller.fetchPaths();
+
+                                          final paths = controller.items
+                                              .whereType<LearningPathModel>()
+                                              .toList();
+                                          final total = paths.length;
+                                          final completed = paths.where((p) {
+                                            final st = (p.progress != null &&
+                                                    p.progress!['status'] !=
+                                                        null)
+                                                ? p.progress!['status']
+                                                    .toString()
+                                                    .toLowerCase()
+                                                : (p.status ?? 'locked')
+                                                    .toString()
+                                                    .toLowerCase();
+                                            return st == 'completed';
+                                          }).length;
+
+                                          if (userId.isNotEmpty &&
+                                              controller.moduleId.isNotEmpty &&
+                                              total > 0 &&
+                                              completed == total) {
+                                            await ModuleService.completeModule(
+                                              userId: userId,
+                                              moduleId: controller.moduleId,
+                                            );
+                                          }
+
+                                          Get.back(result: true);
+                                        }
+                                      }
+                                    : () {
+                                        Get.snackbar(
+                                          "Parcours Verrouillé 🔒",
+                                          "Terminez le parcours précédent pour débloquer celui-ci.",
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: Colors.black87,
+                                          colorText: Colors.white,
+                                          icon: const Icon(Icons.lock,
+                                              color: Colors.orangeAccent),
+                                          margin: const EdgeInsets.all(15),
+                                        );
+                                      },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
+                      );
+                    }
+
+                    return const SizedBox.shrink();
                   },
                 ),
               ),
@@ -331,6 +381,41 @@ class ParcoursSelectionPage extends StatelessWidget {
                   fit: BoxFit.contain,
                   repeat: true,
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModuleHeader(ModuleModel module) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: primaryBlue.withOpacity(0.3), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.folder, color: primaryBlue, size: 32),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              module.title,
+              style: TextStyle(
+                color: primaryBlue,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

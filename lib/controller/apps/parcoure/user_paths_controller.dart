@@ -34,7 +34,7 @@ class UserPathsController extends GetxController {
         userPaths.clear();
       }
     } catch (e) {
-      print('🚨 [UserPathsController] Erreur fetchUserPaths: $e');
+      print('[UserPathsController] Erreur fetchUserPaths: $e');
     } finally {
       isLoading.value = false;
     }
@@ -128,7 +128,7 @@ class UserPathsController extends GetxController {
       }
 
       Get.defaultDialog(
-        title: 'Bravo ! 🎉',
+        title: 'Bravo !',
         middleText: 'Parcours terminé, le suivant est débloqué.',
         textConfirm: 'Super',
         buttonColor: const Color(0xFF00008B),
@@ -137,7 +137,7 @@ class UserPathsController extends GetxController {
       );
 
     } catch (e) {
-      print('🚨 [UserPathsController] Erreur onPathCompleted: $e');
+      print('[UserPathsController] Erreur onPathCompleted: $e');
     }
   }
 }

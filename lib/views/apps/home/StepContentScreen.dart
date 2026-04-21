@@ -1,3 +1,4 @@
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryImage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
@@ -39,7 +40,43 @@ class StepContentScreen extends StatelessWidget {
               child: Text("Erreur de récupération des données"));
         }
 
-        return _buildBody(context, data, controller);
+        return Column(
+          children: [
+            Expanded(
+              child: _buildBody(context, data, controller),
+            ),
+            if (data.type != 'quiz')
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: Obx(
+                      () => ElevatedButton(
+                        onPressed: controller.isCompleting.value
+                            ? null
+                            : () => controller.completeCurrentStep(
+                                  stepId: stepId,
+                                  userId: userId,
+                                ),
+                        child: controller.isCompleting.value
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : const Text("Terminer l’étape"),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
       }),
     );
   }
@@ -58,10 +95,11 @@ class StepContentScreen extends StatelessWidget {
             videoUrl: content.mediaUrl ?? "",
             onVideoFinished: () => Get.back(),
           );
-        case 'pdf':
-          return StepFamilyPdf(
+        case 'image':
+          return StepDiscoveryImage(
             title: data.title,
-            pdfUrl: content.mediaUrl ?? "https://www.google.com",
+            imageUrl: content.mediaUrl ?? "",
+            answerText: content.text ?? "",
           );
         case 'audio':
           return StepDiscoveryAudio(
@@ -108,100 +146,133 @@ class StepContentScreen extends StatelessWidget {
     final bool isLastQuestion =
         controller.currentQuestionIndex.value == questionsList.length - 1;
     if (isLastQuestion) {
-      _showQuizCompletedDialog(context);
+      _showQuizCompletedBottomSheet(context, controller);
     } else {
       controller.nextQuestion();
     }
   }
 
-  void _showQuizCompletedDialog(BuildContext context) {
-    showDialog(
+  void _showQuizCompletedBottomSheet(
+      BuildContext context, StepController controller) {
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF7B61FF), Color(0xFF8456FF)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF7B61FF), Color(0xFF8456FF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 22,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 22,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.emoji_events, color: Colors.white, size: 54),
-              const SizedBox(height: 16),
-              const Text(
-                "Récompense débloquée !",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                "Tu as terminé le quiz 🎉\nBravo pour ta persévérance !",
-                textAlign: TextAlign.center,
-                style:
-                    TextStyle(fontSize: 15, color: Colors.white70, height: 1.4),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: const Text(
-                  "Tu gagnes une récompense spéciale pour ta réussite !",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                ),
-              ),
-              const SizedBox(height: 22),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Get.back();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18)),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    "Retour à l'étape",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF7B61FF)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.emoji_events,
+                            color: Colors.white, size: 54),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "Nous avons une surprise pour vous",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          "Tu as terminé le quiz \nBravo pour ta persévérance !",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 15, color: Colors.white70, height: 1.4),
+                        ),
+                        const SizedBox(height: 20),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: const Text(
+                            "Tu gagnes une récompense spéciale pour ta réussite !",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: controller.isCompleting.value
+                          ? null
+                          : () async {
+                              Navigator.of(context).pop();
+                              await controller.completeCurrentStep(
+                                stepId: stepId,
+                                userId: userId,
+                              );
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18)),
+                        elevation: 0,
+                      ),
+                      child: Obx(
+                        () => controller.isCompleting.value
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : const Text(
+                                "Terminer",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF7B61FF),
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
