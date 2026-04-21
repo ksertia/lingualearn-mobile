@@ -1,6 +1,6 @@
 import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/models/user_model.dart'; 
+import 'package:fasolingo/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,7 +14,7 @@ class SplashCree extends StatefulWidget {
 class _SplashCreeState extends State<SplashCree> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  bool _isLoading = true; 
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -22,7 +22,7 @@ class _SplashCreeState extends State<SplashCree> {
     _checkStatus();
   }
 
-void _checkStatus() async {
+  void _checkStatus() async {
     await Future.delayed(const Duration(milliseconds: 1000));
 
     String? storedToken = LocalStorage.getAuthToken();
@@ -34,33 +34,33 @@ void _checkStatus() async {
 
     try {
       final session = Get.find<SessionController>();
-      
+
       // ✅ CORRECTION ICI : On utilise .value car c'est un RxString
-      session.token.value = storedToken; 
+      session.token.value = storedToken;
 
       final response = await session.dio.get('/users/me');
 
       if (response.statusCode == 200 && response.data['success'] == true) {
         UserModel loggedInUser = UserModel.fromJson(response.data['data']);
-        
+
         // Mise à jour globale (userId, token, selectedLanguageId, etc.)
         session.updateUser(loggedInUser, storedToken);
 
         print("🔍 Splash : Analyse de l'état...");
 
         // On utilise directement les valeurs du modèle reçu
-        if (loggedInUser.selectedLanguageId != null && 
+        if (loggedInUser.selectedLanguageId != null &&
             loggedInUser.selectedLanguageId!.isNotEmpty &&
-            loggedInUser.selectedLevelId != null && 
+            loggedInUser.selectedLevelId != null &&
             loggedInUser.selectedLevelId!.isNotEmpty) {
-          
+
           Get.offAllNamed('/HomeScreen');
-        } 
-        else if (loggedInUser.selectedLanguageId != null && 
-                 loggedInUser.selectedLanguageId!.isNotEmpty) {
-          
+        }
+        else if (loggedInUser.selectedLanguageId != null &&
+            loggedInUser.selectedLanguageId!.isNotEmpty) {
+
           Get.offAllNamed('/selection');
-        } 
+        }
         else {
           Get.offAllNamed('/bienvenue');
         }
@@ -181,7 +181,7 @@ void _checkStatus() async {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     _pages.length,
-                    (index) => _buildDot(index),
+                        (index) => _buildDot(index),
                   ),
                 ),
               ],
@@ -222,7 +222,7 @@ void _checkStatus() async {
             ),
           ),
           onPressed: onPressed,
-          child: Text(text.toUpperCase()), 
+          child: Text(text.toUpperCase()),
         ),
       ),
     );
@@ -249,7 +249,7 @@ void _checkStatus() async {
       height: 55,
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3), 
+        color: Colors.white.withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Container(
@@ -257,7 +257,7 @@ void _checkStatus() async {
         child: OutlinedButton(
           style: OutlinedButton.styleFrom(
             backgroundColor: Colors.white,
-            foregroundColor:  Colors.grey, 
+            foregroundColor:  Colors.grey,
             side: const BorderSide(color: Colors.white, width: 2),
             elevation: 0,
             shape: RoundedRectangleBorder(

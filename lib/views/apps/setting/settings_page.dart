@@ -64,6 +64,24 @@ class _SettingScreenState extends State<SettingScreen>
 
                           // --- GÉRER ABONNEMENT ---
                           _buildSettingsItem(
+                            iconWidget: Icon(Icons.person,
+                                color: contentTheme.black, size: 24),
+                            title: 'Sous comptes',
+                            onTap: () {
+                              Get.toNamed('/souscomptes');
+                            },
+                          ),
+
+                          _buildSettingsItem(
+                            iconWidget: Icon(Icons.person,
+                                color: contentTheme.black, size: 24),
+                            title: 'Parcour sous comptes',
+                            onTap: () {
+                              Get.toNamed('/children_progress');
+                            },
+                          ),
+
+                          _buildSettingsItem(
                             iconWidget: Icon(Icons.credit_card_rounded,
                                 color: contentTheme.black, size: 24),
                             title: 'Gérer mon abonnement',

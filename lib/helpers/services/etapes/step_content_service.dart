@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:fasolingo/helpers/constant/app_constant.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../../../models/etapes/steps_model.dart'; // Notre Master Model
 
 class StepService {
@@ -9,6 +10,14 @@ class StepService {
     headers: {
       'Accept': 'application/json',
     },
+  ))..interceptors.add(PrettyDioLogger(
+    requestHeader: true,
+    requestBody: true,
+    responseHeader: false,
+    responseBody: true,
+    error: true,
+    compact: true,
+    maxWidth: 90,
   ));
 
   // Idéalement, récupère ce token depuis un Prefs ou ton AuthState
