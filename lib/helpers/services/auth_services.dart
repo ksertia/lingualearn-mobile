@@ -1,39 +1,40 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:fasolingo/helpers/constant/app_constant.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class AuthService {
   static bool isLoggedIn = false;
   static String? currentToken;
 
   static final Dio dio = Dio(BaseOptions(
-    baseUrl: AppConstant.baseURl, 
+    baseUrl: AppConstant.baseURl,
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     },
-  ));
+  ))
+    ..interceptors.add(PrettyDioLogger(
+      requestHeader: true,
+      requestBody: true,
+      responseHeader: false,
+      responseBody: true,
+      error: true,
+      compact: true,
+      maxWidth: 90,
+    ));
 
   ///******************************** Login User API ********************************///
-  static Future<Map<String, dynamic>?> loginUser(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>?> loginUser(
+      Map<String, dynamic> data) async {
     try {
       final url = "${AppConstant.baseURl}/auth/login";
-
-      print("\n===================== Webservice Login envoyé =====================");
-      print("=================== URL  : $url");
-      print("=================== Body : ${jsonEncode(data)}");
-      print("===============================================================\n");
-
       final response = await dio.post(url, data: data);
 
-      print("===================== Réponse Login reçue =====================");
-      print("===================== Statut Code : ${response.statusCode}");
-      print("===================== Data         : ${response.data}");
-      print("=============================================================\n");
-
-      if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data != null) {
         print('✅ Connexion réussie');
         return response.data;
       } else {
@@ -50,23 +51,15 @@ class AuthService {
   }
 
   ///******************************** Register User API ********************************///
-  static Future<Map<String, dynamic>?> registerUser(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>?> registerUser(
+      Map<String, dynamic> data) async {
     try {
       final url = "${AppConstant.baseURl}/auth/register";
 
-      print("\n===================== Webservice Register envoyé =====================");
-      print("=================== URL  : $url");
-      print("=================== Body : ${jsonEncode(data)}");
-      print("===============================================================\n");
-
       final response = await dio.post(url, data: data);
 
-      print("===================== Réponse Register reçue =====================");
-      print("===================== Statut Code : ${response.statusCode}");
-      print("===================== Data         : ${response.data}");
-      print("=============================================================\n");
-
-      if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data != null) {
         print('✅ Inscription réussie');
         return response.data;
       } else {
@@ -83,23 +76,14 @@ class AuthService {
   }
 
   ///******************************** Forgot Password Request API ********************************///
-  static Future<Map<String, dynamic>?> forgotPassword(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>?> forgotPassword(
+      Map<String, dynamic> data) async {
     try {
       final url = "${AppConstant.baseURl}/auth/forgot-password";
-
-      print("\n===================== Webservice Forgot Password envoyé =====================");
-      print("=================== URL  : $url");
-      print("=================== Body : ${jsonEncode(data)}");
-      print("===============================================================\n");
-
       final response = await dio.post(url, data: data);
 
-      print("===================== Réponse Forgot Password reçue =====================");
-      print("===================== Statut Code : ${response.statusCode}");
-      print("===================== Data         : ${response.data}");
-      print("=============================================================\n");
-
-      if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data != null) {
         print('✅ Forgot Password request success');
         return response.data;
       } else {
@@ -116,23 +100,13 @@ class AuthService {
   }
 
   ///******************************** Verify OTP API ********************************///
-  static Future<Map<String, dynamic>?> verifyOtp(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>?> verifyOtp(
+      Map<String, dynamic> data) async {
     try {
       final url = "${AppConstant.baseURl}/auth/verify-otp";
-
-      print("\n===================== Webservice Verify OTP envoyé =====================");
-      print("=================== URL  : $url");
-      print("=================== Body : ${jsonEncode(data)}");
-      print("===============================================================\n");
-
       final response = await dio.post(url, data: data);
-
-      print("===================== Réponse Verify OTP reçue =====================");
-      print("===================== Statut Code : ${response.statusCode}");
-      print("===================== Data         : ${response.data}");
-      print("=============================================================\n");
-
-      if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data != null) {
         print('✅ OTP verified success');
         return response.data;
       } else {
@@ -149,23 +123,13 @@ class AuthService {
   }
 
   ///******************************** Reset Password API ********************************///
-  static Future<Map<String, dynamic>?> resetPassword(Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>?> resetPassword(
+      Map<String, dynamic> data) async {
     try {
       final url = "${AppConstant.baseURl}/auth/reset-password";
-
-      print("\n===================== Webservice Reset Password envoyé =====================");
-      print("=================== URL  : $url");
-      print("=================== Body : ${jsonEncode(data)}");
-      print("===============================================================\n");
-
       final response = await dio.post(url, data: data);
-
-      print("===================== Réponse Reset Password reçue =====================");
-      print("===================== Statut Code : ${response.statusCode}");
-      print("===================== Data         : ${response.data}");
-      print("=============================================================\n");
-
-      if ((response.statusCode == 200 || response.statusCode == 201) && response.data != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data != null) {
         print('✅ Password reset success');
         return response.data;
       } else {

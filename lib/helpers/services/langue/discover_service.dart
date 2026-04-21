@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:fasolingo/helpers/constant/app_constant.dart';
 import 'package:fasolingo/models/langue/decouverte_model.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class DiscoverService {
   final Dio _dio = Dio(BaseOptions(
@@ -9,6 +10,14 @@ class DiscoverService {
     headers: {
       'Accept': 'application/json',
     },
+  ))..interceptors.add(PrettyDioLogger(
+    requestHeader: true,
+    requestBody: true,
+    responseHeader: false,
+    responseBody: true,
+    error: true,
+    compact: true,
+    maxWidth: 90,
   ));
 
   final String _token = "TON_TOKEN_ACTUEL"; 

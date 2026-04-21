@@ -4,6 +4,7 @@ import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/models/langue/langue_model.dart';
 import 'package:get/get.dart'; 
 import 'package:fasolingo/controller/apps/session_controller.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class LanguageLevelService {
   late final Dio _dio;
@@ -17,6 +18,14 @@ class LanguageLevelService {
         'accept': '*/*',
         'Content-Type': 'application/json',
       },
+    ))..interceptors.add(PrettyDioLogger(
+      requestHeader: true,
+      requestBody: true,
+      responseHeader: false,
+      responseBody: true,
+      error: true,
+      compact: true,
+      maxWidth: 90,
     ));
 
     _dio.interceptors.add(InterceptorsWrapper(
