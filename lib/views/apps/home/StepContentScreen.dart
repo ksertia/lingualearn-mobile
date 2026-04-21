@@ -1,3 +1,4 @@
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryImage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
@@ -58,10 +59,11 @@ class StepContentScreen extends StatelessWidget {
             videoUrl: content.mediaUrl ?? "",
             onVideoFinished: () => Get.back(),
           );
-        case 'pdf':
-          return StepFamilyPdf(
+        case 'image':
+          return StepDiscoveryImage(
             title: data.title,
-            pdfUrl: content.mediaUrl ?? "https://www.google.com",
+            imageUrl: content.mediaUrl ?? "",
+            answerText: content.text ?? "",
           );
         case 'audio':
           return StepDiscoveryAudio(

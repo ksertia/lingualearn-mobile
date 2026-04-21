@@ -1,7 +1,6 @@
 import 'package:fasolingo/controller/apps/settings/child_language_assign_controller.dart';
 import 'package:fasolingo/model/child_model.dart';
 import 'package:fasolingo/model/language_model.dart';
-import 'package:fasolingo/model/level_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,7 +20,7 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
   final ChildLanguageAssignController controller =
       Get.put(ChildLanguageAssignController());
 
-  final TextEditingController searchController = TextEditingController();
+  String? selectedLanguageId;
 
   @override
   void initState() {
@@ -31,7 +30,6 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
 
   @override
   void dispose() {
-    searchController.dispose();
     super.dispose();
   }
 
@@ -40,15 +38,43 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
     return name.isNotEmpty ? name : 'Sous-compte';
   }
 
-  List<LanguageModel> _applySearch(List<LanguageModel> data) {
-    final q = searchController.text.trim().toLowerCase();
-    if (q.isEmpty) return data;
+  String _getLanguageEmoji(String? name) {
+    if (name == null) return "🌍";
+    final lowerName = name.toLowerCase();
+    
+    if (lowerName.contains("français") || lowerName.contains("french")) {
+      return "🗼"; 
+    } else if (lowerName.contains("english") || lowerName.contains("anglais")) {
+      return "🎯"; 
+    } else if (lowerName.contains("español") || lowerName.contains("spanish") || lowerName.contains("espagnol")) {
+      return "💃"; 
+    } else if (lowerName.contains("mooré") || lowerName.contains("moore") || lowerName.contains("moré")) {
+      return "☀️"; 
+    } else if (lowerName.contains("dioula") || lowerName.contains("dyula")) {
+      return "🌿"; 
+    } else if (lowerName.contains("allemand") || lowerName.contains("german")) {
+      return "🏰"; 
+    } else if (lowerName.contains("italien") || lowerName.contains("italian")) {
+      return "🍕"; 
+    } else if (lowerName.contains("portugais") || lowerName.contains("portuguese")) {
+      return "⚽"; 
+    } else if (lowerName.contains("chinois") || lowerName.contains("chinese")) {
+      return "🐉"; 
+    } else if (lowerName.contains("arabe") || lowerName.contains("arabic")) {
+      return "🕌"; 
+    } 
+    
+    return "🌍"; // Default globe
+  }
 
-    return data.where((e) {
-      final name = (e.name ?? '').toLowerCase();
-      final code = (e.code ?? '').toLowerCase();
-      return name.contains(q) || code.contains(q);
-    }).toList();
+  Future<void> _openLevelsBottomSheetForSelected() async {
+    if (selectedLanguageId == null) return;
+    final selectedLang = controller.languages.firstWhere(
+      (lang) => lang.id == selectedLanguageId,
+      orElse: () => LanguageModel(id: '', name: '', code: '', isActive: false),
+    );
+    if (selectedLang.id.isEmpty) return;
+    await _openLevelsBottomSheet(selectedLang);
   }
 
   Future<void> _openLevelsBottomSheet(LanguageModel language) async {
@@ -73,35 +99,81 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F9),
+      backgroundColor: const Color(0xFFE3F2FD), // Light blue background
       appBar: AppBar(
-        title: Text('Langues - ${_childName()}'),
-        backgroundColor: const Color(0xFFF6F7F9),
+        title: Text(
+          '🌍 Langues pour ${_childName()}',
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1565C0),
+          ),
+        ),
+        backgroundColor: const Color(0xFFE3F2FD),
         elevation: 0,
-        surfaceTintColor: const Color(0xFFF6F7F9),
+        surfaceTintColor: const Color(0xFFE3F2FD),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: Color(0xFFFFC107)),
+            onPressed: () {}, // Placeholder
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
           child: Column(
             children: [
-              TextField(
-                controller: searchController,
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  hintText: 'Rechercher une langue',
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: const Color(0xFFF2F3F5),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.orange.shade200,
+                    width: 1,
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text(
+                          '📚',
+                          style: TextStyle(fontSize: 24),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Liste des langues disponibles',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.orange.shade800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Sélectionnez une langue à attribuer à ${_childName()}. Choisissez celle qui correspond le mieux à ses besoins d\'apprentissage !',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 14),
               Expanded(
                 child: Obx(() {
                   if (controller.isFetchingLanguages.value &&
@@ -109,15 +181,36 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  final list = _applySearch(controller.languages);
+                  final list = controller.languages
+                      .where((lang) => lang.isActive == true)
+                      .toList();
                   if (list.isEmpty) {
                     return Center(
-                      child: Text(
-                        'Aucune langue',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            '🌍',
+                            style: TextStyle(fontSize: 48),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Aucune langue trouvée',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Explore le monde des langues !',
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   }
@@ -125,107 +218,106 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
                   return RefreshIndicator(
                     onRefresh: controller.fetchLanguages,
                     child: ListView.separated(
-                      padding: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.only(
+                          bottom: 100), // Space for button
                       itemCount: list.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (context, index) {
                         final lang = list[index];
-                        final name = (lang.name ?? '').toString();
-                        final code = (lang.code ?? '').toString();
-                        final isActive = lang.isActive == true;
-
-                        return InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => _openLevelsBottomSheet(lang),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x14000000),
-                                  blurRadius: 14,
-                                  offset: Offset(0, 6),
-                                )
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  height: 46,
-                                  width: 46,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color(0xFFE8F5E9),
-                                    border: Border.all(
-                                        color: const Color(0xFF66BB6A),
-                                        width: 1),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    code.isNotEmpty
-                                        ? code.characters.first.toUpperCase()
-                                        : name.isNotEmpty
-                                            ? name.characters.first
-                                                .toUpperCase()
-                                            : '?',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xFF2E7D32),
+                        final isSelected = selectedLanguageId == lang.id;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: InkWell(
+                            onTap: () => setState(() => selectedLanguageId = lang.id),
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.white : Colors.white.withOpacity(0.9),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isSelected ? Colors.orange : Colors.grey.shade200,
+                                  width: isSelected ? 3 : 1,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.orange.withOpacity(0.3),
+                                          blurRadius: 15,
+                                          offset: const Offset(0, 5),
+                                        ),
+                                      ]
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.05),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? Colors.orange.withOpacity(0.1)
+                                          : Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        _getLanguageEmoji(lang.name),
+                                        style: const TextStyle(fontSize: 28),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        name.isEmpty ? 'Sans nom' : name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          lang.name ?? "Langue",
+                                          style: TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w700,
+                                            color: isSelected ? Colors.orange.shade800 : Colors.black87,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        code.isEmpty ? 'Code: —' : 'Code: $code',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey.shade600,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF2F3F5),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    isActive ? 'Active' : 'Inactive',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: isActive
-                                          ? const Color(0xFF2E7D32)
-                                          : Colors.grey.shade700,
+                                        if (lang.code != null)
+                                          Text(
+                                            lang.code!.toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade500,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ],
+                                  if (isSelected)
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [Color(0xFFFFB347), Color(0xFFFFE259)],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(50),
+                                      ),
+                                      child: const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
                         );
@@ -233,6 +325,46 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
                     ),
                   );
                 }),
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: selectedLanguageId != null ? LinearGradient(
+                      colors: [Colors.orangeAccent.shade700, Colors.orangeAccent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ) : LinearGradient(
+                      colors: [Colors.grey.shade400, Colors.grey.shade600],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x29000000),
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: selectedLanguageId != null ? () => _openLevelsBottomSheetForSelected() : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      foregroundColor: selectedLanguageId != null ? Colors.white : Colors.black,
+                      padding: EdgeInsets.symmetric(vertical: selectedLanguageId != null ? 20 : 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text(
+                      '✅ Valider la sélection',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -269,174 +401,202 @@ class _LevelsBottomSheet extends StatelessWidget {
           bottom: 16 + bottomInset,
         ),
         child: Obx(() {
-        final lang = controller.selectedLanguage.value;
-        final languageName = (lang?.name ?? '').toString();
-        final languageId = (lang?.id ?? '').toString();
+          final lang = controller.selectedLanguage.value;
+          final languageName = (lang?.name ?? '').toString();
+          final languageId = (lang?.id ?? '').toString();
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  languageName.isEmpty ? 'Niveaux' : 'Niveaux - $languageName',
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w700),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (controller.isFetchingLevels.value)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else ...[
-              if (controller.levels.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(
-                    'Aucun niveau',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    languageName.isEmpty
+                        ? '🎯 Choisis ton niveau'
+                        : '🎯 Niveaux - $languageName',
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1565C0)),
                   ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (controller.isFetchingLevels.value)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(child: CircularProgressIndicator()),
                 )
-              else
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.levels.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final level = controller.levels[index];
-                    final id = level.id;
-                    final name = (level.name ?? '').toString();
-                    final desc = (level.description ?? '').toString();
-
-                    return Obx(() {
-                      final selected = controller.selectedLevelId.value == id;
-                      return InkWell(
-                        borderRadius: BorderRadius.circular(14),
-                        onTap: () => controller.selectedLevelId.value = id,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF6F7F9),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: selected
-                                  ? const Color(0xFF66BB6A)
-                                  : Colors.transparent,
-                            ),
+              else ...[
+                if (controller.levels.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Column(
+                      children: [
+                        const Text(
+                          '🚀',
+                          style: TextStyle(fontSize: 32),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Aucun niveau disponible',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w600,
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      name.isEmpty ? 'Niveau' : name,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: controller.levels.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final level = controller.levels[index];
+                      final id = level.id;
+                      final name = (level.name ?? '').toString();
+                      final desc = (level.description ?? '').toString();
+
+                      return Obx(() {
+                        final selected = controller.selectedLevelId.value == id;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: InkWell(
+                            onTap: () => controller.selectedLevelId.value = id,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: selected ? Colors.white : Colors.white.withOpacity(0.9),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: selected ? Colors.green : Colors.grey.shade200,
+                                  width: selected ? 3 : 1,
+                                ),
+                                boxShadow: selected
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.green.withOpacity(0.3),
+                                          blurRadius: 15,
+                                          offset: const Offset(0, 5),
+                                        ),
+                                      ]
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.05),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          name.isEmpty ? 'Niveau mystère' : name,
+                                          style: TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w700,
+                                            color: selected ? Colors.green.shade800 : Colors.black87,
+                                          ),
+                                        ),
+                                        if (desc.trim().isNotEmpty) ...[
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            desc,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade500,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  if (selected)
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(50),
+                                      ),
+                                      child: const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 18,
                                       ),
                                     ),
-                                    if (desc.trim().isNotEmpty) ...[
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        desc,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey.shade600,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
+                                ],
                               ),
-                              const SizedBox(width: 10),
-                              Container(
-                                height: 22,
-                                width: 22,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: selected
-                                        ? const Color(0xFF2E7D32)
-                                        : Colors.grey.shade400,
-                                  ),
-                                  color: selected
-                                      ? const Color(0xFF2E7D32)
-                                      : Colors.transparent,
-                                ),
-                                child: selected
-                                    ? const Icon(Icons.check,
-                                        size: 14, color: Colors.white)
-                                    : null,
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      );
-                    });
-                  },
-                ),
-              const SizedBox(height: 16),
-              Obx(
-                () => ElevatedButton(
-                  onPressed: controller.isAssigning.value
-                      ? null
-                      : () async {
-                          if (childId == null || childId!.isEmpty) return;
-                          if (languageId.isEmpty) return;
-                          final levelId = controller.selectedLevelId.value;
-                          if (levelId.isEmpty) return;
-
-                          final ok = await controller.assign(
-                            childId: childId!,
-                            languageId: languageId,
-                            levelId: levelId,
-                          );
-                          if (ok && context.mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D32),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                        );
+                      });
+                    },
                   ),
-                  child: controller.isAssigning.value
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text(
-                          'Assigner',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
+                const SizedBox(height: 16),
+                Obx(
+                  () => ElevatedButton(
+                    onPressed: controller.isAssigning.value
+                        ? null
+                        : () async {
+                            if (childId == null || childId!.isEmpty) return;
+                            if (languageId.isEmpty) return;
+                            final levelId = controller.selectedLevelId.value;
+                            if (levelId.isEmpty) return;
+
+                            final ok = await controller.assign(
+                              childId: childId!,
+                              languageId: languageId,
+                              levelId: levelId,
+                            );
+                            if (ok && context.mounted) {
+                              Navigator.of(context).pop();
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orangeAccent,
+                      foregroundColor: Colors.black87,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: controller.isAssigning.value
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text(
+                            '🚀 Assigner',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
-        );
-      }),
+          );
+        }),
       ),
     );
   }

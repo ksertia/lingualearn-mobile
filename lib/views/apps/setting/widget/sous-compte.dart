@@ -15,52 +15,8 @@ class _SousCompteState extends State<SousCompte> {
   final ChildrenController controller = Get.put(ChildrenController());
 
   final TextEditingController searchController = TextEditingController();
-  final RxInt selectedFilterIndex = 0.obs;
 
-  final List<Map<String, dynamic>> hardcodedAccounts = const [
-    {
-      'id': 'local-child-1',
-      'username': 'LI-EDU-001',
-      'firstName': 'Awa',
-      'lastName': 'Diallo',
-      'password': 'motdepasse123',
-      'email': 'awa@example.com',
-      'phone': '+22670123456',
-      'profile': {
-        'firstName': 'Awa',
-        'lastName': 'Diallo',
-        'avatarUrl': null,
-      },
-    },
-    {
-      'id': 'local-child-2',
-      'username': 'LI-EDU-002',
-      'firstName': 'Moussa',
-      'lastName': 'Traoré',
-      'password': 'motdepasse123',
-      'email': null,
-      'phone': '+22670123457',
-      'profile': {
-        'firstName': 'Moussa',
-        'lastName': 'Traoré',
-        'avatarUrl': null,
-      },
-    },
-    {
-      'id': 'local-child-3',
-      'username': 'LI-EDU-003',
-      'firstName': 'Fatou',
-      'lastName': 'Ouédraogo',
-      'password': 'motdepasse123',
-      'email': 'fatou@example.com',
-      'phone': null,
-      'profile': {
-        'firstName': 'Fatou',
-        'lastName': 'Ouédraogo',
-        'avatarUrl': null,
-      },
-    },
-  ];
+  final List<Map<String, dynamic>> hardcodedAccounts = const [];
 
   Future<void> _openCreateSubAccountSheet() async {
     await showModalBottomSheet<void>(
@@ -92,78 +48,41 @@ class _SousCompteState extends State<SousCompte> {
   }
 
   Widget _buildSearchField() {
-    return TextField(
-      controller: searchController,
-      onChanged: (_) => setState(() {}),
-      decoration: InputDecoration(
-        hintText: 'Rechercher',
-        prefixIcon: const Icon(Icons.search),
-        filled: true,
-        fillColor: const Color(0xFFF2F3F5),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF9C4), Color(0xFFE8F5E9)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildFilterChips() {
-    final filters = const ['Tous', 'Avec email', 'Avec téléphone', 'Sans contact'];
-
-    return Obx(
-      () => SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: List.generate(filters.length, (i) {
-            final selected = selectedFilterIndex.value == i;
-            return Padding(
-              padding: EdgeInsets.only(right: i == filters.length - 1 ? 0 : 10),
-              child: ChoiceChip(
-                label: Text(filters[i]),
-                selected: selected,
-                onSelected: (_) => selectedFilterIndex.value = i,
-                labelStyle: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: selected ? const Color(0xFF2E7D32) : Colors.black87,
-                ),
-                selectedColor: const Color(0xFFE8F5E9),
-                backgroundColor: const Color(0xFFF2F3F5),
-                side: BorderSide(
-                  color: selected ? const Color(0xFF66BB6A) : Colors.transparent,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-              ),
-            );
-          }),
+      child: TextField(
+        controller: searchController,
+        onChanged: (_) => setState(() {}),
+        decoration: InputDecoration(
+          hintText: '🔍 Rechercher un apprenant',
+          prefixIcon: const Icon(Icons.search, color: Color(0xFFFFC107)),
+          filled: true,
+          fillColor: Colors.transparent,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         ),
       ),
     );
   }
 
-  List<ChildModel> _applyFilter(List<ChildModel> data) {
-    final idx = selectedFilterIndex.value;
-    if (idx == 0) return data;
-
-    bool hasEmail(ChildModel e) => (e.email ?? '').trim().isNotEmpty;
-    bool hasPhone(ChildModel e) => (e.phone ?? '').trim().isNotEmpty;
-
-    switch (idx) {
-      case 1:
-        return data.where(hasEmail).toList();
-      case 2:
-        return data.where(hasPhone).toList();
-      case 3:
-        return data.where((e) => !hasEmail(e) && !hasPhone(e)).toList();
-      default:
-        return data;
-    }
-  }
-
-  Widget _buildAccountTile(ChildModel account) {
+  Widget _buildAccountTile(ChildModel account, int index) {
     final fullName = account.displayName;
     final email = account.email;
     final phone = account.phone;
@@ -173,40 +92,63 @@ class _SousCompteState extends State<SousCompte> {
         : '?';
 
     final subtitleLine = (email != null && email.trim().isNotEmpty)
-        ? email
+        ? '📧 $email'
         : (phone != null && phone.trim().isNotEmpty)
-            ? phone
-            : 'Aucun contact';
+            ? '📱 $phone'
+            : '😊 Aucun contact';
+
+    // Fun colors for each tile
+    final tileColors = [
+      const Color(0xFFFFF3E0), // Light orange
+      const Color(0xFFFFF9C4), // Light yellow
+      const Color(0xFFE3F2FD), // Light blue
+      const Color(0xFFFCE4EC), // Light pink
+      const Color(0xFFF3E5F5), // Light purple
+    ];
+    final color = tileColors[index % tileColors.length];
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: color,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 14,
-            offset: Offset(0, 6),
+            color: Color(0x1A000000),
+            blurRadius: 10,
+            offset: Offset(0, 5),
           )
         ],
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
       ),
       child: Row(
         children: [
           Container(
-            height: 46,
-            width: 46,
+            height: 50,
+            width: 50,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFFE8F5E9),
-              border: Border.all(color: const Color(0xFF66BB6A), width: 1),
+              gradient: LinearGradient(
+                colors: [const Color(0xFFFF9800), const Color(0xFFFFC107)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: Border.all(color: Colors.white, width: 2),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x29000000),
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
             alignment: Alignment.center,
             child: Text(
               initial,
               style: const TextStyle(
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF2E7D32),
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                fontSize: 18,
               ),
             ),
           ),
@@ -215,14 +157,21 @@ class _SousCompteState extends State<SousCompte> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  fullName.isEmpty ? 'Sans nom' : fullName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      fullName.isEmpty ? 'Sans nom' : fullName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF1565C0),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Text('⭐', style: TextStyle(fontSize: 14)),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -231,7 +180,7 @@ class _SousCompteState extends State<SousCompte> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: Colors.grey.shade700,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -239,28 +188,7 @@ class _SousCompteState extends State<SousCompte> {
             ),
           ),
           const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF2F3F5),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  (phone != null && phone.trim().isNotEmpty) ? 'Actif' : '—',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Icon(Icons.chevron_right, color: Colors.grey.shade500),
-            ],
-          ),
+          const Icon(Icons.chevron_right, color: Color(0xFFFF9800), size: 24),
         ],
       ),
     );
@@ -269,12 +197,25 @@ class _SousCompteState extends State<SousCompte> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F9),
+      backgroundColor: const Color(0xFFE3F2FD), // Light blue background for a fun feel
       appBar: AppBar(
-        title: const Text('Sous comptes'),
-        backgroundColor: const Color(0xFFF6F7F9),
+        title: const Text(
+          '🎉 Mes Petits Apprenants 🎓',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1565C0),
+          ),
+        ),
+        backgroundColor: const Color(0xFFE3F2FD),
         elevation: 0,
-        surfaceTintColor: const Color(0xFFF6F7F9),
+        surfaceTintColor: const Color(0xFFE3F2FD),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.star, color: Color(0xFFFFC107)),
+            onPressed: () {}, // Placeholder for future fun feature
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -282,9 +223,57 @@ class _SousCompteState extends State<SousCompte> {
           child: Column(
             children: [
               _buildSearchField(),
-              const SizedBox(height: 12),
-              _buildFilterChips(),
               const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.orange.shade200,
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text(
+                          '👥',
+                          style: TextStyle(fontSize: 24),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Liste de mes apprenants',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.orange.shade800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Clique sur un apprenant pour gérer ses langues, ou utilise le bouton + pour en ajouter un nouveau et agrandir ta petite équipe !',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Expanded(
                 child: Obx(() {
                   final fallback = hardcodedAccounts
@@ -294,7 +283,7 @@ class _SousCompteState extends State<SousCompte> {
                   final source = controller.children.isNotEmpty
                       ? controller.children.toList()
                       : fallback;
-                  final list = _applyFilter(_applySearch(source));
+                  final list = _applySearch(source);
 
                   if (controller.isFetching.value && controller.children.isEmpty) {
                     return const Center(
@@ -304,12 +293,31 @@ class _SousCompteState extends State<SousCompte> {
 
                   if (list.isEmpty) {
                     return Center(
-                      child: Text(
-                        'Aucun sous-compte',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            '🎈',
+                            style: TextStyle(fontSize: 48),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Aucun apprenant trouvé',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Ajoute ton premier apprenant !',
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   }
@@ -323,13 +331,13 @@ class _SousCompteState extends State<SousCompte> {
                       itemBuilder: (context, index) {
                         final child = list[index];
                         return InkWell(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(20),
                           onTap: () {
                             Get.to(
                               () => ChildLanguagesPage(child: child),
                             );
                           },
-                          child: _buildAccountTile(child),
+                          child: _buildAccountTile(child, index),
                         );
                       },
                     ),
@@ -340,11 +348,29 @@ class _SousCompteState extends State<SousCompte> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openCreateSubAccountSheet,
-        backgroundColor: const Color(0xFF2E7D32),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add, size: 30),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFF9800), Color(0xFFFFC107)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          shape: BoxShape.circle,
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x29000000),
+              blurRadius: 10,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: _openCreateSubAccountSheet,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          foregroundColor: Colors.white,
+          child: const Icon(Icons.add, size: 32),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
@@ -426,8 +452,8 @@ class _CreateSubAccountBottomSheetState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Créer un sous-compte',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  '🎉 Créer un nouvel apprenti',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1565C0)),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),

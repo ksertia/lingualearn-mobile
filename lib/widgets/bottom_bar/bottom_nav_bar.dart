@@ -38,7 +38,7 @@ class _AppBottomNavBarState extends State<AppBottomNavBar>
       ),
       _NavItem(
         icon: LucideIcons.personStanding,
-        label: 'Moi',
+        label: 'Profil',
         index: 3,
       ),
     ];

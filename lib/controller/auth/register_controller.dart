@@ -6,9 +6,7 @@ import '../../models/user_model.dart';
 import '../../helpers/utils/app_snackbar.dart';
 
 class RegisterController extends GetxController {
-
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  
   final TextEditingController firstName = TextEditingController();
   final TextEditingController lastName = TextEditingController();
   final TextEditingController email = TextEditingController();
