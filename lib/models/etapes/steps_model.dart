@@ -51,6 +51,8 @@ class StepData {
         detectedFormat = 'video';
       } else if (lowerUrl.contains('.pdf')) {
         detectedFormat = 'pdf';
+      } else if (lowerUrl.contains('.png') || lowerUrl.contains('.jpg') || lowerUrl.contains('.jpeg') || lowerUrl.contains('.webp')) {
+        detectedFormat = 'image';
       }
     }
 

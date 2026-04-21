@@ -130,7 +130,7 @@ flutter:
     - assets/lang/
     - assets/images/logo/
     - assets/images/app/
-    - assets/images/video/videos.mp4
+    # - assets/images/video/videos.mp4
     - assets/icon/
     - assets/avatar/
     - assets/lottie/

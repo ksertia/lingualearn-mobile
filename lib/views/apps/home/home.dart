@@ -350,60 +350,82 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
     );
   }
 
-Widget _buildNavigationGrid() {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.05),
-      borderRadius: BorderRadius.circular(28),
-      border: Border.all(
-        color: Colors.white.withOpacity(0.10),
-        width: 1.2,
+  Widget _buildNavigationGrid() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.10),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(-2, -2),
+          ),
+        ],
       ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 18,
-          offset: const Offset(0, 8),
-        ),
-        BoxShadow(
-          color: Colors.white.withOpacity(0.03),
-          blurRadius: 6,
-          offset: const Offset(-2, -2),
-        ),
-      ],
-    ),
-    child: GridView.count(
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 14,
-      mainAxisSpacing: 14,
-      childAspectRatio: 0.78,
-      padding: EdgeInsets.zero,
-      children: [
-        _buildNavBtn(
-          Icons.menu_book,
-          "Modules",
-          Colors.purpleAccent,
-          () => Get.to(() => const HomePage()),
-        ),
-        _buildNavBtn(
-          Icons.map,
-          "Parcours",
-          Colors.blueAccent,
-          () => Get.to(() => const ParcoursSelectionPage()),
-        ),
-        _buildNavBtn(
-          Icons.flag,
-          "Étapes",
-          Colors.orangeAccent,
-          () => Get.to(() => const StepsScreensPages()),
-        ),
-      ],
-    ),
-  );
-}
+      child: GridView.count(
+        crossAxisCount: 3,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        childAspectRatio: 0.78,
+        padding: EdgeInsets.zero,
+        children: [
+          _buildNavBtn(
+            Icons.menu_book,
+            "Modules",
+            Colors.purpleAccent,
+            () => Get.to(() => const HomePage()),
+          ),
+          _buildNavBtn(
+            Icons.map,
+            "Parcours",
+            Colors.blueAccent,
+            () => Get.to(() => const ParcoursSelectionPage(), arguments: {
+              'showAllPaths': true,
+              'userId': session.userId.value.isNotEmpty
+                  ? session.userId.value
+                  : session.user?.id ?? "",
+              'languageId': session.selectedLanguageId.value.isNotEmpty
+                  ? session.selectedLanguageId.value
+                  : session.user?.selectedLanguageId ?? "",
+              'levelId': session.selectedLevelId.value.isNotEmpty
+                  ? session.selectedLevelId.value
+                  : session.user?.selectedLevelId ?? "",
+            }),
+          ),
+          _buildNavBtn(
+            Icons.flag,
+            "Étapes",
+            Colors.orangeAccent,
+            () => Get.to(() => const StepsScreensPages(), arguments: {
+              'showAllSteps': true,
+              'userId': session.userId.value.isNotEmpty
+                  ? session.userId.value
+                  : session.user?.id ?? "",
+              'languageId': session.selectedLanguageId.value.isNotEmpty
+                  ? session.selectedLanguageId.value
+                  : session.user?.selectedLanguageId ?? "",
+              'levelId': session.selectedLevelId.value.isNotEmpty
+                  ? session.selectedLevelId.value
+                  : session.user?.selectedLevelId ?? "",
+            }),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildCurrentPathCard() {
     return Container(
