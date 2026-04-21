@@ -1,4 +1,5 @@
 import 'package:confetti/confetti.dart';
+import 'package:fasolingo/views/apps/Onbranding/Onbranding.dart';
 import 'package:fasolingo/views/apps/change_language.dart';
 import 'package:fasolingo/views/apps/decouvrir/assurance.dart';
 import 'package:fasolingo/views/apps/decouvrir/bienvenu_page.dart';
@@ -90,6 +91,7 @@ getPageRoute() {
     GetPage(name: '/subscription_plans', page: () => SubscriptionPlansPage()),
     GetPage(name: '/laguedecouvert', page: () => LanguageDcouvertPage()),
     GetPage(name: '/decouverte', page: () => const DecouvertePage()),
+    GetPage(name: '/Onboarding', page: () => const OnboardingTibiPro()),
     GetPage(
       name: '/decouvert',
       page: () => StepSuccess(

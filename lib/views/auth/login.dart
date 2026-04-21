@@ -141,7 +141,7 @@ class LoginPage extends StatelessWidget {
                         label: "Google",
                         icon: Icons.g_mobiledata,
                         iconColor: Colors.red,
-                        onTap: ()  => Get.toNamed(''),),
+                        onTap: ()  => Get.toNamed('/Onboarding'),),
 
                     const SizedBox(width: 15),
                     
