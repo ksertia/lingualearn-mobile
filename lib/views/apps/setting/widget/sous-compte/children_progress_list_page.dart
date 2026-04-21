@@ -1,10 +1,9 @@
 import 'package:fasolingo/controller/apps/settings/children_controller.dart';
-import 'package:fasolingo/model/child_model.dart';
-import 'package:fasolingo/views/apps/setting/widget/child_progress_detail_page.dart';
+import 'package:fasolingo/models/child_model.dart';
+import 'package:fasolingo/views/apps/setting/widget/sous-compte/child_progress_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:animate_do/animate_do.dart';
 
 class ChildrenProgressListPage extends StatefulWidget {
   const ChildrenProgressListPage({super.key});
@@ -14,8 +13,7 @@ class ChildrenProgressListPage extends StatefulWidget {
       _ChildrenProgressListPageState();
 }
 
-class _ChildrenProgressListPageState
-    extends State<ChildrenProgressListPage> {
+class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
   final ChildrenController controller = Get.put(ChildrenController());
   final TextEditingController searchController = TextEditingController();
 
@@ -37,25 +35,24 @@ class _ChildrenProgressListPageState
   }
 
   List<String> get animalLotties => [
-    'dino.json',
-    'elephant.json',
-    'cat.json',
-    'Dog.json',
-    'Lion.json',
-    'Chicken.json',
-    'poulet.json'
-  ];
+        'dino.json',
+        'elephant.json',
+        'cat.json',
+        'Dog.json',
+        'Lion.json',
+        'Chicken.json',
+        'poulet.json'
+      ];
 
   Widget _childTile(ChildModel child) {
     final name = child.displayName;
-    final initial =
-    name.isNotEmpty ? name.characters.first.toUpperCase() : 'U';
+    final initial = name.isNotEmpty ? name.characters.first.toUpperCase() : 'U';
 
     final subtitle = (child.username ?? '').isNotEmpty
         ? child.username!
         : (child.email ?? '').isNotEmpty
-        ? child.email!
-        : '—';
+            ? child.email!
+            : '—';
 
     final int index = name.hashCode.abs() % animalLotties.length;
     final String animal = animalLotties[index];
@@ -69,16 +66,13 @@ class _ChildrenProgressListPageState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [cardColor.withOpacity(0.6), Colors.white],
-        ),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: cardColor.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
+        border: Border(
+          top: BorderSide(color: Colors.grey[300]!, width: 1),
+          bottom: BorderSide(color: Colors.grey[300]!, width: 1),
+        ),
+        boxShadow:  [
+          BoxShadow(blurRadius: 2.0, color: Colors.white)
         ],
       ),
       child: Row(
@@ -90,12 +84,7 @@ class _ChildrenProgressListPageState
                 width: 56,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.teal[300]!,
-                      Colors.blue[300]!,
-                    ],
-                  ),
+
                   border: Border.all(color: Colors.teal[100]!, width: 3),
                 ),
                 child: ClipOval(
@@ -164,7 +153,7 @@ class _ChildrenProgressListPageState
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+/*      decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
             Color(0xFFE3F2FD),
@@ -172,15 +161,16 @@ class _ChildrenProgressListPageState
             Color(0xFFE8F5E8),
           ],
         ),
-      ),
+      ),*/
       child: Scaffold(
-        backgroundColor: Colors.transparent,
+        //backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('👦 Progress des Champions! 🎉'),
+          title: const Text('Progress des Champions'),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Get.back(),
-          ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.arrow_back_ios_new)),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
@@ -189,11 +179,11 @@ class _ChildrenProgressListPageState
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                TextField(
+                TextFormField(
                   controller: searchController,
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
-                    hintText: '🔍 Rechercher...',
+                    hintText: 'Rechercher...',
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     border: OutlineInputBorder(
@@ -206,14 +196,24 @@ class _ChildrenProgressListPageState
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.only(bottom: 16),
+                  margin:  EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.orange.withOpacity(0.2)),
+                    border: Border(
+                      left: BorderSide(color: Colors.orange.withOpacity(0.5), width: 3),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        //blurRadius: 2.0,
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 1.0,
+
+                      )
+                    ]
                   ),
                   child: const Text(
-                    '📋 Liste des utilisateurs enfants',
+                    'Liste des utilisateurs enfants',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -225,9 +225,7 @@ class _ChildrenProgressListPageState
                 const SizedBox(height: 12),
                 Expanded(
                   child: Obx(() {
-                    final list = _applySearch(
-                        controller.children.toList());
-
+                    final list = _applySearch(controller.children.toList());
                     if (list.isEmpty) {
                       return const Center(
                         child: Text('Aucun enfant'),
@@ -236,15 +234,12 @@ class _ChildrenProgressListPageState
 
                     return ListView.separated(
                       itemCount: list.length,
-                      separatorBuilder: (_, __) =>
-                      const SizedBox(height: 12),
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final child = list[index];
                         return InkWell(
                           onTap: () {
-                            Get.to(() =>
-                                ChildProgressDetailPage(
-                                    child: child));
+                            Get.to(() => ChildProgressDetailPage(child: child));
                           },
                           child: _childTile(child),
                         );

@@ -1,6 +1,6 @@
 import 'package:fasolingo/controller/apps/settings/child_language_assign_controller.dart';
-import 'package:fasolingo/model/child_model.dart';
-import 'package:fasolingo/model/language_model.dart';
+import 'package:fasolingo/models/child_model.dart';
+import 'package:fasolingo/models/language_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

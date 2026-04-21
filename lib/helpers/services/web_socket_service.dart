@@ -14,10 +14,8 @@ class WebSocketService extends GetxService {
     try {
       _channel = WebSocketChannel.connect(Uri.parse(url));
       isConnected.value = true;
-      print('WebSocket connected to: $url');
     } catch (e) {
       isConnected.value = false;
-      print('WebSocket connection error: $e');
     }
   }
 
@@ -26,14 +24,12 @@ class WebSocketService extends GetxService {
   void disconnect() {
     _channel?.sink.close();
     isConnected.value = false;
-    print('WebSocket disconnected');
   }
 
   void sendMessage(String message) {
     if (_channel != null && isConnected.isTrue) {
       _channel?.sink.add(message);
     } else {
-      print('WebSocket not connected. Cannot send message.');
     }
   }
 }

@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/model/language_model.dart';
-import 'package:fasolingo/model/level_model.dart';
-import 'package:fasolingo/model/child_progress_models.dart';
+import 'package:fasolingo/models/language_model.dart';
+import 'package:fasolingo/models/level_model.dart';
+import 'package:fasolingo/models/child_progress_models.dart';
+import 'package:get/get.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class LanguagesService {
@@ -218,14 +219,6 @@ class LanguagesService {
   }
 
   static void _handleDioError(DioException e, String method) {
-    print(
-        '=================== Erreur réseau $method ===================');
-    print('Type : ${e.type}');
-    print('Message : ${e.message}');
-    if (e.response != null) {
-      print('Code de retour : ${e.response?.statusCode}');
-      print("Données d'erreur : ${e.response?.data}");
-    }
-    print('==============================================================\n');
+    Get.log('Network error ($method): ${e.message}');
   }
 }

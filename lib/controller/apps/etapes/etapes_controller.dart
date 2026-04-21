@@ -46,7 +46,6 @@ class StepsController extends GetxController {
       pathId = "";
       userId = session?.userId.value ?? "";
       showAllSteps = false;
-      print("🚨 [StepsController] Erreur argument : $e");
     }
 
     pageController = PageController();
@@ -83,14 +82,10 @@ class StepsController extends GetxController {
         }
 
         if (userId.isEmpty) {
-          print(
-              "🚨 [StepsController] userId manquant pour charger toutes les étapes");
           items.clear();
           return;
         }
 
-        print(
-            "🔍 [StepsController] Chargement de toutes les étapes pour l'utilisateur $userId");
         final paths = await LearningPathService.getPathsByUser(userId);
         final List<dynamic> allItems = [];
 
@@ -110,37 +105,26 @@ class StepsController extends GetxController {
 
         if (allItems.isNotEmpty) {
           items.assignAll(allItems);
-          print(
-              "🏠 [Steps] ${allItems.whereType<StepModel>().length} étapes reçues pour tous les parcours");
         } else {
           items.clear();
-          print(
-              "⚠️ [Steps] Aucune étape trouvée pour les parcours de l'utilisateur $userId");
         }
       } else {
         if (pathId.isEmpty) {
-          print("🚨 [StepsController] pathId manquant dans les arguments");
           items.clear();
           return;
         }
 
-        print(
-            "🔍 [StepsController] Chargement des étapes pour pathId: $pathId");
         final List<StepModel> results =
             await StepsService.getStepsByPath(pathId);
 
         if (results.isNotEmpty) {
           results.sort((a, b) => a.index.compareTo(b.index));
           items.assignAll(results);
-          print(
-              "🏠 [Steps] ${results.length} étapes reçues pour le parcours $pathId");
         } else {
           items.clear();
-          print("⚠️ [Steps] Aucune étape trouvée pour pathId: $pathId");
         }
       }
     } catch (e) {
-      print("🚨 [StepsController] Erreur lors du chargement : $e");
     } finally {
       isLoading.value = false;
     }

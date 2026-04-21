@@ -70,10 +70,8 @@ class SettingsController extends GetxController {
   Future<void> onLogout() async {
     try {
       isLoading(true);
-      print("➡️ [Logout] Début de la procédure de déconnexion");
 
       final isLogout = await SettingService.userSignOut();
-      print("➡️ [Logout] Réponse serveur: $isLogout");
 
       if (isLogout) {
         await LocalStorage.removeLoggedInUser();
@@ -81,7 +79,6 @@ class SettingsController extends GetxController {
         final session = Get.find<SessionController>();
         session.clearSession();
 
-        print("➡️ [Logout] Nettoyage local terminé.");
 
         Provider.of<NavigationProvider>(
           Get.context!,
@@ -102,7 +99,7 @@ class SettingsController extends GetxController {
         );
       }
     } catch (e, st) {
-      print("❌ [Logout] Erreur fatale: $e\n$st");
+      print("[Logout] Erreur fatale: $e\n$st");
       appSnackbar(
         heading: "Erreur",
         message:

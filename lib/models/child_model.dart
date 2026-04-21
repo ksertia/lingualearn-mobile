@@ -1,4 +1,4 @@
-import 'package:fasolingo/model/child_profile_model.dart';
+import 'package:fasolingo/models/child_profile_model.dart';
 
 class ChildModel {
   final String id;

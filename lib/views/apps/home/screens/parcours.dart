@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 import 'package:fasolingo/helpers/services/module_service.dart';
+import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
 import 'package:fasolingo/models/modules/modul_model.dart';
 import 'package:fasolingo/models/parcoure/parcour_model.dart';
 import '../../../../widgets/parcourspage/ParcoursStepItem.dart';
@@ -155,39 +156,16 @@ class ParcoursSelectionPage extends StatelessWidget {
                     } else if (item is LearningPathModel) {
                       final path = item;
 
-                      debugPrint("=== PATH ${index - 1} ===");
-                      debugPrint("ID: ${path.id}");
-                      debugPrint("Title: ${path.title}");
-                      debugPrint("Status: ${path.status}");
-                      debugPrint("Progress: ${path.progress}");
-                      debugPrint(
-                          "ProgressPercentage: ${path.progressPercentage}");
-                      debugPrint("IsActive: ${path.isActive}");
-                      debugPrint("==================");
-
-                      String pathStatus = path.status ?? "locked";
-                      if (pathStatus == "started") {
-                        pathStatus = "unlocked";
-                      }
-                      bool isCompleted = pathStatus == "completed";
-                      bool isUnlocked =
-                          pathStatus == "unlocked" || pathStatus == "completed";
-
-                      if (pathStatus == "locked") {
-                        bool allPathsLocked = controller.items
-                            .whereType<LearningPathModel>()
-                            .every((p) => (p.status ?? "locked") == "locked");
-                        if (allPathsLocked && controller.items.whereType<LearningPathModel>().toList().indexOf(path) == 0) {
-                          pathStatus = "unlocked";
-                          isUnlocked = true;
-                          print(
-                              "🔓 [FALLBACK] Premier parcours débloqué automatiquement");
-                        }
-                      }
-
-                      bool isActive = isUnlocked;
-                      print(
-                          "Path ${controller.items.whereType<LearningPathModel>().toList().indexOf(path)}: Status='$pathStatus' → isCompleted=$isCompleted, isActive=$isActive");
+                      final String pathStatus = (path.progress != null &&
+                              path.progress!['status'] != null)
+                          ? path.progress!['status'].toString().toLowerCase()
+                          : (path.status ?? 'locked').toString().toLowerCase();
+                      final bool isCompleted = pathStatus == 'completed';
+                      final bool isUnlocked = pathStatus == 'unlocked' ||
+                          pathStatus == 'started' ||
+                          pathStatus == 'in_progress' ||
+                          isCompleted;
+                      final bool isActive = isUnlocked;
 
                       return Align(
                         alignment: controller.items.whereType<LearningPathModel>().toList().indexOf(path) % 2 == 0
@@ -222,12 +200,66 @@ class ParcoursSelectionPage extends StatelessWidget {
                                         ? Icons.check
                                         : Icons.play_arrow_rounded),
                                 onTap: isActive
-                                    ? () =>
-                                        Get.toNamed('/stepsscreens', arguments: {
-                                          'moduleId': path.moduleId,
-                                          'pathId': path.id,
-                                          'moduleLottie': moduleLottie,
-                                        })
+                                    ? () async {
+                                        final args = Get.arguments;
+                                        final userId = (args is Map &&
+                                                args['userId'] != null)
+                                            ? args['userId'].toString()
+                                            : '';
+
+                                        if (userId.isNotEmpty &&
+                                            pathStatus == 'unlocked') {
+                                          await LearningPathService.startPath(
+                                            userId: userId,
+                                            pathId: path.id,
+                                          );
+                                        }
+
+                                        final res = await Get.toNamed(
+                                          '/stepsscreens',
+                                          arguments: {
+                                            'moduleId': path.moduleId,
+                                            'pathId': path.id,
+                                            'userId': userId,
+                                            'moduleLottie': moduleLottie,
+                                          },
+                                        );
+
+                                        if (res == true ||
+                                            res == 'completed' ||
+                                            res == 'finished') {
+                                          await controller.fetchPaths();
+
+                                          final paths = controller.items
+                                              .whereType<LearningPathModel>()
+                                              .toList();
+                                          final total = paths.length;
+                                          final completed = paths.where((p) {
+                                            final st = (p.progress != null &&
+                                                    p.progress!['status'] !=
+                                                        null)
+                                                ? p.progress!['status']
+                                                    .toString()
+                                                    .toLowerCase()
+                                                : (p.status ?? 'locked')
+                                                    .toString()
+                                                    .toLowerCase();
+                                            return st == 'completed';
+                                          }).length;
+
+                                          if (userId.isNotEmpty &&
+                                              controller.moduleId.isNotEmpty &&
+                                              total > 0 &&
+                                              completed == total) {
+                                            await ModuleService.completeModule(
+                                              userId: userId,
+                                              moduleId: controller.moduleId,
+                                            );
+                                          }
+
+                                          Get.back(result: true);
+                                        }
+                                      }
                                     : () {
                                         Get.snackbar(
                                           "Parcours Verrouillé 🔒",

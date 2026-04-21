@@ -2,8 +2,8 @@ import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/controller/my_controller.dart';
 import 'package:fasolingo/helpers/services/languages_service.dart';
 import 'package:fasolingo/helpers/utils/app_snackbar.dart';
-import 'package:fasolingo/model/language_model.dart';
-import 'package:fasolingo/model/level_model.dart';
+import 'package:fasolingo/models/language_model.dart';
+import 'package:fasolingo/models/level_model.dart';
 import 'package:get/get.dart';
 
 class ChildLanguageAssignController extends MyController {

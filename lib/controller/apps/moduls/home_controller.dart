@@ -20,8 +20,6 @@ class HomeController extends GetxController {
       if (session.selectedLanguageId.value.isNotEmpty && 
           session.selectedLevelId.value.isNotEmpty) {
         loadModules();
-      } else {
-        print("⚠️ [Home] langue/niveau non disponibles en onInit, skipping loadModules");
       }
     });
   }
@@ -33,14 +31,11 @@ class HomeController extends GetxController {
       // Vérifier que les ids sont présents
       if (session.selectedLanguageId.value.isEmpty || 
           session.selectedLevelId.value.isEmpty) {
-        print("⚠️ [Home] langue/niveau manquant, impossible de charger les modules");
         isLoading.value = false;
         return;
       }
       
       List<ModuleModel> modulesFromApi = await ModuleService.getAllModules();
-      
-      print("🏠 [Home] ${modulesFromApi.length} modules reçus du backend.");
 
       if (modulesFromApi.isNotEmpty) {
         modulesFromApi.sort((a, b) => a.index.compareTo(b.index));
@@ -53,11 +48,9 @@ class HomeController extends GetxController {
         }
       } else {
         filteredModules.clear();
-        print("⚠️ [Home] La liste retournée par le backend est vide.");
       }
       
     } catch (e) {
-      print("🚨 [Home] Erreur critique lors du chargement : $e");
     } finally {
       isLoading.value = false;
     }
@@ -90,6 +83,13 @@ class HomeController extends GetxController {
 
   Future<void> onModuleCompleted(String moduleId) async {
     try {
+      final userId = session.userId.value.isNotEmpty
+          ? session.userId.value
+          : (session.user?.id ?? '');
+      if (userId.isNotEmpty) {
+        await ModuleService.completeModule(userId: userId, moduleId: moduleId);
+      }
+
       final idx = filteredModules.indexWhere((m) => m.id == moduleId);
       if (idx == -1) return;
 
@@ -177,7 +177,6 @@ class HomeController extends GetxController {
         moduleDisplayStatus[updatedNext.id] = 'unlocked';
       }
     } catch (e) {
-      print('🚨 [Home] Erreur onModuleCompleted: $e');
     }
   }
 }

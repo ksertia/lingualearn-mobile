@@ -1,4 +1,4 @@
-import 'package:fasolingo/model/child_model.dart';
+import 'package:fasolingo/models/child_model.dart';
 
 class ChildrenResponseModel {
   final bool success;

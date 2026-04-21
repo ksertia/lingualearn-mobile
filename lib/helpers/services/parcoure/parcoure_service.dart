@@ -12,21 +12,11 @@ class LearningPathService {
           : session.user?.id;
 
       if (userId == null || userId.isEmpty) {
-        print("🚨 [LearningPathService] userId manquant dans la session !");
         return [];
       }
 
       final String url = '/users/$userId/paths?moduleId=$moduleId';
-
-      print("🚀 [Path API] Appel URL : $url");
-      print("🔑 [Path API] UserId: $userId");
-      print("🔑 [Path API] ModuleId: $moduleId");
-      print("🔑 [Path API] Token présent: ${session.token.value.isNotEmpty}");
-
       final response = await session.dio.get(url);
-
-      print("📊 [Path API] Status Code: ${response.statusCode}");
-      print("📊 [Path API] Response Data: ${response.data}");
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data;
@@ -42,8 +32,7 @@ class LearningPathService {
       }
 
       return [];
-    } catch (e) {
-      print("🚨 [LearningPathService] Erreur API : $e");
+    } catch (_) {
       return [];
     }
   }
@@ -53,8 +42,6 @@ class LearningPathService {
       final session = Get.find<SessionController>();
 
       final String url = '/users/$userId/paths';
-      print("🚀 [Path API] Appel URL : $url");
-
       final response = await session.dio.get(url);
 
       if (response.statusCode == 200 && response.data != null) {
@@ -71,8 +58,7 @@ class LearningPathService {
       }
 
       return [];
-    } catch (e) {
-      print("🚨 [LearningPathService] Erreur API getPathsByUser: $e");
+    } catch (_) {
       return [];
     }
   }
@@ -87,21 +73,11 @@ class LearningPathService {
           : session.user?.id;
 
       if (userId == null || userId.isEmpty) {
-        print("🚨 [LearningPathService] userId manquant dans la session !");
         return [];
       }
 
       final String url = '/users/$userId/modules/$moduleId/paths';
-
-      print("🚀 [Path API] Appel URL spécifique : $url");
-      print("🔑 [Path API] UserId: $userId");
-      print("🔑 [Path API] ModuleId spécifique: $moduleId");
-      print("🔑 [Path API] Token présent: ${session.token.value.isNotEmpty}");
-
       final response = await session.dio.get(url);
-
-      print("📊 [Path API] Status Code: ${response.statusCode}");
-      print("📊 [Path API] Response Data: ${response.data}");
 
       if (response.statusCode == 200 && response.data != null) {
         final data = response.data;
@@ -117,9 +93,38 @@ class LearningPathService {
       }
 
       return [];
-    } catch (e) {
-      print("🚨 [LearningPathService] Erreur API getPathsBySpecificModule: $e");
+    } catch (_) {
       return [];
+    }
+  }
+
+  static Future<bool> startPath({
+    required String userId,
+    required String pathId,
+  }) async {
+    try {
+      final session = Get.find<SessionController>();
+      final response = await session.dio.post(
+        '/users/$userId/paths/$pathId/start',
+      );
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> completePath({
+    required String userId,
+    required String pathId,
+  }) async {
+    try {
+      final session = Get.find<SessionController>();
+      final response = await session.dio.post(
+        '/users/$userId/paths/$pathId/complete',
+      );
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (_) {
+      return false;
     }
   }
 }

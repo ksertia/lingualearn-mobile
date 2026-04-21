@@ -1,6 +1,6 @@
 import 'package:fasolingo/controller/apps/settings/child_progress_controller.dart';
-import 'package:fasolingo/model/child_model.dart';
-import 'package:fasolingo/model/child_progress_models.dart';
+import 'package:fasolingo/models/child_model.dart';
+import 'package:fasolingo/models/child_progress_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fasolingo/helpers/theme/admin_theme.dart';

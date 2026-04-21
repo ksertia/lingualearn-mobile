@@ -145,7 +145,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          "Prêt pour une super aventure ?🌟",
+                          "Prêt pour une super aventure ?",
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 15,

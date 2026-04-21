@@ -48,13 +48,6 @@ class ReportProblemService {
         );
       }
     }
-    print('============ DEBUG ENVOI ============');
-    for (final field in formData.fields) {
-      print('Champ: ${field.key} = ${field.value}');
-    }
-    for (final file in formData.files) {
-      print('Fichier: ${file.key} -> ${file.value.filename}');
-    }
     try {
       final response = await _dio.post(
         '/reports',
@@ -72,14 +65,8 @@ class ReportProblemService {
         );
       }
     } on DioException catch (e) {
-      if (e.error is SocketException) {
-        print(' Problème réseau ou serveur injoignable');
-      }
-      print('=======================================');
       rethrow;
-    } catch (e) {
-      print(e);
-      print('=======================================');
+    } catch (_) {
       rethrow;
     }
   }

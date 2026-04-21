@@ -31,7 +31,6 @@ class ClientService {
 
       if (response.statusCode == 200) {
         final jsonBody = json.decode(response.body);
-        print('==================JSON reçu client : $jsonBody');
         if (jsonBody['client'] != null) {
           return ClientModel.fromJson(jsonBody['client']);
         } else {
@@ -60,8 +59,6 @@ class ClientService {
     if (trimmedClientId.isEmpty) {
       throw Exception('clientId vide');
     }
-    print('========= Envoi validation : clientId="$trimmedClientId", status="$status"');
-    print('================ Token utilisé : "$token"');
     try {
       final response = await http.post(
         url,
@@ -74,15 +71,11 @@ class ClientService {
           'status': status,
         }),
       );
-      print('Code HTTP : ${response.statusCode}');
-      print('Réponse validation : ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         try {
           final jsonBody = json.decode(response.body);
-          print('Validation collecte réussie : $jsonBody');
         } catch (e) {
-          print('⚠ Erreur de parsing JSON : $e');
         }
       } else if (response.statusCode == 401) {
         throw Exception('Collecteur non authentifié ou token invalide.');

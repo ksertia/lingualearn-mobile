@@ -1,8 +1,8 @@
 import 'package:fasolingo/controller/apps/settings/children_controller.dart';
-import 'package:fasolingo/views/apps/setting/widget/child_languages_page.dart';
+import 'package:fasolingo/views/apps/setting/widget/sous-compte/child_languages_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/model/child_model.dart';
+import 'package:fasolingo/models/child_model.dart';
 
 class SousCompte extends StatefulWidget {
   const SousCompte({super.key});
@@ -68,7 +68,7 @@ class _SousCompteState extends State<SousCompte> {
         controller: searchController,
         onChanged: (_) => setState(() {}),
         decoration: InputDecoration(
-          hintText: '🔍 Rechercher un apprenant',
+          hintText: 'Rechercher un apprenant',
           prefixIcon: const Icon(Icons.search, color: Color(0xFFFFC107)),
           filled: true,
           fillColor: Colors.transparent,
@@ -76,7 +76,8 @@ class _SousCompteState extends State<SousCompte> {
             borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         ),
       ),
     );
@@ -87,15 +88,14 @@ class _SousCompteState extends State<SousCompte> {
     final email = account.email;
     final phone = account.phone;
 
-    final initial = fullName.isNotEmpty
-        ? fullName.characters.first.toUpperCase()
-        : '?';
+    final initial =
+        fullName.isNotEmpty ? fullName.characters.first.toUpperCase() : '?';
 
     final subtitleLine = (email != null && email.trim().isNotEmpty)
-        ? '📧 $email'
+        ? '$email'
         : (phone != null && phone.trim().isNotEmpty)
-            ? '📱 $phone'
-            : '😊 Aucun contact';
+            ? ' $phone'
+            : 'Aucun contact';
 
     // Fun colors for each tile
     final tileColors = [
@@ -170,7 +170,7 @@ class _SousCompteState extends State<SousCompte> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Text('⭐', style: TextStyle(fontSize: 14)),
+                    const Text('', style: TextStyle(fontSize: 14)),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -197,25 +197,24 @@ class _SousCompteState extends State<SousCompte> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE3F2FD), // Light blue background for a fun feel
+      // backgroundColor: const Color(0xFFE3F2FD), // Light blue background for a fun feel
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.arrow_back_ios_new)),
         title: const Text(
-          '🎉 Mes Petits Apprenants 🎓',
+          ' Mes Petits Apprenants',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Color(0xFF1565C0),
           ),
         ),
-        backgroundColor: const Color(0xFFE3F2FD),
+        //backgroundColor: const Color(0xFFE3F2FD),
         elevation: 0,
-        surfaceTintColor: const Color(0xFFE3F2FD),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.star, color: Color(0xFFFFC107)),
-            onPressed: () {}, // Placeholder for future fun feature
-          ),
-        ],
+        //surfaceTintColor: const Color(0xFFE3F2FD),
       ),
       body: SafeArea(
         child: Padding(
@@ -245,22 +244,14 @@ class _SousCompteState extends State<SousCompte> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        const Text(
-                          '👥',
-                          style: TextStyle(fontSize: 24),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Liste de mes apprenants',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.orange.shade800,
-                          ),
-                        ),
-                      ],
+                    const SizedBox(width: 8),
+                    Text(
+                      'Liste de mes apprenants',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.orange.shade800,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -285,7 +276,8 @@ class _SousCompteState extends State<SousCompte> {
                       : fallback;
                   final list = _applySearch(source);
 
-                  if (controller.isFetching.value && controller.children.isEmpty) {
+                  if (controller.isFetching.value &&
+                      controller.children.isEmpty) {
                     return const Center(
                       child: CircularProgressIndicator(),
                     );
@@ -297,7 +289,7 @@ class _SousCompteState extends State<SousCompte> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            '🎈',
+                            '',
                             style: TextStyle(fontSize: 48),
                           ),
                           const SizedBox(height: 16),
@@ -452,8 +444,11 @@ class _CreateSubAccountBottomSheetState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  '🎉 Créer un nouvel apprenti',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1565C0)),
+                  'Créer un nouvel apprenti',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1565C0)),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),

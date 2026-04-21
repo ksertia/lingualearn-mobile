@@ -53,8 +53,7 @@ class ParcoursSelectionController extends GetxController {
       items.clear();
 
       if (showAllPaths) {
-        print(
-            " [ParcoursController] Chargement des modules et parcours de l'utilisateur");
+
         final modules = await ModuleService.getAllModules();
 
         if (modules.isNotEmpty) {
@@ -72,8 +71,7 @@ class ParcoursSelectionController extends GetxController {
             }
           }
 
-          print(
-              " [ParcoursController] ${items.whereType<LearningPathModel>().length} parcours reçus pour ${modules.length} modules");
+
         } else {
           print(" [ParcoursController] Aucun module trouvé");
         }

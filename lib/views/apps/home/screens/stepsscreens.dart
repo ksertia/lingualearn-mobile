@@ -1,4 +1,6 @@
 import 'package:fasolingo/controller/apps/etapes/etapes_controller.dart';
+import 'package:fasolingo/helpers/services/etapes/etape_service.dart';
+import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
 import 'package:fasolingo/views/apps/home/StepContentScreen.dart';
 import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
 import 'package:fasolingo/widgets/stepsscreens/custom_app_bar.dart';
@@ -83,7 +85,8 @@ class StepsScreensPages extends StatelessWidget {
           }
 
           if (currentPath != null) {
-            pages.add(_StepsPageData(path: currentPath, steps: [...currentSteps]));
+            pages.add(
+                _StepsPageData(path: currentPath, steps: [...currentSteps]));
           } else if (currentSteps.isNotEmpty) {
             pages.add(_StepsPageData(path: null, steps: currentSteps));
           }
@@ -154,10 +157,65 @@ class StepsScreensPages extends StatelessWidget {
                             ),
                           ),
                         ),
-
                         _buildStepsPagesSection(context, pages, controller),
                       ],
                     ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    child: Obx(() {
+                      if (pages.isEmpty) return const SizedBox.shrink();
+                      final int pageIndex = controller.currentPage.value
+                          .clamp(0, pages.length - 1);
+                      final page = pages[pageIndex];
+                      if (page.path == null) return const SizedBox.shrink();
+
+                      final allCompleted = page.steps.isNotEmpty &&
+                          page.steps.every((s) {
+                            final st = (s.progress != null &&
+                                    s.progress!['status'] != null)
+                                ? s.progress!['status'].toString().toLowerCase()
+                                : (s.status ?? 'locked')
+                                    .toString()
+                                    .toLowerCase();
+                            return st == 'completed';
+                          });
+
+                      if (!allCompleted) return const SizedBox.shrink();
+
+                      final args = Get.arguments;
+                      final userId = (args is Map && args['userId'] != null)
+                          ? args['userId'].toString()
+                          : '';
+
+                      return SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: userId.isEmpty
+                              ? null
+                              : () async {
+                                  final ok =
+                                      await LearningPathService.completePath(
+                                    userId: userId,
+                                    pathId: page.path!.id,
+                                  );
+                                  if (ok) {
+                                    Get.back(result: true);
+                                  }
+                                },
+                          child: const Text('Terminé'),
+                        ),
+                      );
+                    }),
                   ),
                 ),
               ),
@@ -168,8 +226,8 @@ class StepsScreensPages extends StatelessWidget {
     );
   }
 
-  Widget _buildStepsPagesSection(
-      BuildContext context, List<_StepsPageData> pages, StepsController controller) {
+  Widget _buildStepsPagesSection(BuildContext context,
+      List<_StepsPageData> pages, StepsController controller) {
     if (pages.isEmpty) {
       return const Center(
         child: Text(
@@ -192,8 +250,8 @@ class StepsScreensPages extends StatelessWidget {
                   color: Colors.white,
                   icon: const Icon(Icons.arrow_back_ios),
                   onPressed: controller.currentPage.value > 0
-                      ? () => controller.goToPage(
-                          controller.currentPage.value - 1)
+                      ? () =>
+                          controller.goToPage(controller.currentPage.value - 1)
                       : null,
                 ),
                 Text(
@@ -205,8 +263,8 @@ class StepsScreensPages extends StatelessWidget {
                   color: Colors.white,
                   icon: const Icon(Icons.arrow_forward_ios),
                   onPressed: controller.currentPage.value < pages.length - 1
-                      ? () => controller.goToPage(
-                          controller.currentPage.value + 1)
+                      ? () =>
+                          controller.goToPage(controller.currentPage.value + 1)
                       : null,
                 ),
               ],
@@ -243,7 +301,8 @@ class StepsScreensPages extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.9),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: primaryBlue.withOpacity(0.3), width: 2),
+                border:
+                    Border.all(color: primaryBlue.withOpacity(0.3), width: 2),
               ),
               child: Text(
                 'Étapes du parcours',
@@ -261,14 +320,15 @@ class StepsScreensPages extends StatelessWidget {
               itemBuilder: (context, stepIndex) {
                 final StepModel step = page.steps[stepIndex];
 
-                String stepStatus = step.status ?? 'locked';
-                if (stepStatus == 'started') {
-                  stepStatus = 'unlocked';
-                }
+                String stepStatus =
+                    (step.progress != null && step.progress!['status'] != null)
+                        ? step.progress!['status'].toString().toLowerCase()
+                        : (step.status ?? 'locked').toString().toLowerCase();
 
                 final bool isCompleted = stepStatus == 'completed';
                 final bool isUnlocked = stepStatus == 'unlocked' ||
                     stepStatus == 'started' ||
+                    stepStatus == 'in_progress' ||
                     stepStatus == 'completed';
 
                 final bool isActive = isUnlocked;
@@ -289,19 +349,36 @@ class StepsScreensPages extends StatelessWidget {
                     isActive: isActive,
                     icon: !isActive
                         ? Icons.lock_outline
-                        : (isCompleted ? Icons.check : Icons.play_arrow_rounded),
+                        : (isCompleted
+                            ? Icons.check
+                            : Icons.play_arrow_rounded),
                     onTap: isActive
-                        ? () {
+                        ? () async {
+                            final args = Get.arguments;
                             final String currentUserId =
-                                controller.session?.userId.value ?? '';
+                                (args is Map && args['userId'] != null)
+                                    ? args['userId'].toString()
+                                    : (controller.session?.userId.value ?? '');
 
-                            Get.to(
+                            if (currentUserId.isNotEmpty &&
+                                stepStatus == 'unlocked') {
+                              await StepsService.startStep(
+                                userId: currentUserId,
+                                stepId: step.id,
+                              );
+                            }
+
+                            final res = await Get.to(
                               () => StepContentScreen(
                                 stepId: step.id,
                                 userId: currentUserId,
                               ),
                               transition: Transition.rightToLeft,
                             );
+
+                            if (res == true) {
+                              await controller.onRefresh();
+                            }
                           }
                         : () {
                             Get.snackbar(
