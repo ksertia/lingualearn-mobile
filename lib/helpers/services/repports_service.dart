@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:fasolingo/helpers/constant/app_constant.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class ReportProblemService {
   final Dio _dio = Dio(
@@ -10,7 +11,15 @@ class ReportProblemService {
       receiveTimeout: const Duration(seconds: 10),
       headers: {'Accept': 'application/json'},
     ),
-  );
+  )..interceptors.add(PrettyDioLogger(
+    requestHeader: true,
+    requestBody: true,
+    responseHeader: false,
+    responseBody: true,
+    error: true,
+    compact: true,
+    maxWidth: 90,
+  ));
   Future<void> sendReport({
     required String token,
     required String type,

@@ -1,30 +1,30 @@
-# Fix TextEditingController Bug After Password Reset
-Status: [In Progress] 🚧
+# TODO: Improve ChildProgressDetailPage Design for Per-Language Progress
 
-## Steps (from approved plan):
-- [x] **Step 1** ✓: Edit `lib/controller/auth/login_controller.dart` - Add `clear()` method
-- [x] **Step 2** ✓: Edit `lib/views/auth/login.dart` - Fix controller instantiation 
-- [ ] **Step 3**: Edit `lib/views/auth/forget_password/new_password.dart` - Clear controllers before navigate
-- [ ] **Step 4**: Test reset → login flow (no crash, fields work)
-- [ ] **Step 5**: Run `flutter analyze`
-- [ ] **Step 6**: Complete task ✅
+## Steps to Complete:
 
-- [x] **Step 1** ✓: Edit `lib/controller/auth/login_controller.dart` - Add `clear()` method
-- [x] **Step 2** ✓: Edit `lib/views/auth/login.dart` - Fix controller instantiation 
-- [x] **Step 3** ✓: Edit `lib/views/auth/forget_password/new_password.dart` - Clear controllers before navigate + import fix
-- [ ] **Step 4**: Test reset → login flow (no crash, fields work)
-- [ ] **Step 5**: Run `flutter analyze`
-- [ ] **Step 6**: Complete task ✅
+1. ✅ [Complete] Created this TODO.md
 
-**All steps complete** ✅
+2. ✅ [Complete] Added summary stats card, helpers (_getFlagEmoji, _getProgressColor, _formatDate)
 
-## Summary:
-- Controllers now single instance with `permanent: true` + `Get.find()`
-- No more disposed controller errors after password reset → login
-- Clean form UX post-reset
+3. ✅ [Complete] Enhanced per-language cards with flags, color-coded %, level chips, Continue button
 
-Files modified:
-- lib/controller/auth/login_controller.dart (+clear method)
-- lib/views/auth/login.dart (controller fix)
-- lib/views/auth/forget_password/new_password.dart (+clear call + import)
+4. ✅ [Complete] Gamified empty state with icon/CTA
+
+5. ✅ [Complete] Added FadeInUp animations per card
+
+6. [ ] Update controller if needed for summaries (computed)
+
+7. [ ] Test: Refresh, empty/full data, responsive, dark mode
+
+8. [ ] Run `flutter analyze` and fix issues
+
+9. [ ] attempt_completion
+
+6. [ ] Update controller if needed for summaries (computed)
+
+7. [ ] Test: Refresh, empty/full data, responsive, dark mode
+
+8. [ ] Run `flutter analyze` and fix issues
+
+9. [ ] attempt_completion
 

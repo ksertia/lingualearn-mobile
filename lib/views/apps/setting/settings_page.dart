@@ -23,6 +23,7 @@ class _SettingScreenState extends State<SettingScreen>
   final controller = Get.put(SettingsController());
   String firstName = LocalStorage.getUserName() ?? "Champion";
 
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -64,6 +65,24 @@ class _SettingScreenState extends State<SettingScreen>
 
                           // --- GÉRER ABONNEMENT ---
                           _buildSettingsItem(
+                            iconWidget: Icon(Icons.person,
+                                color: contentTheme.black, size: 24),
+                            title: 'Sous comptes',
+                            onTap: () {
+                              Get.toNamed('/souscomptes');
+                            },
+                          ),
+
+                          _buildSettingsItem(
+                            iconWidget: Icon(Icons.bar_chart,
+                                color: contentTheme.black, size: 24),
+                            title: 'Parcours des sous comptes',
+                            onTap: () {
+                              Get.toNamed('/children_progress');
+                            },
+                          ),
+
+                          _buildSettingsItem(
                             iconWidget: Icon(Icons.credit_card_rounded,
                                 color: contentTheme.black, size: 24),
                             title: 'Gérer mon abonnement',
@@ -74,14 +93,6 @@ class _SettingScreenState extends State<SettingScreen>
 
                           const SizedBox(height: 15),
                           Divider(color: contentTheme.kE6E6E6, thickness: 1.0),
-
-                          // --- RÉINITIALISER ---
-                          _buildSettingsItem(
-                            iconWidget: Icon(Icons.restart_alt_rounded,
-                                color: Colors.redAccent, size: 24),
-                            title: 'Réinitialiser ma progression',
-                            onTap: () => _handleResetAccount(context),
-                          ),
 
                           // --- DÉCONNEXION ---
                           _buildSettingsItem(

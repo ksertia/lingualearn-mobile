@@ -20,6 +20,8 @@ import 'package:fasolingo/views/apps/profile/profile.dart';
 import 'package:fasolingo/views/apps/progres/progres_page.dart';
 import 'package:fasolingo/views/apps/setting/settings_page.dart';
 import 'package:fasolingo/views/apps/setting/widget/detail_subscription.dart';
+import 'package:fasolingo/views/apps/setting/widget/children_progress_list_page.dart';
+import 'package:fasolingo/views/apps/setting/widget/sous-compte.dart';
 import 'package:fasolingo/views/apps/setting/widget/select_language.dart';
 import 'package:fasolingo/views/apps/setting/widget/subsciption_plan.dart';
 import 'package:fasolingo/views/auth/forget_password/enter_phone_number.dart';
@@ -77,6 +79,8 @@ getPageRoute() {
     GetPage(name: '/decouvrir', page: () => const DiscoveryPage()),
     GetPage(name: '/step', page: () => const StepMascotte()),
     GetPage(name: '/selection', page: () => const LanguageSelectionPage()),
+    GetPage(name: '/souscomptes', page: () => const SousCompte()),
+    GetPage(name: '/children_progress', page: () => const ChildrenProgressListPage()),
 
     GetPage(name: '/stepsscreens', page: () => const StepsScreensPages()),
     GetPage(
