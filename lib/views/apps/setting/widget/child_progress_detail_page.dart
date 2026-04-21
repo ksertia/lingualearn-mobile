@@ -13,7 +13,8 @@ class ChildProgressDetailPage extends StatefulWidget {
   });
 
   @override
-  State<ChildProgressDetailPage> createState() => _ChildProgressDetailPageState();
+  State<ChildProgressDetailPage> createState() =>
+      _ChildProgressDetailPageState();
 }
 
 class _ChildProgressDetailPageState extends State<ChildProgressDetailPage> {
@@ -75,7 +76,8 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage> {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -275,7 +277,8 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage> {
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         languageName,

@@ -8,7 +8,8 @@ class ChildrenProgressListPage extends StatefulWidget {
   const ChildrenProgressListPage({super.key});
 
   @override
-  State<ChildrenProgressListPage> createState() => _ChildrenProgressListPageState();
+  State<ChildrenProgressListPage> createState() =>
+      _ChildrenProgressListPageState();
 }
 
 class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
@@ -82,7 +83,8 @@ class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -131,13 +133,15 @@ class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),
               ),
               const SizedBox(height: 14),
               Expanded(
                 child: Obx(() {
-                  if (controller.isFetching.value && controller.children.isEmpty) {
+                  if (controller.isFetching.value &&
+                      controller.children.isEmpty) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
