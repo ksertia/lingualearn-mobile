@@ -1,13 +1,34 @@
-import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
+import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
 import 'package:fasolingo/controller/apps/session_controller.dart';
+import 'package:fasolingo/controller/apps/user_progress/user_progress_controller.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/models/langue/langue_model.dart';
+import 'package:fasolingo/models/user_progress/user_progress_model.dart';
 import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
 import 'package:fasolingo/views/apps/home/screens/parcours.dart';
 import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+
+// ── Palette ────────────────────────────────────────────────────────────────
+const _kOrange1 = Color(0xFFFF7043);
+const _kOrange2 = Color(0xFFFFB74D);
+const _kPurple  = Color(0xFF7C3AED);
+const _kBlue    = Color(0xFF0EA5E9);
+const _kBg      = Color(0xFFF6F8FF);
+
+const _kLangColors = [
+  [Color(0xFF7C3AED), Color(0xFF5B21B6)],
+  [Color(0xFF0EA5E9), Color(0xFF0369A1)],
+  [Color(0xFF10B981), Color(0xFF047857)],
+  [Color(0xFFFF7043), Color(0xFFE64A19)],
+  [Color(0xFFF59E0B), Color(0xFFD97706)],
+];
+
+List<Color> _langColors(String name) {
+  final i = name.isNotEmpty ? name.codeUnitAt(0) % _kLangColors.length : 0;
+  return [_kLangColors[i][0], _kLangColors[i][1]];
+}
 
 class AcceuilleSreen extends StatefulWidget {
   const AcceuilleSreen({super.key});
@@ -18,244 +39,227 @@ class AcceuilleSreen extends StatefulWidget {
 
 class _AcceuilleSreenState extends State<AcceuilleSreen> {
   final SessionController session = Get.find<SessionController>();
-  final LanguagesController langController =
-      Get.isRegistered<LanguagesController>()
-          ? Get.find<LanguagesController>()
-          : Get.put(LanguagesController());
+  late final UserProgressController progressCtrl;
 
-  RxString levelName = "Chargement...".obs;
+  final RxInt _currentLangPage = 0.obs;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _initHomeData();
+    _pageController = PageController();
+    progressCtrl = Get.isRegistered<UserProgressController>()
+        ? Get.find<UserProgressController>()
+        : Get.put(UserProgressController());
   }
 
-  void _loadLevelName() {
-    final String levelId = session.selectedLevelId.value.isNotEmpty
-        ? session.selectedLevelId.value
-        : session.user?.selectedLevelId ?? "";
-    if (levelId.isNotEmpty) {
-      langController.getLevelNameById(levelId).then((name) {
-        levelName.value = name;
-      });
-    } else {
-      levelName.value = "Niveau non défini";
-    }
-  }
-
-  Future<void> _initHomeData() async {
-    await langController.loadLanguageLevels();
-
-    _loadLevelName();
-
-    ever(session.selectedLevelId, (_) async {
-      await langController.loadLanguageLevels();
-      _loadLevelName();
-    });
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F5FF),
+      backgroundColor: _kBg,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildHeader(context, session),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 25),
-                    _buildSectionTitle("Ma langue", "Changer"),
-                    const SizedBox(height: 15),
-                    Obx(() {
-                      final String languageId =
-                          session.selectedLanguageId.value.isNotEmpty
-                              ? session.selectedLanguageId.value
-                              : session.user?.selectedLanguageId ?? "";
-                      final LanguageModel? selectedLanguage = langController
-                          .allLanguages
-                          .firstWhereOrNull((lang) => lang.id == languageId);
-
-                      return _buildLanguageCard(
-                          languageId, selectedLanguage, levelName.value);
-                    }),
-                    const SizedBox(height: 25),
-                    _buildSectionTitle("Navigation", null),
-                    const SizedBox(height: 15),
-                    _buildNavigationGrid(),
-                    const SizedBox(height: 25),
-                    _buildSectionTitle("Mon parcours actuel", null),
-                    const SizedBox(height: 15),
-                    _buildCurrentPathCard(),
-                    const SizedBox(height: 30),
-                  ],
+        child: RefreshIndicator(
+          onRefresh: progressCtrl.refresh,
+          color: _kOrange1,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                _buildHeader(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 26),
+                      _buildSectionTitle("Mes langues"),
+                      const SizedBox(height: 14),
+                      _buildLanguageSection(),
+                      const SizedBox(height: 28),
+                      _buildSectionTitle("Navigation rapide"),
+                      const SizedBox(height: 14),
+                      _buildNavigationRow(),
+                      const SizedBox(height: 28),
+                      _buildSectionTitle("En ce moment"),
+                      const SizedBox(height: 14),
+                      _buildCurrentPathCard(),
+                      const SizedBox(height: 34),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, SessionController session) {
-    final String firstName =
+  // ─── Header ───────────────────────────────────────────────────────────────
+
+  Widget _buildHeader() {
+    final firstName =
         session.user?.firstName ?? LocalStorage.getUserName() ?? "Apprenant";
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(20, 30, 20, 30),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.orange.withOpacity(0.8),
-                Colors.orange.withOpacity(0.5)
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(34),
-              bottomRight: Radius.circular(34),
-            ),
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Coucou, $firstName !",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Prêt pour une super aventure ?",
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: Lottie.asset(
-                      'assets/lottie/mascot.json',
-                      fit: BoxFit.contain,
-                      repeat: true,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
-        Positioned(
-          right: -30,
-          bottom: -20,
-          child: Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.14),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          left: -20,
-          bottom: 10,
-          child: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.12),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHeaderBadge(IconData icon, String title, String subtitle) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.17),
-        borderRadius: BorderRadius.circular(18),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(22, 24, 16, 26),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [_kOrange1, _kOrange2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(36),
+          bottomRight: Radius.circular(36),
+        ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Colors.white24,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: Colors.white, size: 18),
-          ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12)),
-              Text(subtitle,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.22),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.local_fire_department_rounded,
+                          color: Colors.white, size: 14),
+                      SizedBox(width: 5),
+                      Text(
+                        "Bonne journée !",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Salut, $firstName 👋",
                   style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
-            ],
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  "Prêt pour ta prochaine leçon ?",
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 90,
+            height: 90,
+            child: Lottie.asset(
+              'assets/lottie/mascot.json',
+              fit: BoxFit.contain,
+              repeat: true,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLanguageCard(
-      String languageId, LanguageModel? selectedLanguage, String levelName) {
-    final String languageName = selectedLanguage?.name ??
-        (languageId.isNotEmpty
-            ? "Langue choisie"
-            : "Aucune langue sélectionnée");
+  // ─── Mes langues ──────────────────────────────────────────────────────────
 
-    final String languageShortCode = selectedLanguage?.code.toUpperCase() ??
-        (languageName.length >= 2
-            ? languageName.substring(0, 2).toUpperCase()
-            : "LN");
+  Widget _buildLanguageSection() {
+    return Obx(() {
+      if (progressCtrl.isLoading.value) return _buildLangSkeleton();
+
+      final entries = progressCtrl.progressList;
+      if (entries.isEmpty) return _buildNoLanguageCard();
+
+      if (entries.length == 1) {
+        return _buildLangCard(entries.first);
+      }
+
+      return Column(
+        children: [
+          SizedBox(
+            height: 180,
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (i) => _currentLangPage.value = i,
+              itemCount: entries.length,
+              itemBuilder: (_, i) => Padding(
+                padding:
+                    EdgeInsets.only(right: i < entries.length - 1 ? 10 : 0),
+                child: _buildLangCard(entries[i]),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Obx(() => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  entries.length,
+                  (i) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: _currentLangPage.value == i ? 20 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: _currentLangPage.value == i
+                          ? _kOrange1
+                          : _kOrange1.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              )),
+        ],
+      );
+    });
+  }
+
+  Widget _buildLangCard(UserProgressEntry entry) {
+    final pct = (entry.language.progressPercentage / 100.0).clamp(0.0, 1.0);
+    final pctInt = entry.language.progressPercentage;
+    final code = entry.language.code.toUpperCase();
+    final shortCode = code.length >= 2 ? code.substring(0, 2) : code;
+    final colors = _langColors(entry.language.name);
+    final c1 = colors[0];
+    final c2 = colors[1];
+    final currentModule = entry.module?.title;
+    final currentStep = entry.step?.title;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
+          colors: [c1, c2],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.blueAccent, Colors.blueAccent],
         ),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.18),
-            blurRadius: 20,
+            color: c1.withValues(alpha: 0.35),
+            blurRadius: 22,
             offset: const Offset(0, 10),
           ),
         ],
@@ -266,83 +270,110 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
           Row(
             children: [
               Container(
-                height: 60,
-                width: 60,
+                height: 52,
+                width: 52,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(18),
+                  color: Colors.white.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Center(
-                  child: Text(
-                    languageShortCode,
-                    style: const TextStyle(
+                alignment: Alignment.center,
+                child: Text(
+                  shortCode,
+                  style: const TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 17),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(languageName,
+                    Text(
+                      entry.language.name,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 9, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        entry.level.name,
                         style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 6),
-                    Text("Niveau : $levelName",
-                        style: const TextStyle(
-                            color: Color(0xFFF0F4FF), fontSize: 13)),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: const Text(
-                  "Kids",
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+              // Circular progress
+              SizedBox(
+                width: 52,
+                height: 52,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      value: pct,
+                      strokeWidth: 4.5,
+                      backgroundColor:
+                          Colors.white.withValues(alpha: 0.25),
+                      valueColor: const AlwaysStoppedAnimation(Colors.white),
+                    ),
+                    Text(
+                      '$pctInt%',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: LinearProgressIndicator(
+              value: pct,
+              minHeight: 7,
+              backgroundColor: Colors.white.withValues(alpha: 0.25),
+              valueColor: const AlwaysStoppedAnimation(Colors.white),
+            ),
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
+              Icon(
+                currentModule != null
+                    ? Icons.menu_book_rounded
+                    : Icons.flag_outlined,
+                color: Colors.white70,
+                size: 14,
+              ),
+              const SizedBox(width: 6),
               Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: const LinearProgressIndicator(
-                    value: 0.68,
-                    minHeight: 10,
-                    backgroundColor: Color(0x55FFFFFF),
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Color(0xFFFFFFFF)),
-                  ),
+                child: Text(
+                  currentModule ??
+                      (currentStep?.isNotEmpty == true
+                          ? currentStep!
+                          : "Continue ton aventure !"),
+                  style:
+                      const TextStyle(color: Colors.white70, fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 12),
-              const Text("68%",
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Row(
-            children: const [
-              Icon(Icons.emoji_objects, color: Colors.white, size: 18),
-              SizedBox(width: 8),
-              Text("Continue ton aventure !",
-                  style: TextStyle(color: Colors.white70, fontSize: 13)),
             ],
           ),
         ],
@@ -350,48 +381,74 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
     );
   }
 
-  Widget _buildNavigationGrid() {
+  Widget _buildNoLanguageCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.10),
-          width: 1.2,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.white.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(-2, -2),
-          ),
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 16,
+              offset: const Offset(0, 8)),
         ],
       ),
-      child: GridView.count(
-        crossAxisCount: 3,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-        childAspectRatio: 0.78,
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
-          _buildNavBtn(
-            Icons.menu_book,
+          Icon(Icons.language_rounded, size: 48, color: Colors.orange.shade200),
+          const SizedBox(height: 12),
+          const Text("Aucune langue en cours",
+              style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                  color: Color(0xFF1A1A1A))),
+          const SizedBox(height: 6),
+          Text("Commence par choisir une langue à apprendre",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLangSkeleton() {
+    return Container(
+      width: double.infinity,
+      height: 170,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [
+          _kOrange1.withValues(alpha: 0.10),
+          _kOrange2.withValues(alpha: 0.05),
+        ]),
+        borderRadius: BorderRadius.circular(26),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(color: _kOrange1, strokeWidth: 2.5),
+      ),
+    );
+  }
+
+  // ─── Navigation rapide ────────────────────────────────────────────────────
+
+  Widget _buildNavigationRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildNavBtn(
+            Icons.menu_book_rounded,
             "Modules",
-            Colors.purpleAccent,
-            () => Get.to(() => const HomePage()),
+            _kPurple,
+            _showLanguagePickerSheet,
           ),
-          _buildNavBtn(
-            Icons.map,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildNavBtn(
+            Icons.map_rounded,
             "Parcours",
-            Colors.blueAccent,
+            _kBlue,
             () => Get.to(() => const ParcoursSelectionPage(), arguments: {
               'showAllPaths': true,
               'userId': session.userId.value.isNotEmpty
@@ -405,10 +462,13 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
                   : session.user?.selectedLevelId ?? "",
             }),
           ),
-          _buildNavBtn(
-            Icons.flag,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildNavBtn(
+            Icons.flag_rounded,
             "Étapes",
-            Colors.orangeAccent,
+            _kOrange1,
             () => Get.to(() => const StepsScreensPages(), arguments: {
               'showAllSteps': true,
               'userId': session.userId.value.isNotEmpty
@@ -422,206 +482,426 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
                   : session.user?.selectedLevelId ?? "",
             }),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCurrentPathCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFAFAFF),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 16),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _buildGradientIcon(Icons.rocket_launch),
-              const SizedBox(width: 15),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text("Ton parcours du jour",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 6),
-                  Text("5 modules • 5 étapes",
-                      style: TextStyle(color: Colors.grey, fontSize: 13)),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildPathStat("1/5", "MODULES"),
-              _buildPathStat("1/4", "PARCOURS"),
-              _buildPathStat("1/5", "ÉTAPES"),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                  colors: [Colors.blueAccent, Colors.blueAccent]),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: ElevatedButton(
-              onPressed: () => Get.to(() => const HomePage()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18)),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
-                child: Text(
-                  "Explorer les modules",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title, String? action) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(title,
-            style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF1A1A1A))),
-        if (action != null)
-          Text(action,
-              style: const TextStyle(
-                  color: Color(0xFF4A90E2),
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.4)),
+        ),
       ],
-    );
-  }
-
-  Widget _cardContainer({required Widget child}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 18,
-              offset: const Offset(0, 12))
-        ],
-      ),
-      child: child,
     );
   }
 
   Widget _buildNavBtn(
       IconData icon, String label, Color color, VoidCallback onTap) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(28),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(28),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [color.withOpacity(0.15), color.withOpacity(0.05)],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.14),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.18),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.22),
-                  shape: BoxShape.circle,
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [color, color.withValues(alpha: 0.72)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: Icon(icon, color: color, size: 26),
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(height: 10),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.bold,
-                    color: color.withOpacity(0.95)),
-              ),
-            ],
-          ),
+              child: Icon(icon, color: Colors.white, size: 24),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: color),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildPathStat(String val, String label) {
+  // ─── En ce moment ─────────────────────────────────────────────────────────
+
+  Widget _buildCurrentPathCard() {
+    return Obx(() {
+      if (progressCtrl.isLoading.value) {
+        return Container(
+          height: 120,
+          decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(26)),
+          child: const Center(
+              child: CircularProgressIndicator(
+                  color: _kOrange1, strokeWidth: 2)),
+        );
+      }
+
+      final entry = progressCtrl.mostRecentEntry;
+      if (entry == null || entry.module == null) return _buildNoPathCard();
+
+      final modulePct = entry.module!.progressPercentage;
+      final moduleName = entry.module!.title;
+      final pathName = entry.path?.title;
+      final stepName = entry.step?.title;
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(26),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                        colors: [_kOrange1, _kOrange2]),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.rocket_launch_rounded,
+                      color: Colors.white, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Parcours actuel",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF1A1A1A))),
+                      Text(entry.language.name,
+                          style: const TextStyle(
+                              color: Colors.grey, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3E0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$modulePct%',
+                    style: const TextStyle(
+                        color: _kOrange1,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            _buildPathItem(
+                Icons.menu_book_rounded, "Module", moduleName, _kPurple),
+            if (pathName != null) ...[
+              const SizedBox(height: 8),
+              _buildPathItem(
+                  Icons.map_rounded, "Parcours", pathName, _kBlue),
+            ],
+            if (stepName != null) ...[
+              const SizedBox(height: 8),
+              _buildPathItem(
+                  Icons.flag_rounded, "Étape", stepName, _kOrange1),
+            ],
+            const SizedBox(height: 18),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: modulePct / 100.0,
+                minHeight: 7,
+                backgroundColor: const Color(0xFFF0F0F0),
+                valueColor: const AlwaysStoppedAnimation(_kOrange1),
+              ),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _showLanguagePickerSheet,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _kOrange1,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text("Explorer les modules",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 15)),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildPathItem(
+      IconData icon, String type, String value, Color color) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: color, size: 14),
+        ),
+        const SizedBox(width: 10),
+        Text("$type : ",
+            style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[500],
+                fontWeight: FontWeight.w500)),
+        Expanded(
+          child: Text(value,
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1A1A1A)),
+              overflow: TextOverflow.ellipsis),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoPathCard() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F7FF),
-        borderRadius: BorderRadius.circular(14),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 16,
+              offset: const Offset(0, 6)),
+        ],
       ),
       child: Column(
         children: [
-          Text(val,
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 4),
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold)),
+          Icon(Icons.explore_outlined,
+              size: 44, color: Colors.orange.shade200),
+          const SizedBox(height: 10),
+          const Text("Pas encore de parcours",
+              style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: Color(0xFF1A1A1A))),
+          const SizedBox(height: 5),
+          Text("Choisis un module pour commencer",
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _showLanguagePickerSheet,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _kOrange1,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
+            ),
+            child: const Text("Commencer"),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildGradientIcon(IconData icon) {
-    return ShaderMask(
-      shaderCallback: (bounds) => const LinearGradient(
-        colors: [Color(0xFFFF8B9A), Color(0xFFFFCC6F)],
-      ).createShader(bounds),
-      child: Icon(icon, size: 44, color: Colors.white),
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  Widget _buildSectionTitle(String title) {
+    return Text(title,
+        style: const TextStyle(
+            fontSize: 19,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF1A1A1A)));
+  }
+
+  // ─── Language picker bottom sheet ─────────────────────────────────────────
+
+  void _navigateToModules(UserProgressEntry entry) {
+    session.selectedLanguageId.value = entry.language.id;
+    session.selectedLevelId.value = entry.level.id;
+    if (Get.isRegistered<HomeController>()) {
+      Get.delete<HomeController>(force: true);
+    }
+    Get.to(
+      () => const HomePage(),
+      arguments: {
+        'languageId': entry.language.id,
+        'levelId': entry.level.id,
+      },
+    );
+  }
+
+  void _showLanguagePickerSheet() {
+    final entries = progressCtrl.progressList;
+
+    if (entries.isEmpty) {
+      Get.to(() => const HomePage());
+      return;
+    }
+
+    if (entries.length == 1) {
+      _navigateToModules(entries.first);
+      return;
+    }
+
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFF8F9FF),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text("Choisir une langue",
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1A1A1A))),
+            const SizedBox(height: 4),
+            Text("Sélectionne la langue pour voir ses modules",
+                style: TextStyle(fontSize: 13, color: Colors.grey[500])),
+            const SizedBox(height: 18),
+            ...entries.map((entry) {
+              final pct = entry.language.progressPercentage;
+              final code = entry.language.code.toUpperCase();
+              final shortCode =
+                  code.length >= 2 ? code.substring(0, 2) : code;
+              final colors = _langColors(entry.language.name);
+              final c1 = colors[0];
+
+              return GestureDetector(
+                onTap: () {
+                  Get.back();
+                  _navigateToModules(entry);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                          color: c1.withValues(alpha: 0.10),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4)),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [c1, c1.withValues(alpha: 0.72)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(shortCode,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 15)),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(entry.language.name,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 15,
+                                    color: Color(0xFF1A1A1A))),
+                            const SizedBox(height: 2),
+                            Text(entry.level.name,
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.grey[500])),
+                            const SizedBox(height: 8),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: LinearProgressIndicator(
+                                value: pct / 100.0,
+                                minHeight: 6,
+                                backgroundColor: Colors.grey[100],
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(c1),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text('$pct% complété',
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: c1,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(Icons.chevron_right_rounded,
+                          color: Colors.grey[300], size: 22),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 }

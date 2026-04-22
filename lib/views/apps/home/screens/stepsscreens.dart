@@ -2,7 +2,6 @@ import 'package:fasolingo/controller/apps/etapes/etapes_controller.dart';
 import 'package:fasolingo/helpers/services/etapes/etape_service.dart';
 import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
 import 'package:fasolingo/views/apps/home/StepContentScreen.dart';
-import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
 import 'package:fasolingo/widgets/stepsscreens/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,26 +10,26 @@ import 'package:shimmer/shimmer.dart';
 import 'package:fasolingo/models/parcoure/parcour_model.dart';
 import '../../../../widgets/stepsscreens/parcours_item.dart';
 
+const Color _sCompleted = Color(0xFF22C55E);
+const Color _sActive    = Color(0xFFFF7043);
+const Color _sLocked    = Color(0xFF9E9E9E);
+
 class StepsScreensPages extends StatelessWidget {
   const StepsScreensPages({super.key});
 
-  static const Color primaryBlue = Color(0xFF00CED1);
-  static const Color colorCompleted = Color(0xFF81C784);
-  static const Color orangeAccent = Color(0xFFFF9800);
-  static const Color colorLocked = Color(0xFF9E9E9E);
-
   @override
   Widget build(BuildContext context) {
-    final StepsController controller = Get.put(StepsController());
+    final controller = Get.put(StepsController());
 
-    final dynamic _args = Get.arguments;
-    final String moduleLottie = (_args is Map && _args['moduleLottie'] != null)
-        ? _args['moduleLottie'].toString()
-        : 'assets/lottie/Lion.json';
+    final dynamic args = Get.arguments;
+    final String moduleLottie =
+        (args is Map && args['moduleLottie'] != null)
+            ? args['moduleLottie'].toString()
+            : 'assets/lottie/Lion.json';
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: const CustomAppBar(title: "Mon Parcours d'Apprentissage"),
+      appBar: const CustomAppBar(title: "Mes Étapes"),
       body: Container(
         constraints: const BoxConstraints.expand(),
         decoration: const BoxDecoration(
@@ -40,42 +39,50 @@ class StepsScreensPages extends StatelessWidget {
           ),
         ),
         child: Obx(() {
-          if (controller.isLoading.value) {
-            return _buildShimmerEffect(primaryBlue);
-          }
+          if (controller.isLoading.value) return _shimmer();
 
           if (controller.items.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.info_outline, size: 50, color: Colors.grey),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Aucune étape disponible pour le moment.",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  TextButton(
-                    onPressed: () => controller.onRefresh(),
-                    child: const Text(
-                      "Réactualiser",
-                      style: TextStyle(color: Colors.orange),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      shape: BoxShape.circle,
                     ),
-                  )
+                    child: Icon(Icons.info_outline,
+                        size: 40, color: Colors.grey.shade400),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text('Aucune étape disponible.',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: controller.onRefresh,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _sActive,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: const Text('Réactualiser'),
+                  ),
                 ],
               ),
             );
           }
 
-          final List<_StepsPageData> pages = [];
+          // Group items into pages (one page per path)
+          final List<_PageData> pages = [];
           LearningPathModel? currentPath;
           List<StepModel> currentSteps = [];
-
-          for (final dynamic item in controller.items) {
+          for (final item in controller.items) {
             if (item is LearningPathModel) {
               if (currentPath != null) {
-                pages.add(_StepsPageData(
-                    path: currentPath, steps: [...currentSteps]));
+                pages.add(_PageData(path: currentPath, steps: [...currentSteps]));
               }
               currentPath = item;
               currentSteps = [];
@@ -83,122 +90,86 @@ class StepsScreensPages extends StatelessWidget {
               currentSteps.add(item);
             }
           }
-
           if (currentPath != null) {
-            pages.add(
-                _StepsPageData(path: currentPath, steps: [...currentSteps]));
+            pages.add(_PageData(path: currentPath, steps: [...currentSteps]));
           } else if (currentSteps.isNotEmpty) {
-            pages.add(_StepsPageData(path: null, steps: currentSteps));
+            pages.add(_PageData(path: null, steps: currentSteps));
           }
 
           return Stack(
             children: [
-              Positioned(
-                left: 56,
-                top: MediaQuery.of(context).padding.top + 30,
-                bottom: 30,
-                child: Container(
-                  width: 3,
-                  color: primaryBlue.withOpacity(0.2),
-                ),
-              ),
               RefreshIndicator(
-                onRefresh: () => controller.onRefresh(),
+                onRefresh: controller.onRefresh,
+                color: _sActive,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: MediaQuery.of(context).size.height,
                     ),
                     child: Column(
                       children: [
-                        SafeArea(
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 14),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.95),
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                color: primaryBlue.withOpacity(0.4),
-                                width: 2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Lottie.asset(
-                                  moduleLottie,
-                                  height: 45,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    "Mon chemin magique",
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: primaryBlue,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        SizedBox(
+                          height: MediaQuery.of(context).padding.top +
+                              kToolbarHeight +
+                              16,
                         ),
-                        _buildStepsPagesSection(context, pages, controller),
+                        // Header card with lottie
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: _headerCard(moduleLottie, pages),
+                        ),
+                        const SizedBox(height: 16),
+                        // Page nav + steps
+                        _pagesSection(context, pages, controller),
+                        const SizedBox(height: 90),
                       ],
                     ),
                   ),
                 ),
               ),
+              // Sticky "Terminé" button
               Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
+                left: 0, right: 0, bottom: 0,
                 child: SafeArea(
                   top: false,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                     child: Obx(() {
                       if (pages.isEmpty) return const SizedBox.shrink();
-                      final int pageIndex = controller.currentPage.value
+                      final pageIdx = controller.currentPage.value
                           .clamp(0, pages.length - 1);
-                      final page = pages[pageIndex];
+                      final page = pages[pageIdx];
                       if (page.path == null) return const SizedBox.shrink();
 
-                      final allCompleted = page.steps.isNotEmpty &&
+                      final allDone = page.steps.isNotEmpty &&
                           page.steps.every((s) {
                             final st = (s.progress != null &&
                                     s.progress!['status'] != null)
                                 ? s.progress!['status'].toString().toLowerCase()
-                                : (s.status ?? 'locked')
-                                    .toString()
-                                    .toLowerCase();
+                                : (s.status ?? 'locked').toLowerCase();
                             return st == 'completed';
                           });
+                      if (!allDone) return const SizedBox.shrink();
 
-                      if (!allCompleted) return const SizedBox.shrink();
-
-                      final args = Get.arguments;
-                      final userId = (args is Map && args['userId'] != null)
-                          ? args['userId'].toString()
+                      final a = Get.arguments;
+                      final userId = (a is Map && a['userId'] != null)
+                          ? a['userId'].toString()
                           : '';
 
-                      return SizedBox(
-                        width: double.infinity,
-                        height: 52,
+                      return Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                              colors: [_sActive, Color(0xFFFFB74D)]),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _sActive.withValues(alpha: 0.40),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
                         child: ElevatedButton(
                           onPressed: userId.isEmpty
                               ? null
@@ -208,11 +179,31 @@ class StepsScreensPages extends StatelessWidget {
                                     userId: userId,
                                     pathId: page.path!.id,
                                   );
-                                  if (ok) {
-                                    Get.back(result: true);
-                                  }
+                                  if (ok) Get.back(result: true);
                                 },
-                          child: const Text('Terminé'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            minimumSize: const Size(double.infinity, 52),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18)),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.check_circle_rounded,
+                                  color: Colors.white, size: 20),
+                              SizedBox(width: 8),
+                              Text(
+                                'Parcours terminé !',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }),
@@ -226,166 +217,231 @@ class StepsScreensPages extends StatelessWidget {
     );
   }
 
-  Widget _buildStepsPagesSection(BuildContext context,
-      List<_StepsPageData> pages, StepsController controller) {
-    if (pages.isEmpty) {
-      return const Center(
-        child: Text(
-          "Aucune étape disponible.",
-          style: TextStyle(color: Colors.white),
-        ),
-      );
-    }
+  Widget _headerCard(String lottie, List<_PageData> pages) {
+    final totalSteps =
+        pages.fold<int>(0, (sum, p) => sum + p.steps.length);
+    final doneSteps = pages.fold<int>(0, (sum, p) {
+      return sum +
+          p.steps.where((s) {
+            final st = (s.progress != null && s.progress!['status'] != null)
+                ? s.progress!['status'].toString().toLowerCase()
+                : (s.status ?? 'locked').toLowerCase();
+            return st == 'completed';
+          }).length;
+    });
+    final pct = totalSteps > 0 ? doneSteps / totalSteps : 0.0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (pages.length > 1)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.93),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+            color: _sActive.withValues(alpha: 0.20), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: _sActive.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Lottie.asset(lottie, fit: BoxFit.contain),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  color: Colors.white,
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: controller.currentPage.value > 0
-                      ? () =>
-                          controller.goToPage(controller.currentPage.value - 1)
-                      : null,
+                const Text(
+                  'Mon chemin',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1A1A1A),
+                  ),
                 ),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: pct,
+                    minHeight: 6,
+                    backgroundColor: Colors.grey.shade200,
+                    valueColor: const AlwaysStoppedAnimation(_sActive),
+                  ),
+                ),
+                const SizedBox(height: 5),
                 Text(
-                  "Parcours ${controller.currentPage.value + 1} / ${pages.length}",
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  color: Colors.white,
-                  icon: const Icon(Icons.arrow_forward_ios),
-                  onPressed: controller.currentPage.value < pages.length - 1
-                      ? () =>
-                          controller.goToPage(controller.currentPage.value + 1)
-                      : null,
+                  '$doneSteps / $totalSteps étapes',
+                  style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600),
                 ),
               ],
             ),
           ),
-        const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  Widget _pagesSection(BuildContext context, List<_PageData> pages,
+      StepsController controller) {
+    if (pages.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      children: [
+        if (pages.length > 1)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Obx(() => Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 6, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _navBtn(
+                        Icons.arrow_back_ios_new,
+                        controller.currentPage.value > 0,
+                        () => controller
+                            .goToPage(controller.currentPage.value - 1),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Parcours ${controller.currentPage.value + 1} / ${pages.length}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _navBtn(
+                        Icons.arrow_forward_ios,
+                        controller.currentPage.value < pages.length - 1,
+                        () => controller
+                            .goToPage(controller.currentPage.value + 1),
+                      ),
+                    ],
+                  ),
+                )),
+          ),
+        const SizedBox(height: 8),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.75,
+          height: MediaQuery.of(context).size.height * 0.72,
           child: PageView.builder(
             controller: controller.pageController,
             onPageChanged: controller.onPageChanged,
             itemCount: pages.length,
-            itemBuilder: (context, pageIndex) {
-              final page = pages[pageIndex];
-              return _buildStepsPage(page, controller);
-            },
+            itemBuilder: (_, i) => _stepsPage(pages[i], controller),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStepsPage(_StepsPageData page, StepsController controller) {
+  Widget _navBtn(IconData icon, bool enabled, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: enabled
+              ? _sActive.withValues(alpha: 0.12)
+              : Colors.grey.withValues(alpha: 0.10),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon,
+            size: 16,
+            color: enabled ? _sActive : Colors.grey.shade400),
+      ),
+    );
+  }
+
+  Widget _stepsPage(_PageData page, StepsController controller) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (page.path != null) _buildPathHeader(page.path!),
-          if (page.path == null)
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(16),
-                border:
-                    Border.all(color: primaryBlue.withOpacity(0.3), width: 2),
-              ),
-              child: Text(
-                'Étapes du parcours',
-                style: TextStyle(
-                  color: primaryBlue,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+          if (page.path != null) _pathHeader(page.path!),
+          if (page.path == null) _fallbackHeader(),
+          const SizedBox(height: 8),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.only(top: 12),
+              padding: const EdgeInsets.only(top: 4, bottom: 16),
               itemCount: page.steps.length,
-              itemBuilder: (context, stepIndex) {
-                final StepModel step = page.steps[stepIndex];
-
-                String stepStatus =
-                    (step.progress != null && step.progress!['status'] != null)
-                        ? step.progress!['status'].toString().toLowerCase()
-                        : (step.status ?? 'locked').toString().toLowerCase();
-
-                final bool isCompleted = stepStatus == 'completed';
-                final bool isUnlocked = stepStatus == 'unlocked' ||
+              itemBuilder: (context, i) {
+                final step = page.steps[i];
+                final stepStatus = (step.progress != null &&
+                        step.progress!['status'] != null)
+                    ? step.progress!['status'].toString().toLowerCase()
+                    : (step.status ?? 'locked').toLowerCase();
+                final isCompleted = stepStatus == 'completed';
+                final isActive = stepStatus == 'unlocked' ||
                     stepStatus == 'started' ||
                     stepStatus == 'in_progress' ||
-                    stepStatus == 'completed';
-
-                final bool isActive = isUnlocked;
-                final String label =
-                    'Étape ${stepIndex + 1}: ${step.title ?? ''}';
+                    isCompleted;
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: ParcoursItem(
-                    label: label,
-                    status: isActive
-                        ? (isCompleted ? 'Terminé' : 'En cours')
-                        : 'Verrouillé',
+                    label: 'Étape ${i + 1} : ${step.title ?? ''}',
+                    status: isCompleted
+                        ? 'Terminé'
+                        : (isActive ? 'En cours' : 'Verrouillé'),
                     mainColor: isActive
-                        ? (isCompleted ? colorCompleted : orangeAccent)
-                        : colorLocked,
+                        ? (isCompleted ? _sCompleted : _sActive)
+                        : _sLocked,
                     isCompleted: isCompleted,
                     isActive: isActive,
                     icon: !isActive
-                        ? Icons.lock_outline
+                        ? Icons.lock_rounded
                         : (isCompleted
-                            ? Icons.check
+                            ? Icons.check_rounded
                             : Icons.play_arrow_rounded),
                     onTap: isActive
                         ? () async {
-                            final args = Get.arguments;
-                            final String currentUserId =
-                                (args is Map && args['userId'] != null)
-                                    ? args['userId'].toString()
-                                    : (controller.session?.userId.value ?? '');
-
-                            if (currentUserId.isNotEmpty &&
-                                stepStatus == 'unlocked') {
+                            final a = Get.arguments;
+                            final userId = (a is Map && a['userId'] != null)
+                                ? a['userId'].toString()
+                                : (controller.session?.userId.value ?? '');
+                            if (userId.isNotEmpty && stepStatus == 'unlocked') {
                               await StepsService.startStep(
-                                userId: currentUserId,
-                                stepId: step.id,
-                              );
+                                  userId: userId, stepId: step.id);
                             }
-
                             final res = await Get.to(
                               () => StepContentScreen(
-                                stepId: step.id,
-                                userId: currentUserId,
-                              ),
+                                  stepId: step.id, userId: userId),
                               transition: Transition.rightToLeft,
                             );
-
-                            if (res == true) {
-                              await controller.onRefresh();
-                            }
+                            if (res == true) await controller.onRefresh();
                           }
-                        : () {
-                            Get.snackbar(
-                              'Verrouillé',
+                        : () => Get.snackbar(
+                              'Étape verrouillée 🔒',
                               'Complète les étapes précédentes pour débloquer celle-ci.',
-                            );
-                          },
+                              backgroundColor: Colors.black87,
+                              colorText: Colors.white,
+                              snackPosition: SnackPosition.BOTTOM,
+                              margin: const EdgeInsets.all(16),
+                              borderRadius: 16,
+                            ),
                   ),
                 );
               },
@@ -396,26 +452,41 @@ class StepsScreensPages extends StatelessWidget {
     );
   }
 
-  Widget _buildPathHeader(LearningPathModel path) {
+  Widget _pathHeader(LearningPathModel path) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primaryBlue.withOpacity(0.3), width: 2),
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+            color: _sActive.withValues(alpha: 0.22), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Icon(Icons.route, color: primaryBlue, size: 32),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _sActive.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child:
+                const Icon(Icons.route_rounded, color: _sActive, size: 20),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               path.title,
-              style: TextStyle(
-                color: primaryBlue,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF1A1A1A),
               ),
             ),
           ),
@@ -424,18 +495,45 @@ class StepsScreensPages extends StatelessWidget {
     );
   }
 
-  Widget _buildShimmerEffect(Color primaryColor) {
+  Widget _fallbackHeader() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: const Text('Étapes du parcours',
+          style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1A1A1A))),
+    );
+  }
+
+  Widget _shimmer() {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
-      child: const SizedBox(),
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 100, 16, 20),
+        itemCount: 5,
+        itemBuilder: (_, __) => Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: Container(
+            height: 72,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
-class _StepsPageData {
+class _PageData {
   final LearningPathModel? path;
   final List<StepModel> steps;
-
-  _StepsPageData({required this.path, required this.steps});
+  _PageData({required this.path, required this.steps});
 }

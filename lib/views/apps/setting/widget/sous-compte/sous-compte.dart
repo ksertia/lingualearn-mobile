@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fasolingo/models/child_model.dart';
 
+const Color _scOrange  = Color(0xFFFF7043);
+const Color _scOrange2 = Color(0xFFFFB74D);
+
 class SousCompte extends StatefulWidget {
   const SousCompte({super.key});
 
@@ -13,9 +16,7 @@ class SousCompte extends StatefulWidget {
 
 class _SousCompteState extends State<SousCompte> {
   final ChildrenController controller = Get.put(ChildrenController());
-
   final TextEditingController searchController = TextEditingController();
-
   final List<Map<String, dynamic>> hardcodedAccounts = const [];
 
   Future<void> _openCreateSubAccountSheet() async {
@@ -23,9 +24,7 @@ class _SousCompteState extends State<SousCompte> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _CreateSubAccountBottomSheet(
-        controller: controller,
-      ),
+      builder: (context) => _CreateSubAccountBottomSheet(controller: controller),
     );
   }
 
@@ -38,7 +37,6 @@ class _SousCompteState extends State<SousCompte> {
   List<ChildModel> _applySearch(List<ChildModel> data) {
     final q = searchController.text.trim().toLowerCase();
     if (q.isEmpty) return data;
-
     return data.where((e) {
       final full = e.displayName.toLowerCase();
       final email = (e.email ?? '').toLowerCase();
@@ -47,20 +45,90 @@ class _SousCompteState extends State<SousCompte> {
     }).toList();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      extendBodyBehindAppBar: true,
+      appBar: _buildAppBar(),
+      body: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Column(
+            children: [
+              _buildSearchField(),
+              const SizedBox(height: 14),
+              _buildInfoCard(),
+              const SizedBox(height: 4),
+              Expanded(child: _buildList()),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: _buildFab(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [_scOrange, _scOrange2],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
+        ),
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
+      ),
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 17),
+          ),
+        ),
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text(
+            'Mes Apprenants',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18),
+          ),
+          Text(
+            'Gerez vos sous-comptes',
+            style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSearchField() {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFF9C4), Color(0xFFE8F5E9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _scOrange.withValues(alpha: 0.18), width: 1.5),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 8,
-            offset: Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -68,313 +136,228 @@ class _SousCompteState extends State<SousCompte> {
         controller: searchController,
         onChanged: (_) => setState(() {}),
         decoration: InputDecoration(
-          hintText: 'Rechercher un apprenant',
-          prefixIcon: const Icon(Icons.search, color: Color(0xFFFFC107)),
-          filled: true,
-          fillColor: Colors.transparent,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          hintText: 'Rechercher un apprenant...',
+          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          prefixIcon: Icon(Icons.search_rounded, color: _scOrange.withValues(alpha: 0.7), size: 22),
+          filled: false,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         ),
       ),
     );
   }
 
-  Widget _buildAccountTile(ChildModel account, int index) {
-    final fullName = account.displayName;
-    final email = account.email;
-    final phone = account.phone;
-
-    final initial =
-        fullName.isNotEmpty ? fullName.characters.first.toUpperCase() : '?';
-
-    final subtitleLine = (email != null && email.trim().isNotEmpty)
-        ? '$email'
-        : (phone != null && phone.trim().isNotEmpty)
-            ? ' $phone'
-            : 'Aucun contact';
-
-    // Fun colors for each tile
-    final tileColors = [
-      const Color(0xFFFFF3E0), // Light orange
-      const Color(0xFFFFF9C4), // Light yellow
-      const Color(0xFFE3F2FD), // Light blue
-      const Color(0xFFFCE4EC), // Light pink
-      const Color(0xFFF3E5F5), // Light purple
-    ];
-    final color = tileColors[index % tileColors.length];
-
+  Widget _buildInfoCard() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _scOrange.withValues(alpha: 0.18), width: 1.5),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 10,
-            offset: Offset(0, 5),
-          )
+            color: _scOrange.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
       ),
       child: Row(
         children: [
           Container(
-            height: 50,
-            width: 50,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: _scOrange.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.people_alt_rounded, color: _scOrange, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Appuyez sur un apprenant pour gerer ses langues, ou + pour en ajouter un.',
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildList() {
+    return Obx(() {
+      final fallback = hardcodedAccounts
+          .map((e) => ChildModel.fromJson(e))
+          .where((e) => e.id.isNotEmpty)
+          .toList();
+      final source = controller.children.isNotEmpty
+          ? controller.children.toList()
+          : fallback;
+      final list = _applySearch(source);
+
+      if (controller.isFetching.value && controller.children.isEmpty) {
+        return const Center(
+          child: CircularProgressIndicator(color: _scOrange),
+        );
+      }
+
+      if (list.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: _scOrange.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.person_add_alt_1_rounded, color: _scOrange, size: 40),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Aucun apprenant trouve',
+                style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w700, fontSize: 16),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Ajoutez votre premier apprenant !',
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return RefreshIndicator(
+        color: _scOrange,
+        onRefresh: controller.fetchMyChildren,
+        child: ListView.separated(
+          padding: const EdgeInsets.only(bottom: 110),
+          itemCount: list.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final child = list[index];
+            return InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: () => Get.to(() => ChildLanguagesPage(child: child)),
+              child: _buildAccountTile(child),
+            );
+          },
+        ),
+      );
+    });
+  }
+
+  Widget _buildAccountTile(ChildModel account) {
+    final fullName = account.displayName;
+    final initial = fullName.isNotEmpty ? fullName.characters.first.toUpperCase() : '?';
+    final subtitle = (account.email != null && account.email!.trim().isNotEmpty)
+        ? account.email!
+        : (account.phone != null && account.phone!.trim().isNotEmpty)
+            ? account.phone!
+            : 'Aucun contact';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _scOrange.withValues(alpha: 0.15), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 48,
+            width: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [const Color(0xFFFF9800), const Color(0xFFFFC107)],
+              gradient: const LinearGradient(
+                colors: [_scOrange, _scOrange2],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              border: Border.all(color: Colors.white, width: 2),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x29000000),
-                  blurRadius: 6,
-                  offset: Offset(0, 3),
+                  color: _scOrange.withValues(alpha: 0.30),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
             alignment: Alignment.center,
             child: Text(
               initial,
-              style: const TextStyle(
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                fontSize: 18,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white, fontSize: 18),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      fullName.isEmpty ? 'Sans nom' : fullName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF1565C0),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Text('', style: TextStyle(fontSize: 14)),
-                  ],
-                ),
-                const SizedBox(height: 4),
                 Text(
-                  subtitleLine,
+                  fullName.isEmpty ? 'Sans nom' : fullName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade700,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade500, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          const Icon(Icons.chevron_right, color: Color(0xFFFF9800), size: 24),
+          const SizedBox(width: 8),
+          Icon(Icons.chevron_right_rounded, color: _scOrange.withValues(alpha: 0.6), size: 22),
         ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // backgroundColor: const Color(0xFFE3F2FD), // Light blue background for a fun feel
-      appBar: AppBar(
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: Icon(Icons.arrow_back_ios_new)),
-        title: const Text(
-          ' Mes Petits Apprenants',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1565C0),
-          ),
+  Widget _buildFab() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [_scOrange, _scOrange2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        //backgroundColor: const Color(0xFFE3F2FD),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: _scOrange.withValues(alpha: 0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: FloatingActionButton(
+        onPressed: _openCreateSubAccountSheet,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        //surfaceTintColor: const Color(0xFFE3F2FD),
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add_rounded, size: 30),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Column(
-            children: [
-              _buildSearchField(),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.orange.shade200,
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 8),
-                    Text(
-                      'Liste de mes apprenants',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.orange.shade800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Clique sur un apprenant pour gérer ses langues, ou utilise le bouton + pour en ajouter un nouveau et agrandir ta petite équipe !',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Obx(() {
-                  final fallback = hardcodedAccounts
-                      .map((e) => ChildModel.fromJson(e))
-                      .where((e) => e.id.isNotEmpty)
-                      .toList();
-                  final source = controller.children.isNotEmpty
-                      ? controller.children.toList()
-                      : fallback;
-                  final list = _applySearch(source);
-
-                  if (controller.isFetching.value &&
-                      controller.children.isEmpty) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  if (list.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            '',
-                            style: TextStyle(fontSize: 48),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Aucun apprenant trouvé',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Ajoute ton premier apprenant !',
-                            style: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return RefreshIndicator(
-                    onRefresh: controller.fetchMyChildren,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.only(bottom: 110),
-                      itemCount: list.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final child = list[index];
-                        return InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: () {
-                            Get.to(
-                              () => ChildLanguagesPage(child: child),
-                            );
-                          },
-                          child: _buildAccountTile(child, index),
-                        );
-                      },
-                    ),
-                  );
-                }),
-              ),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFF9800), Color(0xFFFFC107)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          shape: BoxShape.circle,
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x29000000),
-              blurRadius: 10,
-              offset: Offset(0, 5),
-            ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: _openCreateSubAccountSheet,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          foregroundColor: Colors.white,
-          child: const Icon(Icons.add, size: 32),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
 
 class _CreateSubAccountBottomSheet extends StatefulWidget {
   final ChildrenController controller;
-
-  const _CreateSubAccountBottomSheet({
-    required this.controller,
-  });
+  const _CreateSubAccountBottomSheet({required this.controller});
 
   @override
   State<_CreateSubAccountBottomSheet> createState() =>
@@ -388,7 +371,6 @@ class _CreateSubAccountBottomSheetState
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -403,7 +385,6 @@ class _CreateSubAccountBottomSheetState
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-
     final ok = await widget.controller.createSubAccount(
       firstName: firstNameController.text.trim(),
       lastName: lastNameController.text.trim(),
@@ -411,9 +392,30 @@ class _CreateSubAccountBottomSheetState
       email: emailController.text,
       phone: phoneController.text,
     );
-
     if (!mounted) return;
     if (ok) Navigator.of(context).pop();
+  }
+
+  InputDecoration _fieldDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: _scOrange, size: 20),
+      filled: true,
+      fillColor: Colors.grey.shade50,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: _scOrange, width: 1.5),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    );
   }
 
   @override
@@ -421,17 +423,12 @@ class _CreateSubAccountBottomSheetState
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: 16 + bottomInset,
-      ),
+      padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 20 + bottomInset),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
       ),
       child: Form(
@@ -441,75 +438,94 @@ class _CreateSubAccountBottomSheetState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Créer un nouvel apprenti',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1565C0)),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _scOrange.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.person_add_rounded, color: _scOrange, size: 20),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Creer un apprenant',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
+                  ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close_rounded, color: Colors.grey.shade500),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 18),
             TextFormField(
               controller: firstNameController,
-              decoration: const InputDecoration(labelText: 'Prénom'),
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Prénom obligatoire';
-                return null;
-              },
+              decoration: _fieldDecoration('Prenom', Icons.badge_outlined),
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Prenom obligatoire' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: lastNameController,
-              decoration: const InputDecoration(labelText: 'Nom'),
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Nom obligatoire';
-                return null;
-              },
+              decoration: _fieldDecoration('Nom', Icons.badge_outlined),
+              validator: (v) => (v == null || v.trim().isEmpty) ? 'Nom obligatoire' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: passwordController,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Mot de passe'),
-              validator: (v) {
-                if (v == null || v.isEmpty) return 'Mot de passe obligatoire';
-                return null;
-              },
+              decoration: _fieldDecoration('Mot de passe', Icons.lock_outline_rounded),
+              validator: (v) => (v == null || v.isEmpty) ? 'Mot de passe obligatoire' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email (optionnel)'),
+              decoration: _fieldDecoration('Email (optionnel)', Icons.email_outlined),
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: phoneController,
-              decoration:
-                  const InputDecoration(labelText: 'Téléphone (optionnel)'),
+              decoration: _fieldDecoration('Telephone (optionnel)', Icons.phone_outlined),
               keyboardType: TextInputType.phone,
             ),
-            const SizedBox(height: 16),
-            Obx(
-              () => ElevatedButton(
-                onPressed: widget.controller.isLoading.value ? null : _submit,
-                child: widget.controller.isLoading.value
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Créer'),
+            const SizedBox(height: 20),
+            Obx(() => GestureDetector(
+              onTap: widget.controller.isLoading.value ? null : _submit,
+              child: Container(
+                height: 52,
+                decoration: BoxDecoration(
+                  gradient: widget.controller.isLoading.value
+                      ? null
+                      : const LinearGradient(
+                          colors: [_scOrange, _scOrange2],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                  color: widget.controller.isLoading.value ? Colors.grey.shade300 : null,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: widget.controller.isLoading.value
+                      ? []
+                      : [BoxShadow(color: _scOrange.withValues(alpha: 0.30), blurRadius: 10, offset: const Offset(0, 4))],
+                ),
+                child: Center(
+                  child: widget.controller.isLoading.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                        )
+                      : const Text(
+                          'Creer le compte',
+                          style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800),
+                        ),
+                ),
               ),
-            ),
+            )),
           ],
         ),
       ),

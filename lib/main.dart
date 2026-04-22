@@ -110,7 +110,7 @@ class _MyAppState extends State<MyApp> {
             darkTheme: AppTheme.darkTheme,
             defaultTransition: Transition.native,
             navigatorKey: NavigationService.navigatorKey,
-            initialRoute: "/splash", // Ta page d'onboarding/splash
+            initialRoute: "/Onboarding",
             themeMode: LocalStorage.getTheme() == "Dark"
                 ? ThemeMode.dark
                 : ThemeMode.light,

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -7,16 +6,18 @@ import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
 import 'package:fasolingo/helpers/services/module_service.dart';
 import 'package:fasolingo/models/modules/modul_model.dart';
 
+// kept for backward compat (parcours.dart imports primaryBlue from here)
 const Color colorProBlue = Color(0xFF00008B);
 const Color primaryBlue = Color(0xFF00CED1);
-const Color colorCompleted = Color(0xFF81C784);
-const Color orangeAccent = Color(0xFFFF9800);
-const Color colorLocked = Color(0xFF9E9E9E);
+
+const Color _kCompleted = Color(0xFF22C55E);
+const Color _kActive = Color(0xFFFF7043);
+const Color _kLocked = Color(0xFF9E9E9E);
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  final Map<int, String> moduleAnimals = const {
+  static const Map<int, String> _animals = {
     0: 'assets/lottie/poulet.json',
     1: 'assets/lottie/elephant.json',
     2: 'assets/lottie/cat.json',
@@ -35,353 +36,396 @@ class HomePage extends StatelessWidget {
     15: 'assets/lottie/buffalo.json',
   };
 
-  String _getAnimal(int index) =>
-      moduleAnimals[index % moduleAnimals.length] ?? 'assets/lottie/Lion.json';
+  String _animal(int i) =>
+      _animals[i % _animals.length] ?? 'assets/lottie/Lion.json';
+
+  Color _accent(String s) {
+    if (s == 'completed') return _kCompleted;
+    if (s == 'unlocked') return _kActive;
+    return _kLocked;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final HomeController controller = Get.put(HomeController());
+    final controller = Get.put(HomeController());
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.orangeAccent,
-        foregroundColor: Colors.black87,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Get.back(),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              'Liste des modules',
-              style: TextStyle(
-                color: Colors.black87,
-                fontWeight: FontWeight.w900,
-                fontSize: 20,
-              ),
-            ),
-            SizedBox(height: 2),
-            Text(
-              'Choisis le prochain défi',
-              style: TextStyle(
-                color: Colors.black87,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
+      extendBodyBehindAppBar: true,
+      appBar: _appBar(),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/app/plan1.png'),
             fit: BoxFit.cover,
           ),
         ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(25, 20, 25, 10),
-              child: Text(
-                'Les modules',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  color: colorProBlue,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return _buildShimmerLoading();
-                }
+        child: Obx(() {
+          if (controller.isLoading.value) return _shimmer();
 
-                if (controller.filteredModules.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.info_outline,
-                            size: 50, color: Colors.grey),
-                        const SizedBox(height: 10),
-                        const Text("Aucun module trouvé."),
-                        const SizedBox(height: 15),
-                        ElevatedButton(
-                            onPressed: () => controller.loadModules(),
-                            child: const Text("Réessayer"))
-                      ],
+          if (controller.filteredModules.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      shape: BoxShape.circle,
                     ),
-                  );
-                }
+                    child: Icon(Icons.info_outline,
+                        size: 40, color: Colors.grey.shade400),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text('Aucun module trouvé.',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 14),
+                  ElevatedButton(
+                    onPressed: controller.loadModules,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _kActive,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: const Text('Réessayer'),
+                  ),
+                ],
+              ),
+            );
+          }
 
-                return RefreshIndicator(
-                  onRefresh: () => controller.onRefresh(),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(25, 35, 25, 40),
-                    itemCount: controller.filteredModules.length,
-                    itemBuilder: (context, index) {
-                      final module = controller.filteredModules[index];
-                      bool isLast =
-                          index == controller.filteredModules.length - 1;
+          return RefreshIndicator(
+            onRefresh: controller.onRefresh,
+            color: _kActive,
+            child: ListView.builder(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                MediaQuery.of(context).padding.top + kToolbarHeight + 18,
+                20,
+                40,
+              ),
+              itemCount: controller.filteredModules.length,
+              itemBuilder: (_, index) {
+                final module = controller.filteredModules[index];
+                final bool isLast =
+                    index == controller.filteredModules.length - 1;
+                final String st =
+                    (controller.moduleDisplayStatus[module.id] ?? 'locked')
+                        .toLowerCase();
+                final bool isUnlocked =
+                    st == 'unlocked' || st == 'started' || st == 'completed';
+                final accent = _accent(st);
 
-                      final String moduleStatus =
-                          (controller.moduleDisplayStatus[module.id] ?? 'locked')
-                              .toLowerCase();
-
-                      bool isCompleted = moduleStatus == "completed";
-                      bool isUnlocked = moduleStatus == "unlocked" ||
-                          moduleStatus == "started" ||
-                          moduleStatus == "completed";
-                      bool isLocked = moduleStatus == "locked";
-
-                      return IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                return IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 44,
+                        child: Column(
                           children: [
-                            Column(
-                              children: [
-                                _buildTimelineIcon(moduleStatus),
-                                if (!isLast)
-                                  Expanded(
-                                    child: Container(
-                                      width: 6,
-                                      margin: const EdgeInsets.symmetric(
-                                          vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: isUnlocked
-                                            ? (isCompleted
-                                                    ? primaryBlue
-                                                    : orangeAccent)
-                                                .withOpacity(0.3)
-                                            : colorLocked.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(10),
+                            _timelineNode(st, accent),
+                            if (!isLast)
+                              Expanded(
+                                child: Center(
+                                  child: Container(
+                                    width: 3,
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          accent.withValues(alpha: 0.55),
+                                          accent.withValues(alpha: 0.08),
+                                        ],
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
                                       ),
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
                                   ),
-                              ],
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 40),
-                                child: _buildKidCard(
-                                    controller, module, moduleStatus, index),
+                                ),
                               ),
-                            ),
                           ],
                         ),
-                      );
-                    },
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: _moduleCard(controller, module, st, isUnlocked,
+                              accent, index),
+                        ),
+                      ),
+                    ],
                   ),
                 );
-              }),
+              },
             ),
-          ],
-        ),
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildTimelineIcon(String moduleStatus) {
-    IconData iconData = Icons.lock_rounded;
-    Color iconColor = colorLocked;
+  PreferredSizeWidget _appBar() {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFF7043), Color(0xFFFFB74D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+        ),
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+      ),
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: GestureDetector(
+          onTap: Get.back,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.arrow_back_ios_new,
+                color: Colors.white, size: 17),
+          ),
+        ),
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text('Mes Modules',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18)),
+          Text('Choisis ton prochain défi',
+              style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
 
-    if (moduleStatus == "completed") {
-      iconData = Icons.check_circle_rounded;
-      iconColor = colorCompleted;
-    } else if (moduleStatus == "unlocked") {
-      iconData = Icons.play_circle_filled_rounded;
-      iconColor = orangeAccent;
+  Widget _timelineNode(String status, Color accent) {
+    IconData icon;
+    if (status == 'completed') {
+      icon = Icons.check_circle_rounded;
+    } else if (status == 'unlocked') {
+      icon = Icons.play_circle_filled_rounded;
+    } else {
+      icon = Icons.lock_rounded;
     }
-
     return Container(
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: [
-          if (moduleStatus != "locked")
+          if (status != 'locked')
             BoxShadow(
-                color: iconColor.withOpacity(0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 5))
+              color: accent.withValues(alpha: 0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
         ],
       ),
-      child: Icon(iconData, color: iconColor, size: 42),
+      child: Icon(icon, color: accent, size: 44),
     );
   }
 
-  Widget _buildKidCard(HomeController controller, ModuleModel module,
-      String moduleStatus, int index) {
-    final String status = moduleStatus.toLowerCase();
-
-    Color mainColor;
-    if (status == "completed") {
-      mainColor = colorCompleted;
-    } else if (status == "unlocked" ||
-        status == "started" ||
-        status == "en cours") {
-      mainColor = orangeAccent;
-    } else {
-      mainColor = colorLocked;
-    }
-
-    bool isUnlocked = status == "unlocked" ||
-        status == "started" ||
-        status == "completed" ||
-        status == "en cours";
-
+  Widget _moduleCard(
+    HomeController controller,
+    ModuleModel module,
+    String st,
+    bool isUnlocked,
+    Color accent,
+    int index,
+  ) {
     return GestureDetector(
       onTap: !isUnlocked
-          ? () => Get.snackbar("Oups ! 🔒",
-              "Termine le module précédent pour débloquer celui-ci.")
+          ? () => Get.snackbar(
+                'Oups ! 🔒',
+                'Termine le module précédent pour débloquer celui-ci.',
+                backgroundColor: Colors.black87,
+                colorText: Colors.white,
+                snackPosition: SnackPosition.BOTTOM,
+                margin: const EdgeInsets.all(16),
+                borderRadius: 16,
+              )
           : () async {
               final userId = controller.session.userId.value.isNotEmpty
                   ? controller.session.userId.value
                   : (controller.session.user?.id ?? '');
-
-              if (userId.isNotEmpty && status == 'unlocked') {
-                await ModuleService.startModule(userId: userId, moduleId: module.id);
+              final raw = (module.progress?.status ?? module.status ?? '')
+                  .toLowerCase();
+              if (userId.isNotEmpty && raw == 'unlocked') {
+                await ModuleService.startModule(
+                    userId: userId, moduleId: module.id);
               }
-
-              final res = await Get.toNamed('/parcoursselectionpage',
-                  arguments: {
-                    'moduleId': module.id,
-                    'userId': userId,
-                    'moduleLottie': _getAnimal(index),
-                  });
-              if (res == true || res == 'completed' || res == 'finished') {
-                controller.onModuleCompleted(module.id);
-              }
+              await Get.toNamed('/parcoursselectionpage', arguments: {
+                'moduleId': module.id,
+                'userId': userId,
+                'moduleLottie': _animal(index),
+              });
+              await controller.loadModules();
             },
       child: Container(
-        height: 120,
+        height: 110,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: mainColor.withOpacity(0.5), width: 2.5),
+          color: Colors.white.withValues(alpha: 0.93),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: accent.withValues(alpha: 0.25), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: mainColor.withOpacity(0.15),
-              offset: const Offset(0, 10),
-              blurRadius: 0,
+              color: accent.withValues(alpha: 0.15),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(21),
           child: Stack(
-            clipBehavior: Clip.hardEdge,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 80),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              status == "completed"
-                                  ? "BIEN JOUÉ !"
-                                  : isUnlocked
-                                      ? "EN COURS"
-                                      : "À DÉBLOQUER",
-                              style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w900,
-                                  color: mainColor,
-                                  letterSpacing: 1),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              module.title.toUpperCase(),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 16,
-                                  color:
-                                      isUnlocked ? colorProBlue : colorLocked),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              isUnlocked
-                                  ? module.description
-                                  : "Continue pour découvrir...",
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  color: Colors.grey[600], fontSize: 13),
-                            ),
-                          ],
+              // Left accent strip
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(width: 5, color: accent),
+              ),
+              // Text content
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 12, 98, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: Text(
+                          st == 'completed'
+                              ? 'TERMINÉ'
+                              : isUnlocked
+                                  ? 'EN COURS'
+                                  : 'VERROUILLÉ',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: accent,
+                            letterSpacing: 0.8,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 6),
+                      Text(
+                        module.title.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          color: isUnlocked
+                              ? const Color(0xFF1A1A1A)
+                              : Colors.grey.shade500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        isUnlocked
+                            ? module.description
+                            : 'Continue pour découvrir...',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 12,
+                            height: 1.3),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-
+              // Lottie
               Positioned(
-                right: 8,
-                bottom: 10,
-                child: Container(
-                  width: 110,
-                  alignment: Alignment.bottomCenter,
-                  child: Opacity(
-                    opacity: isUnlocked ? 1.0 : 0.2,
-                    child: ColorFiltered(
-                      colorFilter: isUnlocked
-                          ? const ColorFilter.mode(
-                              Colors.transparent, BlendMode.multiply)
-                          : const ColorFilter.mode(
-                              Colors.grey, BlendMode.srcIn),
-                      child: Lottie.asset(
-                        _getAnimal(index),
-                        height: 90,
-                        animate: isUnlocked,
-                        fit: BoxFit.contain,
+                right: 6,
+                bottom: 6,
+                top: 0,
+                child: SizedBox(
+                  width: 88,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Opacity(
+                      opacity: isUnlocked ? 1.0 : 0.15,
+                      child: ColorFiltered(
+                        colorFilter: isUnlocked
+                            ? const ColorFilter.mode(
+                                Colors.transparent, BlendMode.multiply)
+                            : const ColorFilter.mode(
+                                Colors.grey, BlendMode.srcIn),
+                        child: Lottie.asset(
+                          _animal(index),
+                          height: 86,
+                          animate: isUnlocked,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-
+              // Lock icon overlay
               if (!isUnlocked)
                 Positioned(
-                  right: 35,
+                  right: 30,
                   top: 0,
                   bottom: 0,
                   child: Center(
                     child: Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(7),
                       decoration: const BoxDecoration(
                           color: Colors.white, shape: BoxShape.circle),
                       child: const Icon(Icons.lock_rounded,
-                          color: Colors.grey, size: 22),
+                          color: Colors.grey, size: 18),
                     ),
                   ),
                 ),
-
-              if (status == "unlocked" || status == "en cours")
+              // Play button for unlocked
+              if (st == 'unlocked')
                 Positioned(
-                  bottom: 12,
-                  right: 12,
+                  right: 8,
+                  bottom: 8,
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(200),
-                        shape: BoxShape.circle,
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black12, blurRadius: 4)
-                        ]),
-                    child: Icon(Icons.play_circle_fill,
-                        color: mainColor, size: 35),
+                      color: Colors.white.withValues(alpha: 0.85),
+                      shape: BoxShape.circle,
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black12, blurRadius: 4)
+                      ],
+                    ),
+                    child:
+                        Icon(Icons.play_circle_fill, color: accent, size: 32),
                   ),
                 ),
             ],
@@ -391,25 +435,28 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildShimmerLoading() {
+  Widget _shimmer() {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(25, 35, 25, 40),
+      padding: const EdgeInsets.fromLTRB(20, 120, 20, 40),
       itemCount: 5,
-      itemBuilder: (context, index) => Shimmer.fromColors(
+      itemBuilder: (_, __) => Shimmer.fromColors(
         baseColor: Colors.grey[300]!,
         highlightColor: Colors.grey[100]!,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 40),
+          padding: const EdgeInsets.only(bottom: 24),
           child: Row(
             children: [
-              const CircleAvatar(radius: 20, backgroundColor: Colors.white),
-              const SizedBox(width: 20),
+              const CircleAvatar(radius: 22, backgroundColor: Colors.white),
+              const SizedBox(width: 14),
               Expanded(
-                  child: Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(25)))),
+                child: Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

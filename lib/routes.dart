@@ -8,14 +8,12 @@ import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/langue_decouvert.dart';
 import 'package:fasolingo/views/apps/decouvrir/selection_langues_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/step_mascotte.dart';
+import 'package:fasolingo/views/apps/history/history_page.dart';
 import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
 import 'package:fasolingo/views/apps/home/home.dart';
 import 'package:fasolingo/views/apps/home/home_page.dart';
 import 'package:fasolingo/views/apps/home/screens/parcours.dart';
 import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
-
-import 'package:fasolingo/views/apps/lexique/lexique_page.dart';
-
 import 'package:fasolingo/views/apps/profile/edit_profile.dart';
 import 'package:fasolingo/views/apps/profile/profile.dart';
 import 'package:fasolingo/views/apps/progres/progres_page.dart';
@@ -35,7 +33,6 @@ import 'package:fasolingo/widgets/decouvrir_page/and_page.dart';
 import 'package:fasolingo/widgets/stepsscreens/quiz_step_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'helpers/services/auth_services.dart';
 import 'views/error_pages/coming_soon_page.dart';
 import 'views/error_pages/error_404.dart';
 import 'views/error_pages/error_500.dart';
@@ -45,24 +42,21 @@ import 'controller/apps/session_controller.dart';
 class AuthMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
-    // Les routes d'authentification sont toujours accessibles
     if (route == '/login' ||
         route == '/register' ||
         route == '/numberphone' ||
         route == '/otpCode' ||
         route == '/newPassword' ||
         route == '/splash') {
-      print("✅ Autorisation route d'auth: $route");
+      print("Autorisation route d'auth: $route");
       return null;
     }
-
-    // Pour les autres routes, vérifier la session
     final session = Get.find<SessionController>();
     if (session.userId.value.isEmpty || session.token.value.isEmpty) {
-      print("🚫 Redirection forcée vers /login (session vide)");
+      print("Redirection forcée vers /login (session vide)");
       return const RouteSettings(name: '/login');
     }
-    print("✅ Autorisation route protégée: $route");
+    print("Autorisation route protégée: $route");
     return null;
   }
 }
@@ -81,7 +75,9 @@ getPageRoute() {
     GetPage(name: '/step', page: () => const StepMascotte()),
     GetPage(name: '/selection', page: () => const LanguageSelectionPage()),
     GetPage(name: '/souscomptes', page: () => const SousCompte()),
-    GetPage(name: '/children_progress', page: () => const ChildrenProgressListPage()),
+    GetPage(
+        name: '/children_progress',
+        page: () => const ChildrenProgressListPage()),
 
     GetPage(name: '/stepsscreens', page: () => const StepsScreensPages()),
     GetPage(
@@ -107,10 +103,7 @@ getPageRoute() {
     ),
 
     GetPage(name: '/bienvenue', page: () => const BienvenuPage()),
-     GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
-
-
-
+    GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
 
     GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
 
@@ -126,7 +119,7 @@ getPageRoute() {
         middlewares: [AuthMiddleware()]),
     GetPage(
         name: '/lexique',
-        page: () => LexiquePage(),
+        page: () => HistoryPage(),
         middlewares: [AuthMiddleware()]),
     GetPage(
         name: '/progres',

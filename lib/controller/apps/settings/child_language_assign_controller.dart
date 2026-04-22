@@ -13,9 +13,25 @@ class ChildLanguageAssignController extends MyController {
 
   final RxList<LanguageModel> languages = <LanguageModel>[].obs;
   final RxList<LevelModel> levels = <LevelModel>[].obs;
+  final RxSet<String> enrolledLanguageIds = <String>{}.obs;
 
   final Rxn<LanguageModel> selectedLanguage = Rxn<LanguageModel>();
   final RxString selectedLevelId = ''.obs;
+
+  Future<void> fetchEnrolledLanguages(String childId) async {
+    try {
+      final session = Get.find<SessionController>();
+      final res = await LanguagesService.getChildProgress(childId, token: session.token.value);
+      if (res != null) {
+        enrolledLanguageIds.assignAll(
+          res.data
+              .map((item) => item.language?.id ?? '')
+              .where((id) => id.isNotEmpty)
+              .toSet(),
+        );
+      }
+    } catch (_) {}
+  }
 
   Future<void> fetchLanguages() async {
     try {

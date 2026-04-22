@@ -4,6 +4,12 @@ import 'package:lottie/lottie.dart';
 import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
 import 'package:fasolingo/controller/apps/session_controller.dart';
 
+const Color _prOrange  = Color(0xFFFF7043);
+const Color _prOrange2 = Color(0xFFFFB74D);
+const Color _prGreen   = Color(0xFF22C55E);
+const Color _prBlue    = Color(0xFF0EA5E9);
+const Color _prLocked  = Color(0xFF9E9E9E);
+
 class ProgresPage extends StatefulWidget {
   const ProgresPage({super.key});
 
@@ -12,7 +18,6 @@ class ProgresPage extends StatefulWidget {
 }
 
 class _ProgresPageState extends State<ProgresPage> {
-
   String languageName = 'Langue';
   String levelName = 'Niveau';
   bool isLoadingProgression = true;
@@ -38,43 +43,32 @@ class _ProgresPageState extends State<ProgresPage> {
     try {
       final langController = Get.find<LanguagesController>();
       final session = Get.find<SessionController>();
-
       final progression = await langController.loadProgression();
 
       if (progression != null && mounted) {
-
         if (progression['language'] != null) {
           languageName = progression['language']['name'] ?? 'Langue';
         }
-
         if (progression['overallProgress'] != null) {
           final overall = progression['overallProgress'];
           totalXp = overall['totalXp'] ?? 0;
           totalTimeSpent = overall['totalTimeMinutes'] ?? 0;
         }
-
         if (progression['levels'] != null) {
           final levels = progression['levels'] as List;
-          String selectedId = session.selectedLevelId.value;
-
+          final selectedId = session.selectedLevelId.value;
           for (var level in levels) {
             if (level['id']?.toString() == selectedId) {
-
               levelName = level['name'] ?? 'Niveau';
-
               if (level['userProgress'] != null) {
                 currentLevelXp = level['userProgress']['totalXp'] ?? 0;
               }
-
               if (level['modules'] != null) {
                 for (var module in level['modules']) {
                   totalModules++;
-
                   String status = 'locked';
-
                   if (module['userProgress'] != null) {
                     status = module['userProgress']['status'] ?? 'locked';
-
                     if (status == 'completed') {
                       completedModules++;
                     } else if (status == 'started' || status == 'unlocked') {
@@ -82,7 +76,6 @@ class _ProgresPageState extends State<ProgresPage> {
                     } else {
                       lockedModules++;
                     }
-
                     if (module['userProgress']['quizScore'] != null) {
                       quizScore = module['userProgress']['quizScore'];
                     }
@@ -95,10 +88,9 @@ class _ProgresPageState extends State<ProgresPage> {
             }
           }
         }
-
         setState(() => isLoadingProgression = false);
       }
-    } catch (e) {
+    } catch (_) {
       setState(() => isLoadingProgression = false);
     }
   }
@@ -107,206 +99,188 @@ class _ProgresPageState extends State<ProgresPage> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFFFF9C4), // jaune pastel
-              Color(0xFFE1F5FE), // bleu clair
-              Color(0xFFE8F5E9), // vert pastel
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+    if (isLoadingProgression) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: _prOrange),
         ),
-        child: isLoadingProgression
-            ? const Center(child: CircularProgressIndicator())
-            : SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
+      );
+    }
 
-              _buildHeader(),
-
-              const SizedBox(height: 25),
-
-              _buildStats(),
-
-              const SizedBox(height: 30),
-
-              Padding(
-                padding: EdgeInsets.only(
-                  bottom: bottomInset + 10,
-                ),
-                child: _buildAdventure(),
-              ),
-            ],
+    return Scaffold(
+      backgroundColor: const Color(0xFFF6F7F9),
+      body: SafeArea(
+        bottom: false,
+        child: RefreshIndicator(
+          color: _prOrange,
+          onRefresh: () async {
+            setState(() {
+              isLoadingProgression = true;
+              totalXp = 0; totalTimeSpent = 0; quizScore = 0;
+              currentLevelXp = 0; completedModules = 0;
+              inProgressModules = 0; lockedModules = 0; totalModules = 0;
+            });
+            await _loadProgressionData();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset + 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeroCard(),
+                const SizedBox(height: 22),
+                _buildSectionTitle('Mes exploits', Icons.emoji_events_rounded, _prOrange),
+                const SizedBox(height: 12),
+                _buildStatsRow(),
+                const SizedBox(height: 22),
+                _buildSectionTitle('Progression des modules', Icons.bar_chart_rounded, _prBlue),
+                const SizedBox(height: 12),
+                _buildModuleProgress(),
+                const SizedBox(height: 22),
+                _buildSectionTitle('Repartition', Icons.pie_chart_rounded, _prGreen),
+                const SizedBox(height: 12),
+                _buildRings(),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  /// ================= HEADER =================
-  Widget _buildHeader() {
-    double progress = currentLevelXp / targetXp;
+  Widget _buildSectionTitle(String title, IconData icon, Color color) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: color, size: 16),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF1A1A1A),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeroCard() {
+    final progress = (currentLevelXp / targetXp).clamp(0.0, 1.0);
+    final pct = (progress * 100).round();
 
     return Container(
-      margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFFFFD54F), // jaune fun
-            Color(0xFF4FC3F7), // bleu ciel
-          ],
+          colors: [_prOrange, _prOrange2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withOpacity(0.3),
-            blurRadius: 15,
-          )
+            color: _prOrange.withValues(alpha: 0.35),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Ma Progression',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _heroChip(languageName, Icons.language_rounded),
+                        const SizedBox(width: 8),
+                        _heroChip(levelName, Icons.layers_rounded),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Lottie.asset('assets/lottie/mascot.json', width: 72, height: 72),
+            ],
+          ),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  const Text(
-                    "Ma Progression",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  Row(
-                    children: [
-                      _chip(languageName),
-                      const SizedBox(width: 10),
-                      _chip(levelName),
-                    ],
-                  ),
-                ],
+              Text(
+                'XP du niveau',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 13),
               ),
-
-              SizedBox(
-                width: 70,
-                height: 70,
-                child: Lottie.asset('assets/lottie/mascot.json'),
-              )
+              Text(
+                '$currentLevelXp / $targetXp XP',
+                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+              ),
             ],
           ),
-
-          const SizedBox(height: 20),
-
-          Stack(
-            children: [
-              Container(
-                height: 25,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Colors.white.withOpacity(0.3),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              children: [
+                Container(
+                  height: 12,
+                  color: Colors.white.withValues(alpha: 0.25),
                 ),
-              ),
-              FractionallySizedBox(
-                widthFactor: progress.clamp(0.0, 1.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: const LinearGradient(
-                      colors: [Colors.yellow, Colors.green],
+                FractionallySizedBox(
+                  widthFactor: progress,
+                  child: Container(
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
-              ),
-              Positioned.fill(
-                child: Center(
-                  child: Text(
-                    "$currentLevelXp / $targetXp XP",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              )
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          Text("Encore ${targetXp - currentLevelXp} XP 🔥"),
-
-          const SizedBox(height: 20),
-
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF7043),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: const Text(
-                "Continuer",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _chip(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(text),
-    );
-  }
-
-  /// ================= STATS =================
-  Widget _buildStats() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          const Text(
-            "🏆 Tes exploits",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 15),
-
+          const SizedBox(height: 10),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _statCard("⭐", "$totalXp XP", const Color(0xFFFFEB3B)),
-              const SizedBox(width: 12),
-              _statCard("🔥", "$totalTimeSpent min", const Color(0xFFFF9800)),
-              const SizedBox(width: 12),
-              _statCard("🎯", "$quizScore%", const Color(0xFF42A5F5)),
+              Text(
+                'Encore ${targetXp - currentLevelXp} XP pour le prochain niveau',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.80), fontSize: 12),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$pct%',
+                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800),
+                ),
+              ),
             ],
           ),
         ],
@@ -314,90 +288,232 @@ class _ProgresPageState extends State<ProgresPage> {
     );
   }
 
-  Widget _statCard(String icon, String text, Color color) {
+  Widget _heroChip(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 13),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsRow() {
+    return Row(
+      children: [
+        _statCard(Icons.bolt_rounded, '$totalXp XP', 'Total XP', _prOrange),
+        const SizedBox(width: 12),
+        _statCard(Icons.timer_rounded, '${totalTimeSpent}m', 'Temps', _prBlue),
+        const SizedBox(width: 12),
+        _statCard(Icons.quiz_rounded, '$quizScore%', 'Quiz', _prGreen),
+      ],
+    );
+  }
+
+  Widget _statCard(IconData icon, String value, String label, Color color) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              color.withOpacity(0.3),
-              Colors.white,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(22),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: color.withValues(alpha: 0.15), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-            )
+              color: color.withValues(alpha: 0.10),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
+            ),
           ],
         ),
         child: Column(
           children: [
-            Text(icon, style: const TextStyle(fontSize: 30)),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
             const SizedBox(height: 10),
-            Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// ================= 🎮 AVENTURE =================
-  Widget _buildAdventure() {
-    double completed = totalModules > 0 ? completedModules / totalModules : 0;
-    double progress = totalModules > 0 ? inProgressModules / totalModules : 0;
-    double locked = totalModules > 0 ? lockedModules / totalModules : 0;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 5, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          const Text(
-            "🎮 Ton aventure magique",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 15),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _circle("🧭", "Progression", completed, const Color(0xFF42A5F5)),
-              _circle("🔥", "En cours", progress, const Color(0xFFFF7043)),
-              _circle("🔒", "Restant", locked, const Color(0xFFBDBDBD)),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget _circle(String icon, String label, double value, Color color) {
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              height: 80,
-              width: 80,
-              child: CircularProgressIndicator(
-                value: value,
-                strokeWidth: 9,
-                backgroundColor: color.withOpacity(0.15),
-                valueColor: AlwaysStoppedAnimation<Color>(color),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: color,
               ),
             ),
-            Text(icon, style: const TextStyle(fontSize: 20)),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade500, fontWeight: FontWeight.w600),
+            ),
           ],
         ),
-        const SizedBox(height: 8),
-        Text(label),
+      ),
+    );
+  }
+
+  Widget _buildModuleProgress() {
+    final items = [
+      _ModuleStat('Termines', completedModules, totalModules, _prGreen, Icons.check_circle_rounded),
+      _ModuleStat('En cours', inProgressModules, totalModules, _prOrange, Icons.play_circle_rounded),
+      _ModuleStat('Verrouilles', lockedModules, totalModules, _prLocked, Icons.lock_rounded),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 12, offset: const Offset(0, 5)),
+        ],
+      ),
+      child: Column(
+        children: items.map((item) {
+          final fraction = totalModules > 0 ? item.count / totalModules : 0.0;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: item.color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(item.icon, color: item.color, size: 16),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            item.label,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A)),
+                          ),
+                          Text(
+                            '${item.count} / $totalModules',
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: LinearProgressIndicator(
+                          value: fraction.clamp(0.0, 1.0),
+                          minHeight: 7,
+                          backgroundColor: Colors.grey.shade100,
+                          valueColor: AlwaysStoppedAnimation<Color>(item.color),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildRings() {
+    final completedFrac = totalModules > 0 ? completedModules / totalModules : 0.0;
+    final progressFrac  = totalModules > 0 ? inProgressModules / totalModules : 0.0;
+    final lockedFrac    = totalModules > 0 ? lockedModules / totalModules : 0.0;
+
+    return Row(
+      children: [
+        _ringCard('Termines', completedModules, completedFrac, _prGreen),
+        const SizedBox(width: 12),
+        _ringCard('En cours', inProgressModules, progressFrac, _prOrange),
+        const SizedBox(width: 12),
+        _ringCard('Verrouilles', lockedModules, lockedFrac, _prLocked),
       ],
     );
   }
+
+  Widget _ringCard(String label, int count, double value, Color color) {
+    final pct = (value * 100).round();
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: color.withValues(alpha: 0.15), width: 1.5),
+          boxShadow: [
+            BoxShadow(color: color.withValues(alpha: 0.08), blurRadius: 10, offset: const Offset(0, 4)),
+          ],
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 72,
+              width: 72,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: value.clamp(0.0, 1.0),
+                    strokeWidth: 7,
+                    backgroundColor: color.withValues(alpha: 0.12),
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  ),
+                  Text(
+                    '$pct%',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '$count',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: color),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade500, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ModuleStat {
+  final String label;
+  final int count;
+  final int total;
+  final Color color;
+  final IconData icon;
+  const _ModuleStat(this.label, this.count, this.total, this.color, this.icon);
 }

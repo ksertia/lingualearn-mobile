@@ -23,7 +23,6 @@ class _SettingScreenState extends State<SettingScreen>
   final controller = Get.put(SettingsController());
   String firstName = LocalStorage.getUserName() ?? "Champion";
 
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -64,37 +63,36 @@ class _SettingScreenState extends State<SettingScreen>
                           _buildDarkModeSetting(),
 
                           // --- GÉRER ABONNEMENT ---
-                          _buildSettingsItem(
-                            iconWidget: Icon(Icons.person,
-                                color: contentTheme.black, size: 24),
-                            title: 'Sous comptes',
-                            onTap: () {
-                              Get.toNamed('/souscomptes');
-                            },
-                          ),
-
-                          _buildSettingsItem(
-                            iconWidget: Icon(Icons.bar_chart,
-                                color: contentTheme.black, size: 24),
-                            title: 'Parcours des sous comptes',
-                            onTap: () {
-                              Get.toNamed('/children_progress');
-                            },
-                          ),
-
-                          _buildSettingsItem(
-                            iconWidget: Icon(Icons.credit_card_rounded,
-                                color: contentTheme.black, size: 24),
-                            title: 'Gérer mon abonnement',
-                            onTap: () {
-                              Get.toNamed('/subscription_details');
-                            },
-                          ),
+                          if (controller.user.value?.accountType !=
+                              'sub_account_learner') ...[
+                            _buildSettingsItem(
+                              iconWidget: Icon(Icons.person,
+                                  color: contentTheme.black, size: 24),
+                              title: 'Sous comptes',
+                              onTap: () {
+                                Get.toNamed('/souscomptes');
+                              },
+                            ),
+                            _buildSettingsItem(
+                              iconWidget: Icon(Icons.bar_chart,
+                                  color: contentTheme.black, size: 24),
+                              title: 'Parcours des sous comptes',
+                              onTap: () {
+                                Get.toNamed('/children_progress');
+                              },
+                            ),
+                            _buildSettingsItem(
+                              iconWidget: Icon(Icons.credit_card_rounded,
+                                  color: contentTheme.black, size: 24),
+                              title: 'Gérer mon abonnement',
+                              onTap: () {
+                                Get.toNamed('/subscription_details');
+                              },
+                            ),
+                          ],
 
                           const SizedBox(height: 15),
                           Divider(color: contentTheme.kE6E6E6, thickness: 1.0),
-
-                          // --- DÉCONNEXION ---
                           _buildSettingsItem(
                             icon: Images.logout,
                             title: 'Déconnexion',
@@ -102,10 +100,8 @@ class _SettingScreenState extends State<SettingScreen>
                                 ? null
                                 : () => _handleLogout(context),
                           ),
-
                           const SizedBox(height: 15),
                           Divider(color: contentTheme.kE6E6E6, thickness: 1.0),
-
                           const SizedBox(height: 30),
                           Center(
                             child: MyText.bodySmall(

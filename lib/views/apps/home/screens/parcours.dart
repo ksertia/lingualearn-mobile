@@ -1,5 +1,4 @@
 import 'package:fasolingo/controller/apps/parcoure/parcoure_controller.dart';
-import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -11,95 +10,106 @@ import 'package:fasolingo/models/parcoure/parcour_model.dart';
 import '../../../../widgets/parcourspage/ParcoursStepItem.dart';
 import '../../../../widgets/stepsscreens/custom_app_bar.dart';
 
+const Color _pCompleted = Color(0xFF22C55E);
+const Color _pActive    = Color(0xFFFF7043);
+const Color _pLocked    = Color(0xFF9E9E9E);
+
 class ParcoursSelectionPage extends StatelessWidget {
   const ParcoursSelectionPage({super.key});
 
+  static const List<String> _lotties = [
+    'assets/lottie/poulet.json',
+    'assets/lottie/elephant.json',
+    'assets/lottie/cat.json',
+    'assets/lottie/Chicken.json',
+    'assets/lottie/dino.json',
+    'assets/lottie/Dog.json',
+    'assets/lottie/Lion.json',
+    'assets/lottie/croco.json',
+    'assets/lottie/tiger.json',
+    'assets/lottie/panda.json',
+    'assets/lottie/koala.json',
+    'assets/lottie/snake.json',
+    'assets/lottie/toucan.json',
+    'assets/lottie/rhino.json',
+    'assets/lottie/leopard.json',
+    'assets/lottie/buffalo.json',
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final ParcoursSelectionController controller =
-        Get.put(ParcoursSelectionController());
+    final controller = Get.put(ParcoursSelectionController());
 
-    final dynamic _args = Get.arguments;
+    final dynamic args = Get.arguments;
     final String? moduleLottieArg =
-        (_args is Map && _args['moduleLottie'] != null)
-            ? _args['moduleLottie'].toString()
+        (args is Map && args['moduleLottie'] != null)
+            ? args['moduleLottie'].toString()
             : null;
     final String backgroundImage =
-        (_args is Map && _args['backgroundImage'] != null)
-            ? _args['backgroundImage'].toString()
+        (args is Map && args['backgroundImage'] != null)
+            ? args['backgroundImage'].toString()
             : 'assets/images/app/plan3.png';
 
-    final Future<List<ModuleModel>> _modulesFuture =
+    final Future<List<ModuleModel>> modulesFuture =
         ModuleService.getAllModules();
-
-    final List<String> _moduleLotties = const [
-      'assets/lottie/poulet.json',
-      'assets/lottie/elephant.json',
-      'assets/lottie/cat.json',
-      'assets/lottie/Chicken.json',
-      'assets/lottie/dino.json',
-      'assets/lottie/Dog.json',
-      'assets/lottie/Lion.json',
-      'assets/lottie/croco.json',
-      'assets/lottie/tiger.json',
-      'assets/lottie/panda.json',
-      'assets/lottie/koala.json',
-      'assets/lottie/snake.json',
-      'assets/lottie/toucan.json',
-      'assets/lottie/rhino.json',
-      'assets/lottie/leopard.json',
-      'assets/lottie/buffalo.json',
-    ];
-
-    String _resolveLottieFromModule(
-        List<ModuleModel> modules, String moduleId) {
-      try {
-        final pos = modules.indexWhere((m) => m.id == moduleId);
-        if (pos != -1) {
-          return _moduleLotties[pos % _moduleLotties.length];
-        }
-      } catch (_) {}
-      return 'assets/lottie/Lion.json';
-    }
-
-    const Color primaryBlue = Color(0xFF00CED1);
-    const Color colorCompleted = Color(0xFF81C784);
-    const Color orangeAccent = Color(0xFFFF9800);
-    const Color colorLocked = Color(0xFF9E9E9E);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: "Suivez votre parcours"),
+      backgroundColor: Colors.transparent,
+      appBar: const CustomAppBar(title: 'Mes Parcours'),
       body: Obx(() {
-        if (controller.isLoading.value) {
-          return _buildShimmerEffect();
-        }
+        if (controller.isLoading.value) return _shimmer();
 
         if (controller.items.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.map_outlined, size: 50, color: Colors.grey.shade400),
-                const SizedBox(height: 10),
-                const Text("Aucun parcours disponible.",
-                    style: TextStyle(color: Colors.grey)),
-                TextButton(
-                    onPressed: () => controller.fetchPaths(),
-                    child: const Text("Réessayer")),
-              ],
+          return Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(backgroundImage),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                    Colors.black.withValues(alpha: 0.18), BlendMode.darken),
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.map_outlined,
+                        size: 40, color: Colors.grey.shade400),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text('Aucun parcours disponible.',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: controller.fetchPaths,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _pActive,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: const Text('Réessayer'),
+                  ),
+                ],
+              ),
             ),
           );
         }
 
         return FutureBuilder<List<ModuleModel>>(
-          future: _modulesFuture,
-          builder: (context, modulesSnap) {
-            final String moduleLottie = moduleLottieArg ??
-                (modulesSnap.hasData
-                    ? _resolveLottieFromModule(
-                        modulesSnap.data!, controller.moduleId)
+          future: modulesFuture,
+          builder: (context, snap) {
+            final String lottie = moduleLottieArg ??
+                (snap.hasData
+                    ? _resolveLottie(snap.data!, controller.moduleId)
                     : 'assets/lottie/Lion.json');
 
             return Container(
@@ -108,27 +118,32 @@ class ParcoursSelectionPage extends StatelessWidget {
                   image: AssetImage(backgroundImage),
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.22), BlendMode.darken),
+                      Colors.black.withValues(alpha: 0.18), BlendMode.darken),
                 ),
               ),
               child: RefreshIndicator(
-                onRefresh: () => controller.fetchPaths(),
+                onRefresh: controller.fetchPaths,
+                color: _pActive,
                 child: ListView.builder(
-                  padding: const EdgeInsets.only(
-                      top: 110, bottom: 20, left: 15, right: 15),
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    MediaQuery.of(context).padding.top + kToolbarHeight + 16,
+                    16,
+                    32,
+                  ),
                   itemCount: controller.items.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
-                      String title =
-                          controller.showAllPaths ? "Mes parcours" : "MODULE";
+                      String title = controller.showAllPaths
+                          ? 'Mes parcours'
+                          : 'MODULE';
                       String description = controller.showAllPaths
-                          ? "Parcours adaptés à votre langue et votre niveau"
-                          : "";
-
+                          ? 'Parcours adaptés à ta langue et ton niveau'
+                          : '';
                       if (!controller.showAllPaths &&
-                          modulesSnap.hasData &&
-                          modulesSnap.data!.isNotEmpty) {
-                        final found = modulesSnap.data!
+                          snap.hasData &&
+                          snap.data!.isNotEmpty) {
+                        final found = snap.data!
                             .where((m) => m.id == controller.moduleId)
                             .toList();
                         if (found.isNotEmpty) {
@@ -136,149 +151,132 @@ class ParcoursSelectionPage extends StatelessWidget {
                           description = found.first.description;
                         }
                       }
-
-                      final int total = controller.items.whereType<LearningPathModel>().length;
-                      final int completed = controller.items
+                      final paths = controller.items
                           .whereType<LearningPathModel>()
-                          .where((p) => (p.status ?? "") == "completed")
+                          .toList();
+                      final total = paths.length;
+                      final completed = paths
+                          .where((p) =>
+                              (p.status ?? '').toLowerCase() == 'completed')
                           .length;
-                      final double progress =
-                          total > 0 ? (completed / total) : 0.0;
-
-                      return _buildHeaderCard(title, description, progress,
-                          completed, total, moduleLottie);
+                      final progress =
+                          total > 0 ? completed / total : 0.0;
+                      return _headerCard(title, description,
+                          progress, completed, total, lottie);
                     }
 
                     final item = controller.items[index - 1];
-
-                    if (item is ModuleModel) {
-                      return _buildModuleHeader(item);
-                    } else if (item is LearningPathModel) {
+                    if (item is ModuleModel) return _moduleHeader(item);
+                    if (item is LearningPathModel) {
                       final path = item;
-
-                      final String pathStatus = (path.progress != null &&
+                      final pathStatus = (path.progress != null &&
                               path.progress!['status'] != null)
                           ? path.progress!['status'].toString().toLowerCase()
-                          : (path.status ?? 'locked').toString().toLowerCase();
-                      final bool isCompleted = pathStatus == 'completed';
-                      final bool isUnlocked = pathStatus == 'unlocked' ||
+                          : (path.status ?? 'locked').toLowerCase();
+                      final isCompleted = pathStatus == 'completed';
+                      final isActive = pathStatus == 'unlocked' ||
                           pathStatus == 'started' ||
                           pathStatus == 'in_progress' ||
                           isCompleted;
-                      final bool isActive = isUnlocked;
+                      final pathList = controller.items
+                          .whereType<LearningPathModel>()
+                          .toList();
+                      final pathIndex = pathList.indexOf(path);
 
                       return Align(
-                        alignment: controller.items.whereType<LearningPathModel>().toList().indexOf(path) % 2 == 0
+                        alignment: pathIndex % 2 == 0
                             ? Alignment.centerRight
                             : Alignment.centerLeft,
                         child: FractionallySizedBox(
                           widthFactor: 0.92,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 4, horizontal: 4),
-                              child: ParcoursStepItem(
-                                number: "${controller.items.whereType<LearningPathModel>().toList().indexOf(path) + 1}",
-                                title: path.title,
-                                statusText: isCompleted
-                                    ? 'Terminé'
-                                    : (isActive ? 'En cours' : 'Verrouillé'),
-                                subtitle: isActive
-                                    ? path.description
-                                    : "Verrouillé : Terminez le parcours précédent",
-                                color: isActive
-                                    ? (isCompleted
-                                        ? colorCompleted
-                                        : orangeAccent)
-                                    : colorLocked,
-                                isCompleted: isCompleted,
-                                isActive: isActive,
-                                icon: !isActive
-                                    ? Icons.lock_rounded
-                                    : (isCompleted
-                                        ? Icons.check
-                                        : Icons.play_arrow_rounded),
-                                onTap: isActive
-                                    ? () async {
-                                        final args = Get.arguments;
-                                        final userId = (args is Map &&
-                                                args['userId'] != null)
-                                            ? args['userId'].toString()
-                                            : '';
-
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: ParcoursStepItem(
+                              number: '${pathIndex + 1}',
+                              title: path.title,
+                              statusText: isCompleted
+                                  ? 'Terminé'
+                                  : (isActive ? 'En cours' : 'Verrouillé'),
+                              subtitle: isActive
+                                  ? path.description
+                                  : 'Terminez le parcours précédent',
+                              color: isActive
+                                  ? (isCompleted ? _pCompleted : _pActive)
+                                  : _pLocked,
+                              isCompleted: isCompleted,
+                              isActive: isActive,
+                              icon: !isActive
+                                  ? Icons.lock_rounded
+                                  : (isCompleted
+                                      ? Icons.check_rounded
+                                      : Icons.play_arrow_rounded),
+                              onTap: isActive
+                                  ? () async {
+                                      final a = Get.arguments;
+                                      final userId = (a is Map &&
+                                              a['userId'] != null)
+                                          ? a['userId'].toString()
+                                          : '';
+                                      if (userId.isNotEmpty &&
+                                          pathStatus == 'unlocked') {
+                                        await LearningPathService.startPath(
+                                          userId: userId,
+                                          pathId: path.id,
+                                        );
+                                      }
+                                      final res = await Get.toNamed(
+                                        '/stepsscreens',
+                                        arguments: {
+                                          'moduleId': path.moduleId,
+                                          'pathId': path.id,
+                                          'userId': userId,
+                                          'moduleLottie': lottie,
+                                        },
+                                      );
+                                      if (res == true ||
+                                          res == 'completed' ||
+                                          res == 'finished') {
+                                        await controller.fetchPaths();
+                                        final ps = controller.items
+                                            .whereType<LearningPathModel>()
+                                            .toList();
+                                        final tot = ps.length;
+                                        final comp = ps.where((p) {
+                                          final st = (p.progress != null &&
+                                                  p.progress!['status'] != null)
+                                              ? p.progress!['status']
+                                                  .toString()
+                                                  .toLowerCase()
+                                              : (p.status ?? 'locked')
+                                                  .toLowerCase();
+                                          return st == 'completed';
+                                        }).length;
                                         if (userId.isNotEmpty &&
-                                            pathStatus == 'unlocked') {
-                                          await LearningPathService.startPath(
+                                            controller.moduleId.isNotEmpty &&
+                                            tot > 0 &&
+                                            comp == tot) {
+                                          await ModuleService.completeModule(
                                             userId: userId,
-                                            pathId: path.id,
+                                            moduleId: controller.moduleId,
                                           );
                                         }
-
-                                        final res = await Get.toNamed(
-                                          '/stepsscreens',
-                                          arguments: {
-                                            'moduleId': path.moduleId,
-                                            'pathId': path.id,
-                                            'userId': userId,
-                                            'moduleLottie': moduleLottie,
-                                          },
-                                        );
-
-                                        if (res == true ||
-                                            res == 'completed' ||
-                                            res == 'finished') {
-                                          await controller.fetchPaths();
-
-                                          final paths = controller.items
-                                              .whereType<LearningPathModel>()
-                                              .toList();
-                                          final total = paths.length;
-                                          final completed = paths.where((p) {
-                                            final st = (p.progress != null &&
-                                                    p.progress!['status'] !=
-                                                        null)
-                                                ? p.progress!['status']
-                                                    .toString()
-                                                    .toLowerCase()
-                                                : (p.status ?? 'locked')
-                                                    .toString()
-                                                    .toLowerCase();
-                                            return st == 'completed';
-                                          }).length;
-
-                                          if (userId.isNotEmpty &&
-                                              controller.moduleId.isNotEmpty &&
-                                              total > 0 &&
-                                              completed == total) {
-                                            await ModuleService.completeModule(
-                                              userId: userId,
-                                              moduleId: controller.moduleId,
-                                            );
-                                          }
-
-                                          Get.back(result: true);
-                                        }
+                                        Get.back(result: true);
                                       }
-                                    : () {
-                                        Get.snackbar(
-                                          "Parcours Verrouillé 🔒",
-                                          "Terminez le parcours précédent pour débloquer celui-ci.",
-                                          snackPosition: SnackPosition.BOTTOM,
-                                          backgroundColor: Colors.black87,
-                                          colorText: Colors.white,
-                                          icon: const Icon(Icons.lock,
-                                              color: Colors.orangeAccent),
-                                          margin: const EdgeInsets.all(15),
-                                        );
-                                      },
-                              ),
+                                    }
+                                  : () => Get.snackbar(
+                                        'Parcours Verrouillé 🔒',
+                                        'Terminez le parcours précédent pour débloquer celui-ci.',
+                                        snackPosition: SnackPosition.BOTTOM,
+                                        backgroundColor: Colors.black87,
+                                        colorText: Colors.white,
+                                        margin: const EdgeInsets.all(15),
+                                        borderRadius: 16,
+                                      ),
                             ),
                           ),
                         ),
                       );
                     }
-
                     return const SizedBox.shrink();
                   },
                 ),
@@ -290,26 +288,32 @@ class ParcoursSelectionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderCard(String title, String description, double progress,
-      int completed, int total, String lottieAsset) {
-    final int displayTotal = total <= 0 ? 0 : total;
-    final int percent = (progress * 100).clamp(0, 100).toInt();
+  String _resolveLottie(List<ModuleModel> modules, String moduleId) {
+    try {
+      final pos = modules.indexWhere((m) => m.id == moduleId);
+      if (pos != -1) return _lotties[pos % _lotties.length];
+    } catch (_) {}
+    return 'assets/lottie/Lion.json';
+  }
+
+  Widget _headerCard(String title, String description, double progress,
+      int completed, int total, String lottie) {
+    final percent = (progress * 100).clamp(0, 100).toInt();
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 30),
-      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color.fromARGB(181, 251, 138, 0), Color(0xFF00A3A3)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(18),
+        color: Colors.white.withValues(alpha: 0.93),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+            color: _pActive.withValues(alpha: 0.20), width: 1.5),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.18),
-              blurRadius: 12,
-              offset: const Offset(0, 6))
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
       child: Row(
@@ -319,103 +323,118 @@ class ParcoursSelectionPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800)),
-                const SizedBox(height: 6),
-                Text(description,
-                    style: const TextStyle(color: Colors.white70, fontSize: 15),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1A1A1A),
+                  ),
+                ),
+                if (description.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
                     maxLines: 2,
-                    overflow: TextOverflow.ellipsis),
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: Colors.grey.shade500, fontSize: 13),
+                  ),
+                ],
                 const SizedBox(height: 14),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 7,
+                    backgroundColor: Colors.grey.shade200,
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(_pActive),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                            value: progress,
-                            backgroundColor: Colors.white24,
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.white)),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white24,
-                        borderRadius: BorderRadius.circular(12),
+                        color: _pActive.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text("$percent%",
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold)),
+                      child: Text(
+                        '$percent%',
+                        style: const TextStyle(
+                          color: _pActive,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '$completed / $total parcours',
+                      style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text("$completed/$displayTotal Parcours",
-                    style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600)),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: 88,
-              height: 88,
-              color: Colors.white24,
-              child: Padding(
-                padding: const EdgeInsets.all(6),
-                child: Lottie.asset(
-                  lottieAsset,
-                  fit: BoxFit.contain,
-                  repeat: true,
-                ),
-              ),
+          const SizedBox(width: 14),
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: _pActive.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
             ),
+            child: Lottie.asset(lottie, fit: BoxFit.contain, repeat: true),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildModuleHeader(ModuleModel module) {
+  Widget _moduleHeader(ModuleModel module) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primaryBlue.withOpacity(0.3), width: 2),
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(18),
+        border:
+            Border.all(color: _pActive.withValues(alpha: 0.22), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
-          Icon(Icons.folder, color: primaryBlue, size: 32),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _pActive.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.menu_book_rounded,
+                color: _pActive, size: 22),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               module.title,
-              style: TextStyle(
-                color: primaryBlue,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF1A1A1A),
               ),
             ),
           ),
@@ -424,26 +443,29 @@ class ParcoursSelectionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildShimmerEffect() {
+  Widget _shimmer() {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
       child: ListView.builder(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 100, 16, 20),
         itemCount: 5,
         itemBuilder: (_, __) => Padding(
-          padding: const EdgeInsets.only(bottom: 25),
+          padding: const EdgeInsets.only(bottom: 20),
           child: Row(
             children: [
-              const CircleAvatar(radius: 28, backgroundColor: Colors.white),
-              const SizedBox(width: 20),
+              const CircleAvatar(
+                  radius: 24, backgroundColor: Colors.white),
+              const SizedBox(width: 14),
               Expanded(
                 child: Container(
-                    height: 90,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20))),
-              )
+                  height: 88,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

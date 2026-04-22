@@ -3,6 +3,13 @@ import 'package:get/get.dart';
 
 import '../controller/apps/session_controller.dart';
 
+const Color _obOrange  = Color(0xFFFF7043);
+const Color _obOrange2 = Color(0xFFFFB74D);
+const Color _obCyan    = Color(0xFF0EA5E9);
+const Color _obCard    = Color(0xFFF6F7F9);
+const Color _obText    = Color(0xFF1A1A1A);
+const Color _obSub     = Color(0xFF888888);
+
 class OnboardingTibiPro extends StatefulWidget {
   const OnboardingTibiPro({super.key});
 
@@ -14,29 +21,43 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-
-  final Color tibiOrange = const Color(0xFFFF7F00);
-  final Color tibiCyan = const Color(0xFF00CED1);
-  final Color scaffoldBg = const Color(0xFF0A120F);
-  final Color cardBg = const Color(0xFF13221C);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: scaffoldBg,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-
+          // Subtle decorative blob
           Positioned(
-            top: -50,
-            right: -50,
+            top: -60,
+            right: -60,
             child: Container(
-              width: 300,
-              height: 300,
+              width: 280,
+              height: 280,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [tibiOrange.withOpacity(0.08), Colors.transparent],
+                  colors: [
+                    _obOrange.withValues(alpha: 0.07),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -80,
+            left: -60,
+            child: Container(
+              width: 240,
+              height: 240,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    _obCyan.withValues(alpha: 0.06),
+                    Colors.transparent,
+                  ],
                 ),
               ),
             ),
@@ -45,12 +66,11 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
           SafeArea(
             child: Column(
               children: [
-
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   child: Row(
                     children: [
-                      _buildCircleBtn(Icons.arrow_back),
+                      _buildCircleBtn(Icons.arrow_back_ios_new),
                       const Spacer(),
                       _buildSegmentedProgress(),
                       const Spacer(),
@@ -58,8 +78,6 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
                     ],
                   ),
                 ),
-
-                // Pages d'Onboarding
                 Expanded(
                   child: PageView(
                     controller: _pageController,
@@ -79,44 +97,44 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
     );
   }
 
-  // ÉTAPE 1
+  // ─────────────────── STEP 1 ───────────────────
   Widget _buildActivityStep() {
     return _StepLayout(
-      title: "À quel point es-tu exposé à la langue ?",
+      title: 'A quel point es-tu expose a la langue ?',
       child: Column(
         children: [
-          _buildSelectableTile("Rarement", "Je ne l'entends jamais", Icons.visibility_off, false),
-          _buildSelectableTile("Parfois", "Je l'entends lors de fêtes", Icons.celebration, false),
-          _buildSelectableTile("Souvent", "Ma famille la parle à la maison", Icons.home, true),
-          _buildSelectableTile("Quotidiennement", "C'est ma langue principale", Icons.forum, false),
+          _buildSelectableTile('Rarement', 'Je ne l\'entends jamais', Icons.visibility_off_rounded, false),
+          _buildSelectableTile('Parfois', 'Je l\'entends lors de fetes', Icons.celebration_rounded, false),
+          _buildSelectableTile('Souvent', 'Ma famille la parle a la maison', Icons.home_rounded, true),
+          _buildSelectableTile('Quotidiennement', 'C\'est ma langue principale', Icons.forum_rounded, false),
         ],
       ),
     );
   }
 
-  // ÉTAPE 2
+  // ─────────────────── STEP 2 ───────────────────
   Widget _buildTopicStep() {
     return _StepLayout(
-      title: "Que veux-tu apprendre en priorité ?",
+      title: 'Que veux-tu apprendre en priorite ?',
       child: Column(
         children: [
           const SizedBox(height: 20),
           Wrap(
             alignment: WrapAlignment.center,
-            spacing: 20,
-            runSpacing: 25,
+            spacing: 16,
+            runSpacing: 20,
             children: [
-              _buildTopicCard("Salutations", Icons.handshake, false, rotation: -0.06),
+              _buildTopicCard('Salutations', Icons.handshake_rounded, false, rotation: -0.06),
               Padding(
                 padding: const EdgeInsets.only(top: 30),
-                child: _buildTopicCard("Famille", Icons.people, true, rotation: 0.12),
+                child: _buildTopicCard('Famille', Icons.people_rounded, true, rotation: 0.12),
               ),
-              _buildTopicCard("Commerce", Icons.shopping_cart, false, rotation: 0.05),
+              _buildTopicCard('Commerce', Icons.shopping_cart_rounded, false, rotation: 0.05),
               Padding(
                 padding: const EdgeInsets.only(top: 15),
-                child: _buildTopicCard("Contes", Icons.menu_book, false, rotation: -0.10),
+                child: _buildTopicCard('Contes', Icons.menu_book_rounded, false, rotation: -0.10),
               ),
-              _buildTopicCard("Culture", Icons.account_balance, false, rotation: 0.04),
+              _buildTopicCard('Culture', Icons.account_balance_rounded, false, rotation: 0.04),
             ],
           ),
         ],
@@ -124,85 +142,177 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
     );
   }
 
-  //  ÉTAPE 3
+  // ─────────────────── STEP 3 ───────────────────
   Widget _buildGoalStep() {
     final session = Get.find<SessionController>();
-
     return _StepLayout(
-      title: "Reste concentré, et gagne ton défi.",
-
+      title: 'Reste concentre, et gagne ton defi.',
       child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.72, // Ajuste la zone pour pousser le spacer
+        height: MediaQuery.of(context).size.height * 0.72,
         child: Column(
           children: [
+            // Motivational card
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: tibiOrange,
-                borderRadius: BorderRadius.circular(25),
+                gradient: const LinearGradient(
+                  colors: [_obOrange, _obOrange2],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: _obOrange.withValues(alpha: 0.28),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.flag, size: 40, color: Colors.black),
-                  SizedBox(width: 15),
-                  Expanded(
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.25),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.flag_rounded, size: 28, color: Colors.white),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
                     child: Text(
-                      "À ce rythme, tu maîtriseras les bases dans 21 jours !",
-                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                      'A ce rythme, tu maitriseras les bases dans 21 jours !',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        height: 1.4,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 30),
-            _buildProgressCircle(),
-            const SizedBox(height: 30),
-            _buildStatLine("Vocabulaire", 0.7, tibiCyan, "150 mots"),
-            _buildStatLine("Prononciation", 0.4, tibiOrange, "40%"),
 
-            //  espace dynamique
+            const SizedBox(height: 28),
+            _buildProgressCircle(),
+            const SizedBox(height: 28),
+
+            _buildStatLine('Vocabulaire', 0.7, _obOrange, '150 mots'),
+            _buildStatLine('Prononciation', 0.4, _obCyan, '40%'),
+
             const Spacer(),
 
-            // les boutons
-            _buildPrimaryButton("C’EST PARTI", () {
+            _buildPrimaryButton('C\'EST PARTI', () {
               session.vientDeLaDecouverte = true;
               Get.toNamed('/step');
             }, true),
             const SizedBox(height: 12),
-            _buildPrimaryButton("J’AI DÉJÀ UN COMPTE", () {
+            _buildPrimaryButton('J\'AI DEJA UN COMPTE', () {
               session.vientDeLaDecouverte = false;
               Get.toNamed('/login');
             }, false),
-
-
-            const SizedBox(height: 15),
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  // Widget S
+  // ─────────────────── WIDGETS ───────────────────
 
-  Widget _buildTopicCard(String l, IconData i, bool sel, {double rotation = 0}) {
+  Widget _buildTopicCard(String label, IconData icon, bool selected, {double rotation = 0}) {
     return Transform.rotate(
       angle: rotation,
       child: Container(
-        width: 145,
-        height: 145,
+        width: 140,
+        height: 140,
         decoration: BoxDecoration(
-          color: sel ? tibiOrange : cardBg,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: sel ? [BoxShadow(color: tibiOrange.withOpacity(0.3), blurRadius: 20)] : [],
+          color: selected ? _obOrange : _obCard,
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(
+            color: selected ? Colors.transparent : Colors.grey.shade200,
+            width: 1.5,
+          ),
+          boxShadow: selected
+              ? [BoxShadow(color: _obOrange.withValues(alpha: 0.30), blurRadius: 18, offset: const Offset(0, 6))]
+              : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 3))],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(i, size: 35, color: sel ? Colors.black : Colors.white70),
+            Icon(
+              icon,
+              size: 34,
+              color: selected ? Colors.white : _obOrange,
+            ),
             const SizedBox(height: 12),
-            Text(l, style: TextStyle(color: sel ? Colors.black : Colors.white, fontWeight: FontWeight.bold)),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: selected ? Colors.white : _obText,
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSelectableTile(String title, String subtitle, IconData icon, bool selected) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: selected ? _obOrange : _obCard,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: selected ? Colors.transparent : Colors.grey.shade200,
+          width: 1.5,
+        ),
+        boxShadow: selected
+            ? [BoxShadow(color: _obOrange.withValues(alpha: 0.25), blurRadius: 14, offset: const Offset(0, 5))]
+            : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 6, offset: const Offset(0, 2))],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: selected
+                  ? Colors.white.withValues(alpha: 0.25)
+                  : _obOrange.withValues(alpha: 0.10),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: selected ? Colors.white : _obOrange, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: selected ? Colors.white : _obText,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: selected ? Colors.white.withValues(alpha: 0.80) : _obSub,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -210,24 +320,55 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
   Widget _buildPrimaryButton(String text, VoidCallback onPress, bool isFull) {
     return SizedBox(
       width: double.infinity,
-      height: 60,
+      height: 56,
       child: isFull
-          ? ElevatedButton(
-        onPressed: onPress,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: tibiOrange,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        ),
-        child: Text(text, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-      )
+          ? GestureDetector(
+              onTap: onPress,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [_obOrange, _obOrange2],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _obOrange.withValues(alpha: 0.35),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    text,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+            )
           : OutlinedButton(
-        onPressed: onPress,
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: tibiOrange, width: 2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        ),
-        child: Text(text, style: TextStyle(color: tibiOrange, fontWeight: FontWeight.bold)),
-      ),
+              onPressed: onPress,
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: _obOrange, width: 1.8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+              ),
+              child: Text(
+                text,
+                style: const TextStyle(
+                  color: _obOrange,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
     );
   }
 
@@ -236,52 +377,28 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withOpacity(0.05),
-        border: Border.all(color: Colors.white10),
+        color: _obCard,
+        border: Border.all(color: Colors.grey.shade200, width: 1.5),
       ),
-      child: Icon(icon, color: Colors.white, size: 20),
+      child: Icon(icon, color: _obText, size: 18),
     );
   }
 
   Widget _buildSegmentedProgress() {
     return Row(
       children: List.generate(10, (index) {
-        bool isCurrent = index == (_currentPage * 3 + 1);
+        final bool isCurrent = index == (_currentPage * 3 + 1);
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           margin: const EdgeInsets.symmetric(horizontal: 2),
           height: 4,
-          width: isCurrent ? 25 : 6,
+          width: isCurrent ? 28 : 6,
           decoration: BoxDecoration(
-            color: isCurrent ? tibiOrange : Colors.white12,
-            borderRadius: BorderRadius.circular(2),
+            color: isCurrent ? _obOrange : Colors.grey.shade300,
+            borderRadius: BorderRadius.circular(4),
           ),
         );
       }),
-    );
-  }
-
-  Widget _buildSelectableTile(String t, String s, IconData i, bool sel) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: sel ? tibiOrange : cardBg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          Icon(i, color: sel ? Colors.black : tibiOrange),
-          const SizedBox(width: 15),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(t, style: TextStyle(color: sel ? Colors.black : Colors.white, fontWeight: FontWeight.bold)),
-              Text(s, style: TextStyle(color: sel ? Colors.black54 : Colors.white54, fontSize: 12)),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -295,15 +412,25 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
           child: CircularProgressIndicator(
             value: 0.65,
             strokeWidth: 10,
-            backgroundColor: Colors.white10,
-            valueColor: AlwaysStoppedAnimation(tibiCyan),
+            backgroundColor: Colors.grey.shade200,
+            valueColor: const AlwaysStoppedAnimation<Color>(_obCyan),
           ),
         ),
-        const Column(
+        Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("65%", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-            Text("Prêt", style: TextStyle(color: Colors.white54, fontSize: 12)),
+            const Text(
+              '65%',
+              style: TextStyle(
+                color: _obText,
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              'Pret',
+              style: TextStyle(color: _obSub, fontSize: 13),
+            ),
           ],
         ),
       ],
@@ -318,18 +445,37 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: const TextStyle(color: Colors.white, fontSize: 13)),
-              Text(trailing, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: _obText,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                trailing,
+                style: TextStyle(color: _obSub, fontSize: 12, fontWeight: FontWeight.w600),
+              ),
             ],
           ),
           const SizedBox(height: 6),
-          LinearProgressIndicator(value: val, color: color, backgroundColor: Colors.white10, minHeight: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: val,
+              color: color,
+              backgroundColor: Colors.grey.shade200,
+              minHeight: 7,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
+// ─────────────────── STEP LAYOUT ───────────────────
 class _StepLayout extends StatelessWidget {
   final String title;
   final Widget child;
@@ -338,11 +484,20 @@ class _StepLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(
         children: [
-          Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 30),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: _obText,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 28),
           child,
         ],
       ),

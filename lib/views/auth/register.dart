@@ -9,14 +9,41 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
-final controller = Get.put(RegisterController());
+class _RegisterPageState extends State<RegisterPage>
+    with SingleTickerProviderStateMixin {
+  final controller = Get.put(RegisterController());
   int currentStep = 0;
+
+  late AnimationController _animCtrl;
+  late Animation<double> _fadeAnim;
+
+  static const _primary = Color(0xFF0000CC);
+  static const _primaryLight = Color(0xFF4466FF);
+
+  @override
+  void initState() {
+    super.initState();
+    _animCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
+    _fadeAnim = CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOut);
+    _animCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _animCtrl.dispose();
+    super.dispose();
+  }
 
   void nextStep() {
     if (controller.formKey.currentState!.validate()) {
       if (currentStep < 1) {
-        setState(() => currentStep++);
+        _animCtrl.reverse().then((_) {
+          setState(() => currentStep++);
+          _animCtrl.forward();
+        });
       } else {
         controller.onRegister();
       }
@@ -24,167 +51,308 @@ final controller = Get.put(RegisterController());
   }
 
   void previousStep() {
-    if (currentStep > 0) setState(() => currentStep--);
-  }
-
-  String get stepTitle {
-    return currentStep == 0 ? "Informations personnelles" : "Sécurité du compte";
+    if (currentStep > 0) {
+      _animCtrl.reverse().then((_) {
+        setState(() => currentStep--);
+        _animCtrl.forward();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              Text(
-                "Étape ${currentStep + 1}/2",
-                style: const TextStyle(
-                    color: Color.fromARGB(255, 0, 0, 153),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14),
+      backgroundColor: const Color(0xFFF5F7FF),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [_primary, _primaryLight],
               ),
-              Text(
-                stepTitle,
-                style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E232C)),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
               ),
-              const SizedBox(height: 30),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Form(
-                    key: controller.formKey, 
-                    child: currentStep == 0 ? buildStep1() : buildStep2(),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Row(
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (currentStep > 0)
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: previousStep,
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            side: const BorderSide(color: Color.fromARGB(255, 0, 0, 153)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    if (currentStep == 0)
+                      InkWell(
+                        onTap: () => Get.back(),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Text("Précédent", style: TextStyle(color: Color(0xFF1E232C))),
+                          child: const Icon(Icons.arrow_back_ios_rounded,
+                              color: Colors.white, size: 18),
                         ),
+                      )
+                    else
+                      const SizedBox(height: 36),
+                    const SizedBox(height: 16),
+                    Text(
+                      currentStep == 0
+                          ? "Informations\npersonnelles"
+                          : "Sécurité\ndu compte",
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        height: 1.2,
                       ),
-                    if (currentStep > 0) const SizedBox(width: 15),
-                    Expanded(
-                      child: Obx(() => ElevatedButton(
-                        onPressed: controller.isLoading.value ? null : nextStep,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 0, 0, 153),
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: controller.isLoading.value 
-                          ? const SizedBox(
-                              height: 20, 
-                              width: 20, 
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : Text(
-                              currentStep == 1 ? "S'inscrire" : "Suivant",
-                              style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: List.generate(2, (i) {
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: i == 0 ? 6 : 0),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: i <= currentStep
+                                    ? Colors.white
+                                    : Colors.white.withValues(alpha: 0.35),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
-                      )),
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Étape ${currentStep + 1} sur 2",
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+
+          Expanded(
+            child: SingleChildScrollView(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              child: Form(
+                key: controller.formKey,
+                child: FadeTransition(
+                  opacity: _fadeAnim,
+                  child: currentStep == 0 ? _buildStep1() : _buildStep2(),
+                ),
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            child: Row(
+              children: [
+                if (currentStep > 0) ...[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: previousStep,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: const BorderSide(color: _primary, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: const Text(
+                        "Précédent",
+                        style: TextStyle(
+                            color: _primary, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                ],
+                Expanded(
+                  child: Obx(() => ElevatedButton(
+                        onPressed:
+                            controller.isLoading.value ? null : nextStep,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _primary,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
+                        ),
+                        child: controller.isLoading.value
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 2),
+                              )
+                            : Text(
+                                currentStep == 1 ? "S'inscrire" : "Suivant",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                      )),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      bottomNavigationBar: currentStep == 0 ? _buildLoginLink() : null,
+      bottomNavigationBar: currentStep == 0
+          ? Container(
+              color: const Color(0xFFF5F7FF),
+              padding: const EdgeInsets.only(bottom: 24, top: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Déjà un compte ?  ",
+                    style:
+                        TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                  ),
+                  GestureDetector(
+                    onTap: () => Get.toNamed('/login'),
+                    child: const Text(
+                      "Se connecter",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: _primary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : null,
     );
   }
 
-  Widget buildStep1() {
+  Widget _buildStep1() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel("Prénom"),
-        TextFormField(
-          controller: controller.firstName,
-          keyboardType: TextInputType.text,
-          decoration: _buildInputDecoration("Entrez votre prénom"),
-          validator: (value) => value!.isEmpty ? "Veuillez entrer votre prénom" : null,
+        _buildField(
+          label: "Prénom",
+          textController: controller.firstName,
+          hint: "Entrez votre prénom",
+          icon: Icons.person_outline_rounded,
+          validator: (v) => v!.isEmpty ? "Prénom requis" : null,
         ),
-        const SizedBox(height: 15),
-        _buildLabel("Nom"),
-        TextFormField(
-          controller: controller.lastName,
-          keyboardType: TextInputType.text,
-          decoration: _buildInputDecoration("Entrez votre nom"),
-          validator: (value) => value!.isEmpty ? "Veuillez entrer votre nom" : null,
+        const SizedBox(height: 16),
+        _buildField(
+          label: "Nom",
+          textController: controller.lastName,
+          hint: "Entrez votre nom",
+          icon: Icons.badge_outlined,
+          validator: (v) => v!.isEmpty ? "Nom requis" : null,
         ),
-        const SizedBox(height: 15),
-        _buildLabel("Email"),
-        TextFormField(
-          controller: controller.email,
+        const SizedBox(height: 16),
+        _buildField(
+          label: "Email",
+          textController: controller.email,
+          hint: "exemple@mail.com",
+          icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
-          decoration: _buildInputDecoration("Entrez votre adresse email"),
-          validator: (value) => value!.isEmpty ? "Veuillez entrer votre email" : null,
+          validator: (v) => v!.isEmpty ? "Email requis" : null,
         ),
-        const SizedBox(height: 15),
-        _buildLabel("Téléphone"),
-        TextFormField(
-          controller: controller.phone,
+        const SizedBox(height: 16),
+        _buildField(
+          label: "Téléphone",
+          textController: controller.phone,
+          hint: "+XXX XXX XXXXX",
+          icon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
-          decoration: _buildInputDecoration("Entrez votre numéro de téléphone"),
-          validator: (value) => value!.isEmpty ? "Veuillez entrer votre numéro" : null,
+          validator: (v) => v!.isEmpty ? "Téléphone requis" : null,
         ),
       ],
     );
   }
 
-  Widget buildStep2() {
+  Widget _buildStep2() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildLabel("Mot de passe"),
-        GetBuilder<RegisterController>(builder: (_) => TextFormField(
-          controller: controller.password,
-          obscureText: !controller.showPassword,
-          decoration: _buildInputDecoration("Entrez votre mot de passe").copyWith(
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: IconButton(
-              icon: Icon(controller.showPassword ? Icons.visibility : Icons.visibility_off),
-              onPressed: () => controller.toggleShowPassword(),
+        GetBuilder<RegisterController>(
+          builder: (_) => TextFormField(
+            controller: controller.password,
+            obscureText: !controller.showPassword,
+            decoration: _inputDeco(
+              hint: "Minimum 6 caractères",
+              icon: Icons.lock_outline_rounded,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  controller.showPassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: Colors.grey,
+                  size: 20,
+                ),
+                onPressed: controller.toggleShowPassword,
+              ),
             ),
+            validator: (v) {
+              if (v == null || v.isEmpty) return "Obligatoire";
+              if (v.length < 6) return "Minimum 6 caractères";
+              return null;
+            },
           ),
-          validator: (value) {
-            if (value == null || value.isEmpty) return "Obligatoire";
-            if (value.length < 6) return "Minimum 6 caractères";
-            return null;
-          },
-        )),
-        const SizedBox(height: 15),
+        ),
+        const SizedBox(height: 16),
         _buildLabel("Confirmer le mot de passe"),
         TextFormField(
           controller: controller.confirmPassword,
           obscureText: true,
-          decoration: _buildInputDecoration("Répétez votre mot de passe").copyWith(
-            prefixIcon: const Icon(Icons.lock_reset),
+          decoration: _inputDeco(
+            hint: "Répétez le mot de passe",
+            icon: Icons.lock_reset_rounded,
           ),
-          validator: (value) {
-            if (value == null || value.isEmpty) return "Obligatoire";
-            if (value != controller.password.text) return "Mots de passe différents";
+          validator: (v) {
+            if (v == null || v.isEmpty) return "Obligatoire";
+            if (v != controller.password.text) return "Mots de passe différents";
             return null;
           },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildField({
+    required String label,
+    required TextEditingController textController,
+    required String hint,
+    required IconData icon,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel(label),
+        TextFormField(
+          controller: textController,
+          keyboardType: keyboardType,
+          validator: validator,
+          decoration: _inputDeco(hint: hint, icon: icon),
         ),
       ],
     );
@@ -192,55 +360,50 @@ final controller = Get.put(RegisterController());
 
   Widget _buildLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Colors.black87,
+          color: Color(0xFF1E232C),
         ),
       ),
     );
   }
 
-  InputDecoration _buildInputDecoration(String hint) {
+  InputDecoration _inputDeco({
+    required String hint,
+    required IconData icon,
+    Widget? suffixIcon,
+  }) {
     return InputDecoration(
-      filled: true,
-      fillColor: Colors.grey[100],
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+      prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 20),
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.grey.shade200),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: _primary, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: Colors.redAccent, width: 1),
       ),
-    );
-  }
-
-  Widget _buildLoginLink() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text("Déjà un compte ?"),
-          TextButton(
-            onPressed: () => Get.toNamed('/login'),
-            child: const Text(
-              "Se connecter", 
-              style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 153))
-            ),
-          ),
-        ],
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
       ),
     );
   }

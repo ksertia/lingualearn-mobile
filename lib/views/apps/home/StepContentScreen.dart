@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
-import 'package:fasolingo/widgets/etapefamille/pdf_etape.dart';
 import 'package:fasolingo/widgets/lessons/qcm.dart';
-import 'package:fasolingo/widgets/lessons/qcmdrag.dart';
 import '../../../controller/apps/etapes/stepController.dart';
 import '../../../models/etapes/steps_model.dart';
+
+const Color _cOrange  = Color(0xFFFF7043);
+const Color _cOrange2 = Color(0xFFFFB74D);
 
 class StepContentScreen extends StatelessWidget {
   final String stepId;
@@ -23,61 +24,230 @@ class StepContentScreen extends StatelessWidget {
     Future.microtask(() => controller.loadStepContent(stepId, userId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Obx(
-            () => Text(controller.stepData.value?.title ?? "Chargement...")),
-        elevation: 0,
-      ),
+      extendBodyBehindAppBar: true,
+      appBar: _appBar(controller),
       body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+        if (controller.isLoading.value) return _loading();
 
         final data = controller.stepData.value;
 
-        if (data == null) {
-          return const Center(
-              child: Text("Erreur de récupération des données"));
-        }
+        if (data == null) return _error();
 
         return Column(
           children: [
             Expanded(
               child: _buildBody(context, data, controller),
             ),
-            if (data.type != 'quiz')
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: Obx(
-                      () => ElevatedButton(
-                        onPressed: controller.isCompleting.value
-                            ? null
-                            : () => controller.completeCurrentStep(
-                                  stepId: stepId,
-                                  userId: userId,
-                                ),
-                        child: controller.isCompleting.value
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                ),
-                              )
-                            : const Text("Terminer l’étape"),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            if (data.type != 'quiz') _completeButton(controller),
           ],
         );
       }),
+    );
+  }
+
+  PreferredSizeWidget _appBar(StepController controller) {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [_cOrange, _cOrange2],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
+        ),
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
+      ),
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: GestureDetector(
+          onTap: Get.back,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.arrow_back_ios_new,
+                color: Colors.white, size: 17),
+          ),
+        ),
+      ),
+      title: Obx(() => Text(
+            controller.stepData.value?.title ?? 'Chargement...',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 17,
+            ),
+          )),
+    );
+  }
+
+  Widget _loading() {
+    return Container(
+      color: Colors.white,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: _cOrange.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
+              child: const CircularProgressIndicator(
+                color: _cOrange,
+                strokeWidth: 3,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Chargement du contenu...',
+              style: TextStyle(
+                color: Color(0xFF888888),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _error() {
+    return Container(
+      color: Colors.white,
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+                color: Colors.red.shade200.withValues(alpha: 0.5), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.red.withValues(alpha: 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.error_outline_rounded,
+                    color: Colors.red.shade400, size: 32),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'Impossible de charger le contenu',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Verifiez votre connexion et reessayez.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade500,
+                    height: 1.4),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _completeButton(StepController controller) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        child: Obx(
+          () => GestureDetector(
+            onTap: controller.isCompleting.value
+                ? null
+                : () => controller.completeCurrentStep(
+                      stepId: stepId,
+                      userId: userId,
+                    ),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: 54,
+              decoration: BoxDecoration(
+                gradient: controller.isCompleting.value
+                    ? null
+                    : const LinearGradient(
+                        colors: [_cOrange, _cOrange2],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                color: controller.isCompleting.value
+                    ? Colors.grey.shade300
+                    : null,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: controller.isCompleting.value
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: _cOrange.withValues(alpha: 0.35),
+                          blurRadius: 14,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+              ),
+              child: Center(
+                child: controller.isCompleting.value
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check_circle_rounded,
+                              color: Colors.white, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            "Terminer l'etape",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -92,31 +262,31 @@ class StepContentScreen extends StatelessWidget {
         case 'video':
           return StepDiscoveryVideo(
             videoTitle: data.title,
-            videoUrl: content.mediaUrl ?? "",
+            videoUrl: content.mediaUrl ?? '',
             onVideoFinished: () => Get.back(),
           );
         case 'image':
           return StepDiscoveryImage(
             title: data.title,
-            imageUrl: content.mediaUrl ?? "",
-            answerText: content.text ?? "",
+            imageUrl: content.mediaUrl ?? '',
+            answerText: content.text ?? '',
           );
         case 'audio':
           return StepDiscoveryAudio(
             title: data.title,
-            texteOriginal: content.text ?? "",
-            traduction: "Répète après moi",
+            texteOriginal: content.text ?? '',
+            traduction: 'Repete apres moi',
             lottie: 'assets/lottie/mascot.json',
           );
         default:
-          return Center(child: Text(content.text ?? "Leçon textuelle"));
+          return Center(child: Text(content.text ?? 'Lecon textuelle'));
       }
     } else if (type == 'quiz') {
       final questionsList = content.questions;
 
       if (questionsList == null || questionsList.isEmpty) {
         return const Center(
-            child: Text("Ce quiz ne contient aucune question."));
+            child: Text('Ce quiz ne contient aucune question.'));
       }
 
       final currentQuestion =
@@ -135,10 +305,10 @@ class StepContentScreen extends StatelessWidget {
         );
       }
 
-      return const Center(child: Text("Type de question non supporté"));
+      return const Center(child: Text('Type de question non supporte'));
     }
 
-    return const Center(child: Text("Type de contenu inconnu"));
+    return const Center(child: Text('Type de contenu inconnu'));
   }
 
   void _handleQuizNext(BuildContext context, StepController controller,
@@ -173,7 +343,7 @@ class StepContentScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 22,
                   offset: const Offset(0, 10),
                 ),
@@ -192,7 +362,7 @@ class StepContentScreen extends StatelessWidget {
                             color: Colors.white, size: 54),
                         const SizedBox(height: 16),
                         const Text(
-                          "Nous avons une surprise pour vous",
+                          'Nous avons une surprise pour vous',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 22,
@@ -202,7 +372,7 @@ class StepContentScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         const Text(
-                          "Tu as terminé le quiz \nBravo pour ta persévérance !",
+                          'Tu as termine le quiz\nBravo pour ta perseverance !',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontSize: 15, color: Colors.white70, height: 1.4),
@@ -213,11 +383,11 @@ class StepContentScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               vertical: 16, horizontal: 16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
+                            color: Colors.white.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(18),
                           ),
                           child: const Text(
-                            "Tu gagnes une récompense spéciale pour ta réussite !",
+                            'Tu gagnes une recompense speciale pour ta reussite !',
                             textAlign: TextAlign.center,
                             style: TextStyle(fontSize: 14, color: Colors.white),
                           ),
@@ -257,7 +427,7 @@ class StepContentScreen extends StatelessWidget {
                                 ),
                               )
                             : const Text(
-                                "Terminer",
+                                'Terminer',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,

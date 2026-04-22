@@ -5,20 +5,27 @@ import 'package:get/get.dart';
 
 class HomeController extends GetxController {
   final session = Get.find<SessionController>();
-  
+
   RxBool isLoading = false.obs;
   RxList<ModuleModel> filteredModules = <ModuleModel>[].obs;
   // Map moduleId -> resolved status ('locked' | 'unlocked' | 'completed')
   RxMap<String, String> moduleDisplayStatus = <String, String>{}.obs;
 
+  // IDs fixés à la création du contrôleur — indépendants des changements de session
+  late final String _languageId;
+  late final String _levelId;
+
   @override
   void onInit() {
     super.onInit();
-    // Attendre un petit moment pour que SessionController.updateUser() finisse
-    // puis charger les modules quand les ids sont disponibles.
+    final args = Get.arguments;
+    final String argLang = args is Map ? (args['languageId'] as String? ?? '') : '';
+    final String argLvl  = args is Map ? (args['levelId']   as String? ?? '') : '';
+    _languageId = argLang.isNotEmpty ? argLang : session.selectedLanguageId.value;
+    _levelId    = argLvl.isNotEmpty  ? argLvl  : session.selectedLevelId.value;
+
     Future.delayed(const Duration(milliseconds: 100), () {
-      if (session.selectedLanguageId.value.isNotEmpty && 
-          session.selectedLevelId.value.isNotEmpty) {
+      if (_languageId.isNotEmpty && _levelId.isNotEmpty) {
         loadModules();
       }
     });
@@ -27,15 +34,16 @@ class HomeController extends GetxController {
   Future<void> loadModules() async {
     try {
       isLoading.value = true;
-      
-      // Vérifier que les ids sont présents
-      if (session.selectedLanguageId.value.isEmpty || 
-          session.selectedLevelId.value.isEmpty) {
+
+      if (_languageId.isEmpty || _levelId.isEmpty) {
         isLoading.value = false;
         return;
       }
-      
-      List<ModuleModel> modulesFromApi = await ModuleService.getAllModules();
+
+      List<ModuleModel> modulesFromApi = await ModuleService.getAllModules(
+        languageId: _languageId,
+        levelId: _levelId,
+      );
 
       if (modulesFromApi.isNotEmpty) {
         modulesFromApi.sort((a, b) => a.index.compareTo(b.index));
@@ -81,15 +89,10 @@ class HomeController extends GetxController {
   }
 
 
+  // completeModule est déjà appelé dans parcours.dart avant Get.back(result: true)
+  // Ne pas le rappeler ici pour éviter la double requête
   Future<void> onModuleCompleted(String moduleId) async {
     try {
-      final userId = session.userId.value.isNotEmpty
-          ? session.userId.value
-          : (session.user?.id ?? '');
-      if (userId.isNotEmpty) {
-        await ModuleService.completeModule(userId: userId, moduleId: moduleId);
-      }
-
       final idx = filteredModules.indexWhere((m) => m.id == moduleId);
       if (idx == -1) return;
 

@@ -3,84 +3,40 @@ import 'package:fasolingo/models/child_model.dart';
 import 'package:fasolingo/models/child_progress_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/helpers/theme/admin_theme.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
+
+const Color _pdOrange  = Color(0xFFFF7043);
+const Color _pdOrange2 = Color(0xFFFFB74D);
+const Color _pdGreen   = Color(0xFF22C55E);
 
 class ChildProgressDetailPage extends StatefulWidget {
   final ChildModel child;
 
-  const ChildProgressDetailPage({
-    super.key,
-    required this.child,
-  });
+  const ChildProgressDetailPage({super.key, required this.child});
 
   @override
-  State<ChildProgressDetailPage> createState() =>
-      _ChildProgressDetailPageState();
+  State<ChildProgressDetailPage> createState() => _ChildProgressDetailPageState();
 }
 
 class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
     with TickerProviderStateMixin {
   final ChildProgressController controller = Get.put(ChildProgressController());
-  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     controller.fetchProgress(widget.child.id);
-    _animationController =
-    AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))
-      ..repeat();
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  Widget _buildStatBadge(int value, String label, IconData icon, {bool isHeader = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isHeader ? Colors.white.withOpacity(0.2) : Colors.blueAccent.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: isHeader ? Colors.white.withOpacity(0.4) : Colors.blueAccent.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: isHeader ? Colors.white : AdminTheme.theme.contentTheme.primary),
-          const SizedBox(width: 4),
-          Text('$value',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: isHeader ? Colors.white : AdminTheme.theme.contentTheme.primary)),
-          Text(' $label',
-              style: TextStyle(
-                  fontSize: 12,
-                  color: isHeader ? Colors.white.withOpacity(0.9) : AdminTheme.theme.contentTheme.kB7B7B7)),
-        ],
-      ),
-    );
-  }
-
-  Widget _shimmerCard() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      child: Container(
-        height: 100,
-        margin: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-      ),
-    );
+  String _formatRelativeTime(String? dateStr) {
+    if (dateStr == null) return 'Jamais';
+    final date = DateTime.tryParse(dateStr);
+    if (date == null) return dateStr;
+    final diff = DateTime.now().difference(date);
+    if (diff.inDays > 0) return '${diff.inDays}j';
+    if (diff.inHours > 0) return '${diff.inHours}h';
+    return 'Recent';
   }
 
   int _compareLastAccessed(ChildProgressItemModel a, ChildProgressItemModel b) {
@@ -92,142 +48,19 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
     return bd.compareTo(ad);
   }
 
-  String _formatRelativeTime(String? dateStr) {
-    if (dateStr == null) return 'Jamais';
-    final date = DateTime.tryParse(dateStr);
-    if (date == null) return dateStr;
-    final now = DateTime.now();
-    final diff = now.difference(date);
-    if (diff.inDays > 0) return '${diff.inDays}j';
-    if (diff.inHours > 0) return '${diff.inHours}h';
-    return 'Récemment';
-  }
-
-  Widget _progressRing({
-    required double percent,
-    Color? color,
-    String? label,
-  }) {
-    final p = percent.clamp(0.0, 100.0);
-    return Column(
-      children: [
-        SizedBox(
-          height: 70,
-          width: 70,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CircularProgressIndicator(
-                value: p / 100,
-                strokeWidth: 8,
-                backgroundColor: AdminTheme.theme.contentTheme.kEDEDED,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                    color ?? AdminTheme.theme.contentTheme.primary),
-              ),
-              Text(
-                '${p.toStringAsFixed(0)}%',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AdminTheme.theme.contentTheme.k545454,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (label != null) ...[
-          const SizedBox(height: 6),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 12,
-                  color: AdminTheme.theme.contentTheme.kB7B7B7)),
-        ],
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    AdminTheme.setTheme(context);
     final name = widget.child.displayName;
 
     return Scaffold(
-      backgroundColor: AdminTheme.theme.contentTheme.kDarkColor ?? const Color(0xFFF6F7F9),
-      appBar: AppBar(
-        toolbarHeight: 80,
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.blueAccent.shade700,
-                Colors.blueAccent,
-              ],
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(30),
-              bottomRight: Radius.circular(30),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.blueAccent.withOpacity(0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-        ),
-        title: Column(
-          children: [
-            Text(
-              name,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Container(
-              height: 4,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Colors.orange,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ],
-        ),
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 10),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-            onPressed: () => Get.back(),
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 15),
-            child: CircleAvatar(
-              backgroundColor: Colors.white.withOpacity(0.2),
-              child: const Icon(Icons.person_search, color: Colors.white, size: 20),
-            ),
-          ),
-        ],
-      ),
+      backgroundColor: const Color(0xFFF6F7F9),
+      extendBodyBehindAppBar: true,
+      appBar: _buildAppBar(name),
       body: SafeArea(
+        top: false,
         child: Obx(() {
           if (controller.isLoading.value && controller.progress.value == null) {
-            return ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: 5,
-              itemBuilder: (_, __) => _shimmerCard(),
-            );
+            return _shimmerList();
           }
 
           final res = controller.progress.value;
@@ -235,312 +68,30 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
           items.sort(_compareLastAccessed);
 
           if (items.isEmpty) {
-            return CustomScrollView(
-              slivers: [
-                SliverFillRemaining(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Lottie.asset('assets/lottie/Chicken.json',
-                          width: 200, height: 200, repeat: true),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Aucune progression encore',
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: AdminTheme.theme.contentTheme.k545454),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Ajoutez des langues à $name pour voir la magie opérer! ✨',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: AdminTheme.theme.contentTheme.kB7B7B7),
-                      ),
-                      const SizedBox(height: 32),
-                      ElevatedButton.icon(
-                        onPressed: () => Get.back(),
-                        icon: const Icon(Icons.arrow_back, size: 20),
-                        label: const Text('Ajouter langues',
-                            style: TextStyle(fontSize: 16)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AdminTheme.theme.contentTheme.primary,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
+            return _emptyState(name);
           }
 
-          final avgProgress = items.isEmpty
-              ? 0.0
-              : items
+          final avgProgress = items
               .map((i) => i.level?.progressPercentage ?? 0.0)
               .reduce((a, b) => a + b) /
               items.length;
 
           return RefreshIndicator(
-            color: AdminTheme.theme.contentTheme.primary,
+            color: _pdOrange,
             onRefresh: () => controller.fetchProgress(widget.child.id),
             child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.blueAccent,
-                            Colors.blueAccent.shade700,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blueAccent.withOpacity(0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Hero(
-                            tag: 'child_avatar_${widget.child.id}',
-                            child: Container(
-                              height: 60,
-                              width: 60,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                border: Border.all(
-                                    color: Colors.white.withOpacity(0.5),
-                                    width: 3),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 8),
-                                  ),
-                                ],
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                name.isNotEmpty
-                                    ? name.characters.first.toUpperCase()
-                                    : 'U',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.blueAccent,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  name,
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  widget.child.username ?? '—',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    _buildStatBadge(items.length, 'Langues',
-                                        Icons.language, isHeader: true),
-                                    const SizedBox(width: 12),
-                                    _buildStatBadge(avgProgress.round(),
-                                        'Mon. Prog.', Icons.trending_up, isHeader: true),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    padding: const EdgeInsets.fromLTRB(16, 100, 16, 0),
+                    child: _summaryCard(name, items.length, avgProgress),
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                        final it = items[index];
-                        final lang = it.language;
-                        final lvl = it.level;
-                        final languageName = lang?.name ?? '—';
-                        final languageCode = lang?.code ?? '—';
-                        final languageStatus = lang?.status ?? '—';
-                        final lastAccessed = _formatRelativeTime(lang?.lastAccessedAt);
-                        final levelName = lvl?.name ?? '—';
-                        final levelStatus = lvl?.status ?? '—';
-                        final totalModules = lvl?.totalModules ?? 0;
-                        final completedModules = lvl?.completedModules ?? 0;
-                        final langPercent = lang?.progressPercentage ?? 0.0;
-                        final lvlPercent = lvl?.progressPercentage ?? 0.0;
-
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x0D000000),
-                                blurRadius: 16,
-                                offset: Offset(0, 8),
-                              ),
-                            ],
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.orange.withOpacity(0.05),
-                                Colors.white,
-                              ],
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.orange.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: const Icon(Icons.flag,
-                                        size: 24, color: Colors.orange),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          languageName,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w800,
-                                            color: AdminTheme.theme.contentTheme.k545454,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              languageCode,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: AdminTheme.theme.contentTheme.kB7B7B7,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            if (languageStatus != 'started')
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.orange.withOpacity(0.1),
-                                                  borderRadius: BorderRadius.circular(12),
-                                                ),
-                                                child: Text(
-                                                  languageStatus,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors.orange,
-                                                  ),
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      _progressRing(
-                                          percent: langPercent,
-                                          color: Colors.orange,
-                                          label: 'Langue'),
-                                      const SizedBox(width: 12),
-                                      _progressRing(
-                                          percent: lvlPercent,
-                                          color: Colors.blueAccent,
-                                          label: 'Niveau'),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade50,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.orange.withOpacity(0.2)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.school, size: 20, color: Colors.orange),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        'Niveau: $levelName',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                          color: AdminTheme.theme.contentTheme.k545454,
-                                        ),
-                                      ),
-                                    ),
-                                    Text(
-                                      '$completedModules/$totalModules ${levelStatus == 'started' ? '' : '• $levelStatus'}',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: AdminTheme.theme.contentTheme.kB7B7B7,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                      (context, index) => _languageCard(items[index]),
                       childCount: items.length,
                     ),
                   ),
@@ -549,6 +100,339 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
             ),
           );
         }),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(String name) {
+    return AppBar(
+      toolbarHeight: 76,
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [_pdOrange, _pdOrange2],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+        ),
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+      ),
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: GestureDetector(
+          onTap: () => Get.back(),
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 17),
+          ),
+        ),
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            name,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18),
+          ),
+          const Text(
+            'Progression de l\'apprenant',
+            style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryCard(String name, int langCount, double avg) {
+    final initial = name.isNotEmpty ? name.characters.first.toUpperCase() : 'U';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [_pdOrange, _pdOrange2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: _pdOrange.withValues(alpha: 0.30),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 58,
+            width: 58,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 2.5),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.10), blurRadius: 10, offset: const Offset(0, 4)),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              initial,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: _pdOrange),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _statChip('$langCount', 'Langues', Icons.language_rounded),
+                    const SizedBox(width: 10),
+                    _statChip('${avg.round()}%', 'Moy.', Icons.trending_up_rounded),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statChip(String value, String label, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.20),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
+          const SizedBox(width: 3),
+          Text(label, style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.85))),
+        ],
+      ),
+    );
+  }
+
+  Widget _languageCard(ChildProgressItemModel it) {
+    final lang = it.language;
+    final lvl  = it.level;
+    final languageName   = lang?.name ?? '-';
+    final languageCode   = (lang?.code ?? '-').toUpperCase();
+    final lastAccessed   = _formatRelativeTime(lang?.lastAccessedAt);
+    final levelName      = lvl?.name ?? '-';
+    final totalModules   = lvl?.totalModules ?? 0;
+    final completedModules = lvl?.completedModules ?? 0;
+    final langPercent    = (lang?.progressPercentage ?? 0.0).clamp(0.0, 100.0);
+    final lvlPercent     = (lvl?.progressPercentage ?? 0.0).clamp(0.0, 100.0);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _pdOrange.withValues(alpha: 0.12), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 14, offset: const Offset(0, 6)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: _pdOrange.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.flag_rounded, size: 22, color: _pdOrange),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      languageName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Text(languageCode, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: _pdOrange.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            lastAccessed,
+                            style: const TextStyle(fontSize: 11, color: _pdOrange, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              _progressRing(percent: langPercent, color: _pdOrange, label: 'Langue'),
+              const SizedBox(width: 10),
+              _progressRing(percent: lvlPercent, color: _pdGreen, label: 'Niveau'),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.school_rounded, size: 18, color: _pdOrange),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Niveau: $levelName',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A)),
+                  ),
+                ),
+                Text(
+                  '$completedModules / $totalModules modules',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade500),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _progressRing({required double percent, Color? color, String? label}) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 60,
+          width: 60,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CircularProgressIndicator(
+                value: percent / 100,
+                strokeWidth: 7,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: AlwaysStoppedAnimation<Color>(color ?? _pdOrange),
+              ),
+              Text(
+                '${percent.toStringAsFixed(0)}%',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF444444)),
+              ),
+            ],
+          ),
+        ),
+        if (label != null) ...[
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+        ],
+      ],
+    );
+  }
+
+  Widget _emptyState(String name) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Lottie.asset('assets/lottie/Chicken.json', width: 160, height: 160),
+            const SizedBox(height: 20),
+            const Text(
+              'Aucune progression',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF444444)),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Ajoutez des langues a $name pour voir sa progression.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade500, height: 1.4),
+            ),
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: () => Get.back(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [_pdOrange, _pdOrange2],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(color: _pdOrange.withValues(alpha: 0.30), blurRadius: 10, offset: const Offset(0, 4)),
+                  ],
+                ),
+                child: const Text(
+                  'Retour',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _shimmerList() {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 100, 16, 20),
+      itemCount: 4,
+      itemBuilder: (_, __) => Shimmer.fromColors(
+        baseColor: Colors.grey.shade300,
+        highlightColor: Colors.grey.shade100,
+        child: Container(
+          height: 130,
+          margin: const EdgeInsets.only(bottom: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
       ),
     );
   }

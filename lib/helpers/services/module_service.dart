@@ -24,7 +24,10 @@ class ModuleService {
     _prettyLoggerAdded = true;
   }
 
-  static Future<List<ModuleModel>> getAllModules() async {
+  static Future<List<ModuleModel>> getAllModules({
+    String? languageId,
+    String? levelId,
+  }) async {
     try {
       _ensurePrettyLogger();
       final String? userId = session.userId.value.isNotEmpty
@@ -35,7 +38,17 @@ class ModuleService {
         return [];
       }
       final String url = '/users/$userId/modules';
-      final response = await session.dio.get(url);
+      final Map<String, dynamic> queryParams = {};
+      if (languageId != null && languageId.isNotEmpty) {
+        queryParams['languageId'] = languageId;
+      }
+      if (levelId != null && levelId.isNotEmpty) {
+        queryParams['levelId'] = levelId;
+      }
+      final response = await session.dio.get(
+        url,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
       if (response.statusCode == 200) {
         dynamic data = response.data['data'] ?? response.data;
         List modulesData = [];

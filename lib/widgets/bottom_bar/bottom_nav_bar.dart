@@ -28,7 +28,7 @@ class _AppBottomNavBarState extends State<AppBottomNavBar>
       ),
       _NavItem(
         icon: LucideIcons.bookOpen,
-        label: 'Lexique',
+        label: 'Historique',
         index: 1,
       ),
       _NavItem(
