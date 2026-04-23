@@ -71,34 +71,84 @@ class ParcoursSelectionPage extends StatelessWidget {
               ),
             ),
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.map_outlined,
-                        size: 40, color: Colors.grey.shade400),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.97),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 14),
-                  const Text('Aucun parcours disponible.',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: controller.fetchPaths,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _pActive,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
-                    ),
-                    child: const Text('Réessayer'),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: _pActive.withValues(alpha: 0.10),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.map_outlined,
+                            color: _pActive, size: 42),
+                      ),
+                      const SizedBox(height: 18),
+                      const Text(
+                        'Aucun parcours disponible',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Il n\'y a pas encore de parcours disponible pour ce module.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade500,
+                            height: 1.5),
+                      ),
+                      const SizedBox(height: 22),
+                      GestureDetector(
+                        onTap: controller.fetchPaths,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 28, vertical: 13),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [_pActive, Color(0xFFFFB74D)],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _pActive.withValues(alpha: 0.30),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            'Reessayer',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           );

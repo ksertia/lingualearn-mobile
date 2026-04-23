@@ -10,8 +10,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  static const _primary = Color(0xFF0000CC);
-  static const _primaryLight = Color(0xFF4466FF);
+  static const _primary = Color(0xFFFF7043);
+  static const _primaryLight = Color(0xFFFFB74D);
 
   late LoginController controller;
 
@@ -29,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FF),
+      backgroundColor: const Color(0xFFF6F8FF),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -222,7 +222,7 @@ class _LoginPageState extends State<LoginPage> {
                           label: "Google",
                           icon: Icons.g_mobiledata,
                           iconColor: Colors.red,
-                          onTap: () => Get.toNamed('/Onboarding'),
+                          onTap: () => Get.toNamed(''),
                         ),
                         const SizedBox(width: 12),
                         _socialButton(
@@ -242,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        color: const Color(0xFFF5F7FF),
+        color: const Color(0xFFF6F8FF),
         padding: const EdgeInsets.only(bottom: 28, top: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

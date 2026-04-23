@@ -24,10 +24,8 @@ class DiscoveryController extends GetxController {
     super.onClose();
   }
 
-  // Calcul de la progression pour la barre LinearProgressIndicator
   double get progress => (currentPage.value + 1) / totalPages;
 
-  // Logique de navigation
   void nextPage() {
     if (currentPage.value < totalPages - 1) {
       pageController.nextPage(
@@ -48,7 +46,6 @@ class DiscoveryController extends GetxController {
     }
   }
 
-  // --- POPUP DE FIN AVEC CONFETTIS ---
   void _showFinalCelebration() {
     confettiController.play();
 
@@ -85,7 +82,6 @@ class DiscoveryController extends GetxController {
                     style: TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                   const SizedBox(height: 30),
-                  // Bouton pour débloquer/quitter
                   SizedBox(
                     width: double.infinity,
                     height: 55,

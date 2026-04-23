@@ -5,6 +5,7 @@ import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/helpers/theme/app_notifier.dart';
 import 'package:fasolingo/helpers/utils/ui_mixins.dart';
 import 'package:fasolingo/views/apps/setting/widget/logout_bottom_sheet.dart';
+import 'package:fasolingo/views/apps/setting/widget/subsciption_plan.dart';
 import 'package:fasolingo/views/ui/apploader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -130,29 +131,6 @@ class _SettingScreenState extends State<SettingScreen>
     );
   }
 
-  // --- LOGIQUE DE RÉINITIALISATION ---
-  Future<void> _handleResetAccount(BuildContext context) async {
-    Get.defaultDialog(
-      title: "Réinitialiser ?",
-      middleText:
-          "Es-tu sûr de vouloir effacer ta progression pour choisir une autre langue ?",
-      textConfirm: "Réinitialiser",
-      textCancel: "Annuler",
-      confirmTextColor: Colors.white,
-      buttonColor: Colors.redAccent,
-      onConfirm: () {
-        Get.back();
-        Get.snackbar(
-          "Succès",
-          "Progression réinitialisée (Simulation UI)",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orangeAccent.withOpacity(0.8),
-        );
-      },
-    );
-  }
-
-  // --- WIDGETS ---
 
   Widget _buildProfileSection() {
     final user = controller.user.value;
@@ -184,19 +162,17 @@ class _SettingScreenState extends State<SettingScreen>
 
   Widget _buildPremiumCard() {
     return InkWell(
-      onTap: () => Get.toNamed('/subscription_plans'),
+      onTap: () => showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => const SubscriptionPlansPage(isBottomSheet: true),
+      ),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              contentTheme.primary,
-              contentTheme.primary.withOpacity(0.8)
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+         color: const Color.fromARGB(255, 255, 144, 64),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(

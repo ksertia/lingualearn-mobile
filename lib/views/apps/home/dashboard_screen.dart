@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -62,36 +63,90 @@ class HomePage extends StatelessWidget {
         child: Obx(() {
           if (controller.isLoading.value) return _shimmer();
 
+          if (controller.hasSubscriptionError.value) {
+            return _subscriptionErrorWidget(context, controller);
+          }
+
           if (controller.filteredModules.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.info_outline,
-                        size: 40, color: Colors.grey.shade400),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.97),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 14),
-                  const Text('Aucun module trouvé.',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 14),
-                  ElevatedButton(
-                    onPressed: controller.loadModules,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _kActive,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
-                    ),
-                    child: const Text('Réessayer'),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: _kActive.withValues(alpha: 0.10),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.menu_book_outlined,
+                            color: _kActive, size: 42),
+                      ),
+                      const SizedBox(height: 18),
+                      const Text(
+                        'Aucun module disponible',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Il n\'y a pas encore de module disponible pour cette langue et ce niveau.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade500,
+                            height: 1.5),
+                      ),
+                      const SizedBox(height: 22),
+                      GestureDetector(
+                        onTap: controller.loadModules,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 28, vertical: 13),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [_kActive, Color(0xFFFFB74D)],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _kActive.withValues(alpha: 0.30),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            'Reessayer',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             );
           }
@@ -155,7 +210,7 @@ class HomePage extends StatelessWidget {
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 20),
-                          child: _moduleCard(controller, module, st, isUnlocked,
+                          child: _moduleCard(context, controller, module, st, isUnlocked,
                               accent, index),
                         ),
                       ),
@@ -248,6 +303,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _moduleCard(
+    BuildContext context,
     HomeController controller,
     ModuleModel module,
     String st,
@@ -267,14 +323,27 @@ class HomePage extends StatelessWidget {
                 borderRadius: 16,
               )
           : () async {
+              if (!controller.isSubscriptionActive.value) {
+                _showSubscriptionRequired(context);
+                return;
+              }
               final userId = controller.session.userId.value.isNotEmpty
                   ? controller.session.userId.value
                   : (controller.session.user?.id ?? '');
               final raw = (module.progress?.status ?? module.status ?? '')
                   .toLowerCase();
               if (userId.isNotEmpty && raw == 'unlocked') {
-                await ModuleService.startModule(
-                    userId: userId, moduleId: module.id);
+                try {
+                  await ModuleService.startModule(
+                      userId: userId, moduleId: module.id);
+                } on DioException catch (e) {
+                  if (e.response?.statusCode == 403 ||
+                      e.response?.statusCode == 402) {
+                    controller.isSubscriptionActive.value = false;
+                    if (context.mounted) _showSubscriptionRequired(context);
+                    return;
+                  }
+                }
               }
               await Get.toNamed('/parcoursselectionpage', arguments: {
                 'moduleId': module.id,
@@ -428,6 +497,204 @@ class HomePage extends StatelessWidget {
                         Icon(Icons.play_circle_fill, color: accent, size: 32),
                   ),
                 ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSubscriptionRequired(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1A1A1A),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 28),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF7043), Color(0xFFFFB74D)],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF7043).withValues(alpha: 0.35),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.workspace_premium_rounded,
+                  color: Colors.white, size: 36),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Abonnement requis',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Accédez à tous les modules en illimité.\nSouscrivez dès maintenant et commencez à apprendre.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.55),
+                fontSize: 13,
+                height: 1.6,
+              ),
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Get.toNamed('/subscription_plans');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF7043),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  "Voir les forfaits",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Plus tard',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.35),
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _subscriptionErrorWidget(BuildContext context, HomeController controller) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.97),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF7043).withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.workspace_premium_rounded,
+                    color: Color(0xFFFF7043), size: 42),
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                'Abonnement requis',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Votre abonnement est expiré ou inactif.\nSouscrivez pour accéder aux modules.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade500,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 22),
+              GestureDetector(
+                onTap: () => Get.toNamed('/subscription_plans'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 28, vertical: 13),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF7043), Color(0xFFFFB74D)],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFF7043).withValues(alpha: 0.30),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    "S'abonner",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: controller.loadModules,
+                child: Text(
+                  'Réessayer',
+                  style: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

@@ -17,8 +17,8 @@ class _RegisterPageState extends State<RegisterPage>
   late AnimationController _animCtrl;
   late Animation<double> _fadeAnim;
 
-  static const _primary = Color(0xFF0000CC);
-  static const _primaryLight = Color(0xFF4466FF);
+  static const _primary = Color(0xFFFF7043);
+  static const _primaryLight = Color(0xFFFFB74D);
 
   @override
   void initState() {
@@ -62,7 +62,7 @@ class _RegisterPageState extends State<RegisterPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FF),
+      backgroundColor: const Color(0xFFF6F8FF),
       body: Column(
         children: [
           Container(
@@ -219,7 +219,7 @@ class _RegisterPageState extends State<RegisterPage>
       ),
       bottomNavigationBar: currentStep == 0
           ? Container(
-              color: const Color(0xFFF5F7FF),
+              color: const Color(0xFFF6F8FF),
               padding: const EdgeInsets.only(bottom: 24, top: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

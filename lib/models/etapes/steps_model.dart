@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class StepMasterResponse {
   final bool success;
   final StepData data;
@@ -9,7 +7,7 @@ class StepMasterResponse {
   factory StepMasterResponse.fromJson(Map<String, dynamic> json) {
     return StepMasterResponse(
       success: json['success'] ?? false,
-      data: StepData.fromJson(json['data'] ?? {}),
+      data: StepData.fromJson(Map<String, dynamic>.from(json['data'] as Map? ?? {})),
     );
   }
 }
@@ -17,8 +15,8 @@ class StepMasterResponse {
 class StepData {
   final String id;
   final String title;
-  final String type;   
-  final String format; 
+  final String type;
+  final String format;
   final Content content;
 
   StepData({
@@ -30,35 +28,44 @@ class StepData {
   });
 
   factory StepData.fromJson(Map<String, dynamic> json) {
-    final stepInfo = json['step'] ?? {};
-    final contentJson = json['content'] ?? {};
+    final Map<String, dynamic> stepInfo = json['step'] is Map
+        ? Map<String, dynamic>.from(json['step'] as Map)
+        : {};
 
-    final String rawType = stepInfo['stepType'] ?? json['contentType'] ?? 'lesson';
+    final Map<String, dynamic> contentJson = json['content'] is Map
+        ? Map<String, dynamic>.from(json['content'] as Map)
+        : {};
 
-    // LOGIQUE DE DÉTECTION DU FORMAT
+    final String rawType =
+        stepInfo['stepType']?.toString() ??
+        json['contentType']?.toString() ??
+        'lesson';
+
     String detectedFormat = 'text';
-    String? url = contentJson['videoUrl'] != null
-        ? Uri.decodeFull(contentJson['videoUrl'])
-        : null;
+    final String? rawUrl = contentJson['videoUrl']?.toString();
+    final String? url = rawUrl != null ? Uri.decodeFull(rawUrl) : null;
 
     if (rawType == 'quiz' || contentJson['questions'] != null) {
       detectedFormat = 'quiz';
     } else if (url != null) {
-      String lowerUrl = url.toLowerCase();
+      final lowerUrl = url.toLowerCase();
       if (lowerUrl.contains('.mp3') || lowerUrl.contains('/audios/')) {
         detectedFormat = 'audio';
       } else if (lowerUrl.contains('.mp4') || lowerUrl.contains('/videos/')) {
         detectedFormat = 'video';
       } else if (lowerUrl.contains('.pdf')) {
         detectedFormat = 'pdf';
-      } else if (lowerUrl.contains('.png') || lowerUrl.contains('.jpg') || lowerUrl.contains('.jpeg') || lowerUrl.contains('.webp')) {
+      } else if (lowerUrl.contains('.png') ||
+          lowerUrl.contains('.jpg') ||
+          lowerUrl.contains('.jpeg') ||
+          lowerUrl.contains('.webp')) {
         detectedFormat = 'image';
       }
     }
 
     return StepData(
       id: stepInfo['id']?.toString() ?? '',
-      title: stepInfo['title'] ?? 'Sans titre',
+      title: stepInfo['title']?.toString() ?? 'Sans titre',
       type: rawType,
       format: detectedFormat,
       content: Content.fromJson(contentJson, detectedFormat),
@@ -75,12 +82,15 @@ class Content {
 
   factory Content.fromJson(Map<String, dynamic> json, String format) {
     return Content(
-      text: json['content'],
-      mediaUrl: json['videoUrl'] != null ? Uri.decodeFull(json['videoUrl']) : null,
-      questions: json['questions'] != null
+      text: json['content']?.toString(),
+      mediaUrl: json['videoUrl'] != null
+          ? Uri.decodeFull(json['videoUrl'].toString())
+          : null,
+      questions: json['questions'] is List
           ? (json['questions'] as List)
-          .map((q) => Question.fromJson(q))
-          .toList()
+              .map((q) => Question.fromJson(
+                  q is Map ? Map<String, dynamic>.from(q) : {}))
+              .toList()
           : null,
     );
   }
@@ -101,12 +111,12 @@ class Question {
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
-      text: json['questionText'] ?? '',
-      type: json['questionType'] ?? 'multiple_choice',
-      options: json['options'] != null
-          ? List<String>.from(json['options'])
+      text: json['questionText']?.toString() ?? '',
+      type: json['questionType']?.toString() ?? 'multiple_choice',
+      options: json['options'] is List
+          ? List<String>.from(json['options'] as List)
           : [],
-      answer: json['correctAnswer'] ?? '',
+      answer: json['correctAnswer']?.toString() ?? '',
     );
   }
 }

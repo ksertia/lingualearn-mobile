@@ -1,13 +1,15 @@
 import 'package:fasolingo/controller/apps/session_controller.dart';
+import 'package:fasolingo/helpers/storage/local_storage.dart'; // Import nécessaire
+import 'package:fasolingo/models/user_model.dart';          // Import nécessaire
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 const Color _obOrange  = Color(0xFFFF7043);
 const Color _obOrange2 = Color(0xFFFFB74D);
-const Color _obCyan    = Color(0xFF0EA5E9);
-const Color _obCard    = Color(0xFFF6F7F9);
-const Color _obText    = Color(0xFF1A1A1A);
-const Color _obSub     = Color(0xFF888888);
+const Color _obCyan     = Color(0xFF0EA5E9);
+const Color _obCard     = Color(0xFFF6F7F9);
+const Color _obText     = Color(0xFF1A1A1A);
+const Color _obSub      = Color(0xFF888888);
 
 class OnboardingTibiPro extends StatefulWidget {
   const OnboardingTibiPro({super.key});
@@ -19,13 +21,80 @@ class OnboardingTibiPro extends StatefulWidget {
 class _OnboardingTibiProState extends State<OnboardingTibiPro> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  bool _isLoading = true; 
+
+  @override
+  void initState() {
+    super.initState();
+    _checkStatus(); 
+  }
+
+  void _checkStatus() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final String? storedToken = LocalStorage.getAuthToken();
+
+    if (storedToken == null || storedToken.isEmpty || storedToken == "null") {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+
+    try {
+      final session = Get.find<SessionController>();
+      session.token.value = storedToken;
+
+      final response = await session.dio.get('/users/me');
+
+      if (response.statusCode != 200) {
+        if (mounted) setState(() => _isLoading = false);
+        return;
+      }
+
+      // Support API avec ou sans wrapper { success, data }
+      final dynamic raw = response.data;
+      final Map<String, dynamic> userData =
+          (raw is Map && raw.containsKey('data') && raw['data'] is Map)
+              ? Map<String, dynamic>.from(raw['data'] as Map)
+              : Map<String, dynamic>.from(raw as Map);
+
+      final UserModel loggedInUser = UserModel.fromJson(userData);
+      session.updateUser(loggedInUser, storedToken);
+
+      final String langId  = loggedInUser.selectedLanguageId ?? '';
+      final String levelId = loggedInUser.selectedLevelId    ?? '';
+
+      if (langId.isNotEmpty && levelId.isNotEmpty) {
+        Get.offAllNamed(
+          '/HomeScreen',
+          arguments: {'languageId': langId, 'levelId': levelId},
+        );
+      } else if (langId.isNotEmpty) {
+        Get.offAllNamed('/selection');
+      } else {
+        Get.offAllNamed('/bienvenue');
+      }
+    } catch (e) {
+      debugPrint("Erreur Auto-Login : $e");
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(color: _obOrange),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
+          // Tes cercles de design (Positioned...)
           Positioned(
             top: -60,
             right: -60,
@@ -68,7 +137,6 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   child: Row(
                     children: [
-                      _buildCircleBtn(Icons.arrow_back_ios_new),
                       const Spacer(),
                       _buildSegmentedProgress(),
                       const Spacer(),
@@ -94,6 +162,8 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
       ),
     );
   }
+
+  // --- Tes Widgets de Steps (inchangés) ---
 
   Widget _buildActivityStep() {
     return _StepLayout(
@@ -188,16 +258,12 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
                 ],
               ),
             ),
-
             const SizedBox(height: 28),
             _buildProgressCircle(),
             const SizedBox(height: 28),
-
             _buildStatLine('Vocabulaire', 0.7, _obOrange, '150 mots'),
             _buildStatLine('Prononciation', 0.4, _obCyan, '40%'),
-
             const Spacer(),
-
             _buildPrimaryButton('C\'EST PARTI', () {
               session.vientDeLaDecouverte = true;
               Get.toNamed('/step');
@@ -214,6 +280,7 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
     );
   }
 
+  // --- Méthodes de Build UI (inchangées) ---
   Widget _buildTopicCard(String label, IconData icon, bool selected, {double rotation = 0}) {
     return Transform.rotate(
       angle: rotation,
@@ -360,18 +427,6 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
     );
   }
 
-  Widget _buildCircleBtn(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _obCard,
-        border: Border.all(color: Colors.grey.shade200, width: 1.5),
-      ),
-      child: Icon(icon, color: _obText, size: 18),
-    );
-  }
-
   Widget _buildSegmentedProgress() {
     return Row(
       children: List.generate(10, (index) {
@@ -463,6 +518,7 @@ class _OnboardingTibiProState extends State<OnboardingTibiPro> {
   }
 }
 
+// Layout Helper
 class _StepLayout extends StatelessWidget {
   final String title;
   final Widget child;

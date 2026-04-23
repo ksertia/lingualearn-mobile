@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:fasolingo/helpers/constant/app_constant.dart';
+import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../../../models/etapes/steps_model.dart'; // Notre Master Model
 
@@ -10,33 +11,31 @@ class StepService {
     headers: {
       'Accept': 'application/json',
     },
-  ))..interceptors.add(PrettyDioLogger(
-    requestHeader: true,
-    requestBody: true,
-    responseHeader: false,
-    responseBody: true,
-    error: true,
-    compact: true,
-    maxWidth: 90,
-  ));
-
-  // Idéalement, récupère ce token depuis un Prefs ou ton AuthState
-  final String _token = "TON_TOKEN_ACTUEL";
+  ))
+    ..interceptors.add(PrettyDioLogger(
+      requestHeader: true,
+      requestBody: true,
+      responseHeader: false,
+      responseBody: true,
+      error: true,
+      compact: true,
+      maxWidth: 90,
+    ));
 
   StepService() {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        options.headers['Authorization'] = 'Bearer $_token';
+        final token = LocalStorage.getAuthToken();
+        if (token != null && token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
         return handler.next(options);
       },
     ));
   }
 
-  /// Récupère le contenu complet d'une étape
   Future<StepData?> getStepContent(String stepId, {String? userId}) async {
     try {
-      // On construit les paramètres de requête (queryParameters)
-      // Dio s'occupe de transformer ça en ?userId=xxx
       final Map<String, dynamic> queryParams = {};
       if (userId != null) {
         queryParams['userId'] = userId;
@@ -46,20 +45,20 @@ class StepService {
         '/steps/$stepId/content',
         queryParameters: queryParams,
       );
-
-      // On utilise le Master Model pour transformer la réponse
-      // On passe 'data' directement comme dans ton exemple DiscoverService
       if (response.data['success'] == true) {
-        return StepData.fromJson(response.data['data']);
+        final raw = response.data['data'];
+        if (raw == null) return null;
+        final data = Map<String, dynamic>.from(raw as Map);
+        if (data['content'] == null) return null;
+        return StepData.fromJson(data);
       }
       return null;
-
     } on DioException catch (e) {
       print("Erreur Dio : ${e.message}");
       return null;
     } catch (e) {
       print("Erreur inattendue : $e");
-      rethrow;
+      return null;
     }
   }
 }

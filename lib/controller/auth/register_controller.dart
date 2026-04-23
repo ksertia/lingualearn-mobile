@@ -2,7 +2,6 @@ import 'package:fasolingo/helpers/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
-import '../../models/user_model.dart';
 import '../../helpers/utils/app_snackbar.dart';
 
 class RegisterController extends GetxController {

@@ -1,7 +1,5 @@
 import 'package:fasolingo/helpers/services/module_service.dart';
 import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
-import 'package:fasolingo/models/modules/modul_model.dart';
-import 'package:fasolingo/models/parcoure/parcour_model.dart';
 import 'package:get/get.dart';
 
 class ParcoursSelectionController extends GetxController {
@@ -53,7 +51,6 @@ class ParcoursSelectionController extends GetxController {
       items.clear();
 
       if (showAllPaths) {
-
         final modules = await ModuleService.getAllModules();
 
         if (modules.isNotEmpty) {
@@ -64,14 +61,13 @@ class ParcoursSelectionController extends GetxController {
             items.add(module);
 
             // Load paths for this module
-            final paths = await LearningPathService.getPathsBySpecificModule(module.id);
+            final paths =
+                await LearningPathService.getPathsBySpecificModule(module.id);
             if (paths.isNotEmpty) {
               paths.sort((a, b) => a.index.compareTo(b.index));
               items.addAll(paths);
             }
           }
-
-
         } else {
           print(" [ParcoursController] Aucun module trouvé");
         }

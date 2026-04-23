@@ -69,17 +69,13 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
     return Scaffold(
       body: Stack(
         children: [
-          // --- ARRIÈRE-PLAN DÉGRADÉ LUDIQUE ---
+          // --- ARRIÈRE-PLAN ---
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color.fromARGB(159, 255, 178, 71), 
-                  Color.fromARGB(166, 255, 227, 89), 
-                  Color.fromARGB(152, 136, 216, 176), 
-                ],
+                colors: [Color(0xFFFFF3E0), Color(0xFFFFF9F5)],
               ),
             ),
           ),
@@ -118,12 +114,12 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
 
     final colorsList = [
       Colors.yellow.shade600,
-      Colors.white.withOpacity(0.7),
+      Colors.orange.withValues(alpha: 0.7),
       Colors.pink.shade300,
       Colors.orange.shade300,
-      Colors.blue.shade300,
-      Colors.purple.shade200,
-      Colors.green.shade300,
+      Colors.amber.shade400,
+      Colors.deepOrange.shade200,
+      Colors.orange.shade200,
     ];
 
     return AnimatedBuilder(
@@ -270,10 +266,10 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.green.shade100,
+              color: Colors.orange.shade50,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.green.shade300,
+                color: Colors.orange.shade200,
                 width: 1,
               ),
             ),
@@ -282,7 +278,7 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
               children: [
                 Icon(
                   Icons.lightbulb_outline,
-                  color: Colors.green.shade700,
+                  color: Colors.orange.shade700,
                   size: 18,
                 ),
                 const SizedBox(width: 6),
@@ -290,7 +286,7 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
                   "Les leçons seront adaptées à votre niveau.",
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.green.shade800,
+                    color: Colors.orange.shade800,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -629,9 +625,9 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
 
   Color _getTreeColor(int index) {
     final colors = [
-      Colors.green.shade400,  
-      Colors.green.shade600,    
-      Colors.green.shade800,   
+      const Color(0xFFFF7043),
+      const Color(0xFFFFB74D),
+      const Color(0xFFFF8F00),
     ];
     return colors[index % colors.length];
   }

@@ -98,39 +98,7 @@ class ProfileController extends MyController {
         .enumerationsModel);
   }
 
-  ///******************************** Get Payment Method ********************************///
-  // Future<void> getPaymentMethodData({required String context}) async {
-  //   PaymentOperatorModel? model = await PaymentService.getPaymentMethodAPI(
-  //       context: context,
-  //       countryUUid: LocalStorage.getCountryID() ?? "",
-  //       offset: 0,
-  //       limit: 25);
-  //   if (model != null) {
-  //     paymentModel(model);
-  //   }
-  // }
 
-  ///******************************** Get User Payment Method ********************************///
-  // Future<void> getUserPaymentMethodData() async {
-  //   isPaymentMethodLoading(true);
-  //   List<PaymentItem>? list = await PaymentService.getUserPaymentMethodAPI(
-  //       userUUid: LocalStorage.getUserID() ?? "", offset: 0, limit: 25);
-  //   if (list != null) {
-  //     paymentMethodList(list);
-  //     isPaymentMethodLoading(false);
-  //   } else {
-  //     isPaymentMethodLoading(false);
-  //   }
-  // }
-
-  // @override
-  // void onInit() {
-  //   super.onInit();
-  //
-  //   getPaymentMethodData(context: "");
-  //
-  //   getUserPaymentMethodData();
-  // }
 
   void onChangedFilledChecked(bool? value) {
     filled = value ?? filled;

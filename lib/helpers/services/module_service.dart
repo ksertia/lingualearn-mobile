@@ -75,17 +75,11 @@ class ModuleService {
     required String userId,
     required String moduleId,
   }) async {
-    try {
-      _ensurePrettyLogger();
-      final response = await session.dio.post(
-        '/users/$userId/modules/$moduleId/start',
-      );
-      return response.statusCode == 200 || response.statusCode == 201;
-    } on DioException catch (_) {
-      return false;
-    } catch (_) {
-      return false;
-    }
+    _ensurePrettyLogger();
+    final response = await session.dio.post(
+      '/users/$userId/modules/$moduleId/start',
+    );
+    return response.statusCode == 200 || response.statusCode == 201;
   }
 
   static Future<bool> completeModule({

@@ -54,18 +54,13 @@ class _BienvenuPageState extends State<BienvenuPage>
     return Scaffold(
       body: Stack(
         children: [
-          // --- ARRIÈRE-PLAN DÉGRADÉ AMUSANT ---
+          // --- ARRIÈRE-PLAN ---
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF87CEEB).withOpacity(0.6), 
-                  const Color(0xFFFFB6C1).withOpacity(0.6), 
-                  const Color(0xFFFFD700).withOpacity(0.5),
-                  const Color(0xFFFFA500).withOpacity(0.6), 
-                ],
+                colors: [Color(0xFFFFF3E0), Color(0xFFFFF9F5)],
               ),
             ),
           ),
@@ -136,11 +131,11 @@ class _BienvenuPageState extends State<BienvenuPage>
 
     final colors = [
       Colors.yellow.shade600,
-      Colors.white.withOpacity(0.8),
+      Colors.orange.shade200,
       Colors.pink.shade300,
       Colors.orange.shade300,
-      Colors.blue.shade300,
-      Colors.purple.shade200,
+      Colors.amber.shade400,
+      Colors.deepOrange.shade200,
     ];
 
     return AnimatedBuilder(
@@ -148,7 +143,9 @@ class _BienvenuPageState extends State<BienvenuPage>
       builder: (context, child) {
         return Positioned(
           left: left,
-          top: (index * 60.0 + _floatAnimation.value + delay) % MediaQuery.of(context).size.height - 30,
+          top: (index * 60.0 + _floatAnimation.value + delay) %
+                  MediaQuery.of(context).size.height -
+              30,
           child: Opacity(
             opacity: 0.6,
             child: Transform.rotate(
@@ -185,11 +182,11 @@ class _BienvenuPageState extends State<BienvenuPage>
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w900,
-            color: Colors.white,
+            color: Colors.orange.shade800,
             letterSpacing: 2,
             shadows: [
               Shadow(
-                color: Colors.orange.shade300,
+                color: Colors.orange.shade200,
                 offset: const Offset(2, 2),
                 blurRadius: 4,
               ),
@@ -202,7 +199,7 @@ class _BienvenuPageState extends State<BienvenuPage>
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.orange.shade800,
           ),
         ),
       ],
@@ -213,11 +210,11 @@ class _BienvenuPageState extends State<BienvenuPage>
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.orange.withValues(alpha: 0.12),
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.orange.withValues(alpha: 0.25),
             blurRadius: 30,
             spreadRadius: 10,
           ),
@@ -286,7 +283,7 @@ class _BienvenuPageState extends State<BienvenuPage>
                   ),
                 ),
                 const TextSpan(
-                  text: "Découvre les langues\nde nos racines ! 🌍\n\n",
+                  text: "Découvre les langues\nde nos racines ! \n\n",
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 TextSpan(
@@ -317,9 +314,7 @@ class _BienvenuPageState extends State<BienvenuPage>
           child: child,
         );
       },
-      onEnd: () {
-        
-      },
+      onEnd: () {},
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
@@ -358,8 +353,6 @@ class _BienvenuPageState extends State<BienvenuPage>
                   letterSpacing: 1.5,
                 ),
               ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward_rounded, size: 24),
             ],
           ),
         ),
@@ -367,4 +360,3 @@ class _BienvenuPageState extends State<BienvenuPage>
     );
   }
 }
-
