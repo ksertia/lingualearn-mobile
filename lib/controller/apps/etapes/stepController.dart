@@ -10,12 +10,12 @@ class StepController extends GetxController {
   var isCompleting = false.obs;
   var stepData = Rxn<StepData>();
 
-  var currentQuestionIndex = 0.obs; 
+  var currentQuestionIndex = 0.obs;
 
   Future<void> loadStepContent(String stepId, String userId) async {
     try {
       isLoading(true);
-      currentQuestionIndex(0); 
+      currentQuestionIndex(0);
 
       final result = await _stepService.getStepContent(stepId, userId: userId);
 
@@ -38,7 +38,8 @@ class StepController extends GetxController {
     try {
       if (isCompleting.value) return;
       isCompleting.value = true;
-      final ok = await StepsService.completeStep(userId: userId, stepId: stepId);
+      final ok =
+          await StepsService.completeStep(userId: userId, stepId: stepId);
       if (ok) {
         Get.back(result: true);
         return;
@@ -69,6 +70,5 @@ class StepController extends GetxController {
     }
   }
 
-  void nextStep() {
-  }
+  void nextStep() {}
 }

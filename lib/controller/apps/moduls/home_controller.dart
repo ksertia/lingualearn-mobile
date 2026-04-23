@@ -1,6 +1,6 @@
 import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/helpers/services/module_service.dart';
-import 'package:fasolingo/models/modules/modul_model.dart'; 
+import 'package:fasolingo/models/modules/modul_model.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
@@ -8,10 +8,8 @@ class HomeController extends GetxController {
 
   RxBool isLoading = false.obs;
   RxList<ModuleModel> filteredModules = <ModuleModel>[].obs;
-  // Map moduleId -> resolved status ('locked' | 'unlocked' | 'completed')
   RxMap<String, String> moduleDisplayStatus = <String, String>{}.obs;
 
-  // IDs fixés à la création du contrôleur — indépendants des changements de session
   late final String _languageId;
   late final String _levelId;
 
@@ -19,10 +17,12 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     final args = Get.arguments;
-    final String argLang = args is Map ? (args['languageId'] as String? ?? '') : '';
-    final String argLvl  = args is Map ? (args['levelId']   as String? ?? '') : '';
-    _languageId = argLang.isNotEmpty ? argLang : session.selectedLanguageId.value;
-    _levelId    = argLvl.isNotEmpty  ? argLvl  : session.selectedLevelId.value;
+    final String argLang =
+        args is Map ? (args['languageId'] as String? ?? '') : '';
+    final String argLvl = args is Map ? (args['levelId'] as String? ?? '') : '';
+    _languageId =
+        argLang.isNotEmpty ? argLang : session.selectedLanguageId.value;
+    _levelId = argLvl.isNotEmpty ? argLvl : session.selectedLevelId.value;
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_languageId.isNotEmpty && _levelId.isNotEmpty) {
@@ -48,8 +48,6 @@ class HomeController extends GetxController {
       if (modulesFromApi.isNotEmpty) {
         modulesFromApi.sort((a, b) => a.index.compareTo(b.index));
         filteredModules.assignAll(modulesFromApi);
-
-        // Remplir la map de statuts pour que l'UI puisse se baser dessus
         moduleDisplayStatus.clear();
         for (var m in modulesFromApi) {
           moduleDisplayStatus[m.id] = _resolveDisplayStatus(m);
@@ -57,7 +55,6 @@ class HomeController extends GetxController {
       } else {
         filteredModules.clear();
       }
-      
     } catch (e) {
     } finally {
       isLoading.value = false;
@@ -65,10 +62,15 @@ class HomeController extends GetxController {
   }
 
   String _resolveDisplayStatus(ModuleModel m) {
-    // Priorité: progress.status > module.status > locked
-    final status = (m.progress?.status ?? m.status ?? 'locked').toString().toLowerCase();
+    final status =
+        (m.progress?.status ?? m.status ?? 'locked').toString().toLowerCase();
     if (status == 'completed' || status == 'complete') return 'completed';
-    if (status == 'unlocked' || status == 'started' || status == 'in_progress' || status == 'deblocked' || status == 'debloque' || status == 'debloqued') return 'unlocked';
+    if (status == 'unlocked' ||
+        status == 'started' ||
+        status == 'in_progress' ||
+        status == 'deblocked' ||
+        status == 'debloque' ||
+        status == 'debloqued') return 'unlocked';
     return 'locked';
   }
 
@@ -88,9 +90,6 @@ class HomeController extends GetxController {
     await loadModules();
   }
 
-
-  // completeModule est déjà appelé dans parcours.dart avant Get.back(result: true)
-  // Ne pas le rappeler ici pour éviter la double requête
   Future<void> onModuleCompleted(String moduleId) async {
     try {
       final idx = filteredModules.indexWhere((m) => m.id == moduleId);
@@ -135,14 +134,13 @@ class HomeController extends GetxController {
       // Afficher un dialog de réussite
       Get.defaultDialog(
         title: 'Félicitations',
-        middleText: 'Module terminé 🎉',
+        middleText: 'Module terminé',
         textConfirm: 'Continuer',
         onConfirm: () {
           Get.back();
         },
       );
 
-      // Débloquer le module suivant si présent
       final nextIdx = idx + 1;
       if (nextIdx < filteredModules.length) {
         final next = filteredModules[nextIdx];
@@ -153,7 +151,8 @@ class HomeController extends GetxController {
           status: 'unlocked',
           progressPercentage: next.progressPercentage ?? '0',
           totalXp: next.progress?.totalXp ?? next.totalXp,
-          timeSpentMinutes: next.progress?.timeSpentMinutes ?? next.timeSpentMinutes,
+          timeSpentMinutes:
+              next.progress?.timeSpentMinutes ?? next.timeSpentMinutes,
           unlockedAt: now,
           startedAt: next.progress?.startedAt,
           completedAt: next.progress?.completedAt,
@@ -179,7 +178,6 @@ class HomeController extends GetxController {
         filteredModules[nextIdx] = updatedNext;
         moduleDisplayStatus[updatedNext.id] = 'unlocked';
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 }

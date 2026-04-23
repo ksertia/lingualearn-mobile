@@ -30,11 +30,9 @@ class LayoutController extends MyController {
   }
 
   enableNotificationShade() {
-    // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom, SystemUiOverlay.top]);
   }
 
   disableNotificationShade() {
-    // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
   }
 
   @override

@@ -12,12 +12,10 @@ class DiscoverController extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
-  // Initialisation : Charger les langues
   Future<void> init() async {
     isLoading = true;
     error = null;
     notifyListeners();
-
     try {
       languages = await _service.getAllLanguages();
     } catch (e) {
@@ -28,20 +26,14 @@ class DiscoverController extends ChangeNotifier {
     }
   }
 
-  // Sélection d'une langue
   Future<void> selectLanguage(String language) async {
-    // Si c'est déjà la langue sélectionnée, on ne fait rien
     if (selectedLanguage == language && languageContent != null) return;
-
     selectedLanguage = language;
     isLoading = true;
     error = null;
     notifyListeners();
-
     try {
       languageContent = await _service.getContentByLanguage(language);
-
-      // Tri automatique par le champ 'order'
       languageContent?.lessons.sort((a, b) => a.order.compareTo(b.order));
       languageContent?.exercises.sort((a, b) => a.order.compareTo(b.order));
     } catch (e) {

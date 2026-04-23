@@ -1,9 +1,6 @@
-import 'package:fasolingo/helpers/constant/app_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fasolingo/helpers/services/auth_services.dart';
-import 'dart:convert';
-
 
 class ForgotPasswordController extends GetxController {
   final emailController = TextEditingController();
@@ -13,29 +10,25 @@ class ForgotPasswordController extends GetxController {
 
   var isLoading = false.obs;
 
-
-
   Future<void> requestOtp() async {
     String login = emailController.text.trim();
     if (login.isEmpty) {
-      Get.snackbar("Attention", "Veuillez entrer votre identifiant", 
+      Get.snackbar("Attention", "Veuillez entrer votre identifiant",
           backgroundColor: Colors.orangeAccent, colorText: Colors.white);
       return;
     }
-
     isLoading.value = true;
     final data = {"loginInfo": login};
     final response = await AuthService.forgotPassword(data);
     isLoading.value = false;
 
     if (response != null) {
-      Get.toNamed('/otpCode'); 
+      Get.toNamed('/otpCode');
     } else {
       Get.snackbar("Erreur", "Compte introuvable ou erreur serveur.");
     }
   }
 
-  // --- ÉTAPE 2 : VÉRIFICATION DE L'OTP ---
   Future<void> verifyOtp() async {
     String code = otpController.text.trim();
     if (code.isEmpty) {
@@ -58,7 +51,6 @@ class ForgotPasswordController extends GetxController {
     }
   }
 
-  // --- ÉTAPE 3 : RÉINITIALISATION FINALE ---
   Future<void> resetPassword() async {
     String pass = newPasswordController.text;
     String confirm = confirmPasswordController.text;
@@ -83,8 +75,8 @@ class ForgotPasswordController extends GetxController {
     isLoading.value = false;
 
     if (response != null) {
-      Get.offAllNamed('/login'); 
-      Get.snackbar("Bravo !", "Mot de passe modifié avec succès.", 
+      Get.offAllNamed('/login');
+      Get.snackbar("Succès", "Mot de passe modifié avec succès.",
           backgroundColor: Colors.green, colorText: Colors.white);
     } else {
       Get.snackbar("Erreur", "Échec de l'opération.");

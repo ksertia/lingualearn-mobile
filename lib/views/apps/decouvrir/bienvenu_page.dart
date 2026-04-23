@@ -57,16 +57,7 @@ class _BienvenuPageState extends State<BienvenuPage>
           // --- ARRIÈRE-PLAN DÉGRADÉ AMUSANT ---
           Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF87CEEB).withOpacity(0.6), 
-                  const Color(0xFFFFB6C1).withOpacity(0.6), 
-                  const Color(0xFFFFD700).withOpacity(0.5),
-                  const Color(0xFFFFA500).withOpacity(0.6), 
-                ],
-              ),
+
             ),
           ),
 
@@ -148,7 +139,9 @@ class _BienvenuPageState extends State<BienvenuPage>
       builder: (context, child) {
         return Positioned(
           left: left,
-          top: (index * 60.0 + _floatAnimation.value + delay) % MediaQuery.of(context).size.height - 30,
+          top: (index * 60.0 + _floatAnimation.value + delay) %
+                  MediaQuery.of(context).size.height -
+              30,
           child: Opacity(
             opacity: 0.6,
             child: Transform.rotate(
@@ -202,7 +195,7 @@ class _BienvenuPageState extends State<BienvenuPage>
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.black.withOpacity(0.9),
           ),
         ),
       ],
@@ -286,7 +279,7 @@ class _BienvenuPageState extends State<BienvenuPage>
                   ),
                 ),
                 const TextSpan(
-                  text: "Découvre les langues\nde nos racines ! 🌍\n\n",
+                  text: "Découvre les langues\nde nos racines ! \n\n",
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 TextSpan(
@@ -317,9 +310,7 @@ class _BienvenuPageState extends State<BienvenuPage>
           child: child,
         );
       },
-      onEnd: () {
-        
-      },
+      onEnd: () {},
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
@@ -358,8 +349,6 @@ class _BienvenuPageState extends State<BienvenuPage>
                   letterSpacing: 1.5,
                 ),
               ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward_rounded, size: 24),
             ],
           ),
         ),
@@ -367,4 +356,3 @@ class _BienvenuPageState extends State<BienvenuPage>
     );
   }
 }
-

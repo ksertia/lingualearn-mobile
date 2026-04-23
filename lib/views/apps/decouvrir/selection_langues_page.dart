@@ -81,7 +81,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
+/*          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
@@ -89,7 +89,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
               Color(0xFFFFE259), // Jaune soleil
               Color(0xFF88D8B0), // Vert clair menthe
             ],
-          ),
+          ),*/
         ),
         child: SafeArea(
           child: SingleChildScrollView(
@@ -114,7 +114,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.black.withOpacity(0.8),
                                   borderRadius: BorderRadius.circular(14),
                                   boxShadow: [
                                     BoxShadow(
@@ -126,7 +126,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                                 ),
                                 child: const Icon(
                                   Icons.arrow_back_ios_new,
-                                  color: Colors.orange,
+                                  color: Colors.white,
                                   size: 20,
                                 ),
                               ),
@@ -142,7 +142,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.black.withOpacity(0.3),
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
@@ -170,7 +170,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                                     style: TextStyle(
                                       fontSize: 26,
                                       fontWeight: FontWeight.w800,
-                                      color: Colors.white,
+                                      color: Colors.black,
                                       height: 1.2,
                                       shadows: [
                                         Shadow(
@@ -185,7 +185,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.3),
+                                      color: Colors.black.withOpacity(0.3),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: const Text(
@@ -255,11 +255,11 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.black.withOpacity(0.3),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Text(
-                                "🌟 Langues disponibles",
+                                "Langues disponibles",
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
@@ -309,7 +309,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: _buildActionButton(
-                                  label: "➕ Ajouter cette langue",
+                                  label: "Ajouter cette langue",
                                   onPressed: isLoading
                                       ? null
                                       : () async {
@@ -322,8 +322,8 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
 
                             _buildActionButton(
                               label: languagesController.selectedLanguageLevels.isEmpty
-                                  ? "🤔 Sélectionner une langue"
-                                  : "🚀 Continuons !",
+                                  ? "Sélectionner une langue"
+                                  : "Continuons !",
                               onPressed: isLoading
                                   ? null
                                   : () async {
@@ -382,7 +382,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.white.withOpacity(0.9),
+            color: isSelected ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.3),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isSelected ? Colors.orange : Colors.grey.shade200,
@@ -433,7 +433,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
-                        color: isSelected ? Colors.orange.shade800 : Colors.black87,
+                        color: isSelected ? Colors.white : Colors.black,
                       ),
                     ),
                     if (lang.code != null)
@@ -441,7 +441,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                         lang.code!.toUpperCase(),
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade500,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

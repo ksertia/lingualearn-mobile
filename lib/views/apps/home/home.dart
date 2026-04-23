@@ -13,9 +13,9 @@ import 'package:lottie/lottie.dart';
 // ── Palette ────────────────────────────────────────────────────────────────
 const _kOrange1 = Color(0xFFFF7043);
 const _kOrange2 = Color(0xFFFFB74D);
-const _kPurple  = Color(0xFF7C3AED);
-const _kBlue    = Color(0xFF0EA5E9);
-const _kBg      = Color(0xFFF6F8FF);
+const _kPurple = Color(0xFF7C3AED);
+const _kBlue = Color(0xFF0EA5E9);
+const _kBg = Color(0xFFF6F8FF);
 
 const _kLangColors = [
   [Color(0xFF7C3AED), Color(0xFF5B21B6)],
@@ -326,8 +326,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
                     CircularProgressIndicator(
                       value: pct,
                       strokeWidth: 4.5,
-                      backgroundColor:
-                          Colors.white.withValues(alpha: 0.25),
+                      backgroundColor: Colors.white.withValues(alpha: 0.25),
                       valueColor: const AlwaysStoppedAnimation(Colors.white),
                     ),
                     Text(
@@ -369,8 +368,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
                       (currentStep?.isNotEmpty == true
                           ? currentStep!
                           : "Continue ton aventure !"),
-                  style:
-                      const TextStyle(color: Colors.white70, fontSize: 12),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -524,9 +522,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                  color: color),
+                  fontSize: 12.5, fontWeight: FontWeight.w700, color: color),
             ),
           ],
         ),
@@ -544,8 +540,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
           decoration: BoxDecoration(
               color: Colors.white, borderRadius: BorderRadius.circular(26)),
           child: const Center(
-              child: CircularProgressIndicator(
-                  color: _kOrange1, strokeWidth: 2)),
+              child:
+                  CircularProgressIndicator(color: _kOrange1, strokeWidth: 2)),
         );
       }
 
@@ -579,8 +575,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                        colors: [_kOrange1, _kOrange2]),
+                    gradient:
+                        const LinearGradient(colors: [_kOrange1, _kOrange2]),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(Icons.rocket_launch_rounded,
@@ -624,13 +620,11 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
                 Icons.menu_book_rounded, "Module", moduleName, _kPurple),
             if (pathName != null) ...[
               const SizedBox(height: 8),
-              _buildPathItem(
-                  Icons.map_rounded, "Parcours", pathName, _kBlue),
+              _buildPathItem(Icons.map_rounded, "Parcours", pathName, _kBlue),
             ],
             if (stepName != null) ...[
               const SizedBox(height: 8),
-              _buildPathItem(
-                  Icons.flag_rounded, "Étape", stepName, _kOrange1),
+              _buildPathItem(Icons.flag_rounded, "Étape", stepName, _kOrange1),
             ],
             const SizedBox(height: 18),
             ClipRRect(
@@ -656,8 +650,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
                       borderRadius: BorderRadius.circular(16)),
                 ),
                 child: const Text("Explorer les modules",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 15)),
+                    style:
+                        TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
               ),
             ),
           ],
@@ -666,8 +660,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
     });
   }
 
-  Widget _buildPathItem(
-      IconData icon, String type, String value, Color color) {
+  Widget _buildPathItem(IconData icon, String type, String value, Color color) {
     return Row(
       children: [
         Container(
@@ -712,8 +705,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
       ),
       child: Column(
         children: [
-          Icon(Icons.explore_outlined,
-              size: 44, color: Colors.orange.shade200),
+          Icon(Icons.explore_outlined, size: 44, color: Colors.orange.shade200),
           const SizedBox(height: 10),
           const Text("Pas encore de parcours",
               style: TextStyle(
@@ -768,10 +760,32 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
   }
 
   void _showLanguagePickerSheet() {
+    if (progressCtrl.isLoading.value) {
+      Get.snackbar(
+        'Chargement...',
+        'Tes langues sont en cours de chargement.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.black87,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 16,
+      );
+      return;
+    }
+
     final entries = progressCtrl.progressList;
 
     if (entries.isEmpty) {
-      Get.to(() => const HomePage());
+      Get.snackbar(
+        'Aucune langue inscrite',
+        'Tu n\'as pas encore de langue assignee.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.black87,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 16,
+      );
       return;
     }
 
@@ -813,8 +827,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
             ...entries.map((entry) {
               final pct = entry.language.progressPercentage;
               final code = entry.language.code.toUpperCase();
-              final shortCode =
-                  code.length >= 2 ? code.substring(0, 2) : code;
+              final shortCode = code.length >= 2 ? code.substring(0, 2) : code;
               final colors = _langColors(entry.language.name);
               final c1 = colors[0];
 
@@ -877,8 +890,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
                                 value: pct / 100.0,
                                 minHeight: 6,
                                 backgroundColor: Colors.grey[100],
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(c1),
+                                valueColor: AlwaysStoppedAnimation<Color>(c1),
                               ),
                             ),
                             const SizedBox(height: 4),

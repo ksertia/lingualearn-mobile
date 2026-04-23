@@ -3,17 +3,13 @@ import 'package:fasolingo/helpers/constant/app_constant.dart';
 import 'package:get/get.dart';
 import '../../models/user_model.dart';
 import '../../helpers/storage/local_storage.dart';
-import 'package:get/get.dart';
-import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
-import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
 
 class SessionController extends GetxController {
   var token = "".obs;
   var userId = "".obs; 
   var isLoggedIn = false.obs;
   
-  // --- AJOUTS CRITIQUES ICI ---
-  // On utilise des RxString pour que le Splash puisse les observer facilement
+
   var selectedLanguageId = "".obs;
   var selectedLevelId = "".obs;
 
@@ -31,7 +27,6 @@ class SessionController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    // Charger token/userId depuis le stockage local si présents
     try {
       final String? storedToken = LocalStorage.getAuthToken();
       final String? storedUserId = LocalStorage.getUserID();
@@ -46,12 +41,12 @@ class SessionController extends GetxController {
 
       isLoggedIn.value = token.value.isNotEmpty && userId.value.isNotEmpty;
       if (isLoggedIn.value) {
-        print("✅ Session initialisée depuis LocalStorage: userId=${userId.value}");
+        print("Session initialisée depuis LocalStorage: userId=${userId.value}");
       } else {
-        print("ℹ️ Pas de session locale trouvée");
+        print("Pas de session locale trouvée");
       }
     } catch (e) {
-      print("⚠️ Erreur lecture LocalStorage en onReady: $e");
+      print("Erreur lecture LocalStorage en onReady: $e");
     }
   }
 
@@ -73,39 +68,15 @@ class SessionController extends GetxController {
     ));
   }
 
-  // Fonction appelée lors du Login OU du Splash (quand le profil est chargé)
   void updateUser(UserModel newUser, String newToken) {
     user = newUser;
     userId.value = newUser.id;
     token.value = newToken;   
     isLoggedIn.value = true;
-    
-    // --- ON SYNCHRONISE LES CHOIX DU SERVEUR ---
-    // On convertit les String? du modèle en "" (vide) si null pour les RxString
     selectedLanguageId.value = newUser.selectedLanguageId ?? "";
     selectedLevelId.value = newUser.selectedLevelId ?? "";
-    
-    print("✅ SESSION MAJ : Langue = ${selectedLanguageId.value}, Niveau = ${selectedLevelId.value}");
-    update(); 
+    update();
 
-    // Après mise à jour de la session, essayer de recharger les modules
-    try {
-      if (Get.isRegistered<LanguagesController>()) {
-        final langCtrl = Get.find<LanguagesController>();
-        langCtrl.loadModules();
-      }
-    } catch (e) {
-      print("⚠️ Impossible d'appeler LanguagesController.loadModules: $e");
-    }
-
-    try {
-      if (Get.isRegistered<HomeController>()) {
-        final homeCtrl = Get.find<HomeController>();
-        homeCtrl.loadModules();
-      }
-    } catch (e) {
-      print("⚠️ Impossible d'appeler HomeController.loadModules: $e");
-    }
   }
 
   bool hasValidSession() {
@@ -119,7 +90,6 @@ class SessionController extends GetxController {
     isLoggedIn.value = false;
     selectedLanguageId.value = "";
     selectedLevelId.value = "";
-    print("📴 Session vidée");
     update();
   }
 }
