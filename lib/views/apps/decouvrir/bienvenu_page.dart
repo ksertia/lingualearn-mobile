@@ -278,7 +278,7 @@ class _BienvenuPageState extends State<BienvenuPage>
               children: [
                 const TextSpan(text: "Bienvenue sur "),
                 TextSpan(
-                  text: "LinguaLearn\n",
+                  text: "TiBi\n",
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
                     color: Colors.orange.shade800,
