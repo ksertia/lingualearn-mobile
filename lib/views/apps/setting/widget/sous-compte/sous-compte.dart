@@ -20,11 +20,104 @@ class _SousCompteState extends State<SousCompte> {
   final List<Map<String, dynamic>> hardcodedAccounts = const [];
 
   Future<void> _openCreateSubAccountSheet() async {
-    await showModalBottomSheet<void>(
+    final created = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => _CreateSubAccountBottomSheet(controller: controller),
+    );
+    if (created == true && mounted) {
+      _showChooseLanguageInfo();
+    }
+  }
+
+  void _showChooseLanguageInfo() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [_scOrange, _scOrange2],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: _scOrange.withValues(alpha: 0.30),
+                    blurRadius: 14,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.language_rounded,
+                  color: Colors.white, size: 30),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'Apprenant créé !',
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF1A1A1A),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Veuillez choisir une langue d\'apprentissage pour votre sous-compte.\nPour cela, veuillez cliquer sur un sous-compte.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+                height: 1.55,
+              ),
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _scOrange,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Compris !',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -387,7 +480,7 @@ class _CreateSubAccountBottomSheetState
       password: passwordController.text,
     );
     if (!mounted) return;
-    if (ok) Navigator.of(context).pop();
+    if (ok) Navigator.of(context).pop(true);
   }
 
   InputDecoration _fieldDecoration(String label, IconData icon) {
