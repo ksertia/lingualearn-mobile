@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/helpers/services/etapes/etape_service.dart';
 import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
+import 'package:fasolingo/helpers/services/souscription/sousciption_service.dart';
 import 'package:fasolingo/models/parcoure/parcour_model.dart';
 import 'package:get/get.dart';
 
@@ -12,6 +14,7 @@ class StepsController extends GetxController {
   late bool showAllSteps;
 
   RxBool isLoading = false.obs;
+  RxBool isSubscriptionActive = true.obs;
   RxInt currentPage = 0.obs;
   RxList<dynamic> items = <dynamic>[].obs;
 
@@ -50,6 +53,7 @@ class StepsController extends GetxController {
 
     pageController = PageController();
     fetchSteps();
+    checkSubscription();
   }
 
   void onPageChanged(int page) {
@@ -132,5 +136,29 @@ class StepsController extends GetxController {
 
   Future<void> onRefresh() async {
     await fetchSteps();
+  }
+
+  Future<void> checkSubscription() async {
+    try {
+      final planService = Get.put(PlanService());
+      final data = await planService.checkCurrentSubscription();
+      if (data == null) {
+        isSubscriptionActive.value = false;
+        return;
+      }
+      final sub = data['subscription'];
+      final active = data['isActive'] == true ||
+          data['active'] == true ||
+          data['status']?.toString().toLowerCase() == 'active' ||
+          data['hasActiveSubscription'] == true ||
+          (sub is Map &&
+              (sub['status']?.toString().toLowerCase() == 'active' ||
+               sub['isActive'] == true));
+      isSubscriptionActive.value = active;
+    } on DioException catch (e) {
+      isSubscriptionActive.value = e.response == null;
+    } catch (_) {
+      isSubscriptionActive.value = true;
+    }
   }
 }

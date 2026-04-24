@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:fasolingo/helpers/services/module_service.dart';
 import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
+import 'package:fasolingo/helpers/services/souscription/sousciption_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -11,6 +13,7 @@ class ParcoursSelectionController extends GetxController {
   late bool showAllPaths;
 
   RxBool isLoading = false.obs;
+  RxBool isSubscriptionActive = true.obs;
   RxList<dynamic> items = <dynamic>[].obs;
   RxInt currentPage = 0.obs;
   late PageController pageController;
@@ -46,6 +49,7 @@ class ParcoursSelectionController extends GetxController {
     }
 
     fetchPaths();
+    checkSubscription();
   }
 
   void goToPage(int page) {
@@ -97,6 +101,30 @@ class ParcoursSelectionController extends GetxController {
   }
 
   Future<void> onRefresh() async => fetchPaths();
+
+  Future<void> checkSubscription() async {
+    try {
+      final planService = Get.put(PlanService());
+      final data = await planService.checkCurrentSubscription();
+      if (data == null) {
+        isSubscriptionActive.value = false;
+        return;
+      }
+      final sub = data['subscription'];
+      final active = data['isActive'] == true ||
+          data['active'] == true ||
+          data['status']?.toString().toLowerCase() == 'active' ||
+          data['hasActiveSubscription'] == true ||
+          (sub is Map &&
+              (sub['status']?.toString().toLowerCase() == 'active' ||
+               sub['isActive'] == true));
+      isSubscriptionActive.value = active;
+    } on DioException catch (e) {
+      isSubscriptionActive.value = e.response == null;
+    } catch (_) {
+      isSubscriptionActive.value = true;
+    }
+  }
 
   @override
   void onClose() {

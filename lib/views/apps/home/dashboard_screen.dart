@@ -18,27 +18,17 @@ const Color _kLocked = Color(0xFF9E9E9E);
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  static const Map<int, String> _animals = {
-    0: 'assets/lottie/poulet.json',
-    1: 'assets/lottie/elephant.json',
-    2: 'assets/lottie/cat.json',
-    3: 'assets/lottie/Chicken.json',
-    4: 'assets/lottie/dino.json',
-    5: 'assets/lottie/Dog.json',
-    6: 'assets/lottie/Lion.json',
-    7: 'assets/lottie/croco.json',
-    8: 'assets/lottie/tiger.json',
-    9: 'assets/lottie/panda.json',
-    10: 'assets/lottie/koala.json',
-    11: 'assets/lottie/snake.json',
-    12: 'assets/lottie/toucan.json',
-    13: 'assets/lottie/rhino.json',
-    14: 'assets/lottie/leopard.json',
-    15: 'assets/lottie/buffalo.json',
-  };
+  static const List<String> _animals = [
+    'assets/lottie/poulet.json',
+    'assets/lottie/elephant.json',
+    'assets/lottie/cat.json',
+    'assets/lottie/Chicken.json',
+    'assets/lottie/dino.json',
+    'assets/lottie/Dog.json',
+    'assets/lottie/Lion.json',
+  ];
 
-  String _animal(int i) =>
-      _animals[i % _animals.length] ?? 'assets/lottie/Lion.json';
+  String _animal(int i) => _animals[i % _animals.length];
 
   Color _accent(String s) {
     if (s == 'completed') return _kCompleted;

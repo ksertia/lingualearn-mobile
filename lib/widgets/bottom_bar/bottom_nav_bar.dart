@@ -73,7 +73,7 @@ class _AppBottomNavBarState extends State<AppBottomNavBar>
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 220),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
+                          horizontal: 10,
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(

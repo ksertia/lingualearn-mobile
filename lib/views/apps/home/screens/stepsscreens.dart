@@ -14,6 +14,107 @@ const Color _sCompleted = Color(0xFF22C55E);
 const Color _sActive    = Color(0xFFFF7043);
 const Color _sLocked    = Color(0xFF9E9E9E);
 
+void _showSubscriptionRequired(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (_) => Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40, height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white24,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 28),
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFF7043), Color(0xFFFFB74D)],
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFFFF7043).withValues(alpha: 0.35),
+                  blurRadius: 18,
+                  offset: Offset(0, 6),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.workspace_premium_rounded,
+                color: Colors.white, size: 36),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Abonnement requis',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Accédez à toutes les étapes en illimité.\nSouscrivez dès maintenant et commencez à apprendre.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.55),
+              fontSize: 13,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 28),
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Get.toNamed('/subscription_plans');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF7043),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Voir les forfaits',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Plus tard',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.35),
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 class StepsScreensPages extends StatelessWidget {
   const StepsScreensPages({super.key});
 
@@ -468,6 +569,10 @@ class StepsScreensPages extends StatelessWidget {
                             : Icons.play_arrow_rounded),
                     onTap: isActive
                         ? () async {
+                            if (!controller.isSubscriptionActive.value) {
+                              _showSubscriptionRequired(context);
+                              return;
+                            }
                             final a = Get.arguments;
                             final userId = (a is Map && a['userId'] != null)
                                 ? a['userId'].toString()

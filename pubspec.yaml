@@ -130,13 +130,37 @@ flutter:
   assets:
     - assets/lang/
     - assets/images/logo/
-    - assets/images/app/
-    # - assets/images/video/videos.mp4
     - assets/icon/
     - assets/avatar/
-    - assets/lottie/
     - assets/img/8e4b0793efdb04971f43cf916a5f151e.jpg
-    - assets/images/quiz/
+    # Images app (uniquement celles utilisées)
+    - assets/images/app/plan1.png
+    - assets/images/app/plan2.png
+    - assets/images/app/plan3.png
+    - assets/images/app/plan4.jpeg
+    - assets/images/app/plan5.jpg
+    - assets/images/app/plan51.jpg
+    - assets/images/app/splash11.png
+    - assets/images/app/splash22.jpeg
+    - assets/images/app/splash33.jpeg
+    - assets/images/app/logo.png
+    # Images quiz (uniquement celles utilisées)
+    - assets/images/quiz/certificat.jpg
+    - assets/images/quiz/clipboard.png
+    - assets/images/quiz/creative.jpg
+    - assets/images/quiz/light-bulb.png
+    - assets/images/quiz/super-intelligence.png
+    # Lottie (uniquement celles utilisées)
+    - assets/lottie/mascot.json
+    - assets/lottie/poulet.json
+    - assets/lottie/elephant.json
+    - assets/lottie/cat.json
+    - assets/lottie/Chicken.json
+    - assets/lottie/dino.json
+    - assets/lottie/Dog.json
+    - assets/lottie/Lion.json
+    - assets/lottie/Happy mascot.json
+    - assets/lottie/Sad mascot.json
 
 
 

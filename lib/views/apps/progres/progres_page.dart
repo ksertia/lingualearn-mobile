@@ -88,10 +88,10 @@ class _ProgresPageState extends State<ProgresPage> {
             }
           }
         }
-        setState(() => isLoadingProgression = false);
       }
     } catch (_) {
-      setState(() => isLoadingProgression = false);
+    } finally {
+      if (mounted) setState(() => isLoadingProgression = false);
     }
   }
 

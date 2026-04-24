@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
 import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/controller/apps/user_progress/user_progress_controller.dart';
+import 'package:fasolingo/helpers/services/souscription/sousciption_service.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/models/user_progress/user_progress_model.dart';
 import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
@@ -44,6 +46,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
   final RxInt _currentLangPage = 0.obs;
   late PageController _pageController;
 
+  bool _isSubscriptionActive = true;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +55,134 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
     progressCtrl = Get.isRegistered<UserProgressController>()
         ? Get.find<UserProgressController>()
         : Get.put(UserProgressController());
+    _checkSubscription();
+  }
+
+  Future<void> _checkSubscription() async {
+    try {
+      final planService = Get.put(PlanService());
+      final data = await planService.checkCurrentSubscription();
+      if (!mounted) return;
+      if (data == null) {
+        setState(() => _isSubscriptionActive = false);
+        return;
+      }
+      final sub = data['subscription'];
+      final active = data['isActive'] == true ||
+          data['active'] == true ||
+          data['status']?.toString().toLowerCase() == 'active' ||
+          data['hasActiveSubscription'] == true ||
+          (sub is Map &&
+              (sub['status']?.toString().toLowerCase() == 'active' ||
+               sub['isActive'] == true));
+      setState(() => _isSubscriptionActive = active);
+    } on DioException catch (e) {
+      if (!mounted) return;
+      setState(() => _isSubscriptionActive = e.response == null);
+    } catch (_) {
+      // erreur inattendue → ne pas bloquer
+    }
+  }
+
+  void _showSubscriptionRequired() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1A1A1A),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 28),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF7043), Color(0xFFFFB74D)],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xFFFF7043).withValues(alpha: 0.35),
+                    blurRadius: 18,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.workspace_premium_rounded,
+                  color: Colors.white, size: 36),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Abonnement requis',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Accédez à tous les parcours et étapes en illimité.\nSouscrivez dès maintenant et commencez à apprendre.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.55),
+                fontSize: 13,
+                height: 1.6,
+              ),
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Get.toNamed('/subscription_plans');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF7043),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Voir les forfaits',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Plus tard',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.35),
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -169,14 +301,31 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
               ],
             ),
           ),
-          SizedBox(
-            width: 90,
-            height: 90,
-            child: Lottie.asset(
-              'assets/lottie/mascot.json',
-              fit: BoxFit.contain,
-              repeat: true,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              GestureDetector(
+                onTap: () => Get.toNamed('/notifications'),
+                child: Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.22),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.notifications_rounded,
+                      color: Colors.white, size: 20),
+                ),
+              ),
+              SizedBox(
+                width: 80,
+                height: 80,
+                child: Lottie.asset(
+                  'assets/lottie/mascot.json',
+                  fit: BoxFit.contain,
+                  repeat: true,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -447,18 +596,24 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
             Icons.map_rounded,
             "Parcours",
             _kBlue,
-            () => Get.to(() => const ParcoursSelectionPage(), arguments: {
-              'showAllPaths': true,
-              'userId': session.userId.value.isNotEmpty
-                  ? session.userId.value
-                  : session.user?.id ?? "",
-              'languageId': session.selectedLanguageId.value.isNotEmpty
-                  ? session.selectedLanguageId.value
-                  : session.user?.selectedLanguageId ?? "",
-              'levelId': session.selectedLevelId.value.isNotEmpty
-                  ? session.selectedLevelId.value
-                  : session.user?.selectedLevelId ?? "",
-            }),
+            () {
+              if (!_isSubscriptionActive) {
+                _showSubscriptionRequired();
+                return;
+              }
+              Get.to(() => const ParcoursSelectionPage(), arguments: {
+                'showAllPaths': true,
+                'userId': session.userId.value.isNotEmpty
+                    ? session.userId.value
+                    : session.user?.id ?? "",
+                'languageId': session.selectedLanguageId.value.isNotEmpty
+                    ? session.selectedLanguageId.value
+                    : session.user?.selectedLanguageId ?? "",
+                'levelId': session.selectedLevelId.value.isNotEmpty
+                    ? session.selectedLevelId.value
+                    : session.user?.selectedLevelId ?? "",
+              });
+            },
           ),
         ),
         const SizedBox(width: 12),
@@ -467,18 +622,24 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
             Icons.flag_rounded,
             "Étapes",
             _kOrange1,
-            () => Get.to(() => const StepsScreensPages(), arguments: {
-              'showAllSteps': true,
-              'userId': session.userId.value.isNotEmpty
-                  ? session.userId.value
-                  : session.user?.id ?? "",
-              'languageId': session.selectedLanguageId.value.isNotEmpty
-                  ? session.selectedLanguageId.value
-                  : session.user?.selectedLanguageId ?? "",
-              'levelId': session.selectedLevelId.value.isNotEmpty
-                  ? session.selectedLevelId.value
-                  : session.user?.selectedLevelId ?? "",
-            }),
+            () {
+              if (!_isSubscriptionActive) {
+                _showSubscriptionRequired();
+                return;
+              }
+              Get.to(() => const StepsScreensPages(), arguments: {
+                'showAllSteps': true,
+                'userId': session.userId.value.isNotEmpty
+                    ? session.userId.value
+                    : session.user?.id ?? "",
+                'languageId': session.selectedLanguageId.value.isNotEmpty
+                    ? session.selectedLanguageId.value
+                    : session.user?.selectedLanguageId ?? "",
+                'levelId': session.selectedLevelId.value.isNotEmpty
+                    ? session.selectedLevelId.value
+                    : session.user?.selectedLevelId ?? "",
+              });
+            },
           ),
         ),
       ],
