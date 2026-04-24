@@ -643,8 +643,6 @@ class _LevelsBottomSheet extends StatelessWidget {
                         : const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 18),
-                              SizedBox(width: 8),
                               Text(
                                 'Assigner ce niveau',
                                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15),

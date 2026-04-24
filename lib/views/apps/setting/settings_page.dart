@@ -1,6 +1,5 @@
 import 'package:fasolingo/controller/apps/settings/settings_controller.dart';
 import 'package:fasolingo/helpers/constant/images.dart';
-import 'package:fasolingo/helpers/my_widgets/my_text.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/helpers/theme/app_notifier.dart';
 import 'package:fasolingo/helpers/utils/ui_mixins.dart';
@@ -12,6 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
+const Color _sOrange  = Color(0xFFFF7043);
+const Color _sOrange2 = Color(0xFFFFB74D);
+
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
 
@@ -22,7 +24,6 @@ class SettingScreen extends StatefulWidget {
 class _SettingScreenState extends State<SettingScreen>
     with SingleTickerProviderStateMixin, UIMixin {
   final controller = Get.put(SettingsController());
-  String firstName = LocalStorage.getUserName() ?? "Champion";
 
   @override
   Widget build(BuildContext context) {
@@ -36,78 +37,198 @@ class _SettingScreenState extends State<SettingScreen>
               return const AppLoader();
             }
 
-            final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+            final user = controller.user.value;
+            final bool isSub = user?.accountType == 'sub_account_learner';
+            final bool isDark = LocalStorage.getTheme() == 'Dark';
+            final Color cardBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+            final Color textPrimary = isDark ? Colors.white : const Color(0xFF1A1A1A);
+            final Color textSecondary = isDark ? Colors.white60 : const Color(0xFF888888);
+            final Color dividerColor = isDark ? Colors.white12 : const Color(0xFFEEEEEE);
 
             return Stack(
               children: [
-                Column(
+                ListView(
+                  padding: EdgeInsets.zero,
                   children: [
-                    SizedBox(height: isIOS ? 70 : 60),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _buildProfileSection(),
-                    ),
-                    const SizedBox(height: 25),
-                    Divider(color: contentTheme.kE6E6E6, thickness: 1.0)
-                        .paddingSymmetric(horizontal: 20),
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        children: [
-                          const SizedBox(height: 15),
+                    // ── Header gradient ─────────────────────────────────
+                    _buildHeader(user, cardBg, textPrimary, textSecondary),
 
-                          _buildPremiumCard(),
+                    const SizedBox(height: 8),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+
+                          // ── Premium banner (non-sub) ─────────────────
+                          if (!isSub) ...[
+                            _buildPremiumBanner(),
+                            const SizedBox(height: 20),
+                          ],
+
+                          // ── Préférences ──────────────────────────────
+                          _buildSectionTitle('Preferences'),
+                          const SizedBox(height: 10),
+                          _buildCard(cardBg, dividerColor, [
+                            _buildLanguageItem(textPrimary, textSecondary),
+                            _buildDivider(dividerColor),
+                            _buildDarkModeItem(textPrimary),
+                          ]),
 
                           const SizedBox(height: 20),
 
-                          _buildLanguageSetting(),
-                          _buildDarkModeSetting(),
-
-                          // --- GÉRER ABONNEMENT ---
-                          if (controller.user.value?.accountType !=
-                              'sub_account_learner') ...[
-                            _buildSettingsItem(
-                              iconWidget: Icon(Icons.person,
-                                  color: contentTheme.black, size: 24),
-                              title: 'Rattacher un compte ',
-                              onTap: () {
-                                Get.toNamed('/souscomptes');
-                              },
-                            ),
-                            _buildSettingsItem(
-                              iconWidget: Icon(Icons.bar_chart,
-                                  color: contentTheme.black, size: 24),
-                              title: 'Parcours du compte Rattaché',
-                              onTap: () {
-                                Get.toNamed('/children_progress');
-                              },
-                            ),
-                            _buildSettingsItem(
-                              iconWidget: Icon(Icons.credit_card_rounded,
-                                  color: contentTheme.black, size: 24),
-                              title: 'Gérer mon abonnement',
-                              onTap: () {
-                                Get.toNamed('/subscription_details');
-                              },
-                            ),
+                          // ── Compte (non-sub) ─────────────────────────
+                          if (!isSub) ...[
+                            _buildSectionTitle('Compte'),
+                            const SizedBox(height: 10),
+                            _buildCard(cardBg, dividerColor, [
+                              _buildItem(
+                                icon: Icons.people_rounded,
+                                iconBg: const Color(0xFFEDE9FF),
+                                iconColor: const Color(0xFF7C3AED),
+                                title: 'Rattacher un compte',
+                                textColor: textPrimary,
+                                onTap: () => Get.toNamed('/souscomptes'),
+                              ),
+                              _buildDivider(dividerColor),
+                              _buildItem(
+                                icon: Icons.bar_chart_rounded,
+                                iconBg: const Color(0xFFE0F2FE),
+                                iconColor: const Color(0xFF0EA5E9),
+                                title: 'Parcours du compte rattache',
+                                textColor: textPrimary,
+                                onTap: () => Get.toNamed('/children_progress'),
+                              ),
+                              _buildDivider(dividerColor),
+                              _buildItem(
+                                icon: Icons.credit_card_rounded,
+                                iconBg: const Color(0xFFFFF3E0),
+                                iconColor: _sOrange,
+                                title: 'Gerer mon abonnement',
+                                textColor: textPrimary,
+                                onTap: () => Get.toNamed('/subscription_details'),
+                              ),
+                            ]),
+                            const SizedBox(height: 20),
                           ],
 
-                          const SizedBox(height: 15),
-                          Divider(color: contentTheme.kE6E6E6, thickness: 1.0),
-                          _buildSettingsItem(
-                            icon: Images.logout,
-                            title: 'Déconnexion',
-                            onTap: controller.isLoading.value
-                                ? null
-                                : () => _handleLogout(context),
-                          ),
-                          const SizedBox(height: 15),
-                          Divider(color: contentTheme.kE6E6E6, thickness: 1.0),
-                          const SizedBox(height: 30),
+                          // ── Securite ─────────────────────────────────
+                          _buildSectionTitle('Securite'),
+                          const SizedBox(height: 10),
+                          _buildCard(cardBg, dividerColor, [
+                            _buildItem(
+                              icon: Icons.lock_rounded,
+                              iconBg: const Color(0xFFFFE4E4),
+                              iconColor: const Color(0xFFEF4444),
+                              title: 'Changer le mot de passe',
+                              textColor: textPrimary,
+                              onTap: () => Get.toNamed('/change_password'),
+                            ),
+                            _buildDivider(dividerColor),
+                            _buildItem(
+                              icon: Icons.block_rounded,
+                              iconBg: const Color(0xFFF3F4F6),
+                              iconColor: const Color(0xFF6B7280),
+                              title: 'Utilisateurs bloques',
+                              textColor: textPrimary,
+                              onTap: () => Get.snackbar(
+                                'Bientot disponible',
+                                'Cette fonctionnalite arrive prochainement.',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.black87,
+                                colorText: Colors.white,
+                                margin: const EdgeInsets.all(16),
+                                borderRadius: 14,
+                              ),
+                            ),
+                          ]),
+
+                          const SizedBox(height: 20),
+
+                          // ── Support ──────────────────────────────────
+                          _buildSectionTitle('Support'),
+                          const SizedBox(height: 10),
+                          _buildCard(cardBg, dividerColor, [
+                            _buildItem(
+                              icon: Icons.help_outline_rounded,
+                              iconBg: const Color(0xFFEDE9FF),
+                              iconColor: const Color(0xFF7C3AED),
+                              title: "Centre d'aide",
+                              textColor: textPrimary,
+                              onTap: () => Get.snackbar(
+                                'Centre d\'aide',
+                                'Consultez notre aide en ligne.',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.black87,
+                                colorText: Colors.white,
+                                margin: const EdgeInsets.all(16),
+                                borderRadius: 14,
+                              ),
+                            ),
+                            _buildDivider(dividerColor),
+                            _buildItem(
+                              icon: Icons.chat_bubble_outline_rounded,
+                              iconBg: const Color(0xFFE0F2FE),
+                              iconColor: const Color(0xFF0EA5E9),
+                              title: 'Contacter le support',
+                              textColor: textPrimary,
+                              onTap: () => Get.snackbar(
+                                'Support',
+                                'Contactez-nous a support@tibi.app',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.black87,
+                                colorText: Colors.white,
+                                margin: const EdgeInsets.all(16),
+                                borderRadius: 14,
+                              ),
+                            ),
+                            _buildDivider(dividerColor),
+                            _buildItem(
+                              icon: Icons.star_outline_rounded,
+                              iconBg: const Color(0xFFFFF9E6),
+                              iconColor: const Color(0xFFF59E0B),
+                              title: "Noter l'application",
+                              textColor: textPrimary,
+                              onTap: () => Get.snackbar(
+                                'Merci !',
+                                'Votre avis nous aide a nous ameliorer.',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.black87,
+                                colorText: Colors.white,
+                                margin: const EdgeInsets.all(16),
+                                borderRadius: 14,
+                              ),
+                            ),
+                          ]),
+
+                          const SizedBox(height: 20),
+
+                          // ── Deconnexion ──────────────────────────────
+                          _buildCard(cardBg, dividerColor, [
+                            _buildItem(
+                              icon: Icons.logout_rounded,
+                              iconBg: const Color(0xFFFFE4E4),
+                              iconColor: const Color(0xFFEF4444),
+                              title: 'Deconnexion',
+                              textColor: const Color(0xFFEF4444),
+                              showArrow: false,
+                              onTap: controller.isLoading.value
+                                  ? null
+                                  : () => _handleLogout(context),
+                            ),
+                          ]),
+
+                          const SizedBox(height: 24),
+
                           Center(
-                            child: MyText.bodySmall(
-                              "Version 1.0.0",
-                              color: contentTheme.black.withOpacity(0.3),
+                            child: Text(
+                              'TiBi v1.0.0',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 80),
@@ -116,10 +237,11 @@ class _SettingScreenState extends State<SettingScreen>
                     ),
                   ],
                 ),
+
                 if (controller.isLoading.value)
                   Positioned.fill(
                     child: Container(
-                      color: Colors.black.withOpacity(0.35),
+                      color: Colors.black.withValues(alpha: 0.35),
                       child: const Center(child: CircularProgressIndicator()),
                     ),
                   ),
@@ -131,163 +253,316 @@ class _SettingScreenState extends State<SettingScreen>
     );
   }
 
+  // ── Header ──────────────────────────────────────────────────────────────────
 
-  Widget _buildProfileSection() {
-    final user = controller.user.value;
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 35,
-          backgroundColor: contentTheme.primary.withOpacity(0.1),
-          backgroundImage: AssetImage(Images.avatars[2]),
+  Widget _buildHeader(dynamic user, Color cardBg, Color textPrimary, Color textSecondary) {
+    final String name = user?.firstName != null
+        ? '${user.firstName} ${user.lastName ?? ''}'.trim()
+        : (LocalStorage.getUserName() ?? 'Apprenant');
+    final String subtitle = user?.email ?? user?.phone ?? '';
+
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [_sOrange, _sOrange2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              MyText.titleMedium(firstName,
-                  fontWeight: 700, fontSize: 18, color: contentTheme.black),
-              const SizedBox(height: 2),
-              MyText.bodyMedium(user?.email ?? "Email non disponible",
-                  fontWeight: 400,
-                  fontSize: 14,
-                  color: contentTheme.black.withOpacity(0.6))
-            ],
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        MediaQuery.of(context).padding.top + 20,
+        20,
+        28,
+      ),
+      child: Row(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 2.5),
+            ),
+            child: CircleAvatar(
+              radius: 34,
+              backgroundColor: Colors.white.withValues(alpha: 0.25),
+              backgroundImage: AssetImage(Images.avatars[2]),
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                ),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () => Get.toNamed('/edit_profile'),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.22),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildPremiumCard() {
-    return InkWell(
+  // ── Premium banner ───────────────────────────────────────────────────────────
+
+  Widget _buildPremiumBanner() {
+    return GestureDetector(
       onTap: () => showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (_) => const SubscriptionPlansPage(isBottomSheet: true),
       ),
-      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-         color: const Color.fromARGB(255, 255, 144, 64),
-          borderRadius: BorderRadius.circular(16),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF7C3AED), Color(0xFF5B21B6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-                color: contentTheme.primary.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4))
+              color: const Color(0xFF7C3AED).withValues(alpha: 0.30),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
           ],
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
-              child:
-                  const Icon(Icons.star_rounded, color: Colors.white, size: 28),
+                color: Colors.white.withValues(alpha: 0.20),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.star_rounded, color: Colors.white, size: 24),
             ),
-            const SizedBox(width: 16),
-            Expanded(
+            const SizedBox(width: 14),
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MyText.titleSmall("Passez au Premium",
-                      color: Colors.white, fontWeight: 700),
-                  MyText.bodySmall("Accès illimité à tous les parcours.",
-                      color: Colors.white.withOpacity(0.9)),
+                  Text(
+                    'Passez au Premium',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Acces illimite a tous les parcours.',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
+            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 14),
           ],
         ),
       ),
     );
   }
 
-  // --- LA FONCTION CORRIGÉE ICI ---
-  Widget _buildSettingsItem(
-      {String? icon,
-      Widget? iconWidget, // Nouveau paramètre ajouté
-      required String title,
-      required VoidCallback? onTap}) {
+  // ── Section helpers ──────────────────────────────────────────────────────────
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        color: _sOrange,
+        fontSize: 13,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+
+  Widget _buildCard(Color bg, Color divider, List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildDivider(Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 58),
+      child: Divider(height: 1, color: color),
+    );
+  }
+
+  Widget _buildItem({
+    required IconData icon,
+    required Color iconBg,
+    required Color iconColor,
+    required String title,
+    required Color textColor,
+    required VoidCallback? onTap,
+    bool showArrow = true,
+  }) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         child: Row(
           children: [
-            // On vérifie si on utilise une image asset ou un widget d'icône
-            if (icon != null)
-              Image.asset(icon,
-                  width: 28, height: 28, color: contentTheme.black)
-            else if (iconWidget != null)
-              SizedBox(width: 28, height: 28, child: iconWidget)
-            else
-              const SizedBox(width: 28, height: 28), // Fallback vide
-
-            const SizedBox(width: 16),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 20),
+            ),
+            const SizedBox(width: 14),
             Expanded(
-                child: MyText.titleMedium(title,
-                    fontWeight: 600,
-                    fontSize: 16,
-                    color: title.contains('Réinitialiser')
-                        ? Colors.redAccent
-                        : contentTheme.black)),
-            Icon(Icons.arrow_forward_ios,
-                size: 18, color: contentTheme.black.withOpacity(0.4)),
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (showArrow)
+              Icon(Icons.chevron_right_rounded,
+                  color: textColor.withValues(alpha: 0.35), size: 22),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLanguageSetting() {
+  Widget _buildLanguageItem(Color textColor, Color subtitleColor) {
     return InkWell(
       onTap: () => Get.toNamed('/selectLanguageScreen'),
+      borderRadius: BorderRadius.circular(18),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         child: Row(
           children: [
-            Image.asset(Images.language,
-                width: 28, height: 28, color: contentTheme.black),
-            const SizedBox(width: 16),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE0F2FE),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.translate_rounded,
+                  color: Color(0xFF0EA5E9), size: 20),
+            ),
+            const SizedBox(width: 14),
             Expanded(
-                child: MyText.titleMedium('Langue',
-                    fontWeight: 600, fontSize: 16, color: contentTheme.black)),
-            MyText.bodyMedium(_getCurrentLanguageName(),
-                color: contentTheme.primary, fontWeight: 500),
-            const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios,
-                size: 18, color: contentTheme.black.withOpacity(0.4)),
+              child: Text(
+                'Langue',
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Text(
+              _getCurrentLanguageName(),
+              style: TextStyle(
+                color: subtitleColor,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right_rounded,
+                color: textColor.withValues(alpha: 0.35), size: 22),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDarkModeSetting() {
+  Widget _buildDarkModeItem(Color textColor) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          Image.asset(Images.lightDarkMode,
-              width: 28, height: 28, color: contentTheme.black),
-          const SizedBox(width: 16),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B).withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.dark_mode_rounded,
+                color: Color(0xFF334155), size: 20),
+          ),
+          const SizedBox(width: 14),
           Expanded(
-              child: MyText.titleMedium('Mode Sombre',
-                  fontWeight: 600, fontSize: 16, color: contentTheme.black)),
+            child: Text(
+              'Mode sombre',
+              style: TextStyle(
+                color: textColor,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
           Transform.scale(
-            scale: 0.8,
+            scale: 0.85,
             child: CupertinoSwitch(
-              value: LocalStorage.getTheme() == "Dark",
-              activeColor: contentTheme.primary,
-              onChanged: (bool val) {
-                LocalStorage.setTheme(val ? "Dark" : "Light");
+              value: LocalStorage.getTheme() == 'Dark',
+              activeTrackColor: _sOrange,
+              onChanged: (val) {
+                LocalStorage.setTheme(val ? 'Dark' : 'Light');
                 Provider.of<AppNotifier>(context, listen: false).changeTheme();
               },
             ),
@@ -297,32 +572,28 @@ class _SettingScreenState extends State<SettingScreen>
     );
   }
 
+  // ── Logout ───────────────────────────────────────────────────────────────────
+
   Future<void> _handleLogout(BuildContext context) async {
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => LogoutDeleteBottomSheet(
-        title: 'Déconnexion',
-        subTitle: 'Êtes-vous sûr de vouloir vous déconnecter ?',
+        title: 'Deconnexion',
+        subTitle: 'Etes-vous sur de vouloir vous deconnecter ?',
       ),
     );
     if (confirmed == true) await controller.onLogout();
   }
 
   String _getCurrentLanguageName() {
-    int index = controller.selectedLanguageIndex.value;
-    switch (index) {
-      case 0:
-        return "Français";
-      case 1:
-        return "Anglais";
-      case 2:
-        return "Mooré";
-      case 3:
-        return "Dioula";
-      default:
-        return "Français";
+    switch (controller.selectedLanguageIndex.value) {
+      case 0: return 'Francais';
+      case 1: return 'Anglais';
+      case 2: return 'Moore';
+      case 3: return 'Dioula';
+      default: return 'Francais';
     }
   }
 }

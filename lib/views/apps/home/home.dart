@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
+import '../../../controller/apps/settings/settings_controller.dart';
+
 // ── Palette ────────────────────────────────────────────────────────────────
 const _kOrange1 = Color(0xFFFF7043);
 const _kOrange2 = Color(0xFFFFB74D);
@@ -42,6 +44,7 @@ class AcceuilleSreen extends StatefulWidget {
 class _AcceuilleSreenState extends State<AcceuilleSreen> {
   final SessionController session = Get.find<SessionController>();
   late final UserProgressController progressCtrl;
+  final controller = Get.put(SettingsController());
 
   final RxInt _currentLangPage = 0.obs;
   late PageController _pageController;
@@ -74,7 +77,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
           data['hasActiveSubscription'] == true ||
           (sub is Map &&
               (sub['status']?.toString().toLowerCase() == 'active' ||
-               sub['isActive'] == true));
+                  sub['isActive'] == true));
       setState(() => _isSubscriptionActive = active);
     } on DioException catch (e) {
       if (!mounted) return;
@@ -99,7 +102,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40, height: 4,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
                 color: Colors.white24,
                 borderRadius: BorderRadius.circular(2),
@@ -210,7 +214,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 26),
-                      _buildSectionTitle("Mes langues"),
+                      _buildSectionTitleLangue(
+                          "Mes langues", "Ajouter une langue"),
                       const SizedBox(height: 14),
                       _buildLanguageSection(),
                       const SizedBox(height: 28),
@@ -901,6 +906,22 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
             fontSize: 19,
             fontWeight: FontWeight.w800,
             color: Color(0xFF1A1A1A)));
+  }
+
+  Widget _buildSectionTitleLangue(String title, String subtitle) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        if (controller.user.value?.accountType != 'sub_account_learner') ...[
+          Text(title,
+              style: const TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF1A1A1A))),
+          TextButton(onPressed: () {}, child: Text(subtitle))
+        ]
+      ],
+    );
   }
 
   // ─── Language picker bottom sheet ─────────────────────────────────────────
