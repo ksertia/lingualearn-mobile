@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
 import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
 import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/controller/apps/user_progress/user_progress_controller.dart';
@@ -909,18 +910,75 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
   }
 
   Widget _buildSectionTitleLangue(String title, String subtitle) {
-    return Row(
+    return Obx(() => Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        if (controller.user.value?.accountType != 'sub_account_learner') ...[
-          Text(title,
-              style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A))),
-          TextButton(onPressed: () {}, child: Text(subtitle))
-        ]
+        Text(
+          title,
+          style: const TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1A1A1A)),
+        ),
+        if (controller.user.value?.accountType != 'sub_account_learner')
+          GestureDetector(
+            onTap: _showAddLanguageSheet,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.add_circle_outline_rounded,
+                    color: _kOrange1, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: _kOrange1,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
+    ));
+  }
+
+  // ─── Add language bottom sheet ────────────────────────────────────────────
+
+  void _showAddLanguageSheet() {
+    final langCtrl = Get.isRegistered<LanguagesController>()
+        ? Get.find<LanguagesController>()
+        : Get.put(LanguagesController());
+
+    langCtrl.selectedLanguage.value = null;
+    langCtrl.selectedLevel.value = null;
+    langCtrl.languageLevels.clear();
+    langCtrl.loadAllLanguages();
+
+    final enrolledIds =
+        progressCtrl.progressList.map((e) => e.language.id).toSet();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AddLanguageSheet(
+        langCtrl: langCtrl,
+        enrolledIds: enrolledIds,
+        onSuccess: () {
+          progressCtrl.loadProgress();
+          Get.snackbar(
+            'Langue ajoutée',
+            'La nouvelle langue a été ajoutée avec succès.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green.shade600,
+            colorText: Colors.white,
+            margin: const EdgeInsets.all(16),
+            borderRadius: 16,
+          );
+        },
+      ),
     );
   }
 
@@ -1096,6 +1154,439 @@ class _AcceuilleSreenState extends State<AcceuilleSreen> {
         ),
       ),
       isScrollControlled: true,
+    );
+  }
+}
+
+// ─── Add Language Bottom Sheet ───────────────────────────────────────────────
+
+class _AddLanguageSheet extends StatefulWidget {
+  final LanguagesController langCtrl;
+  final Set<String> enrolledIds;
+  final VoidCallback onSuccess;
+
+  const _AddLanguageSheet({
+    required this.langCtrl,
+    required this.enrolledIds,
+    required this.onSuccess,
+  });
+
+  @override
+  State<_AddLanguageSheet> createState() => _AddLanguageSheetState();
+}
+
+class _AddLanguageSheetState extends State<_AddLanguageSheet> {
+  int _step = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFFF8F9FF),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+          20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 32),
+      child: _step == 0 ? _buildLanguageStep() : _buildLevelStep(),
+    );
+  }
+
+  Widget _buildDragHandle() {
+    return Center(
+      child: Container(
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageStep() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDragHandle(),
+        const SizedBox(height: 18),
+        const Text(
+          "Ajouter une langue",
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1A1A1A)),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          "Choisis la langue que tu veux apprendre",
+          style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+        ),
+        const SizedBox(height: 18),
+        Obx(() {
+          if (widget.langCtrl.isLoading.value) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: CircularProgressIndicator(
+                    color: _kOrange1, strokeWidth: 2.5),
+              ),
+            );
+          }
+          if (widget.langCtrl.allLanguages.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  "Aucune langue disponible",
+                  style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                ),
+              ),
+            );
+          }
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.45,
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: widget.langCtrl.allLanguages.length,
+              itemBuilder: (_, i) {
+                final lang = widget.langCtrl.allLanguages[i];
+                final isEnrolled = widget.enrolledIds.contains(lang.id);
+                final code = lang.code.toUpperCase();
+                final shortCode =
+                    code.length >= 2 ? code.substring(0, 2) : code;
+                final colors = _langColors(lang.name);
+                final c1 = colors[0];
+                return GestureDetector(
+                  onTap: isEnrolled
+                      ? null
+                      : () async {
+                          widget.langCtrl.selectedLanguage.value = lang;
+                          widget.langCtrl.languageLevels.clear();
+                          await widget.langCtrl.loadLanguageLevels();
+                          if (mounted) setState(() => _step = 1);
+                        },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isEnrolled
+                          ? _kOrange1.withValues(alpha: 0.05)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: isEnrolled
+                          ? Border.all(color: _kOrange1, width: 1.8)
+                          : null,
+                      boxShadow: isEnrolled
+                          ? []
+                          : [
+                              BoxShadow(
+                                color: c1.withValues(alpha: 0.10),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: isEnrolled
+                                  ? [_kOrange1, _kOrange2]
+                                  : [c1, c1.withValues(alpha: 0.72)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          alignment: Alignment.center,
+                          child: isEnrolled
+                              ? const Icon(Icons.check_rounded,
+                                  color: Colors.white, size: 22)
+                              : Text(shortCode,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 15)),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(lang.name,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 15,
+                                      color: isEnrolled
+                                          ? _kOrange1
+                                          : const Color(0xFF1A1A1A))),
+                              const SizedBox(height: 2),
+                              if (isEnrolled)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: _kOrange1.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Text(
+                                    "Déjà inscrit",
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        color: _kOrange1,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                )
+                              else if (lang.description.isNotEmpty)
+                                Text(lang.description,
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500]),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis),
+                            ],
+                          ),
+                        ),
+                        if (!isEnrolled)
+                          Icon(Icons.chevron_right_rounded,
+                              color: Colors.grey[300], size: 22),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildLevelStep() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDragHandle(),
+        const SizedBox(height: 18),
+        Row(
+          children: [
+            GestureDetector(
+              onTap: () => setState(() => _step = 0),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.07),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.arrow_back_ios_new,
+                    size: 16, color: Color(0xFF1A1A1A)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Obx(() => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Choisir un niveau",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF1A1A1A)),
+                      ),
+                      Text(
+                        widget.langCtrl.selectedLanguage.value?.name ?? '',
+                        style:
+                            TextStyle(fontSize: 13, color: Colors.grey[500]),
+                      ),
+                    ],
+                  )),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        Obx(() {
+          if (widget.langCtrl.isLoadingLevels.value) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: CircularProgressIndicator(
+                    color: _kOrange1, strokeWidth: 2.5),
+              ),
+            );
+          }
+          final levels = widget.langCtrl.languageLevels;
+          if (levels.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  "Aucun niveau disponible",
+                  style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                ),
+              ),
+            );
+          }
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.35,
+                ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: levels.length,
+                  itemBuilder: (_, i) {
+                    final level = levels[i];
+                    final levelId = level is Map
+                        ? level['id']?.toString() ?? ''
+                        : level?.id?.toString() ?? '';
+                    final levelName = level is Map
+                        ? level['name']?.toString() ?? 'Niveau'
+                        : level?.name?.toString() ?? 'Niveau';
+                    return Obx(() {
+                      final sel = widget.langCtrl.selectedLevel.value;
+                      final selId = sel == null
+                          ? ''
+                          : sel is Map
+                              ? sel['id']?.toString() ?? ''
+                              : sel?.id?.toString() ?? '';
+                      final isSelected = selId == levelId && levelId.isNotEmpty;
+                      return GestureDetector(
+                        onTap: () =>
+                            widget.langCtrl.selectedLevel.value = level,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? _kOrange1.withValues(alpha: 0.08)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: isSelected
+                                  ? _kOrange1
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                            boxShadow: isSelected
+                                ? []
+                                : [
+                                    BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.05),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? _kOrange1.withValues(alpha: 0.12)
+                                      : const Color(0xFFF5F5F5),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '${i + 1}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 15,
+                                    color: isSelected
+                                        ? _kOrange1
+                                        : Colors.grey[400],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Text(
+                                  levelName,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: isSelected
+                                        ? _kOrange1
+                                        : const Color(0xFF1A1A1A),
+                                  ),
+                                ),
+                              ),
+                              if (isSelected)
+                                const Icon(Icons.check_circle_rounded,
+                                    color: _kOrange1, size: 22),
+                            ],
+                          ),
+                        ),
+                      );
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              Obx(() => SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: widget.langCtrl.isLoading.value ||
+                              widget.langCtrl.selectedLevel.value == null
+                          ? null
+                          : () async {
+                              final ok =
+                                  await widget.langCtrl.addLanguageLevelToList();
+                              if (ok && mounted) {
+                                Navigator.of(context).pop();
+                                widget.onSuccess();
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _kOrange1,
+                        disabledBackgroundColor: Colors.grey.shade200,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
+                      ),
+                      child: widget.langCtrl.isLoading.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2.5, color: Colors.white),
+                            )
+                          : const Text(
+                              "Confirmer",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15),
+                            ),
+                    ),
+                  )),
+            ],
+          );
+        }),
+      ],
     );
   }
 }
