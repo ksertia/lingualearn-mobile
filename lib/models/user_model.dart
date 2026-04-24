@@ -57,8 +57,8 @@ class UserModel {
     
     return UserModel(
       id: userData['id']?.toString() ?? "",
-      firstName: profileData['firstName'] ?? userData['username'] ?? "Apprenant",
-      lastName: profileData['lastName'] ?? "",
+      firstName: profileData['firstName'] ?? userData['firstName'] ?? "",
+      lastName: profileData['lastName'] ?? userData['lastName'] ?? "",
       email: userData['email'] ?? "",
       phone: userData['phone'] ?? "",
       username: userData['username'],

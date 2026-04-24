@@ -21,6 +21,7 @@ import 'package:fasolingo/views/apps/setting/settings_page.dart';
 import 'package:fasolingo/views/apps/setting/widget/detail_subscription.dart';
 import 'package:fasolingo/views/apps/setting/widget/sous-compte/children_progress_list_page.dart';
 import 'package:fasolingo/views/apps/setting/widget/sous-compte/sous-compte.dart';
+import 'package:fasolingo/views/apps/setting/widget/change_password.dart';
 import 'package:fasolingo/views/apps/setting/widget/select_language.dart';
 import 'package:fasolingo/views/apps/setting/widget/subsciption_plan.dart';
 import 'package:fasolingo/views/auth/forget_password/enter_phone_number.dart';
@@ -134,6 +135,10 @@ getPageRoute() {
         page: () => const ProfileDetails(),
         middlewares: [AuthMiddleware()]),
 
+    GetPage(
+        name: '/change_password',
+        page: () => const ChangePasswordPage(),
+        middlewares: [AuthMiddleware()]),
     GetPage(name: '/selectLanguageScreen', page: () => SelectLanguageScreen()),
     GetPage(name: '/changeLanguageScreen', page: () => ChangeLanguageScreen()),
 

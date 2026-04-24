@@ -46,8 +46,14 @@ class SettingService {
       
 
       if (response.statusCode == 200 && response.data != null) {
-        final dynamic userData = response.data['data']['user'];
-        
+        // LOG TEMPORAIRE — à supprimer après vérification
+        print("🔍 [getUserProfile] response.data = ${response.data}");
+
+        final dynamic data = response.data['data'];
+        final dynamic userData = data is Map ? (data['user'] ?? data) : data;
+
+        print("🔍 [getUserProfile] userData = $userData");
+
         if (userData != null) {
           return UserModel.fromJson(userData);
         }

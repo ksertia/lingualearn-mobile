@@ -256,9 +256,31 @@ class _SettingScreenState extends State<SettingScreen>
   // ── Header ──────────────────────────────────────────────────────────────────
 
   Widget _buildHeader(dynamic user, Color cardBg, Color textPrimary, Color textSecondary) {
-    final String name = user?.firstName != null
-        ? '${user.firstName} ${user.lastName ?? ''}'.trim()
-        : (LocalStorage.getUserName() ?? 'Apprenant');
+    final bool isSubAccount = user?.accountType == 'sub_account_learner';
+
+    String name;
+    if (user == null) {
+      name = LocalStorage.getUserName() ?? 'Apprenant';
+    } else if (!isSubAccount) {
+      // Compte principal : prénom + nom
+      // Priorité : données fraîches du profil → nom sauvegardé à la connexion → username
+      final profileName = '${user.firstName} ${user.lastName}'.trim();
+      final savedName = LocalStorage.getUserName();
+      final hasFreshName = profileName.isNotEmpty && profileName != (user.username ?? '');
+      final hasSavedName = savedName != null && savedName.isNotEmpty && savedName != 'Apprenant';
+
+      if (hasFreshName) {
+        name = profileName;
+      } else if (hasSavedName) {
+        name = savedName;
+      } else {
+        name = user.username ?? 'Apprenant';
+      }
+    } else {
+      // Sous-compte : username
+      name = user.username ?? LocalStorage.getUserName() ?? 'Apprenant';
+    }
+
     final String subtitle = user?.email ?? user?.phone ?? '';
 
     return Container(
