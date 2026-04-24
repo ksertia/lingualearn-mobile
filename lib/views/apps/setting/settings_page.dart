@@ -126,23 +126,6 @@ class _SettingScreenState extends State<SettingScreen>
                               textColor: textPrimary,
                               onTap: () => Get.toNamed('/change_password'),
                             ),
-                            _buildDivider(dividerColor),
-                            _buildItem(
-                              icon: Icons.block_rounded,
-                              iconBg: const Color(0xFFF3F4F6),
-                              iconColor: const Color(0xFF6B7280),
-                              title: 'Utilisateurs bloques',
-                              textColor: textPrimary,
-                              onTap: () => Get.snackbar(
-                                'Bientot disponible',
-                                'Cette fonctionnalite arrive prochainement.',
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.black87,
-                                colorText: Colors.white,
-                                margin: const EdgeInsets.all(16),
-                                borderRadius: 14,
-                              ),
-                            ),
                           ]),
 
                           const SizedBox(height: 20),
