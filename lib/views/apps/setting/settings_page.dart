@@ -3,6 +3,7 @@ import 'package:fasolingo/helpers/constant/images.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/helpers/theme/app_notifier.dart';
 import 'package:fasolingo/helpers/utils/ui_mixins.dart';
+import 'package:fasolingo/views/apps/setting/widget/contact_support.dart';
 import 'package:fasolingo/views/apps/setting/widget/help.dart';
 import 'package:fasolingo/views/apps/setting/widget/logout_bottom_sheet.dart';
 import 'package:fasolingo/views/apps/setting/widget/subsciption_plan.dart';
@@ -32,7 +33,7 @@ class _SettingScreenState extends State<SettingScreen>
       canPop: true,
       child: Consumer<AppNotifier>(
         builder: (_, value, child) => Scaffold(
-          backgroundColor: contentTheme.background,
+          //backgroundColor: contentTheme.background,
           body: Obx(() {
             if (controller.isLoading.value && controller.user.value == null) {
               return const AppLoader();
@@ -149,15 +150,8 @@ class _SettingScreenState extends State<SettingScreen>
                               iconColor: const Color(0xFF0EA5E9),
                               title: 'Contacter le support',
                               textColor: textPrimary,
-                              onTap: () => Get.snackbar(
-                                'Support',
-                                'Contactez-nous a support@tibi.app',
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.black87,
-                                colorText: Colors.white,
-                                margin: const EdgeInsets.all(16),
-                                borderRadius: 14,
-                              ),
+                              onTap: () =>
+                                  Get.to(() => const ContactSupportPage()),
                             ),
                             _buildDivider(dividerColor),
                             _buildItem(
