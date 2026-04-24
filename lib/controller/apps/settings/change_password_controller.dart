@@ -1,5 +1,4 @@
 import 'package:fasolingo/helpers/services/change_password_service.dart';
-import 'package:fasolingo/helpers/utils/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -67,11 +66,7 @@ class ChangePasswordController extends GetxController {
       if (success) {
         await _showSuccessDialog();
       } else {
-        appSnackbar(
-          heading: 'Erreur',
-          message: 'Mot de passe actuel incorrect. Veuillez réessayer.',
-          snackbarState: SnackbarState.danger,
-        );
+        currentPasswordError.value = 'Mot de passe actuel incorrect';
       }
     } finally {
       isLoading.value = false;
