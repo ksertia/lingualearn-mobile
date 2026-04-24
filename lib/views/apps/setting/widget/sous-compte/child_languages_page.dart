@@ -28,6 +28,16 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
     super.initState();
     controller.fetchLanguages();
     controller.fetchEnrolledLanguages(widget.child.id);
+    // Dès que l'assignation réussit, fermer le bottom sheet et retourner à SousCompte.
+    // On utilise le NavigatorState directement pour éviter que Get.back() tente
+    // de fermer la snackbar "succès" encore en animation (assertion GetX).
+    ever(controller.justAssigned, (bool assigned) {
+      if (assigned) {
+        controller.justAssigned.value = false;
+        Get.key.currentState?.pop(); // ferme le bottom sheet
+        Get.key.currentState?.pop(); // retourne à SousCompte
+      }
+    });
   }
 
   String _childName() {
@@ -601,12 +611,11 @@ class _LevelsBottomSheet extends StatelessWidget {
                         if (languageId.isEmpty) return;
                         final levelId = controller.selectedLevelId.value;
                         if (levelId.isEmpty) return;
-                        final ok = await controller.assign(
+                        await controller.assign(
                           childId: childId!,
                           languageId: languageId,
                           levelId: levelId,
                         );
-                        if (ok && context.mounted) Navigator.of(context).pop();
                       },
                 child: Container(
                   height: 52,

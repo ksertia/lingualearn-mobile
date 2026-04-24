@@ -41,7 +41,10 @@ class AuthService {
         return null;
       }
     } on DioException catch (e) {
-      _handleDioError(e, "Login");
+      // Retourner le corps de la réponse d'erreur si disponible (contient le message API)
+      if (e.response?.data != null && e.response!.data is Map) {
+        return Map<String, dynamic>.from(e.response!.data as Map);
+      }
       return null;
     } catch (_) {
       return null;
@@ -63,7 +66,10 @@ class AuthService {
         return null;
       }
     } on DioException catch (e) {
-      _handleDioError(e, "Register");
+      // Retourner le corps de la réponse d'erreur si disponible (contient le message API)
+      if (e.response?.data != null && e.response!.data is Map) {
+        return Map<String, dynamic>.from(e.response!.data as Map);
+      }
       return null;
     } catch (_) {
       return null;

@@ -17,6 +17,7 @@ class ChildLanguageAssignController extends MyController {
 
   final Rxn<LanguageModel> selectedLanguage = Rxn<LanguageModel>();
   final RxString selectedLevelId = ''.obs;
+  final RxBool justAssigned = false.obs;
 
   Future<void> fetchEnrolledLanguages(String childId) async {
     try {
@@ -103,6 +104,7 @@ class ChildLanguageAssignController extends MyController {
           heading: 'Succès',
           message: 'Langue assignée avec succès',
         );
+        justAssigned.value = true;
         return true;
       }
 

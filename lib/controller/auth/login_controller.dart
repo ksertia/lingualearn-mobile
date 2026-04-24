@@ -15,6 +15,10 @@ class LoginController extends GetxController {
   bool showPassword = false;
   bool isChecked = false;
 
+  // Erreurs API par champ — lues par les validators des TextFormField
+  var emailError = Rx<String?>(null);
+  var passwordError = Rx<String?>(null);
+
   void onChangeShowPassword() {
     showPassword = !showPassword;
     update();
@@ -26,6 +30,10 @@ class LoginController extends GetxController {
   }
 
   Future<void> onLogin() async {
+    // Réinitialiser les erreurs API avant chaque tentative
+    emailError.value = null;
+    passwordError.value = null;
+
     if (!formKey.currentState!.validate()) return;
     isLoading.value = true;
     try {
@@ -69,13 +77,16 @@ class LoginController extends GetxController {
         } else {
           Get.offAllNamed('/bienvenue');
         }
+      } else if (response != null) {
+        // Erreur API avec message — on identifie quel champ est en cause
+        isLoading.value = false;
+        _applyFieldErrors(response['message']?.toString() ?? '');
       } else {
+        // Pas de réponse du serveur — erreur réseau
         isLoading.value = false;
         appSnackbar(
-            heading: "Échec",
-            message: response != null
-                ? response['message']
-                : "Identifiants incorrects.");
+            heading: "Erreur",
+            message: "Connexion impossible. Vérifiez votre connexion internet.");
       }
     } catch (e) {
       isLoading.value = false;
@@ -84,10 +95,17 @@ class LoginController extends GetxController {
     }
   }
 
+  void _applyFieldErrors(String rawMessage) {
+    passwordError.value = "Mot de passe incorrect";
+    formKey.currentState?.validate();
+  }
+
   /// Clear form fields (for post-reset UX)
   void clear() {
     email.clear();
     password.clear();
+    emailError.value = null;
+    passwordError.value = null;
     update();
   }
 

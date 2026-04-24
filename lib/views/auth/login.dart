@@ -97,7 +97,11 @@ class _LoginPageState extends State<LoginPage> {
                     _buildLabel("Email ou Téléphone"),
                     TextFormField(
                       controller: controller.email,
-                      validator: (v) => v!.isEmpty ? "Email requis" : null,
+                      validator: (v) {
+                        if (v!.isEmpty) return "Email requis";
+                        // Erreur renvoyée par l'API (ex: email incorrect)
+                        return controller.emailError.value;
+                      },
                       decoration: _inputDeco(
                         hint: "exemple@mail.com",
                         icon: Icons.person_outline_rounded,
@@ -109,8 +113,11 @@ class _LoginPageState extends State<LoginPage> {
                       builder: (_) => TextFormField(
                         controller: controller.password,
                         obscureText: !controller.showPassword,
-                        validator: (v) =>
-                            v!.isEmpty ? "Mot de passe requis" : null,
+                        validator: (v) {
+                          if (v!.isEmpty) return "Mot de passe requis";
+                          // Erreur renvoyée par l'API (ex: mot de passe incorrect)
+                          return controller.passwordError.value;
+                        },
                         decoration: _inputDeco(
                           hint: "••••••••",
                           icon: Icons.lock_outline_rounded,

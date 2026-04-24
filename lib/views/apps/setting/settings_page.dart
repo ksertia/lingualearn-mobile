@@ -69,7 +69,7 @@ class _SettingScreenState extends State<SettingScreen>
                             _buildSettingsItem(
                               iconWidget: Icon(Icons.person,
                                   color: contentTheme.black, size: 24),
-                              title: 'Sous comptes',
+                              title: 'Rattacher un compte ',
                               onTap: () {
                                 Get.toNamed('/souscomptes');
                               },
@@ -77,7 +77,7 @@ class _SettingScreenState extends State<SettingScreen>
                             _buildSettingsItem(
                               iconWidget: Icon(Icons.bar_chart,
                                   color: contentTheme.black, size: 24),
-                              title: 'Parcours des sous comptes',
+                              title: 'Parcours du compte Rattaché',
                               onTap: () {
                                 Get.toNamed('/children_progress');
                               },

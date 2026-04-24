@@ -1,5 +1,6 @@
 import 'package:fasolingo/helpers/services/module_service.dart';
 import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ParcoursSelectionController extends GetxController {
@@ -11,10 +12,13 @@ class ParcoursSelectionController extends GetxController {
 
   RxBool isLoading = false.obs;
   RxList<dynamic> items = <dynamic>[].obs;
+  RxInt currentPage = 0.obs;
+  late PageController pageController;
 
   @override
   void onInit() {
     super.onInit();
+    pageController = PageController();
 
     moduleId = "";
     userId = "";
@@ -39,10 +43,21 @@ class ParcoursSelectionController extends GetxController {
     } catch (e) {
       moduleId = "";
       showAllPaths = true;
-      print(" [ParcoursController] Erreur argument : $e");
     }
 
     fetchPaths();
+  }
+
+  void goToPage(int page) {
+    pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void onPageChanged(int page) {
+    currentPage.value = page;
   }
 
   Future<void> fetchPaths() async {
@@ -52,15 +67,10 @@ class ParcoursSelectionController extends GetxController {
 
       if (showAllPaths) {
         final modules = await ModuleService.getAllModules();
-
         if (modules.isNotEmpty) {
           modules.sort((a, b) => a.index.compareTo(b.index));
-
           for (final module in modules) {
-            // Add module header
             items.add(module);
-
-            // Load paths for this module
             final paths =
                 await LearningPathService.getPathsBySpecificModule(module.id);
             if (paths.isNotEmpty) {
@@ -68,38 +78,29 @@ class ParcoursSelectionController extends GetxController {
               items.addAll(paths);
             }
           }
-        } else {
-          print(" [ParcoursController] Aucun module trouvé");
         }
       } else {
-        if (moduleId.isEmpty || moduleId == "null") {
-          print(
-              " [ParcoursController] moduleId vide, impossible de charger les parcours spécifiques.");
-        } else {
-          print(
-              " [ParcoursController] Chargement des parcours pour moduleId: $moduleId");
+        if (moduleId.isNotEmpty && moduleId != "null") {
           final results =
               await LearningPathService.getPathsBySpecificModule(moduleId);
-
           if (results.isNotEmpty) {
             results.sort((a, b) => a.index.compareTo(b.index));
             items.assignAll(results);
-            print(
-                " [ParcoursController] ${results.length} parcours reçus pour le module $moduleId");
-          } else {
-            print(
-                " [ParcoursController] Aucun parcours trouvé pour le module $moduleId");
           }
         }
       }
     } catch (e) {
-      print(" [ParcoursController] Erreur lors du chargement : $e");
+      // silent
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> onRefresh() async {
-    await fetchPaths();
+  Future<void> onRefresh() async => fetchPaths();
+
+  @override
+  void onClose() {
+    pageController.dispose();
+    super.onClose();
   }
 }

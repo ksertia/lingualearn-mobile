@@ -369,8 +369,6 @@ class _CreateSubAccountBottomSheetState
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -378,8 +376,6 @@ class _CreateSubAccountBottomSheetState
     firstNameController.dispose();
     lastNameController.dispose();
     passwordController.dispose();
-    emailController.dispose();
-    phoneController.dispose();
     super.dispose();
   }
 
@@ -389,8 +385,6 @@ class _CreateSubAccountBottomSheetState
       firstName: firstNameController.text.trim(),
       lastName: lastNameController.text.trim(),
       password: passwordController.text,
-      email: emailController.text,
-      phone: phoneController.text,
     );
     if (!mounted) return;
     if (ok) Navigator.of(context).pop();
@@ -480,18 +474,6 @@ class _CreateSubAccountBottomSheetState
               obscureText: true,
               decoration: _fieldDecoration('Mot de passe', Icons.lock_outline_rounded),
               validator: (v) => (v == null || v.isEmpty) ? 'Mot de passe obligatoire' : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: emailController,
-              decoration: _fieldDecoration('Email (optionnel)', Icons.email_outlined),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: phoneController,
-              decoration: _fieldDecoration('Telephone (optionnel)', Icons.phone_outlined),
-              keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 20),
             Obx(() => GestureDetector(
