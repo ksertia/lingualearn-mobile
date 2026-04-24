@@ -3,6 +3,7 @@ import 'package:fasolingo/helpers/constant/images.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/helpers/theme/app_notifier.dart';
 import 'package:fasolingo/helpers/utils/ui_mixins.dart';
+import 'package:fasolingo/views/apps/setting/widget/help.dart';
 import 'package:fasolingo/views/apps/setting/widget/logout_bottom_sheet.dart';
 import 'package:fasolingo/views/apps/setting/widget/subsciption_plan.dart';
 import 'package:fasolingo/views/ui/apploader.dart';
@@ -156,15 +157,7 @@ class _SettingScreenState extends State<SettingScreen>
                               iconColor: const Color(0xFF7C3AED),
                               title: "Centre d'aide",
                               textColor: textPrimary,
-                              onTap: () => Get.snackbar(
-                                'Centre d\'aide',
-                                'Consultez notre aide en ligne.',
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.black87,
-                                colorText: Colors.white,
-                                margin: const EdgeInsets.all(16),
-                                borderRadius: 14,
-                              ),
+                              onTap: () => Get.to(() => const HelpPage()),
                             ),
                             _buildDivider(dividerColor),
                             _buildItem(
