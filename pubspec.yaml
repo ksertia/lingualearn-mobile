@@ -81,19 +81,21 @@ dependencies:
 
 
 flutter_native_splash:
-  color: "#ffffff"
-  color_dark: "#ffffff"
+  color: "#FF6B35"
+  color_dark: "#FF9A70"
   image: assets/images/logo/login.png
-
+  fullscreen: true
   android: true
   ios: true
   ios_content_mode: scaleAspectFit
-  web: false          # ou true si tu veux aussi un splash web
+  web: false
 
   android_12:
+    color: "#FF6B35"
+    color_dark: "#FF9A70"
     image: assets/images/logo/login.png
-    icon_background_color: "#ffffff"  # recommandé pour Android 12
-    fullscreen: true                  # optionnel mais évite certains bugs
+    icon_background_color: "#FFF9F6"
+    icon_background_color_dark: "#FFF0E8"
 
 
 
