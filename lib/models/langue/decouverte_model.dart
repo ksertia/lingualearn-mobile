@@ -62,10 +62,10 @@ class Section {
 
 class Content {
   final String id;
-  final String questionType; 
+  final String questionType;
   final String questionValue;
-  final String answerType;
-  final String answerValue;
+  final String? answerType;
+  final String? answerValue;
   final int order;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -88,8 +88,8 @@ class Content {
       id: json['id'] ?? '',
       questionType: json['questionType'] ?? 'text',
       questionValue: json['questionValue'] ?? '',
-      answerType: json['answerType'] ?? 'text',
-      answerValue: json['answerValue'] ?? '',
+      answerType: json['answerType'] as String?,
+      answerValue: json['answerValue'] as String?,
       order: json['order'] ?? 0,
       createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
       updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),

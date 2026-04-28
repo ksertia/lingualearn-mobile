@@ -6,6 +6,7 @@ import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizDrag.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizQCM.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/step_discovery_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -39,11 +40,17 @@ class DiscoveryPage extends StatelessWidget {
       for (var content in section.contents) {
         Widget stepWidget;
 
-        if (content.questionType == "video") {
-          // Format Vidéo
+        if (content.questionType == "audio") {
+          stepWidget = StepDiscoveryAudioPlayer(
+            title: section.title.toUpperCase(),
+            audioUrl: content.questionValue,
+            answerText: content.answerValue ?? '',
+          );
+        }
+        else if (content.answerType == "video") {
           stepWidget = StepDiscoveryVideo(
             videoTitle: section.title.toUpperCase(),
-            videoUrl: content.questionValue,
+            videoUrl: content.answerValue ?? '',
             onVideoFinished: () {
               if (controller.currentPage.value == allSteps.length - 1) {
                 Get.toNamed('/decouvert');
@@ -52,20 +59,19 @@ class DiscoveryPage extends StatelessWidget {
               }
             },
           );
-        } 
-        else if (content.questionType == "image") {
+        }
+        else if (content.answerType == "image") {
           stepWidget = StepDiscoveryImage(
             title: section.title.toUpperCase(),
-            imageUrl: content.questionValue,
-            answerText: content.answerValue,
+            imageUrl: content.answerValue ?? '',
+            answerText: content.questionValue,
           );
-        } 
+        }
         else {
-          // Format Audio 
           stepWidget = StepDiscoveryAudio(
             title: section.title.toUpperCase(),
             texteOriginal: content.questionValue,
-            traduction: content.answerValue,
+            traduction: content.answerValue ?? '',
             lottie: 'assets/lottie/mascot.json',
           );
         }
@@ -122,7 +128,7 @@ class DiscoveryPage extends StatelessWidget {
                 choix: [
                   {
                     "nom": content.questionValue,
-                    "traduction": content.answerValue,
+                    "traduction": "${content.answerValue ?? ''}",
                     "image": "assets/images/app/mere.png",
                   },
                 ],
