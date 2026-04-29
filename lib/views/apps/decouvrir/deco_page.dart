@@ -47,10 +47,10 @@ class DiscoveryPage extends StatelessWidget {
             answerText: content.answerValue ?? '',
           );
         }
-        else if (content.answerType == "video") {
+        else if (content.questionType == "video") {
           stepWidget = StepDiscoveryVideo(
             videoTitle: section.title.toUpperCase(),
-            videoUrl: content.answerValue ?? '',
+            videoUrl: content.questionValue,
             onVideoFinished: () {
               if (controller.currentPage.value == allSteps.length - 1) {
                 Get.toNamed('/decouvert');
@@ -60,12 +60,13 @@ class DiscoveryPage extends StatelessWidget {
             },
           );
         }
-        else if (content.answerType == "image") {
+        else if (content.questionType == "image") {
           stepWidget = StepDiscoveryImage(
             title: section.title.toUpperCase(),
-            imageUrl: content.answerValue ?? '',
-            answerText: content.questionValue,
+            imageUrl: content.questionValue,
+            answerText: content.answerValue ?? '',
           );
+          
         }
         else {
           stepWidget = StepDiscoveryAudio(
