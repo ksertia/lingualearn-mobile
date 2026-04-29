@@ -10,8 +10,8 @@ class OtpcodePage extends StatefulWidget {
 }
 
 class _OtpcodePageState extends State<OtpcodePage> {
-  static const _primary = Color(0xFF0000CC);
-  static const _primaryLight = Color(0xFF4466FF);
+  static const _primary = Color(0xFFFF7043);
+  static const _primaryLight = Color(0xFFFFB74D);
   static const _successColor = Color(0xFF00BB55);
 
   final int otpLength = 6;
@@ -79,7 +79,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FF),
+      backgroundColor: const Color(0xFFF6F8FF),
       body: Column(
         children: [
           Container(
@@ -261,7 +261,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
         ],
       ),
       bottomNavigationBar: Container(
-        color: const Color(0xFFF5F7FF),
+        color: const Color(0xFFF6F8FF),
         padding: const EdgeInsets.only(bottom: 28, top: 8),
         child: Obx(() => Row(
               mainAxisAlignment: MainAxisAlignment.center,

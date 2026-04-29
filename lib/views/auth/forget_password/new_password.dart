@@ -11,8 +11,8 @@ class NewPasswordPage extends StatefulWidget {
 }
 
 class _NewPasswordPageState extends State<NewPasswordPage> {
-  static const _primary = Color(0xFF0000CC);
-  static const _primaryLight = Color(0xFF4466FF);
+  static const _primary = Color(0xFFFF7043);
+  static const _primaryLight = Color(0xFFFFB74D);
 
   final ForgotPasswordController controller =
       Get.find<ForgotPasswordController>();
@@ -110,7 +110,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FF),
+      backgroundColor: const Color(0xFFF6F8FF),
       body: Column(
         children: [
           Container(
