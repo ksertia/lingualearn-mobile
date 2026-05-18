@@ -150,7 +150,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                   borderRadius: BorderRadius.circular(32.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.deepPurple.withOpacity(0.22),
+                      color: Colors.deepPurple.withValues(alpha: 0.22),
                       blurRadius: 24.r,
                       offset: Offset(0, 14.h),
                     ),
@@ -197,7 +197,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                       padding: EdgeInsets.symmetric(
                           horizontal: 16.w, vertical: 14.h),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.14),
+                        color: Colors.white.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(18.r),
                       ),
                       child: Text(
@@ -205,7 +205,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14.sp,
-                          color: Colors.white.withOpacity(0.92),
+                          color: Colors.white.withValues(alpha: 0.92),
                         ),
                       ),
                     ),
@@ -314,6 +314,9 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
 
   @override
   Widget build(BuildContext context) {
+    final c = _controller;
+    final isReady = c != null && c.value.isInitialized;
+
     return Column(
       children: [
         SizedBox(height: 10.h),
@@ -324,26 +327,21 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
         ),
         SizedBox(height: 15.h),
         Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15.r),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(15.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 16.r,
-                    offset: Offset(0, 8.h),
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  Center(child: _buildVideo()),
-                  _buildOverlay(), // Le filtre qui s'active à la fin
-                ],
-              ),
+          child: Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15.r),
+              child: isReady
+                  ? AspectRatio(
+                      aspectRatio: c!.value.aspectRatio,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          VideoPlayer(c),
+                          _buildOverlay(),
+                        ],
+                      ),
+                    )
+                  : _buildLoadingOrError(),
             ),
           ),
         ),
@@ -351,34 +349,28 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
     );
   }
 
-  Widget _buildVideo() {
-    final c = _controller;
+  Widget _buildLoadingOrError() {
     if (_hasError) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, color: Colors.white, size: 50.sp),
-          Text("Erreur vidéo", style: TextStyle(color: Colors.white)),
-          SizedBox(height: 10.h),
-          ElevatedButton(
+      return Container(
+        color: Colors.black,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, color: Colors.white, size: 50.sp),
+            Text("Erreur vidéo",
+                style: const TextStyle(color: Colors.white)),
+            SizedBox(height: 10.h),
+            ElevatedButton(
               onPressed: () => _initVideo(widget.videoUrl),
-              child: const Text("Réessayer")),
-        ],
-      );
-    }
-    if (c != null && c.value.isInitialized) {
-      return SizedBox.expand(
-        child: FittedBox(
-          fit: BoxFit.cover,
-          child: SizedBox(
-            width: c.value.size.width,
-            height: c.value.size.height,
-            child: VideoPlayer(c),
-          ),
+              child: const Text("Réessayer"),
+            ),
+          ],
         ),
       );
     }
-    return const Center(child: CircularProgressIndicator(color: Colors.white));
+    return const Center(
+      child: CircularProgressIndicator(color: Colors.white),
+    );
   }
 
   Widget _buildOverlay() {
@@ -388,11 +380,10 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
         opacity: _overlayOpacity,
         duration: const Duration(milliseconds: 300),
         child: Container(
-          color: Colors.black
-              .withOpacity(0.5), // Assombrit la vidéo derrière le popup
+          color: Colors.black.withValues(alpha: 0.5), // Assombrit la vidéo derrière le popup
           alignment: Alignment.center,
           child: Icon(Icons.star,
-              color: Colors.yellow.withOpacity(0.3), size: 150.sp),
+              color: Colors.yellow.withValues(alpha: 0.3), size: 150.sp),
         ),
       ),
     );

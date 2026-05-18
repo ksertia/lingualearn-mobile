@@ -1,17 +1,20 @@
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/answer_section.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 class StepDiscoveryAudio extends StatelessWidget {
   final String texteOriginal;
   final String title;
-  final String traduction;
+  final String? answerType;
+  final String? answerValue;
   final String lottie;
 
   const StepDiscoveryAudio({
     super.key,
     required this.texteOriginal,
     required this.title,
-    required this.traduction,
+    this.answerType,
+    this.answerValue,
     required this.lottie,
   });
 
@@ -33,7 +36,7 @@ class StepDiscoveryAudio extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Colors.redAccent.withOpacity(0.1),
+                          color: Colors.redAccent.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(Icons.person_pin,
@@ -77,7 +80,7 @@ class StepDiscoveryAudio extends StatelessWidget {
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
+                                    color: Colors.black.withValues(alpha: 0.08),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),
@@ -158,56 +161,16 @@ class StepDiscoveryAudio extends StatelessWidget {
             margin: EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.grey.withOpacity(0.5), Colors.grey],
+                colors: [Colors.grey.withValues(alpha: 0.5), Colors.grey],
               ),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           Expanded(
             flex: 1,
-            child: Material(
-              elevation: 4,
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Center(
-                        child: Text("TRADUCTION",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            )),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Text(
-                          traduction,
-                          style: TextStyle(
-                              fontSize: 16, height: 1.6, color: Colors.black87),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            child: AnswerSection(
+              answerType: answerType,
+              answerValue: answerValue,
             ),
           )
         ],

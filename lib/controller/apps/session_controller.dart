@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:fasolingo/helpers/constant/app_constant.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../models/user_model.dart';
 import '../../helpers/storage/local_storage.dart';
@@ -56,6 +59,16 @@ class SessionController extends GetxController {
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
     ));
+
+    if (!kIsWeb) {
+      dio.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = HttpClient();
+          client.badCertificateCallback = (cert, host, port) => true;
+          return client;
+        },
+      );
+    }
 
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {

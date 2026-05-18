@@ -44,7 +44,8 @@ class DiscoveryPage extends StatelessWidget {
           stepWidget = StepDiscoveryAudioPlayer(
             title: section.title.toUpperCase(),
             audioUrl: content.questionValue,
-            answerText: content.answerValue ?? '',
+            answerType: content.answerType,
+            answerValue: content.answerValue,
           );
         }
         else if (content.questionType == "video") {
@@ -64,15 +65,16 @@ class DiscoveryPage extends StatelessWidget {
           stepWidget = StepDiscoveryImage(
             title: section.title.toUpperCase(),
             imageUrl: content.questionValue,
-            answerText: content.answerValue ?? '',
+            answerType: content.answerType,
+            answerValue: content.answerValue,
           );
-          
         }
         else {
           stepWidget = StepDiscoveryAudio(
             title: section.title.toUpperCase(),
             texteOriginal: content.questionValue,
-            traduction: content.answerValue ?? '',
+            answerType: content.answerType,
+            answerValue: content.answerValue,
             lottie: 'assets/lottie/mascot.json',
           );
         }

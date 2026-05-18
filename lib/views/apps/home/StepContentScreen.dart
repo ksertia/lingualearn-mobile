@@ -300,13 +300,13 @@ class StepContentScreen extends StatelessWidget {
           return StepDiscoveryImage(
             title: data.title,
             imageUrl: content.mediaUrl ?? '',
-            answerText: content.text ?? '',
+            answerValue: content.text,
           );
         case 'audio':
           return StepDiscoveryAudio(
             title: data.title,
             texteOriginal: content.text ?? '',
-            traduction: 'Repete apres moi',
+            answerValue: 'Repete apres moi',
             lottie: 'assets/lottie/mascot.json',
           );
         default:

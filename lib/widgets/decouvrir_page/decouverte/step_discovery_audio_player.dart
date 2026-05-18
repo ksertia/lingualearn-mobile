@@ -1,19 +1,22 @@
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/answer_section.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 class StepDiscoveryAudioPlayer extends StatefulWidget {
   final String title;
   final String audioUrl;
-  final String answerText;
+  final String? answerType;
+  final String? answerValue;
 
   const StepDiscoveryAudioPlayer({
     super.key,
     required this.title,
     required this.audioUrl,
-    required this.answerText,
+    this.answerType,
+    this.answerValue,
   });
 
   @override
@@ -297,57 +300,12 @@ class _StepDiscoveryAudioPlayerState extends State<StepDiscoveryAudioPlayer>
             ),
           ),
 
-          // Traduction
+          // Traduction / Prononciation
           Expanded(
             flex: 1,
-            child: Material(
-              elevation: 4,
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "TRADUCTION",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Text(
-                          widget.answerText,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            height: 1.6,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            child: AnswerSection(
+              answerType: widget.answerType,
+              answerValue: widget.answerValue,
             ),
           ),
         ],

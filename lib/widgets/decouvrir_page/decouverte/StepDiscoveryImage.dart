@@ -1,3 +1,4 @@
+import 'package:fasolingo/widgets/decouvrir_page/decouverte/answer_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fasolingo/helpers/constant/app_constant.dart';
@@ -5,13 +6,15 @@ import 'package:fasolingo/helpers/constant/app_constant.dart';
 class StepDiscoveryImage extends StatefulWidget {
   final String title;
   final String imageUrl;
-  final String? answerText;
+  final String? answerType;
+  final String? answerValue;
 
   const StepDiscoveryImage({
     super.key,
     required this.title,
     required this.imageUrl,
-    this.answerText,
+    this.answerType,
+    this.answerValue,
   });
 
   @override
@@ -118,66 +121,53 @@ class _StepDiscoveryImageState extends State<StepDiscoveryImage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-      child: Column(
-        children: [
-          Text(
-            widget.title.toUpperCase(),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFFFF8F00),
+    return Column(
+      children: [
+        // Titre en badge pill
+        Padding(
+          padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF8F00).withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(30.r),
+              border: Border.all(
+                color: const Color(0xFFFF8F00).withValues(alpha: 0.30),
+              ),
+            ),
+            child: Text(
+              widget.title.toUpperCase(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFFFF8F00),
+                letterSpacing: 0.6,
+              ),
             ),
           ),
+        ),
 
-          SizedBox(height: 20.h),
+        SizedBox(height: 14.h),
 
-          Expanded(child: _buildImageFrame(_currentImageUrl)),
+        // Image
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: _buildImageFrame(_currentImageUrl),
+          ),
+        ),
 
-          if (widget.answerText != null &&
-              widget.answerText!.isNotEmpty) ...[
-            SizedBox(height: 15.h),
-            Icon(Icons.arrow_downward,
-                color: Colors.orange, size: 30.sp),
-            SizedBox(height: 10.h),
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFF3E0),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: Colors.orange.shade200),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.orange.withOpacity(0.15),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  )
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.lightbulb,
-                      color: Colors.orange, size: 24.sp),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: Text(
-                      widget.answerText!,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+        // Section réponse (sans flèche)
+        if (widget.answerValue?.isNotEmpty ?? false)
+          Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 18.h),
+            child: AnswerSection(
+              answerType: widget.answerType,
+              answerValue: widget.answerValue,
             ),
-          ],
-        ],
-      ),
+          ),
+      ],
     );
   }
 
@@ -190,7 +180,7 @@ class _StepDiscoveryImageState extends State<StepDiscoveryImage> {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
