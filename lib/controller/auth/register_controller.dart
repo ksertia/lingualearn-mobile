@@ -58,7 +58,7 @@ class RegisterController extends GetxController {
           snackbarState: SnackbarState.success,
         );
         await Future.delayed(const Duration(seconds: 2));
-        Get.toNamed('/login');
+        Get.offAllNamed('/login');
       } else if (response != null) {
         // Erreur API — on affiche un message précis selon le problème identifié
         final rawMsg = response['message']?.toString() ?? '';
@@ -80,7 +80,7 @@ class RegisterController extends GetxController {
     } catch (e) {
       appSnackbar(heading: "Erreur", message: "Une erreur technique est survenue.", snackbarState: SnackbarState.danger);
     } finally {
-      isLoading.value = false;
+      if (!isClosed) isLoading.value = false;
     }
   }
 

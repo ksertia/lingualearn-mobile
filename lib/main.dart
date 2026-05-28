@@ -9,6 +9,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'helpers/constant/app_constant.dart';
@@ -29,6 +30,9 @@ import 'widgets/bottom_bar/navigation_provider.dart';
 Future<void> main() async {
   // 1. Indispensable pour l'asynchrone
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 1bis. Initialisation de media_kit pour le lecteur vidéo natif.
+  MediaKit.ensureInitialized();
 
   // 2. Initialisation PRIORITAIRE du stockage (on attend que ce soit fini)
   await GetStorage.init();

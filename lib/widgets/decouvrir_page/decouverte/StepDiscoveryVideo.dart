@@ -1,7 +1,10 @@
-﻿import 'package:flutter/foundation.dart';
+﻿import 'dart:async';
+
+// import 'package:ffmpeg_kit_flutter_min/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:video_player/video_player.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 
 class StepDiscoveryVideo extends StatefulWidget {
   final String videoTitle;
@@ -20,106 +23,114 @@ class StepDiscoveryVideo extends StatefulWidget {
 }
 
 class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
-  VideoPlayerController? _controller;
+  final Player _player = Player();
+  late final VideoController _controller;
+  StreamSubscription<Duration>? _positionSubscription;
+  StreamSubscription<Duration>? _durationSubscription;
 
   bool _hasError = false;
-  bool _isLoaded = false;
-  bool _triedHttpsFallback = false;
-  bool _triedPortFallback = false;
-
-  double _overlayOpacity = 0.0;
+  bool _isLoading = true;
   bool _dialogShown = false;
+  bool _isReady = false;
+  double _overlayOpacity = 0.0;
+  Duration _duration = Duration.zero;
 
   @override
   void initState() {
     super.initState();
+    _controller = VideoController(_player);
+    _initializeFfmpeg();
     _initVideo(widget.videoUrl);
   }
 
-  // --- LOGIQUE DE FORMATAGE D'URL ---
+  void _initializeFfmpeg() {
+    try {
+      // FFmpegKit.execute('-version').then((_) {}, onError: (_) {});
+    } catch (_) {
+      // Ignore initialization errors; this is only a warm-up path.
+    }
+  }
+
   String _formatVideoUrl(String path,
       {bool forceHttps = false, bool forcePort4001 = false}) {
     final trimmed = path.trim();
     Uri uri;
 
-    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
       uri = Uri.parse(trimmed);
     } else {
-      String base = "http://213.32.120.11:4000";
-      if (forcePort4001) base = base.replaceAll(":4000", ":4001");
-      uri = Uri.parse(base + (trimmed.startsWith("/") ? trimmed : "/$trimmed"));
+      String base = 'http://213.32.120.11:4000';
+      if (forcePort4001) base = base.replaceAll(':4000', ':4001');
+      uri = Uri.parse(base + (trimmed.startsWith('/') ? trimmed : '/$trimmed'));
     }
 
-    if (kIsWeb) {
-      final base = Uri.base;
-      if (uri.host == base.host &&
-          uri.port == base.port &&
-          uri.scheme != base.scheme) {
-        uri = uri.replace(scheme: base.scheme);
-      }
-    }
-
-    final scheme = forceHttps ? "https" : uri.scheme;
+    final scheme = forceHttps ? 'https' : uri.scheme;
     int port = uri.port;
     if (forcePort4001) port = 4001;
 
     return Uri.encodeFull(uri.replace(scheme: scheme, port: port).toString());
   }
 
-  void _initVideo(String url) async {
-    _dispose();
+  Future<void> _initVideo(String url) async {
+    _disposePlayer();
+    setState(() {
+      _hasError = false;
+      _isLoading = true;
+      _isReady = false;
+      _dialogShown = false;
+      _overlayOpacity = 0.0;
+      _duration = Duration.zero;
+    });
+
     final fixedUrl = _formatVideoUrl(url);
 
     try {
-      _controller = VideoPlayerController.networkUrl(Uri.parse(fixedUrl));
-      _controller!.addListener(_videoListener);
-      await _controller!.initialize();
-
-      if (!mounted) return;
-
-      setState(() {
-        _hasError = false;
-        _isLoaded = true;
-        _dialogShown = false;
-        _overlayOpacity = 0.0;
+      await _player.open(Media(fixedUrl), play: false);
+      _durationSubscription = _player.stream.duration.listen((duration) {
+        if (duration != null && duration > Duration.zero) {
+          setState(() {
+            _duration = duration;
+          });
+        }
       });
 
-      _controller!.play();
-    } catch (e) {
-      _handleError();
+      _positionSubscription = _player.stream.position.listen((position) {
+        if (_duration > Duration.zero &&
+            position >= _duration - const Duration(milliseconds: 200) &&
+            !_dialogShown) {
+          _dialogShown = true;
+          _player.pause();
+          setState(() {
+            _overlayOpacity = 1.0;
+          });
+          _showVictoryDialog();
+        }
+      });
+
+      await _player.play();
+      setState(() {
+        _hasError = false;
+        _isLoading = false;
+        _isReady = true;
+      });
+    } catch (_) {
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
     }
   }
 
-  void _handleError() {
-    if (!_triedPortFallback) {
-      _triedPortFallback = true;
-      _initVideo(_formatVideoUrl(widget.videoUrl, forcePort4001: true));
-      return;
-    }
-    if (!_triedHttpsFallback) {
-      _triedHttpsFallback = true;
-      _initVideo(_formatVideoUrl(widget.videoUrl, forceHttps: true));
-      return;
-    }
-    setState(() => _hasError = true);
+  Future<void> _retryVideo() async {
+    setState(() {
+      _hasError = false;
+      _isLoading = true;
+      _overlayOpacity = 0.0;
+      _dialogShown = false;
+    });
+    await _initVideo(widget.videoUrl);
   }
 
-  void _videoListener() {
-    final c = _controller;
-    if (c == null || !c.value.isInitialized) return;
-
-    if (c.value.position >= c.value.duration &&
-        c.value.duration.inMilliseconds > 0) {
-      if (!_dialogShown) {
-        _dialogShown = true;
-        c.pause();
-        setState(() => _overlayOpacity = 1.0);
-        _showVictoryDialog();
-      }
-    }
-  }
-
-  // --- LE POPUP SUPER LUDIQUE ---
   void _showVictoryDialog() {
     showDialog(
       context: context,
@@ -142,7 +153,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
               child: Container(
                 padding: EdgeInsets.fromLTRB(24.w, 56.h, 24.w, 22.h),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Color(0xFF6750A4), Color(0xFF7F3DFF)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -150,7 +161,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                   borderRadius: BorderRadius.circular(32.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.deepPurple.withValues(alpha: 0.22),
+                      color: Colors.deepPurple.withAlpha(56),
                       blurRadius: 24.r,
                       offset: Offset(0, 14.h),
                     ),
@@ -160,7 +171,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "Félicitations 🎉",
+                      'Félicitations 🎉',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 22.sp,
@@ -170,7 +181,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                     ),
                     SizedBox(height: 10.h),
                     Text(
-                      "Tu as terminé cette étape !",
+                      'Tu as terminé cette étape !',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16.sp,
@@ -197,15 +208,15 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                       padding: EdgeInsets.symmetric(
                           horizontal: 16.w, vertical: 14.h),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
+                        color: Colors.white.withOpacity(0.14),
                         borderRadius: BorderRadius.circular(18.r),
                       ),
                       child: Text(
-                        "Ton aventure continue, clique sur Continuer pour débloquer la suite.",
+                        'Ton aventure continue, clique sur Continuer pour débloquer la suite.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14.sp,
-                          color: Colors.white.withValues(alpha: 0.92),
+                          color: Colors.white.withOpacity(0.92),
                         ),
                       ),
                     ),
@@ -216,7 +227,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.white,
-                              side: BorderSide(color: Colors.white54),
+                              side: const BorderSide(color: Colors.white54),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(18.r),
                               ),
@@ -227,7 +238,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                               _replay();
                             },
                             child: Text(
-                              "Revoir",
+                              'Revoir',
                               style: TextStyle(
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w600,
@@ -251,7 +262,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                               widget.onVideoFinished();
                             },
                             child: Text(
-                              "Continuer",
+                              'Continuer',
                               style: TextStyle(
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.bold,
@@ -280,7 +291,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                     child: child,
                   ),
                   child: Icon(Icons.celebration,
-                      color: Color(0xFF7F3DFF), size: 40.sp),
+                      color: const Color(0xFF7F3DFF), size: 40.sp),
                 ),
               ),
             ),
@@ -291,32 +302,31 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
   }
 
   void _replay() {
-    if (_controller == null) return;
+    if (_hasError) return;
     setState(() {
       _dialogShown = false;
       _overlayOpacity = 0.0;
     });
-    _controller!.seekTo(Duration.zero);
-    _controller!.play();
+    _player.seek(Duration.zero);
+    _player.play();
   }
 
-  void _dispose() {
-    _controller?.removeListener(_videoListener);
-    _controller?.dispose();
-    _controller = null;
+  void _disposePlayer() {
+    _positionSubscription?.cancel();
+    _durationSubscription?.cancel();
+    _player.pause();
   }
 
   @override
   void dispose() {
-    _dispose();
+    _positionSubscription?.cancel();
+    _durationSubscription?.cancel();
+    _player.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final c = _controller;
-    final isReady = c != null && c.value.isInitialized;
-
     return Column(
       children: [
         SizedBox(height: 10.h),
@@ -330,18 +340,26 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
           child: Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15.r),
-              child: isReady
-                  ? AspectRatio(
-                      aspectRatio: c!.value.aspectRatio,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          VideoPlayer(c),
+              child: _hasError
+                  ? _buildErrorScreen()
+                  : Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Container(
+                          color: Colors.black,
+                          child: Video(
+                            controller: _controller,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        if (_isLoading)
+                          const Center(
+                            child: CircularProgressIndicator(color: Colors.white),
+                          )
+                        else
                           _buildOverlay(),
-                        ],
-                      ),
-                    )
-                  : _buildLoadingOrError(),
+                      ],
+                    ),
             ),
           ),
         ),
@@ -349,41 +367,35 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
     );
   }
 
-  Widget _buildLoadingOrError() {
-    if (_hasError) {
-      return Container(
-        color: Colors.black,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, color: Colors.white, size: 50.sp),
-            Text("Erreur vidéo",
-                style: const TextStyle(color: Colors.white)),
-            SizedBox(height: 10.h),
-            ElevatedButton(
-              onPressed: () => _initVideo(widget.videoUrl),
-              child: const Text("Réessayer"),
-            ),
-          ],
-        ),
-      );
-    }
-    return const Center(
-      child: CircularProgressIndicator(color: Colors.white),
+  Widget _buildErrorScreen() {
+    return Container(
+      color: Colors.black,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, color: Colors.white, size: 50.sp),
+          const SizedBox(height: 10),
+          const Text('Erreur vidéo', style: TextStyle(color: Colors.white)),
+          SizedBox(height: 10.h),
+          ElevatedButton(
+            onPressed: _retryVideo,
+            child: const Text('Réessayer'),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildOverlay() {
     return IgnorePointer(
-      // Laisse passer les clics vers le Dialog
       child: AnimatedOpacity(
         opacity: _overlayOpacity,
         duration: const Duration(milliseconds: 300),
         child: Container(
-          color: Colors.black.withValues(alpha: 0.5), // Assombrit la vidéo derrière le popup
+          color: Colors.black.withOpacity(0.5),
           alignment: Alignment.center,
           child: Icon(Icons.star,
-              color: Colors.yellow.withValues(alpha: 0.3), size: 150.sp),
+              color: Colors.yellow.withOpacity(0.3), size: 150.sp),
         ),
       ),
     );

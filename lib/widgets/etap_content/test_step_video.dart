@@ -1,74 +1,151 @@
-import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+// import 'dart:async';
 
-class TestStepVideo extends StatefulWidget {
-  final String videoTitle;
-  final String videoUrl;
-  final VoidCallback onVideoFinished;
+// import 'package:ffmpeg_kit_flutter_min/ffmpeg_kit.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
+// import 'package:media_kit/media_kit.dart';
+// import 'package:media_kit_video/media_kit_video.dart';
 
-  const TestStepVideo({
-    super.key,
-    required this.videoTitle,
-    required this.videoUrl,
-    required this.onVideoFinished
-  });
+// class TestStepVideo extends StatefulWidget {
+//   final String videoTitle;
+//   final String videoUrl;
+//   final VoidCallback onVideoFinished;
 
-  @override
-  State<TestStepVideo> createState() => _TestStepVideo();
-}
+//   const TestStepVideo({
+//     super.key,
+//     required this.videoTitle,
+//     required this.videoUrl,
+//     required this.onVideoFinished
+//   });
 
-class _TestStepVideo extends State<TestStepVideo> {
-  late VideoPlayerController _controller;
+//   @override
+//   State<TestStepVideo> createState() => _TestStepVideo();
+// }
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.asset(widget.videoUrl)
-      ..initialize().then((_) => setState(() {}));
+// class _TestStepVideo extends State<TestStepVideo> {
+//   late final Player _player;
+//   StreamSubscription<bool>? _playingSubscription;
+//   StreamSubscription<Duration?>? _durationSubscription;
+//   StreamSubscription<Duration>? _positionSubscription;
+//   bool _isReady = false;
+//   bool _hasError = false;
+//   bool _isPlaying = false;
+//   Duration _duration = Duration.zero;
 
-    _controller.addListener(() {
-      if (_controller.value.position == _controller.value.duration) {
-        widget.onVideoFinished();
-      }
-    });
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     _player = Player();
+//     _initializeFfmpeg();
+//     _initializeVideo();
+//   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+//   Future<void> _initializeFfmpeg() async {
+//     try {
+//       await FFmpegKit.execute('-version');
+//     } catch (_) {
+//       // Ignore FFmpeg warm-up failures.
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: 15.h),
-        Text(widget.videoTitle, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp, color: Colors.orange)),
-        SizedBox(height: 20.h),
-        Expanded(
-          child: Center(
-            child: Container(
-              margin: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.r),
-                color: Colors.black,
-              ),
-              child: _controller.value.isInitialized
-                  ? AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: GestureDetector(
-                  onTap: () => _controller.value.isPlaying ? _controller.pause() : _controller.play(),
-                  child: VideoPlayer(_controller),
-                ),
-              )
-                  : const CircularProgressIndicator(),
-            ),
-          ),
-        ),
-        SizedBox(height: 20.h),
-      ],
-    );
-  }
-}
+//   String _normalizeAssetPath(String path) {
+//     if (path.startsWith('asset://')) {
+//       return path;
+//     }
+//     final normalized = path.replaceFirst(RegExp(r'^/+'), '');
+//     return 'asset:///$normalized';
+//   }
+
+//   Future<void> _initializeVideo() async {
+//     try {
+//       final mediaPath = _normalizeAssetPath(widget.videoUrl);
+//       await _player.open(Media(mediaPath), play: false);
+//       _playingSubscription = _player.stream.isPlaying.listen((playing) {
+//         if (mounted) {
+//           setState(() => _isPlaying = playing);
+//         }
+//       });
+//       _durationSubscription = _player.stream.duration.listen((duration) {
+//         if (mounted && duration != null) {
+//           setState(() {
+//             _duration = duration;
+//           });
+//         }
+//       });
+//       _positionSubscription = _player.stream.position.listen((position) {
+//         if (mounted && _duration > Duration.zero && position >= _duration) {
+//           widget.onVideoFinished();
+//         }
+//       });
+//       if (mounted) {
+//         setState(() {
+//           _isReady = true;
+//           _hasError = false;
+//         });
+//       }
+//       await _player.play();
+//     } catch (_) {
+//       if (mounted) {
+//         setState(() {
+//           _hasError = true;
+//         });
+//       }
+//     }
+//   }
+
+//   void _togglePlayback() {
+//     if (_isPlaying) {
+//       _player.pause();
+//     } else {
+//       _player.play();
+//     }
+//   }
+
+//   @override
+//   void dispose() {
+//     _playingSubscription?.cancel();
+//     _durationSubscription?.cancel();
+//     _positionSubscription?.cancel();
+//     _player.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       children: [
+//         SizedBox(height: 15.h),
+//         Text(widget.videoTitle, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp, color: Colors.orange)),
+//         SizedBox(height: 20.h),
+//         Expanded(
+//           child: Center(
+//             child: Container(
+//               margin: EdgeInsets.all(10.w),
+//               decoration: BoxDecoration(
+//                 borderRadius: BorderRadius.circular(20.r),
+//                 color: Colors.black,
+//               ),
+//               child: _hasError
+//                   ? const Center(
+//                       child: Text('Erreur de lecture vidéo',
+//                           style: TextStyle(color: Colors.white)))
+//                   : _isReady
+//                       ? AspectRatio(
+//                           aspectRatio: 16 / 9,
+//                           child: GestureDetector(
+//                             onTap: _togglePlayback,
+//                             child: Video(
+//                               player: _player,
+//                               fit: BoxFit.contain,
+//                             ),
+//                           ),
+//                         )
+//                       : const Center(child: CircularProgressIndicator()),
+//             ),
+//           ),
+//         ),
+//         SizedBox(height: 20.h),
+//       ],
+//     );
+//   }
+// }
