@@ -1,6 +1,7 @@
 import 'package:fasolingo/controller/apps/settings/settings_controller.dart';
 import 'package:fasolingo/helpers/constant/images.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
+import 'package:fasolingo/helpers/theme/app_colors.dart';
 import 'package:fasolingo/helpers/theme/app_notifier.dart';
 import 'package:fasolingo/helpers/utils/ui_mixins.dart';
 import 'package:fasolingo/views/apps/setting/widget/contact_support.dart';
@@ -13,8 +14,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-const Color _sOrange  = Color(0xFFFF7043);
-const Color _sOrange2 = Color(0xFFFFB74D);
+const Color _kGreen     = Color(0xFF188329);
+const Color _kGreenDark = Color(0xFF0F5C1C);
+const Color _kYellow    = Color(0xFFF5BF1E);
+const Color _kOrange    = Color(0xFFF27F22);
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -33,7 +36,6 @@ class _SettingScreenState extends State<SettingScreen>
       canPop: true,
       child: Consumer<AppNotifier>(
         builder: (_, value, child) => Scaffold(
-          //backgroundColor: contentTheme.background,
           body: Obx(() {
             if (controller.isLoading.value && controller.user.value == null) {
               return const AppLoader();
@@ -41,156 +43,164 @@ class _SettingScreenState extends State<SettingScreen>
 
             final user = controller.user.value;
             final bool isSub = user?.accountType == 'sub_account_learner';
-            final bool isDark = LocalStorage.getTheme() == 'Dark';
-            final Color cardBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-            final Color textPrimary = isDark ? Colors.white : const Color(0xFF1A1A1A);
-            final Color textSecondary = isDark ? Colors.white60 : const Color(0xFF888888);
-            final Color dividerColor = isDark ? Colors.white12 : const Color(0xFFEEEEEE);
+            final bool isDark = AppColors.isDark(context);
+            final Color bg = AppColors.bg(context);
+            final Color cardBg = AppColors.card(context);
+            final Color textPrimary = AppColors.textPrimary(context);
+            final Color textSecondary = AppColors.textSecondary(context);
+            final Color dividerColor = AppColors.divider(context);
 
             return Stack(
               children: [
+                Container(color: bg),
                 ListView(
                   padding: EdgeInsets.zero,
                   children: [
-                    // ── Header gradient ─────────────────────────────────
-                    _buildHeader(user, cardBg, textPrimary, textSecondary),
-
-                    const SizedBox(height: 8),
-
+                    _buildHeader(user, isSub),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          const SizedBox(height: 20),
 
-                          // ── Premium banner (non-sub) ─────────────────
+                          // ── Premium banner ─────────────────────────────
                           if (!isSub) ...[
                             _buildPremiumBanner(),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 24),
                           ],
 
-                          // ── Préférences ──────────────────────────────
-                          _buildSectionTitle('Preferences'),
+                          // ── Préférences ────────────────────────────────
+                          _buildSectionTitle('Préférences', isDark),
                           const SizedBox(height: 10),
-                          _buildCard(cardBg, dividerColor, [
-                            _buildLanguageItem(textPrimary, textSecondary),
-                            _buildDivider(dividerColor),
+                          _buildCard(cardBg, [
+                            _buildLanguageItem(
+                                textPrimary, textSecondary, dividerColor),
                             _buildDarkModeItem(textPrimary),
                           ]),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
 
-                          // ── Compte (non-sub) ─────────────────────────
+                          // ── Compte ─────────────────────────────────────
                           if (!isSub) ...[
-                            _buildSectionTitle('Compte'),
+                            _buildSectionTitle('Compte', isDark),
                             const SizedBox(height: 10),
-                            _buildCard(cardBg, dividerColor, [
+                            _buildCard(cardBg, [
                               _buildItem(
                                 icon: Icons.people_rounded,
                                 iconBg: const Color(0xFFEDE9FF),
                                 iconColor: const Color(0xFF7C3AED),
                                 title: 'Rattacher un compte',
                                 textColor: textPrimary,
+                                dividerColor: dividerColor,
+                                showDivider: true,
                                 onTap: () => Get.toNamed('/souscomptes'),
                               ),
-                              _buildDivider(dividerColor),
                               _buildItem(
                                 icon: Icons.bar_chart_rounded,
                                 iconBg: const Color(0xFFE0F2FE),
                                 iconColor: const Color(0xFF0EA5E9),
-                                title: 'Parcours du compte rattache',
+                                title: 'Parcours du compte rattaché',
                                 textColor: textPrimary,
-                                onTap: () => Get.toNamed('/children_progress'),
+                                dividerColor: dividerColor,
+                                showDivider: true,
+                                onTap: () =>
+                                    Get.toNamed('/children_progress'),
                               ),
-                              _buildDivider(dividerColor),
                               _buildItem(
                                 icon: Icons.credit_card_rounded,
                                 iconBg: const Color(0xFFFFF3E0),
-                                iconColor: _sOrange,
-                                title: 'Gerer mon abonnement',
+                                iconColor: _kOrange,
+                                title: 'Gérer mon abonnement',
                                 textColor: textPrimary,
-                                onTap: () => Get.toNamed('/subscription_details'),
+                                dividerColor: dividerColor,
+                                showDivider: true,
+                                onTap: () =>
+                                    Get.toNamed('/subscription_details'),
+                              ),
+                              _buildItem(
+                                icon: Icons.handshake_rounded,
+                                iconBg: const Color(0xFFDCFCE7),
+                                iconColor: _kGreen,
+                                title: 'Devenir partenaire',
+                                textColor: textPrimary,
+                                dividerColor: dividerColor,
+                                showDivider: false,
+                                onTap: () => Get.toNamed('/partenaire'),
                               ),
                             ]),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 24),
                           ],
 
-                          // ── Securite ─────────────────────────────────
-                          _buildSectionTitle('Securite'),
+                          // ── Sécurité ───────────────────────────────────
+                          _buildSectionTitle('Sécurité', isDark),
                           const SizedBox(height: 10),
-                          _buildCard(cardBg, dividerColor, [
+                          _buildCard(cardBg, [
                             _buildItem(
                               icon: Icons.lock_rounded,
                               iconBg: const Color(0xFFFFE4E4),
                               iconColor: const Color(0xFFEF4444),
                               title: 'Changer le mot de passe',
                               textColor: textPrimary,
+                              dividerColor: dividerColor,
+                              showDivider: false,
                               onTap: () => Get.toNamed('/change_password'),
                             ),
                           ]),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
 
-                          // ── Support ──────────────────────────────────
-                          _buildSectionTitle('Support'),
+                          // ── Support ────────────────────────────────────
+                          _buildSectionTitle('Support', isDark),
                           const SizedBox(height: 10),
-                          _buildCard(cardBg, dividerColor, [
+                          _buildCard(cardBg, [
                             _buildItem(
                               icon: Icons.help_outline_rounded,
                               iconBg: const Color(0xFFEDE9FF),
                               iconColor: const Color(0xFF7C3AED),
                               title: "Centre d'aide",
                               textColor: textPrimary,
+                              dividerColor: dividerColor,
+                              showDivider: true,
                               onTap: () => Get.to(() => const HelpPage()),
                             ),
-                            _buildDivider(dividerColor),
                             _buildItem(
                               icon: Icons.chat_bubble_outline_rounded,
                               iconBg: const Color(0xFFE0F2FE),
                               iconColor: const Color(0xFF0EA5E9),
                               title: 'Contacter le support',
                               textColor: textPrimary,
+                              dividerColor: dividerColor,
+                              showDivider: true,
                               onTap: () =>
                                   Get.to(() => const ContactSupportPage()),
                             ),
-                            _buildDivider(dividerColor),
-                            _buildItem(
-                              icon: Icons.star_outline_rounded,
-                              iconBg: const Color(0xFFFFF9E6),
-                              iconColor: const Color(0xFFF59E0B),
-                              title: "Noter l'application",
-                              textColor: textPrimary,
-                              onTap: () => Get.snackbar(
-                                'Merci !',
-                                'Votre avis nous aide a nous ameliorer.',
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.black87,
-                                colorText: Colors.white,
-                                margin: const EdgeInsets.all(16),
-                                borderRadius: 14,
-                              ),
-                            ),
-                          ]),
-
-                          const SizedBox(height: 20),
-
-                          // ── Deconnexion ──────────────────────────────
-                          _buildCard(cardBg, dividerColor, [
-                            _buildItem(
-                              icon: Icons.logout_rounded,
-                              iconBg: const Color(0xFFFFE4E4),
-                              iconColor: const Color(0xFFEF4444),
-                              title: 'Deconnexion',
-                              textColor: const Color(0xFFEF4444),
-                              showArrow: false,
-                              onTap: controller.isLoading.value
-                                  ? null
-                                  : () => _handleLogout(context),
-                            ),
+                            // _buildItem(
+                            //   icon: Icons.star_outline_rounded,
+                            //   iconBg: const Color(0xFFFFF9E6),
+                            //   iconColor: const Color(0xFFF59E0B),
+                            //   title: "Noter l'application",
+                            //   textColor: textPrimary,
+                            //   dividerColor: dividerColor,
+                            //   showDivider: false,
+                            //   onTap: () => Get.snackbar(
+                            //     'Merci !',
+                            //     'Votre avis nous aide à nous améliorer.',
+                            //     snackPosition: SnackPosition.BOTTOM,
+                            //     backgroundColor: Colors.black87,
+                            //     colorText: Colors.white,
+                            //     margin: const EdgeInsets.all(16),
+                            //     borderRadius: 14,
+                            //   ),
+                            // ),
                           ]),
 
                           const SizedBox(height: 24),
 
+                          // ── Déconnexion ────────────────────────────────
+                          _buildLogoutButton(),
+
+                          const SizedBox(height: 20),
                           Center(
                             child: Text(
                               'TiBi v1.0.0',
@@ -208,11 +218,13 @@ class _SettingScreenState extends State<SettingScreen>
                   ],
                 ),
 
+                // Loading overlay
                 if (controller.isLoading.value)
                   Positioned.fill(
                     child: Container(
                       color: Colors.black.withValues(alpha: 0.35),
-                      child: const Center(child: CircularProgressIndicator()),
+                      child: const Center(
+                          child: CircularProgressIndicator(color: _kGreen)),
                     ),
                   ),
               ],
@@ -225,20 +237,19 @@ class _SettingScreenState extends State<SettingScreen>
 
   // ── Header ──────────────────────────────────────────────────────────────────
 
-  Widget _buildHeader(dynamic user, Color cardBg, Color textPrimary, Color textSecondary) {
-    final bool isSubAccount = user?.accountType == 'sub_account_learner';
-
+  Widget _buildHeader(dynamic user, bool isSub) {
     String name;
     if (user == null) {
       name = LocalStorage.getUserName() ?? 'Apprenant';
-    } else if (!isSubAccount) {
-      // Compte principal : prénom + nom
-      // Priorité : données fraîches du profil → nom sauvegardé à la connexion → username
-      final profileName = '${user.firstName} ${user.lastName}'.trim();
+    } else if (!isSub) {
+      final profileName =
+          '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim();
       final savedName = LocalStorage.getUserName();
-      final hasFreshName = profileName.isNotEmpty && profileName != (user.username ?? '');
-      final hasSavedName = savedName != null && savedName.isNotEmpty && savedName != 'Apprenant';
-
+      final hasFreshName =
+          profileName.isNotEmpty && profileName != (user.username ?? '');
+      final hasSavedName = savedName != null &&
+          savedName.isNotEmpty &&
+          savedName != 'Apprenant';
       if (hasFreshName) {
         name = profileName;
       } else if (hasSavedName) {
@@ -247,16 +258,16 @@ class _SettingScreenState extends State<SettingScreen>
         name = user.username ?? 'Apprenant';
       }
     } else {
-      // Sous-compte : username
       name = user.username ?? LocalStorage.getUserName() ?? 'Apprenant';
     }
 
     final String subtitle = user?.email ?? user?.phone ?? '';
+    final String accountLabel = isSub ? 'Sous-compte' : 'Apprenant';
 
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_sOrange, _sOrange2],
+          colors: [_kGreen, _kGreenDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -266,58 +277,171 @@ class _SettingScreenState extends State<SettingScreen>
         20,
         MediaQuery.of(context).padding.top + 20,
         20,
-        28,
+        24,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 2.5),
-            ),
-            child: CircleAvatar(
-              radius: 34,
-              backgroundColor: Colors.white.withValues(alpha: 0.25),
-              backgroundImage: AssetImage(Images.avatars[2]),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    height: 1.2,
+          // Avatar row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Avatar with online dot
+              Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.50),
+                          width: 3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.22),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 38,
+                      backgroundColor:
+                          Colors.white.withValues(alpha: 0.20),
+                      backgroundImage: AssetImage(Images.avatars[2]),
+                    ),
                   ),
-                ),
-                if (subtitle.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                  Positioned(
+                    bottom: 3,
+                    right: 3,
+                    child: Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: _kYellow,
+                        shape: BoxShape.circle,
+                        border:
+                            Border.all(color: Colors.white, width: 2.5),
+                      ),
                     ),
                   ),
                 ],
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: () => Get.toNamed('/edit_profile'),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.22),
-                borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
+              const SizedBox(width: 16),
+              // Name + email + badge
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isSub
+                                ? Icons.person_outline_rounded
+                                : Icons.school_rounded,
+                            color: Colors.white,
+                            size: 11,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            accountLabel,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        height: 1.2,
+                      ),
+                    ),
+                    if (subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.72),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              // Edit button
+              GestureDetector(
+                onTap: () => Get.toNamed('/edit_profile'),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.25),
+                        width: 1),
+                  ),
+                  child: const Icon(Icons.edit_rounded,
+                      color: Colors.white, size: 18),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Quick-access strip
+          Container(
+            padding:
+                const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.15), width: 1),
+            ),
+            child: Row(
+              children: [
+                _buildHeaderTile(
+                  Icons.auto_stories_rounded,
+                  'Mon profil',
+                  'Voir',
+                  onTap: () => Get.toNamed('/edit_profile'),
+                ),
+                _buildHeaderDivider(),
+                _buildHeaderTile(
+                  Icons.history_rounded,
+                  'Historique',
+                  'Parcours',
+                  onTap: null,
+                ),
+                _buildHeaderDivider(),
+                _buildHeaderTile(
+                  Icons.workspace_premium_rounded,
+                  isSub ? 'Sous-compte' : 'Gratuit',
+                  'Statut',
+                  onTap: null,
+                ),
+              ],
             ),
           ),
         ],
@@ -325,7 +449,44 @@ class _SettingScreenState extends State<SettingScreen>
     );
   }
 
-  // ── Premium banner ───────────────────────────────────────────────────────────
+  Widget _buildHeaderTile(IconData icon, String value, String label,
+      {VoidCallback? onTap}) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Colors.white.withValues(alpha: 0.90), size: 18),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.60), fontSize: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderDivider() => Container(
+        width: 1,
+        height: 36,
+        color: Colors.white.withValues(alpha: 0.18),
+      );
+
+  // ── Premium banner ─────────────────────────────────────────────────────────
 
   Widget _buildPremiumBanner() {
     return GestureDetector(
@@ -336,18 +497,18 @@ class _SettingScreenState extends State<SettingScreen>
         builder: (_) => const SubscriptionPlansPage(isBottomSheet: true),
       ),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF7C3AED), Color(0xFF5B21B6)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7C3AED).withValues(alpha: 0.30),
-              blurRadius: 14,
+              color: const Color(0xFF7C3AED).withValues(alpha: 0.28),
+              blurRadius: 16,
               offset: const Offset(0, 6),
             ),
           ],
@@ -357,10 +518,11 @@ class _SettingScreenState extends State<SettingScreen>
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.20),
-                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.star_rounded, color: Colors.white, size: 24),
+              child: const Icon(Icons.workspace_premium_rounded,
+                  color: Colors.white, size: 22),
             ),
             const SizedBox(width: 14),
             const Expanded(
@@ -370,52 +532,82 @@ class _SettingScreenState extends State<SettingScreen>
                   Text(
                     'Passez au Premium',
                     style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15,
-                    ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15),
                   ),
                   SizedBox(height: 2),
                   Text(
-                    'Acces illimite a tous les parcours.',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
+                    'Accès illimité à tous les parcours.',
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.20),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.30), width: 1),
+              ),
+              child: const Text(
+                'Voir',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  // ── Section helpers ──────────────────────────────────────────────────────────
+  // ── Section title ──────────────────────────────────────────────────────────
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: _sOrange,
-        fontSize: 13,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 0.5,
-      ),
+  Widget _buildSectionTitle(String title, bool isDark) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 16,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [_kGreen, _kYellow],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            color: isDark ? Colors.white70 : const Color(0xFF1A1A1A),
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildCard(Color bg, Color divider, List<Widget> children) {
+  // ── Card container ─────────────────────────────────────────────────────────
+
+  Widget _buildCard(Color bg, List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
+            blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
@@ -424,103 +616,162 @@ class _SettingScreenState extends State<SettingScreen>
     );
   }
 
-  Widget _buildDivider(Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 58),
-      child: Divider(height: 1, color: color),
-    );
-  }
+  // ── Generic item ───────────────────────────────────────────────────────────
 
   Widget _buildItem({
     required IconData icon,
     required Color iconBg,
     required Color iconColor,
     required String title,
+    String? subtitle,
     required Color textColor,
+    required Color dividerColor,
+    required bool showDivider,
     required VoidCallback? onTap,
     bool showArrow = true,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: iconBg,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: iconColor, size: 20),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: iconBg,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
                 ),
-              ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                              color: textColor.withValues(alpha: 0.50),
+                              fontSize: 12),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (showArrow)
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: iconColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.chevron_right_rounded,
+                      color: iconColor.withValues(alpha: 0.70),
+                      size: 18,
+                    ),
+                  ),
+              ],
             ),
-            if (showArrow)
-              Icon(Icons.chevron_right_rounded,
-                  color: textColor.withValues(alpha: 0.35), size: 22),
-          ],
+          ),
         ),
-      ),
+        if (showDivider)
+          Padding(
+            padding: const EdgeInsets.only(left: 70),
+            child: Divider(height: 1, color: dividerColor),
+          ),
+      ],
     );
   }
 
-  Widget _buildLanguageItem(Color textColor, Color subtitleColor) {
-    return InkWell(
-      onTap: () => Get.toNamed('/selectLanguageScreen'),
-      borderRadius: BorderRadius.circular(18),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE0F2FE),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.translate_rounded,
-                  color: Color(0xFF0EA5E9), size: 20),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                'Langue',
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+  // ── Language item ──────────────────────────────────────────────────────────
+
+  Widget _buildLanguageItem(
+      Color textColor, Color subtitleColor, Color dividerColor) {
+    return Column(
+      children: [
+        InkWell(
+          onTap: () => Get.toNamed('/selectLanguageScreen'),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0F2FE),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.translate_rounded,
+                      color: Color(0xFF0EA5E9), size: 20),
                 ),
-              ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    'Langue',
+                    style: TextStyle(
+                        color: textColor,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _kGreen.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    _getCurrentLanguageName(),
+                    style: const TextStyle(
+                        color: _kGreen,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0EA5E9).withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.chevron_right_rounded,
+                      color: Color(0xFF0EA5E9), size: 18),
+                ),
+              ],
             ),
-            Text(
-              _getCurrentLanguageName(),
-              style: TextStyle(
-                color: subtitleColor,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(Icons.chevron_right_rounded,
-                color: textColor.withValues(alpha: 0.35), size: 22),
-          ],
+          ),
         ),
-      ),
+        Padding(
+          padding: const EdgeInsets.only(left: 70),
+          child: Divider(height: 1, color: dividerColor),
+        ),
+      ],
     );
   }
+
+  // ── Dark mode item ─────────────────────────────────────────────────────────
 
   Widget _buildDarkModeItem(Color textColor) {
     return Padding(
@@ -528,11 +779,11 @@ class _SettingScreenState extends State<SettingScreen>
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: const Color(0xFF1E293B).withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.dark_mode_rounded,
                 color: Color(0xFF334155), size: 20),
@@ -542,20 +793,20 @@ class _SettingScreenState extends State<SettingScreen>
             child: Text(
               'Mode sombre',
               style: TextStyle(
-                color: textColor,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
+                  color: textColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600),
             ),
           ),
           Transform.scale(
             scale: 0.85,
             child: CupertinoSwitch(
               value: LocalStorage.getTheme() == 'Dark',
-              activeTrackColor: _sOrange,
+              activeTrackColor: _kGreen,
               onChanged: (val) {
                 LocalStorage.setTheme(val ? 'Dark' : 'Light');
-                Provider.of<AppNotifier>(context, listen: false).changeTheme();
+                Provider.of<AppNotifier>(context, listen: false)
+                    .changeTheme();
               },
             ),
           ),
@@ -564,7 +815,43 @@ class _SettingScreenState extends State<SettingScreen>
     );
   }
 
-  // ── Logout ───────────────────────────────────────────────────────────────────
+  // ── Logout button (standalone) ─────────────────────────────────────────────
+
+  Widget _buildLogoutButton() {
+    return GestureDetector(
+      onTap: controller.isLoading.value
+          ? null
+          : () => _handleLogout(context),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFE4E4),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+              color: const Color(0xFFEF4444).withValues(alpha: 0.20),
+              width: 1.5),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.logout_rounded, color: Color(0xFFEF4444), size: 20),
+            SizedBox(width: 10),
+            Text(
+              'Se déconnecter',
+              style: TextStyle(
+                color: Color(0xFFEF4444),
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Logout handler ─────────────────────────────────────────────────────────
 
   Future<void> _handleLogout(BuildContext context) async {
     final confirmed = await showModalBottomSheet<bool>(
@@ -572,8 +859,8 @@ class _SettingScreenState extends State<SettingScreen>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => LogoutDeleteBottomSheet(
-        title: 'Deconnexion',
-        subTitle: 'Etes-vous sur de vouloir vous deconnecter ?',
+        title: 'Déconnexion',
+        subTitle: 'Êtes-vous sûr de vouloir vous déconnecter ?',
       ),
     );
     if (confirmed == true) await controller.onLogout();
@@ -581,11 +868,11 @@ class _SettingScreenState extends State<SettingScreen>
 
   String _getCurrentLanguageName() {
     switch (controller.selectedLanguageIndex.value) {
-      case 0: return 'Francais';
+      case 0: return 'Français';
       case 1: return 'Anglais';
-      case 2: return 'Moore';
+      case 2: return 'Mooré';
       case 3: return 'Dioula';
-      default: return 'Francais';
+      default: return 'Français';
     }
   }
 }

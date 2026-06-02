@@ -9,7 +9,7 @@ import 'package:fasolingo/views/apps/decouvrir/langue_decouvert.dart';
 import 'package:fasolingo/views/apps/decouvrir/selection_langues_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/step_mascotte.dart';
 import 'package:fasolingo/views/apps/history/history_page.dart';
-import 'package:fasolingo/views/apps/home/dashboard_screen.dart';
+import 'package:fasolingo/views/apps/home/module_page.dart';
 import 'package:fasolingo/views/apps/home/home.dart';
 import 'package:fasolingo/views/apps/home/home_page.dart';
 import 'package:fasolingo/views/apps/home/screens/parcours.dart';
@@ -24,6 +24,9 @@ import 'package:fasolingo/views/apps/setting/widget/sous-compte/sous-compte.dart
 import 'package:fasolingo/views/apps/setting/widget/change_password.dart';
 import 'package:fasolingo/views/apps/setting/widget/select_language.dart';
 import 'package:fasolingo/views/apps/setting/widget/subsciption_plan.dart';
+import 'package:fasolingo/views/apps/setting/widget/partner_dashboard_page.dart';
+import 'package:fasolingo/views/apps/setting/widget/partner_page.dart';
+import 'package:fasolingo/views/apps/setting/widget/partner_withdraw_page.dart';
 import 'package:fasolingo/views/auth/forget_password/enter_phone_number.dart';
 import 'package:fasolingo/views/auth/forget_password/new_password.dart';
 import 'package:fasolingo/views/auth/forget_password/otpcode.dart';
@@ -138,6 +141,18 @@ getPageRoute() {
     GetPage(
         name: '/change_password',
         page: () => const ChangePasswordPage(),
+        middlewares: [AuthMiddleware()]),
+    GetPage(
+        name: '/partenaire',
+        page: () => const PartnerPage(),
+        middlewares: [AuthMiddleware()]),
+    GetPage(
+        name: '/partenaire/dashboard',
+        page: () => const PartnerDashboardPage(),
+        middlewares: [AuthMiddleware()]),
+    GetPage(
+        name: '/partenaire/retrait',
+        page: () => const PartnerWithdrawPage(),
         middlewares: [AuthMiddleware()]),
     GetPage(name: '/selectLanguageScreen', page: () => SelectLanguageScreen()),
     GetPage(name: '/changeLanguageScreen', page: () => ChangeLanguageScreen()),

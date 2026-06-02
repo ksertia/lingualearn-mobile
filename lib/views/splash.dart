@@ -1,148 +1,120 @@
-import 'dart:async';
-
 import 'package:fasolingo/controller/apps/session_controller.dart';
 import 'package:fasolingo/helpers/storage/local_storage.dart';
 import 'package:fasolingo/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-const Color _orange = Color(0xFFFF6B35);
-const Color _orangeLight = Color(0xFFFFB347);
-const Color _bg = Color(0xFFFFF9F6);
+// ── Palette ────────────────────────────────────────────────────────────────────
+const Color _bg      = Color(0xFFFFF6F1);   // crème pêche très clair
+const Color _orange  = Color(0xFFFF6B35);
+const Color _orange2 = Color(0xFFFFB347);
+const Color _green   = Color(0xFF188329);
+const Color _green2  = Color(0xFF0F5C1C);
+const Color _grey    = Color(0xFF7A7A8A);
+const Color _dark    = Color(0xFF1A1A2E);
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class SplashCree extends StatefulWidget {
   const SplashCree({super.key});
-
   @override
   State<SplashCree> createState() => _SplashCreeState();
 }
 
-class _SplashCreeState extends State<SplashCree> with TickerProviderStateMixin {
+class _SplashCreeState extends State<SplashCree>
+    with TickerProviderStateMixin {
+
   late final AnimationController _logoCtrl;
-  late final AnimationController _taglineCtrl;
-  late final AnimationController _pulseCtrl;
-  late final AnimationController _ringsCtrl;
+  late final AnimationController _textCtrl;
   late final AnimationController _btnsCtrl;
+  late final AnimationController _pulseCtrl;
   late final AnimationController _exitCtrl;
 
   late final Animation<double> _logoScale;
-  late final Animation<double> _logoOpacity;
-  late final Animation<double> _taglineOpacity;
-  late final Animation<Offset> _taglineSlide;
+  late final Animation<double> _logoFade;
+  late final Animation<double> _textFade;
+  late final Animation<Offset>  _textSlide;
+  late final Animation<double> _btnsFade;
+  late final Animation<Offset>  _btnsSlide;
   late final Animation<double> _pulse;
-  late final Animation<double> _ringsAnim;
-  late final Animation<double> _btnsOpacity;
-  late final Animation<Offset> _btnsSlide;
   late final Animation<double> _exitOpacity;
   late final Animation<double> _exitScale;
 
   @override
   void initState() {
     super.initState();
-    _setupAnimations();
-    _logoCtrl.forward().then((_) {
-      if (mounted) {
-        _taglineCtrl.forward();
-        _btnsCtrl.forward();
-        _pulseCtrl.repeat(reverse: true);
-        _ringsCtrl.repeat(reverse: true);
-      }
-    });
+    _build();
+    _start();
     _checkStatus();
   }
 
-  void _setupAnimations() {
-    _logoCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 950),
-    );
-    _logoScale = Tween<double>(begin: 0.25, end: 1.0).animate(
-      CurvedAnimation(parent: _logoCtrl, curve: Curves.elasticOut),
-    );
-    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _logoCtrl,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
-      ),
-    );
+  void _build() {
+    _logoCtrl = AnimationController(vsync: this,
+        duration: const Duration(milliseconds: 900));
+    _logoScale = Tween<double>(begin: 0.15, end: 1.0).animate(
+        CurvedAnimation(parent: _logoCtrl, curve: Curves.elasticOut));
+    _logoFade  = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _logoCtrl,
+            curve: const Interval(0.0, 0.4, curve: Curves.easeIn)));
 
-    _taglineCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _taglineOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _taglineCtrl, curve: Curves.easeIn),
-    );
-    _taglineSlide = Tween<Offset>(
-      begin: const Offset(0, 0.4),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _taglineCtrl, curve: Curves.easeOut));
+    _textCtrl = AnimationController(vsync: this,
+        duration: const Duration(milliseconds: 540));
+    _textFade  = CurvedAnimation(parent: _textCtrl, curve: Curves.easeIn);
+    _textSlide = Tween<Offset>(
+            begin: const Offset(0, 0.5), end: Offset.zero)
+        .animate(CurvedAnimation(
+            parent: _textCtrl, curve: Curves.easeOutCubic));
 
-    _pulseCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    );
-    _pulse = Tween<double>(begin: 1.0, end: 1.05).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
-    );
-
-    _ringsCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 3200),
-    );
-    _ringsAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _ringsCtrl, curve: Curves.easeInOut),
-    );
-
-    _btnsCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _btnsOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _btnsCtrl, curve: Curves.easeIn),
-    );
+    _btnsCtrl = AnimationController(vsync: this,
+        duration: const Duration(milliseconds: 460));
+    _btnsFade  = CurvedAnimation(parent: _btnsCtrl, curve: Curves.easeIn);
     _btnsSlide = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _btnsCtrl, curve: Curves.easeOut));
+            begin: const Offset(0, 0.4), end: Offset.zero)
+        .animate(CurvedAnimation(
+            parent: _btnsCtrl, curve: Curves.easeOutCubic));
 
-    _exitCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 380),
-    );
+    _pulseCtrl = AnimationController(vsync: this,
+        duration: const Duration(milliseconds: 2400));
+    _pulse = Tween<double>(begin: 1.0, end: 1.055).animate(
+        CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
+
+    _exitCtrl = AnimationController(vsync: this,
+        duration: const Duration(milliseconds: 340));
     _exitOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _exitCtrl, curve: Curves.easeIn),
-    );
-    _exitScale = Tween<double>(begin: 1.0, end: 0.92).animate(
-      CurvedAnimation(parent: _exitCtrl, curve: Curves.easeIn),
-    );
+        CurvedAnimation(parent: _exitCtrl, curve: Curves.easeIn));
+    _exitScale   = Tween<double>(begin: 1.0, end: 0.95).animate(
+        CurvedAnimation(parent: _exitCtrl, curve: Curves.easeIn));
+  }
+
+  void _start() {
+    _logoCtrl.forward().then((_) {
+      if (!mounted) return;
+      _pulseCtrl.repeat(reverse: true);
+      _textCtrl.forward();
+      Future.delayed(const Duration(milliseconds: 220),
+          () { if (mounted) _btnsCtrl.forward(); });
+    });
   }
 
   @override
   void dispose() {
-    _logoCtrl.dispose();
-    _taglineCtrl.dispose();
-    _pulseCtrl.dispose();
-    _ringsCtrl.dispose();
-    _btnsCtrl.dispose();
-    _exitCtrl.dispose();
+    _logoCtrl.dispose(); _textCtrl.dispose(); _btnsCtrl.dispose();
+    _pulseCtrl.dispose(); _exitCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _checkStatus() async {
-    final String? storedToken = LocalStorage.getAuthToken();
-    if (storedToken == null || storedToken.isEmpty || storedToken == 'null') return;
+  // ── Navigation ─────────────────────────────────────────────────────────────
 
+  Future<void> _checkStatus() async {
+    final token = LocalStorage.getAuthToken();
+    if (token == null || token.isEmpty || token == 'null') return;
     try {
       final session = Get.find<SessionController>();
-      session.token.value = storedToken;
-
-      final response = await session.dio.get('/users/me');
-
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        final UserModel user = UserModel.fromJson(response.data['data']);
-        session.updateUser(user, storedToken);
-
+      session.token.value = token;
+      final resp = await session.dio.get('/users/me');
+      if (resp.statusCode == 200 && resp.data['success'] == true) {
+        final user = UserModel.fromJson(resp.data['data']);
+        session.updateUser(user, token);
         if (user.selectedLanguageId != null &&
             user.selectedLanguageId!.isNotEmpty &&
             user.selectedLevelId != null &&
@@ -155,265 +127,264 @@ class _SplashCreeState extends State<SplashCree> with TickerProviderStateMixin {
           _goTo('/bienvenue');
         }
       }
-    } catch (e) {
-      debugPrint('Erreur Splash : $e');
-    }
+    } catch (e) { debugPrint('Splash: $e'); }
   }
 
-  Future<void> _goTo(String route) async {
+  Future<void> _goTo(String r) async {
     await _exitCtrl.forward();
-    if (mounted) Get.offAllNamed(route);
+    if (mounted) Get.offAllNamed(r);
   }
 
-  Future<void> _open(String route) async {
+  Future<void> _open(String r) async {
     await _exitCtrl.forward();
-    if (mounted) Get.toNamed(route);
+    if (mounted) Get.offAllNamed(r);
   }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final session = Get.find<SessionController>();
-    final size = MediaQuery.of(context).size;
+    final size    = MediaQuery.of(context).size;
 
-    return Scaffold(
-      backgroundColor: _bg,
-      body: Stack(
-        children: [
-          // ── Blobs décoratifs de fond
-          Positioned(
-            top: -70,
-            right: -70,
-            child: _blob(220, _orange.withValues(alpha: 0.06)),
-          ),
-          Positioned(
-            bottom: 80,
-            left: -90,
-            child: _blob(260, _orangeLight.withValues(alpha: 0.07)),
-          ),
-          Positioned(
-            top: size.height * 0.42,
-            right: -40,
-            child: _blob(130, _orange.withValues(alpha: 0.04)),
-          ),
+    return AnimatedBuilder(
+      animation: _exitCtrl,
+      builder: (_, child) => Opacity(
+        opacity: _exitOpacity.value,
+        child: Transform.scale(scale: _exitScale.value, child: child),
+      ),
+      child: Scaffold(
+        backgroundColor: _bg,
+        body: Stack(
+          children: [
+            // ── Blobs fond ───────────────────────────────────────────────
+            _Blobs(size: size),
 
-          // ── Contenu
-          SafeArea(
-            child: Column(
-              children: [
-                const Spacer(flex: 2),
-
-                // Zone logo avec anneaux
-                Stack(
-                  alignment: Alignment.center,
+            // ── Contenu ──────────────────────────────────────────────────
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: Column(
                   children: [
-                    _buildPulsingRings(),
+                    const Spacer(flex: 2),
+
+                    // Logo
+                    _buildLogo(),
+
+                    const SizedBox(height: 40),
+
+                    // Texte
                     FadeTransition(
-                      opacity: _logoOpacity,
-                      child: ScaleTransition(
-                        scale: _logoScale,
-                        child: AnimatedBuilder(
-                          animation: _pulse,
-                          builder: (_, child) =>
-                              Transform.scale(scale: _pulse.value, child: child),
-                          child: Container(
-                            width: 130,
-                            height: 130,
-                            padding: const EdgeInsets.all(22),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: _orange.withValues(alpha: 0.22),
-                                  blurRadius: 45,
-                                  spreadRadius: 4,
-                                  offset: const Offset(0, 10),
-                                ),
-                                BoxShadow(
-                                  color: Colors.white.withValues(alpha: 0.95),
-                                  blurRadius: 8,
-                                  spreadRadius: 1,
-                                ),
-                              ],
+                      opacity: _textFade,
+                      child: SlideTransition(
+                          position: _textSlide,
+                          child: _buildText()),
+                    ),
+
+                    const Spacer(flex: 3),
+
+                    // Boutons
+                    FadeTransition(
+                      opacity: _btnsFade,
+                      child: SlideTransition(
+                        position: _btnsSlide,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Primaire
+                            _PrimaryBtn(
+                              label: "C'est parti !",
+                              onTap: () {
+                                session.vientDeLaDecouverte = true;
+                                _open('/step');
+                              },
                             ),
-                            child: Image.asset(
-                              'assets/images/logo/login.png',
-                              fit: BoxFit.contain,
+                            const SizedBox(height: 14),
+                            // Secondaire
+                            _SecondaryBtn(
+                              label: "J'ai déjà un compte",
+                              onTap: () {
+                                session.vientDeLaDecouverte = false;
+                                _open('/login');
+                              },
                             ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    // Mention légale
+                    FadeTransition(
+                      opacity: _btnsFade,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          "En continuant, vous acceptez nos conditions d'utilisation",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 11,
+                            height: 1.55,
                           ),
                         ),
                       ),
                     ),
+
+                    const SizedBox(height: 28),
                   ],
                 ),
-
-                const SizedBox(height: 36),
-
-                // Nom + tagline
-                FadeTransition(
-                  opacity: _taglineOpacity,
-                  child: SlideTransition(
-                    position: _taglineSlide,
-                    child: Column(
-                      children: [
-                        ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            colors: [_orange, _orangeLight],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ).createShader(bounds),
-                          child: const Text(
-                            'Maîtrisez nos langues locales',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const Spacer(flex: 3),
-
-                // Boutons
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28),
-                  child: FadeTransition(
-                    opacity: _btnsOpacity,
-                    child: SlideTransition(
-                      position: _btnsSlide,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _primaryBtn("C'est parti !", () {
-                            session.vientDeLaDecouverte = true;
-                            Get.toNamed('/step');
-                          }),
-                          const SizedBox(height: 14),
-                          _secondaryBtn("J'ai déjà un compte", () {
-                            session.vientDeLaDecouverte = false;
-                            Get.toNamed('/login');
-                          }),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 18),
-
-                // Mention légale
-                FadeTransition(
-                  opacity: _taglineOpacity,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 36),
-                    child: Text(
-                      "En continuant, vous acceptez nos conditions d'utilisation",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.grey.shade400,
-                        fontSize: 11,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _blob(double size, Color color) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      );
+  // ── Logo ───────────────────────────────────────────────────────────────────
 
-  Widget _buildPulsingRings() {
-    return AnimatedBuilder(
-      animation: _ringsAnim,
-      builder: (_, __) {
-        final t = _ringsAnim.value;
-        return SizedBox(
-          width: 230,
-          height: 230,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Anneau externe
-              Opacity(
-                opacity: (0.07 + t * 0.05).clamp(0.0, 1.0),
-                child: Container(
-                  width: 220,
-                  height: 220,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                        color: _orange.withValues(alpha: 0.25), width: 1),
-                  ),
+  Widget _buildLogo() {
+    return FadeTransition(
+      opacity: _logoFade,
+      child: ScaleTransition(
+        scale: _logoScale,
+        child: AnimatedBuilder(
+          animation: _pulse,
+          builder: (_, child) =>
+              Transform.scale(scale: _pulse.value, child: child),
+          child: Container(
+            width: 168, height: 168,
+            padding: const EdgeInsets.all(30),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: _orange.withValues(alpha: 0.18),
+                  blurRadius: 50,
+                  spreadRadius: 4,
+                  offset: const Offset(0, 12),
                 ),
-              ),
-              // Anneau intermédiaire
-              Opacity(
-                opacity: (0.10 + t * 0.07).clamp(0.0, 1.0),
-                child: Container(
-                  width: 178,
-                  height: 178,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                        color: _orange.withValues(alpha: 0.35), width: 1.5),
-                  ),
+                const BoxShadow(
+                  color: Colors.white,
+                  blurRadius: 12,
+                  spreadRadius: 2,
                 ),
-              ),
-              // Halo radial derrière le logo
-              Container(
-                width: 158,
-                height: 158,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      _orange.withValues(alpha: 0.10 + t * 0.06),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
+            child: Image.asset(
+              'assets/images/logo/login.png',
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Icon(
+                  Icons.school_rounded,
+                  color: _orange, size: 52),
+            ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Widget _primaryBtn(String label, VoidCallback onTap) {
+  // ── Texte ──────────────────────────────────────────────────────────────────
+
+  Widget _buildText() {
+    return Column(
+      children: [
+        // Tagline
+        ShaderMask(
+          shaderCallback: (b) => const LinearGradient(
+            colors: [_orange, _orange2],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ).createShader(b),
+          child: const Text(
+            'Maîtrisez nos langues locales',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        // Sous-tagline
+        Text(
+          'Apprenez à votre rythme, où que vous soyez',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.grey.shade500,
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Badge Burkina Faso
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(width: 32, height: 1,
+                color: _orange.withValues(alpha: 0.18)),
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(
+                color: _orange.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: _orange.withValues(alpha: 0.25), width: 1),
+              ),
+              child: const Text(
+                'Burkina Faso',
+                style: TextStyle(
+                  color: _orange,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(width: 32, height: 1,
+                color: _orange.withValues(alpha: 0.18)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── Bouton primaire ───────────────────────────────────────────────────────────
+
+class _PrimaryBtn extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _PrimaryBtn({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 58,
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [_orange, _orangeLight],
+            colors: [_green, _green2],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: _orange.withValues(alpha: 0.38),
-              blurRadius: 22,
-              spreadRadius: -3,
-              offset: const Offset(0, 9),
+              color: _green.withValues(alpha: 0.35),
+              blurRadius: 24,
+              spreadRadius: -2,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
@@ -423,45 +394,149 @@ class _SplashCreeState extends State<SplashCree> with TickerProviderStateMixin {
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30)),
+                borderRadius: BorderRadius.circular(16)),
           ),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.4,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "C'est parti !",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_forward_rounded,
+                  color: Colors.white, size: 18),
+            ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _secondaryBtn(String label, VoidCallback onTap) {
+// ── Bouton secondaire ─────────────────────────────────────────────────────────
+
+class _SecondaryBtn extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _SecondaryBtn({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 58,
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          foregroundColor: _orange,
-          side: BorderSide(color: _orange.withValues(alpha: 0.45), width: 1.5),
-          backgroundColor: _orange.withValues(alpha: 0.04),
+          foregroundColor: _dark,
+          side: BorderSide(color: Colors.grey.shade300, width: 1.2),
+          backgroundColor: Colors.white.withValues(alpha: 0.60),
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30)),
+              borderRadius: BorderRadius.circular(16)),
         ),
         child: Text(
           label,
-          style: const TextStyle(
-            color: _orange,
+          style: TextStyle(
+            color: Colors.grey.shade600,
             fontSize: 15,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.3,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.1,
           ),
         ),
       ),
+    );
+  }
+}
+
+// ── Blobs de fond ─────────────────────────────────────────────────────────────
+
+class _Blobs extends StatelessWidget {
+  final Size size;
+  const _Blobs({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Grand blob haut-droite (orange)
+        Positioned(
+          top: -80,
+          right: -80,
+          child: Container(
+            width: 280, height: 280,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _orange2.withValues(alpha: 0.10),
+            ),
+          ),
+        ),
+        // Blob vert haut-gauche (accent vert harmonieux)
+        Positioned(
+          top: -40,
+          left: -60,
+          child: Container(
+            width: 200, height: 200,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _green.withValues(alpha: 0.07),
+            ),
+          ),
+        ),
+        // Blob milieu-droite petit (orange)
+        Positioned(
+          top: size.height * 0.40,
+          right: -50,
+          child: Container(
+            width: 140, height: 140,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _orange.withValues(alpha: 0.05),
+            ),
+          ),
+        ),
+        // Blob vert bas-droite (contrebalance)
+        Positioned(
+          bottom: size.height * 0.12,
+          right: -30,
+          child: Container(
+            width: 110, height: 110,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _green.withValues(alpha: 0.06),
+            ),
+          ),
+        ),
+        // Petit blob vert milieu-gauche (nouveau)
+        Positioned(
+          top: size.height * 0.55,
+          left: 20,
+          child: Container(
+            width: 70, height: 70,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _green.withValues(alpha: 0.09),
+            ),
+          ),
+        ),
+        // Grand blob bas-gauche (orange)
+        Positioned(
+          bottom: -100,
+          left: -100,
+          child: Container(
+            width: 320, height: 320,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _orange2.withValues(alpha: 0.08),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

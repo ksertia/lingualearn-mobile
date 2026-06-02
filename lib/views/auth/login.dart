@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/auth/login_controller.dart';
+import '../../helpers/theme/app_colors.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,12 +28,17 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final bg = AppColors.bgForm(context);
+    final cardColor = AppColors.card(context);
+    final textSec = AppColors.textSecondary(context);
+    final divCol = AppColors.divider(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FF),
+      backgroundColor: bg,
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // ── Branded header (same in both modes) ──────────────────────
             Container(
               width: double.infinity,
               height: size.height * 0.38,
@@ -87,6 +93,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
 
+            // ── Form ─────────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
               child: Form(
@@ -94,31 +101,31 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildLabel("Email ou Téléphone"),
+                    _buildLabel(context, "Email ou Téléphone"),
                     TextFormField(
                       controller: controller.email,
                       validator: (v) {
                         if (v!.isEmpty) return "Email requis";
-                        // Erreur renvoyée par l'API (ex: email incorrect)
                         return controller.emailError.value;
                       },
                       decoration: _inputDeco(
+                        context: context,
                         hint: "exemple@mail.com",
                         icon: Icons.person_outline_rounded,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildLabel("Mot de passe"),
+                    _buildLabel(context, "Mot de passe"),
                     GetBuilder<LoginController>(
                       builder: (_) => TextFormField(
                         controller: controller.password,
                         obscureText: !controller.showPassword,
                         validator: (v) {
                           if (v!.isEmpty) return "Mot de passe requis";
-                          // Erreur renvoyée par l'API (ex: mot de passe incorrect)
                           return controller.passwordError.value;
                         },
                         decoration: _inputDeco(
+                          context: context,
                           hint: "••••••••",
                           icon: Icons.lock_outline_rounded,
                           suffixIcon: IconButton(
@@ -153,10 +160,10 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Text(
+                              Text(
                                 "Se souvenir de moi",
                                 style: TextStyle(
-                                    fontSize: 13, color: Colors.black54),
+                                    fontSize: 13, color: textSec),
                               ),
                             ],
                           ),
@@ -210,22 +217,22 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 28),
                     Row(
                       children: [
-                        Expanded(child: Divider(color: Colors.grey.shade300)),
+                        Expanded(child: Divider(color: divCol)),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             "ou continuer avec",
-                            style: TextStyle(
-                                color: Colors.grey.shade500, fontSize: 13),
+                            style: TextStyle(color: textSec, fontSize: 13),
                           ),
                         ),
-                        Expanded(child: Divider(color: Colors.grey.shade300)),
+                        Expanded(child: Divider(color: divCol)),
                       ],
                     ),
                     const SizedBox(height: 20),
                     Row(
                       children: [
                         _socialButton(
+                          context: context,
                           label: "Google",
                           icon: Icons.g_mobiledata,
                           iconColor: Colors.red,
@@ -233,6 +240,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(width: 12),
                         _socialButton(
+                          context: context,
                           label: "Facebook",
                           icon: Icons.facebook,
                           iconColor: const Color(0xFF1877F2),
@@ -249,14 +257,14 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        color: const Color(0xFFF6F8FF),
+        color: cardColor,
         padding: const EdgeInsets.only(bottom: 28, top: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               "Pas encore de compte ?  ",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+              style: TextStyle(color: textSec, fontSize: 14),
             ),
             GestureDetector(
               onTap: () => Get.toNamed('/register'),
@@ -275,40 +283,43 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF1E232C),
+          color: AppColors.textLabel(context),
         ),
       ),
     );
   }
 
   InputDecoration _inputDeco({
+    required BuildContext context,
     required String hint,
     required IconData icon,
     Widget? suffixIcon,
   }) {
+    final fill = AppColors.inputFill(context);
+    final bdr = AppColors.border(context);
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-      prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 20),
+      hintStyle: TextStyle(color: AppColors.textHint(context), fontSize: 14),
+      prefixIcon: Icon(icon, color: AppColors.textSecondary(context), size: 20),
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: fill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: bdr),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: bdr),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -326,6 +337,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _socialButton({
+    required BuildContext context,
     required String label,
     required IconData icon,
     required Color iconColor,
@@ -338,12 +350,12 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           height: 52,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.card(context),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: AppColors.border(context)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
+                color: AppColors.shadow(context),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -356,10 +368,10 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(width: 8),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: Color(0xFF1E232C),
+                  color: AppColors.textPrimary(context),
                 ),
               ),
             ],

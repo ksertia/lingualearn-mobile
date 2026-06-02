@@ -7,7 +7,7 @@ import '../../../widgets/bottom_bar/bottom_nav_bar.dart';
 import '../../../widgets/bottom_bar/navigation_provider.dart';
 import '../history/history_page.dart';
 import '../setting/settings_page.dart';
-import 'dashboard_screen.dart';
+import 'module_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

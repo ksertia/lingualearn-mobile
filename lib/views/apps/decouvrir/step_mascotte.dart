@@ -113,15 +113,6 @@ class StepMascotte extends StatelessWidget {
             displayFullTextOnTap: true,
             stopPauseOnTap: true,
           ),
-          // child: const Text(
-          //   "Salut 👋 moi c’est LinguaLearn !\nPrêt à découvrir l’application ?",
-          //   textAlign: TextAlign.center,
-          //   style: TextStyle(
-          //     fontSize: 18,
-          //     fontWeight: FontWeight.bold,
-          //     color: Color(0xFF424242),
-          //   ),
-          // ),
         ),
         Positioned(
           bottom: -12,

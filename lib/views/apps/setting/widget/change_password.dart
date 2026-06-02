@@ -1,81 +1,91 @@
 import 'package:fasolingo/controller/apps/settings/change_password_controller.dart';
+import 'package:fasolingo/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-const Color _orange = Color(0xFFFF7043);
-const Color _orange2 = Color(0xFFFFB74D);
+const Color _kGreen      = Color(0xFF188329);
+const Color _kYellow     = Color(0xFFF5BF1E);
+const Color _kOrange     = Color(0xFFF27F22);
+const Color _kOrangeDark = Color(0xFFC4611A);
+const Color _kRed        = Color(0xFFEF4444);
 
 class ChangePasswordPage extends StatelessWidget {
   const ChangePasswordPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ChangePasswordController());
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F5);
-    final cardBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final textColor = isDark ? Colors.white : const Color(0xFF1A1A1A);
-    final hintColor = isDark ? Colors.white38 : const Color(0xFF9E9E9E);
-    final borderColor = isDark ? Colors.white12 : const Color(0xFFE0E0E0);
+    final ctrl   = Get.put(ChangePasswordController());
+    final topPad = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: AppColors.bgAlt(context),
       body: Column(
         children: [
-          _buildHeader(context),
+          _buildHeader(topPad),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 40),
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
               child: Obx(() => Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildInfoCard(cardBg, textColor),
-                      const SizedBox(height: 24),
-                      _buildField(
-                        label: 'Mot de passe actuel',
-                        controller: controller.currentPasswordController,
-                        obscure: !controller.showCurrentPassword.value,
-                        toggle: () => controller.showCurrentPassword.value =
-                            !controller.showCurrentPassword.value,
-                        isVisible: controller.showCurrentPassword.value,
-                        error: controller.currentPasswordError.value,
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        hintColor: hintColor,
-                        borderColor: borderColor,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildField(
-                        label: 'Nouveau mot de passe',
-                        controller: controller.newPasswordController,
-                        obscure: !controller.showNewPassword.value,
-                        toggle: () => controller.showNewPassword.value =
-                            !controller.showNewPassword.value,
-                        isVisible: controller.showNewPassword.value,
-                        error: controller.newPasswordError.value,
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        hintColor: hintColor,
-                        borderColor: borderColor,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildField(
-                        label: 'Confirmer le nouveau mot de passe',
-                        controller: controller.confirmPasswordController,
-                        obscure: !controller.showConfirmPassword.value,
-                        toggle: () => controller.showConfirmPassword.value =
-                            !controller.showConfirmPassword.value,
-                        isVisible: controller.showConfirmPassword.value,
-                        error: controller.confirmPasswordError.value,
-                        cardBg: cardBg,
-                        textColor: textColor,
-                        hintColor: hintColor,
-                        borderColor: borderColor,
-                      ),
-                      const SizedBox(height: 32),
-                      _buildSubmitButton(controller),
-                    ],
-                  )),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHintBanner(),
+                  const SizedBox(height: 22),
+                  _sectionHeader('MOT DE PASSE ACTUEL', _kOrange,
+                      Icons.lock_outline_rounded),
+                  const SizedBox(height: 10),
+                  _buildFieldCard(
+                    context: context,
+                    icon: Icons.lock_outline_rounded,
+                    iconColor: _kOrange,
+                    label: 'Mot de passe actuel',
+                    hint: 'Votre mot de passe actuel',
+                    fieldController: ctrl.currentPasswordController,
+                    obscure: !ctrl.showCurrentPassword.value,
+                    toggle: () => ctrl.showCurrentPassword.value =
+                        !ctrl.showCurrentPassword.value,
+                    isVisible: ctrl.showCurrentPassword.value,
+                    error: ctrl.currentPasswordError.value,
+                  ),
+                  const SizedBox(height: 24),
+                  _sectionHeader('NOUVEAU MOT DE PASSE', _kGreen,
+                      Icons.vpn_key_rounded),
+                  const SizedBox(height: 10),
+                  _buildFieldCard(
+                    context: context,
+                    icon: Icons.vpn_key_rounded,
+                    iconColor: _kGreen,
+                    label: 'Nouveau mot de passe',
+                    hint: 'Min. 6 caractères',
+                    fieldController: ctrl.newPasswordController,
+                    obscure: !ctrl.showNewPassword.value,
+                    toggle: () => ctrl.showNewPassword.value =
+                        !ctrl.showNewPassword.value,
+                    isVisible: ctrl.showNewPassword.value,
+                    error: ctrl.newPasswordError.value,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildFieldCard(
+                    context: context,
+                    icon: Icons.check_circle_outline_rounded,
+                    iconColor: ctrl.confirmPasswordError.value.isEmpty &&
+                            ctrl.confirmPasswordController.text.isNotEmpty
+                        ? _kGreen
+                        : const Color(0xFF9CA3AF),
+                    label: 'Confirmer le mot de passe',
+                    hint: 'Répétez le nouveau mot de passe',
+                    fieldController: ctrl.confirmPasswordController,
+                    obscure: !ctrl.showConfirmPassword.value,
+                    toggle: () => ctrl.showConfirmPassword.value =
+                        !ctrl.showConfirmPassword.value,
+                    isVisible: ctrl.showConfirmPassword.value,
+                    error: ctrl.confirmPasswordError.value,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildPasswordTips(context),
+                  const SizedBox(height: 28),
+                  _buildSubmitButton(ctrl),
+                ],
+              )),
             ),
           ),
         ],
@@ -83,34 +93,32 @@ class ChangePasswordPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  // ── Header ────────────────────────────────────────────────────────────────
+
+  Widget _buildHeader(double topPad) {
     return Container(
+      padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_orange, _orange2],
+          colors: [_kOrange, _kOrangeDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
-      ),
-      padding: EdgeInsets.fromLTRB(
-        16,
-        MediaQuery.of(context).padding.top + 16,
-        16,
-        24,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
       ),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => Get.back(),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              width: 36, height: 36,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.22),
+                color: Colors.white.withValues(alpha: 0.20),
                 borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white, size: 18),
+              child: const Icon(Icons.arrow_back_ios_new,
+                  color: Colors.white, size: 15),
             ),
           ),
           const SizedBox(width: 14),
@@ -123,18 +131,17 @@ class ChangePasswordPage extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    height: 1.2,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.3,
                   ),
                 ),
-                SizedBox(height: 2),
+                SizedBox(height: 3),
                 Text(
                   'Sécurisez votre compte',
                   style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
+                      color: Colors.white70,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -142,38 +149,74 @@ class ChangePasswordPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.22),
+              color: Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(12),
+              border:
+                  Border.all(color: Colors.white.withValues(alpha: 0.20)),
             ),
-            child: const Icon(Icons.lock_rounded, color: Colors.white, size: 22),
+            child: const Icon(Icons.lock_rounded,
+                color: Colors.white, size: 22),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard(Color cardBg, Color textColor) {
+  // ── Section Header ────────────────────────────────────────────────────────
+
+  Widget _sectionHeader(String title, Color color, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          width: 3, height: 15,
+          decoration: BoxDecoration(
+              color: color, borderRadius: BorderRadius.circular(2)),
+        ),
+        const SizedBox(width: 8),
+        Icon(icon, size: 13, color: color),
+        const SizedBox(width: 5),
+        Text(
+          title,
+          style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: color,
+              letterSpacing: 0.8),
+        ),
+      ],
+    );
+  }
+
+  // ── Hint Banner ───────────────────────────────────────────────────────────
+
+  Widget _buildHintBanner() {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFE4E4),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: _orange.withValues(alpha: 0.30),
-        ),
+        color: _kOrange.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _kOrange.withValues(alpha: 0.20)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.info_outline_rounded, color: _orange, size: 20),
-          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _kOrange.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.shield_outlined,
+                color: _kOrange, size: 18),
+          ),
+          const SizedBox(width: 12),
           const Expanded(
             child: Text(
-              'Choisissez un mot de passe fort d\'au moins 6 caractères.',
+              'Choisissez un mot de passe fort et unique pour protéger votre compte.',
               style: TextStyle(
-                color: Color(0xFFB71C1C),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+                  color: _kOrangeDark,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  height: 1.4),
             ),
           ),
         ],
@@ -181,81 +224,206 @@ class ChangePasswordPage extends StatelessWidget {
     );
   }
 
-  Widget _buildField({
+  // ── Password Tips ─────────────────────────────────────────────────────────
+
+  Widget _buildPasswordTips(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.card(context),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+              color: AppColors.shadow(context),
+              blurRadius: 10,
+              offset: const Offset(0, 3)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 3, height: 13,
+                decoration: BoxDecoration(
+                    color: _kYellow, borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(width: 7),
+              Text(
+                'CONSEILS',
+                style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textSecondary(context),
+                    letterSpacing: 0.8),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8, runSpacing: 8,
+            children: [
+              _tip(context, Icons.tag_rounded, '6 caractères min.'),
+              _tip(context, Icons.abc_rounded, 'Majuscule + minuscule'),
+              _tip(context, Icons.pin_rounded, 'Au moins 1 chiffre'),
+              _tip(context, Icons.star_outline_rounded, 'Symbole recommandé'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tip(BuildContext context, IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.cardAlt(context),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: AppColors.textSecondary(context)),
+          const SizedBox(width: 5),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textSecondary(context),
+                  fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  // ── Field Card ────────────────────────────────────────────────────────────
+
+  Widget _buildFieldCard({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
     required String label,
-    required TextEditingController controller,
+    required String hint,
+    required TextEditingController fieldController,
     required bool obscure,
     required VoidCallback toggle,
     required bool isVisible,
     required String error,
-    required Color cardBg,
-    required Color textColor,
-    required Color hintColor,
-    required Color borderColor,
   }) {
+    final hasError = error.isNotEmpty;
+    final activeIconColor = hasError ? _kRed : iconColor;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Label au-dessus
         Text(
           label,
           style: TextStyle(
-            color: textColor,
             fontSize: 13,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
+            color: hasError ? _kRed : AppColors.textLabel(context),
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: error.isNotEmpty ? Colors.red.shade300 : borderColor,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        // Champ natif Flutter avec fill + border
+        TextField(
+          controller: fieldController,
+          obscureText: obscure,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary(context),
           ),
-          child: TextField(
-            controller: controller,
-            obscureText: obscure,
-            style: TextStyle(color: textColor, fontSize: 15),
-            decoration: InputDecoration(
-              hintText: '••••••••',
-              hintStyle: TextStyle(color: hintColor),
-              border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              suffixIcon: GestureDetector(
-                onTap: toggle,
-                child: Icon(
-                  isVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                  color: hintColor,
-                  size: 20,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+                color: AppColors.textHint(context),
+                fontSize: 14,
+                fontWeight: FontWeight.w400),
+            filled: true,
+            fillColor:
+                hasError ? _kRed.withValues(alpha: 0.04) : AppColors.inputFill(context),
+            // Icône gauche dans boîte colorée
+            prefixIcon: Padding(
+              padding: const EdgeInsets.only(left: 14, right: 10),
+              child: Container(
+                width: 36, height: 36,
+                decoration: BoxDecoration(
+                  color: activeIconColor.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(10),
                 ),
+                alignment: Alignment.center,
+                child: Icon(icon, color: activeIconColor, size: 18),
+              ),
+            ),
+            prefixIconConstraints:
+                const BoxConstraints(minWidth: 64, minHeight: 56),
+            // Bouton œil droit
+            suffixIcon: GestureDetector(
+              onTap: toggle,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Container(
+                  width: 34, height: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.cardAlt(context),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    isVisible
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility_rounded,
+                    color: const Color(0xFF9CA3AF),
+                    size: 17,
+                  ),
+                ),
+              ),
+            ),
+            suffixIconConstraints:
+                const BoxConstraints(minWidth: 54, minHeight: 56),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+            // Bordures
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: hasError
+                    ? _kRed.withValues(alpha: 0.50)
+                    : const Color(0xFFE5E7EB),
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: hasError ? _kRed : _kOrange,
+                width: 2,
               ),
             ),
           ),
         ),
-        if (error.isNotEmpty) ...[
+        // Message d'erreur
+        if (hasError) ...[
           const SizedBox(height: 6),
           Row(
             children: [
               const Icon(Icons.error_outline_rounded,
-                  color: Colors.red, size: 14),
+                  color: _kRed, size: 13),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   error,
                   style: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+                      color: _kRed,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -265,61 +433,62 @@ class ChangePasswordPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSubmitButton(ChangePasswordController controller) {
-    return Obx(() => GestureDetector(
-          onTap: controller.isLoading.value ? null : controller.onChangePassword,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height: 54,
-            decoration: BoxDecoration(
-              gradient: controller.isLoading.value
-                  ? const LinearGradient(
-                      colors: [Color(0xFFBDBDBD), Color(0xFFBDBDBD)],
-                    )
-                  : const LinearGradient(
-                      colors: [_orange, _orange2],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+  // ── Submit Button ─────────────────────────────────────────────────────────
+
+  Widget _buildSubmitButton(ChangePasswordController ctrl) {
+    return Obx(() {
+      final loading = ctrl.isLoading.value;
+      return GestureDetector(
+        onTap: loading ? null : ctrl.onChangePassword,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: 54,
+          decoration: BoxDecoration(
+            gradient: loading
+                ? null
+                : const LinearGradient(
+                    colors: [_kOrange, _kOrangeDark],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+            color: loading ? const Color(0xFFE5E7EB) : null,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: loading
+                ? []
+                : [
+                    BoxShadow(
+                      color: _kOrange.withValues(alpha: 0.32),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: controller.isLoading.value
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: _orange.withValues(alpha: 0.35),
-                        blurRadius: 14,
-                        offset: const Offset(0, 6),
+                  ],
+          ),
+          child: Center(
+            child: loading
+                ? const SizedBox(
+                    width: 22, height: 22,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2.5),
+                  )
+                : const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock_reset_rounded,
+                          color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Modifier le mot de passe',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ],
-            ),
-            child: Center(
-              child: controller.isLoading.value
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2.5,
-                      ),
-                    )
-                  : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.lock_reset_rounded,
-                            color: Colors.white, size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          'Modifier le mot de passe',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
+                  ),
           ),
-        ));
+        ),
+      );
+    });
   }
 }
