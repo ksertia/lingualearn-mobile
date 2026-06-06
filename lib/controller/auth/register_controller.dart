@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import '../../helpers/utils/app_snackbar.dart';
+import 'login_controller.dart';
 
 class RegisterController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -12,6 +13,7 @@ class RegisterController extends GetxController {
   final TextEditingController phone = TextEditingController();
   final TextEditingController password = TextEditingController();
   final TextEditingController confirmPassword = TextEditingController();
+  final TextEditingController promoCode      = TextEditingController();
 
   RxBool isLoading = false.obs;
   RxString selectedAccountType = "learner".obs; 
@@ -45,8 +47,9 @@ class RegisterController extends GetxController {
         "phone": phone.text.trim(),
         "password": password.text.trim(),
         "accountType": selectedAccountType.value,
-        "username": null, 
+        "username": null,
         "parentId": null,
+        "promoCode": promoCode.text.trim().isEmpty ? null : promoCode.text.trim().toUpperCase(),
       };
 
       final response = await AuthService.registerUser(userData);
@@ -58,6 +61,7 @@ class RegisterController extends GetxController {
           snackbarState: SnackbarState.success,
         );
         await Future.delayed(const Duration(seconds: 2));
+        Get.delete<LoginController>(force: true);
         Get.offAllNamed('/login');
       } else if (response != null) {
         // Erreur API — on affiche un message précis selon le problème identifié
@@ -154,6 +158,7 @@ class RegisterController extends GetxController {
     phone.dispose();
     password.dispose();
     confirmPassword.dispose();
+    promoCode.dispose();
     super.onClose();
   }
 }

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────────
-const Color _bg      = Color(0xFFFFF6F1);   // crème pêche très clair
+const Color _bg      = Color(0xFFFFF6F1); 
 const Color _orange  = Color(0xFFFF6B35);
 const Color _orange2 = Color(0xFFFFB347);
 const Color _green   = Color(0xFF188329);

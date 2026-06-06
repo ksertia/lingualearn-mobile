@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
 const Color _kGreen      = Color(0xFF188329);
+const Color _kGreenDark  = Color(0xFF0F5C1C);
 const Color _kYellow     = Color(0xFFF5BF1E);
 const Color _kOrange     = Color(0xFFF27F22);
 const Color _kOrangeDark = Color(0xFFC4611A);
@@ -68,7 +69,7 @@ class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
         padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 22),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [_kOrange, _kOrangeDark],
+            colors: [_kGreen, _kGreenDark],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

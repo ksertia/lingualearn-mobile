@@ -31,7 +31,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
+class _HomePageState extends State<HomePage> 
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   late HomeController controller;
   late BuildContext _ctx;
@@ -528,7 +528,10 @@ class _HomePageState extends State<HomePage>
                   ),
                   child: Lottie.asset(
                     _animal(completed),
+                    width: 60,
+                    height: 60,
                     fit: BoxFit.contain,
+                    alignment: Alignment.center,
                     repeat: true,
                   ),
                 ),
@@ -919,11 +922,15 @@ class _HomePageState extends State<HomePage>
                                     Colors.transparent, BlendMode.multiply)
                                 : const ColorFilter.mode(
                                     Colors.grey, BlendMode.srcIn),
-                            child: Lottie.asset(
-                              _animal(index),
-                              height: 86,
-                              animate: isUnlocked,
-                              fit: BoxFit.contain,
+                            child: RepaintBoundary(
+                              child: Lottie.asset(
+                                _animal(index),
+                                width: 80,
+                                height: 80,
+                                animate: isUnlocked,
+                                fit: BoxFit.contain,
+                                alignment: Alignment.center,
+                              ),
                             ),
                           ),
                         ),

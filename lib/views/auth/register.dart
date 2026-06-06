@@ -17,8 +17,9 @@ class _RegisterPageState extends State<RegisterPage>
   late AnimationController _animCtrl;
   late Animation<double> _fadeAnim;
 
-  static const _primary = Color(0xFFFF7043);
-  static const _primaryLight = Color(0xFFFFB74D);
+  static const _primary      = Color(0xFF188329);
+  static const _primaryLight = Color(0xFF1EB83A);
+  static const _green        = Color(0xFF188329);
 
   @override
   void initState() {
@@ -62,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FF),
+      backgroundColor: const Color(0xFFF4FBF6),
       body: Column(
         children: [
           Container(
@@ -122,9 +123,11 @@ class _RegisterPageState extends State<RegisterPage>
                               duration: const Duration(milliseconds: 300),
                               height: 5,
                               decoration: BoxDecoration(
-                                color: i <= currentStep
-                                    ? Colors.white
-                                    : Colors.white.withValues(alpha: 0.35),
+                                color: i < currentStep
+                                    ? const Color(0xFF4ADE80)
+                                    : i == currentStep
+                                        ? Colors.white
+                                        : Colors.white.withValues(alpha: 0.35),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
@@ -133,13 +136,47 @@ class _RegisterPageState extends State<RegisterPage>
                       }),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      "Étape ${currentStep + 1} sur 2",
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          "Étape ${currentStep + 1} sur 2",
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (currentStep == 1) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF16A34A).withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                  color: const Color(0xFF4ADE80).withValues(alpha: 0.50),
+                                  width: 1),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.check_circle_rounded,
+                                    color: Color(0xFF86EFAC), size: 11),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Étape 1 complète',
+                                  style: TextStyle(
+                                    color: Color(0xFF86EFAC),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -219,7 +256,7 @@ class _RegisterPageState extends State<RegisterPage>
       ),
       bottomNavigationBar: currentStep == 0
           ? Container(
-              color: const Color(0xFFF6F8FF),
+              color: const Color(0xFFF4FBF6),
               padding: const EdgeInsets.only(bottom: 24, top: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -235,7 +272,7 @@ class _RegisterPageState extends State<RegisterPage>
                       "Se connecter",
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: _primary,
+                        color: _green,
                         fontSize: 14,
                       ),
                     ),
@@ -331,6 +368,77 @@ class _RegisterPageState extends State<RegisterPage>
             if (v != controller.password.text) return "Mots de passe différents";
             return null;
           },
+        ),
+        const SizedBox(height: 24),
+        // ── Code promo partenaire (optionnel) ───────────────────────────────
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0FDF4),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFBBF7D0), width: 1.5),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCFCE7),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.card_giftcard_rounded,
+                        color: Color(0xFF16A34A), size: 16),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Code partenaire',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF15803D),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCFCE7),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Optionnel',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF16A34A),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: controller.promoCode,
+                textCapitalization: TextCapitalization.characters,
+                decoration: _inputDeco(
+                  hint: "Ex : TIBI-XXXX",
+                  icon: Icons.confirmation_number_outlined,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Si quelqu\'un vous a partagé son code, entrez-le ici.',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF4ADE80),
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

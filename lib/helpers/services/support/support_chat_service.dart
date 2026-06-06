@@ -22,7 +22,8 @@ class SupportChatService {
     _loggerAdded = true;
   }
 
-  /// GET /messages-ws/conversations
+  // ── GET /messages-ws/conversations ────────────────────────────────────────
+
   static Future<List<SupportConversationModel>> fetchConversations() async {
     try {
       _ensureLogger();
@@ -51,38 +52,81 @@ class SupportChatService {
     }
   }
 
-  /// GET /messages-ws/conversations/:id
-  static Future<List<SupportMessageModel>> fetchMessages(
-      String conversationId) async {
+  // ── GET /messages-ws/conversation?userA=&userB=&page=&limit= ──────────────
+
+  static Future<({List<SupportMessageModel> items, int total, bool hasMore})>
+      fetchConversationPaginated({
+    required String userA,
+    required String userB,
+    int page = 1,
+    int limit = 30,
+  }) async {
     try {
       _ensureLogger();
-      final response =
-          await _session.dio.get('/messages-ws/conversations/$conversationId');
-      if (response.statusCode == 200) {
-        final raw = response.data;
-        final list = raw is List
-            ? raw
-            : raw is Map && raw['messages'] is List
-                ? raw['messages'] as List
-                : raw is Map && raw['data'] is List
-                    ? raw['data'] as List
-                    : <dynamic>[];
-        return list
-            .map((e) => SupportMessageModel.fromJson(
-                e is Map ? Map<String, dynamic>.from(e) : {}))
-            .toList();
+      final response = await _session.dio.get(
+        '/messages-ws/conversation',
+        queryParameters: {
+          'userA': userA,
+          'userB': userB,
+          'page': page,
+          'limit': limit,
+        },
+      );
+      if (response.statusCode == 200 && response.data is Map) {
+        final data = response.data as Map;
+        final rawItems = data['items'] ?? data['data'] ?? [];
+        final items = rawItems is List
+            ? rawItems
+                .map((e) => SupportMessageModel.fromJson(
+                    e is Map ? Map<String, dynamic>.from(e) : {}))
+                .toList()
+            : <SupportMessageModel>[];
+        final total = data['total'] is int ? data['total'] as int : 0;
+        return (items: items, total: total, hasMore: items.length >= limit);
       }
-      return [];
+      return (items: <SupportMessageModel>[], total: 0, hasMore: false);
     } on DioException catch (e) {
-      print('SupportChatService.fetchMessages: ${e.message}');
-      return [];
+      print('SupportChatService.fetchConversation: ${e.message}');
+      return (items: <SupportMessageModel>[], total: 0, hasMore: false);
     } catch (e) {
-      print('SupportChatService.fetchMessages unexpected: $e');
-      return [];
+      print('SupportChatService.fetchConversation unexpected: $e');
+      return (items: <SupportMessageModel>[], total: 0, hasMore: false);
     }
   }
 
-  /// POST /messages-ws
+  // ── POST /messages-ws/support (Learner → support) ─────────────────────────
+  // Pas besoin de recipientId : le backend retrouve automatiquement l'admin.
+
+  static Future<SupportMessageModel?> sendSupportMessage({
+    required String content,
+  }) async {
+    try {
+      _ensureLogger();
+      final response = await _session.dio.post(
+        '/messages-ws/support',
+        data: {'content': content},
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final raw = response.data;
+        final msgJson = raw is Map && raw['data'] is Map
+            ? Map<String, dynamic>.from(raw['data'] as Map)
+            : raw is Map
+                ? Map<String, dynamic>.from(raw)
+                : <String, dynamic>{};
+        return SupportMessageModel.fromJson(msgJson);
+      }
+      return null;
+    } on DioException catch (e) {
+      print('SupportChatService.sendSupportMessage: ${e.message}');
+      return null;
+    } catch (e) {
+      print('SupportChatService.sendSupportMessage unexpected: $e');
+      return null;
+    }
+  }
+
+  // ── POST /messages-ws (Admin → learner) ───────────────────────────────────
+
   static Future<SupportMessageModel?> sendMessage({
     required String senderId,
     required String recipientId,
@@ -121,32 +165,48 @@ class SupportChatService {
     }
   }
 
-  /// POST /messages-ws/read
-  static Future<void> markMessagesRead({
-    String? conversationId,
-    List<String>? messageIds,
-  }) async {
+  // ── PUT /messages-ws/read ─────────────────────────────────────────────────
+
+  static Future<void> markMessagesRead({required String senderId}) async {
     try {
       _ensureLogger();
-      final body = <String, dynamic>{};
-      if (conversationId != null) body['conversationId'] = conversationId;
-      if (messageIds != null) body['messageIds'] = messageIds;
-      await _session.dio.post('/messages-ws/read', data: body);
+      await _session.dio.put(
+        '/messages-ws/read',
+        data: {'senderId': senderId},
+      );
     } catch (e) {
       print('SupportChatService.markRead: $e');
     }
   }
 
-  /// GET /messages-ws/unread-count
+  // ── DELETE /messages-ws/:id ───────────────────────────────────────────────
+
+  static Future<bool> deleteMessage(String messageId) async {
+    try {
+      _ensureLogger();
+      final response =
+          await _session.dio.delete('/messages-ws/$messageId');
+      return response.statusCode == 200 || response.statusCode == 204;
+    } on DioException catch (e) {
+      print('SupportChatService.deleteMessage: ${e.message}');
+      return false;
+    } catch (e) {
+      print('SupportChatService.deleteMessage unexpected: $e');
+      return false;
+    }
+  }
+
+  // ── GET /messages-ws/unread-count ─────────────────────────────────────────
+
   static Future<int> fetchUnreadCount() async {
     try {
       _ensureLogger();
       final response = await _session.dio.get('/messages-ws/unread-count');
       if (response.statusCode == 200 && response.data is Map) {
         final data = response.data as Map;
-        return data['count'] is int
-            ? data['count'] as int
-            : int.tryParse(data['count']?.toString() ?? '0') ?? 0;
+        // L'API retourne { "unreadCount": 3 }
+        final val = data['unreadCount'] ?? data['count'] ?? 0;
+        return val is int ? val : int.tryParse(val.toString()) ?? 0;
       }
       return 0;
     } catch (_) {

@@ -1,4 +1,3 @@
-import 'package:confetti/confetti.dart';
 import 'package:fasolingo/widgets/decouvrir_page/and_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,7 +22,6 @@ class StepQuizDrag extends StatefulWidget {
 class _StepQuizDragState extends State<StepQuizDrag>
     with TickerProviderStateMixin {
   final DiscoveryController controller = Get.find();
-  late ConfettiController _confettiController;
 
   int _indexMotActuel = 0;
   String? _erreurSurNom;
@@ -31,23 +29,9 @@ class _StepQuizDragState extends State<StepQuizDrag>
   bool _jeuTermine = false;
 
   @override
-  void initState() {
-    super.initState();
-    _confettiController =
-        ConfettiController(duration: const Duration(seconds: 3));
-  }
-
-  @override
-  void dispose() {
-    _confettiController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (_jeuTermine) {
-      _confettiController.play();
-      return StepSuccess(confettiController: _confettiController);
+      return const SizedBox.shrink();
     }
 
     final currentItem = widget.choix[_indexMotActuel];
@@ -173,6 +157,11 @@ class _StepQuizDragState extends State<StepQuizDrag>
         _jeuTermine = true;
       }
     });
+    if (_jeuTermine) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) StepSuccess.show(context);
+      });
+    }
   }
 
   void _notifierErreur(String nom) {

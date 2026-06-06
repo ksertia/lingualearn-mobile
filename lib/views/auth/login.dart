@@ -11,8 +11,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  static const _primary = Color(0xFFFF7043);
-  static const _primaryLight = Color(0xFFFFB74D);
+  static const _primary      = Color(0xFF188329);
+  static const _primaryLight = Color(0xFF1EB83A);
+  static const _green        = Color(0xFF188329);
 
   late LoginController controller;
 
@@ -57,24 +58,33 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(
-                      "assets/images/logo/login.png",
-                      height: 90,
-                      errorBuilder: (ctx, e, st) => Container(
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.school_rounded,
-                            size: 54, color: Colors.white),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Image.asset(
+                        "assets/images/logo/login.png",
+                        height: 64,
+                        errorBuilder: (ctx, e, st) => const Icon(
+                            Icons.school_rounded,
+                            size: 54,
+                            color: Color(0xFF188329)),
                       ),
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      "Bienvenue sur TiBi",
+                      "Le Burkina dans ta voix",
                       style: TextStyle(
-                        fontSize: 26,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         letterSpacing: 0.3,
@@ -86,6 +96,34 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.40),
+                            width: 1),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.verified_rounded,
+                              color: Colors.white, size: 13),
+                          SizedBox(width: 5),
+                          Text(
+                            'Connexion sécurisée',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -143,31 +181,8 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 4),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        GetBuilder<LoginController>(
-                          builder: (_) => Row(
-                            children: [
-                              SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: Checkbox(
-                                  value: controller.isChecked,
-                                  activeColor: _primary,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4)),
-                                  onChanged: controller.onChangeCheckBox,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                "Se souvenir de moi",
-                                style: TextStyle(
-                                    fontSize: 13, color: textSec),
-                              ),
-                            ],
-                          ),
-                        ),
                         TextButton(
                           onPressed: () => Get.toNamed('/numberphone'),
                           style: TextButton.styleFrom(padding: EdgeInsets.zero),
@@ -272,7 +287,7 @@ class _LoginPageState extends State<LoginPage> {
                 "S'inscrire",
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: _primary,
+                  color: _green,
                   fontSize: 14,
                 ),
               ),

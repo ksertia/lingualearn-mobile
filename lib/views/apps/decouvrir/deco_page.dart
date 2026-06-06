@@ -1,5 +1,6 @@
 import 'package:fasolingo/controller/apps/discovery_controller.dart';
 import 'package:fasolingo/models/langue/decouverte_model.dart';
+import 'package:fasolingo/widgets/decouvrir_page/and_page.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryImage.dart';
 import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizDrag.dart';
@@ -54,7 +55,7 @@ class DiscoveryPage extends StatelessWidget {
             videoUrl: content.questionValue,
             onVideoFinished: () {
               if (controller.currentPage.value == allSteps.length - 1) {
-                Get.toNamed('/decouvert');
+                StepSuccess.show(context);
               } else {
                 controller.nextPage();
               }
@@ -114,7 +115,7 @@ class DiscoveryPage extends StatelessWidget {
                   final bool isLastPage =
                       controller.currentPage.value == allSteps.length - 1;
                   if (isLastPage) {
-                    Get.toNamed('/decouvert');
+                    StepSuccess.show(context);
                   } else {
                     controller.nextPage();
                   }
@@ -154,7 +155,7 @@ class DiscoveryPage extends StatelessWidget {
       bool isLastPage = controller.currentPage.value == allSteps.length - 1;
 
       if (isLastPage) {
-        Get.toNamed('/decouvert');
+        StepSuccess.show(context);
       } else {
         controller.nextPage();
       }
@@ -168,7 +169,9 @@ class DiscoveryPage extends StatelessWidget {
           flexibleSpace: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF8F00), Color(0xFFFF8F00)],
+                colors: [Color(0xFF188329), Color(0xFF0F5C1C)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
           ),
@@ -210,7 +213,7 @@ class DiscoveryPage extends StatelessWidget {
                     minHeight: 8.h,
                     backgroundColor: Colors.grey[300],
                     valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color(0xFFFF8F00),
+                      Color(0xFF188329),
                     ),
                   ),
                 );
@@ -267,8 +270,8 @@ class DiscoveryPage extends StatelessWidget {
                           icon: Icon(Icons.arrow_back_ios, size: 14.sp),
                           label: const Text("Précédent"),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFFFF8F00),
-                            side: const BorderSide(color: Color(0xFFFF8F00)),
+                            foregroundColor: const Color(0xFF188329),
+                            side: const BorderSide(color: Color(0xFF188329)),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.r),
                             ),
@@ -283,7 +286,7 @@ class DiscoveryPage extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: handleNext,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF8F00),
+                          backgroundColor: const Color(0xFF188329),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.r),
                           ),

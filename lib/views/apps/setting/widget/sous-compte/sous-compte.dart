@@ -139,7 +139,7 @@ class _SousCompteState extends State<SousCompte> {
         padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 22),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [_kOrange, _kOrangeDark],
+            colors: [_kGreen, _kGreenDark],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

@@ -46,7 +46,11 @@ class DiscoveryController extends GetxController {
     }
   }
 
+  bool _celebrationShown = false;
+
   void _showFinalCelebration() {
+    if (_celebrationShown) return;
+    _celebrationShown = true;
     confettiController.play();
 
     Get.dialog(
@@ -87,9 +91,10 @@ class DiscoveryController extends GetxController {
                     height: 55,
                     child: ElevatedButton(
                       onPressed: () {
+                        if (!Get.isDialogOpen!) return;
                         confettiController.stop();
                         Get.back();
-                        Get.back(); 
+                        Get.back();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF8F00),

@@ -30,7 +30,8 @@ class SupportMessageModel {
       type: json['type']?.toString() ?? 'text',
       read: json['read'] == true || json['isRead'] == true,
       createdAt:
-          DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+              DateTime.now(),
       metadata: json['metadata'] is Map
           ? Map<String, dynamic>.from(json['metadata'] as Map)
           : {},
@@ -49,13 +50,29 @@ class SupportParticipantModel {
     this.avatar,
   });
 
+  // Gère deux formats :
+  //   1. {userId, name, avatar}           (ancien format interne)
+  //   2. {id, username, profile:{firstName, lastName, avatarUrl}}  (réponse API réelle)
   factory SupportParticipantModel.fromJson(Map<String, dynamic> json) {
+    final profile = json['profile'] is Map
+        ? Map<String, dynamic>.from(json['profile'] as Map)
+        : <String, dynamic>{};
+
+    final firstName = profile['firstName']?.toString() ?? '';
+    final lastName  = profile['lastName']?.toString()  ?? '';
+    final fullName  = [firstName, lastName].where((s) => s.isNotEmpty).join(' ');
+
     return SupportParticipantModel(
-      userId: json['userId']?.toString() ?? json['id']?.toString() ?? '',
-      name: json['name']?.toString() ??
-          json['firstName']?.toString() ??
-          'Support',
-      avatar: json['avatar']?.toString() ?? json['profileImage']?.toString(),
+      userId: json['id']?.toString() ??
+              json['userId']?.toString() ?? '',
+      name: fullName.isNotEmpty
+          ? fullName
+          : json['username']?.toString() ??
+            json['name']?.toString() ??
+            'Support',
+      avatar: profile['avatarUrl']?.toString() ??
+              json['avatar']?.toString() ??
+              json['profileImage']?.toString(),
     );
   }
 }
@@ -78,30 +95,58 @@ class SupportConversationModel {
   });
 
   String otherParticipantId(String myId) {
-    final other =
-        participants.where((p) => p.userId != myId).firstOrNull;
+    final other = participants.where((p) => p.userId != myId).firstOrNull;
     return other?.userId ?? '';
   }
 
   String otherParticipantName(String myId) {
-    final other =
-        participants.where((p) => p.userId != myId).firstOrNull;
-    return other?.name ?? 'Support';
+    final other = participants.where((p) => p.userId != myId).firstOrNull;
+    return other?.name ?? 'Support TiBi';
   }
 
   factory SupportConversationModel.fromJson(Map<String, dynamic> json) {
-    final rawParticipants = json['participants'];
-    final List<SupportParticipantModel> participants = rawParticipants is List
-        ? rawParticipants
-            .map((p) => SupportParticipantModel.fromJson(
-                p is Map ? Map<String, dynamic>.from(p) : {}))
-            .toList()
-        : [];
+    // ── Format API réel : {sender: {...}, recipient: {...}, lastMessage, unreadCount}
+    // ── Format alternatif : {participants: [...], id, ...}
+    List<SupportParticipantModel> participants = [];
+
+    if (json['sender'] != null || json['recipient'] != null) {
+      // Format API réel : sender + recipient
+      final sender    = json['sender'];
+      final recipient = json['recipient'];
+      if (sender is Map) {
+        participants.add(SupportParticipantModel.fromJson(
+            Map<String, dynamic>.from(sender)));
+      }
+      if (recipient is Map) {
+        participants.add(SupportParticipantModel.fromJson(
+            Map<String, dynamic>.from(recipient)));
+      }
+    } else if (json['participants'] is List) {
+      participants = (json['participants'] as List)
+          .map((p) => SupportParticipantModel.fromJson(
+              p is Map ? Map<String, dynamic>.from(p) : {}))
+          .toList();
+    }
+
+    // Construire un ID stable à partir des participants si absent
+    final rawId = json['id']?.toString();
+    String id;
+    if (rawId != null && rawId.isNotEmpty) {
+      id = rawId;
+    } else {
+      final sorted = participants.map((p) => p.userId).toList()..sort();
+      id = sorted.join('_');
+    }
 
     final rawLast = json['lastMessage'];
     final SupportMessageModel? lastMessage = rawLast is Map
         ? SupportMessageModel.fromJson(Map<String, dynamic>.from(rawLast))
         : null;
+
+    // updatedAt : on essaie plusieurs clés
+    final rawDate = json['updatedAt'] ?? json['createdAt'] ??
+        lastMessage?.createdAt.toIso8601String();
+    final updatedAt = DateTime.tryParse(rawDate?.toString() ?? '') ?? DateTime.now();
 
     final rawMessages = json['messages'];
     final List<SupportMessageModel> messages = rawMessages is List
@@ -112,14 +157,13 @@ class SupportConversationModel {
         : [];
 
     return SupportConversationModel(
-      id: json['id']?.toString() ?? '',
+      id: id,
       participants: participants,
       lastMessage: lastMessage,
       unreadCount: json['unreadCount'] is int
-          ? json['unreadCount']
+          ? json['unreadCount'] as int
           : int.tryParse(json['unreadCount']?.toString() ?? '0') ?? 0,
-      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
-          DateTime.now(),
+      updatedAt: updatedAt,
       messages: messages,
     );
   }

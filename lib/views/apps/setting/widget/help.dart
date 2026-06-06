@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-const Color _hOrange  = Color(0xFFFF7043);
-const Color _hOrange2 = Color(0xFFFFB74D);
+const Color _hOrange  = Color(0xFF188329);
+const Color _hOrange2 = Color(0xFF1EB83A);
 const Color _hPurple  = Color(0xFF7C3AED);
 const Color _hBlue    = Color(0xFF0EA5E9);
 const Color _hGreen   = Color(0xFF10B981);
-const Color _hBg      = Color(0xFFF6F8FF);
+const Color _hBg      = Color(0xFFF4FBF6);
 
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});

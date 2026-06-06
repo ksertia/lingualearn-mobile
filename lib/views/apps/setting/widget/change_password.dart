@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 const Color _kGreen      = Color(0xFF188329);
+const Color _kGreenDark  = Color(0xFF0F5C1C);
 const Color _kYellow     = Color(0xFFF5BF1E);
-const Color _kOrange     = Color(0xFFF27F22);
-const Color _kOrangeDark = Color(0xFFC4611A);
 const Color _kRed        = Color(0xFFEF4444);
 
 class ChangePasswordPage extends StatelessWidget {
@@ -30,13 +29,13 @@ class ChangePasswordPage extends StatelessWidget {
                 children: [
                   _buildHintBanner(),
                   const SizedBox(height: 22),
-                  _sectionHeader('MOT DE PASSE ACTUEL', _kOrange,
+                  _sectionHeader('MOT DE PASSE ACTUEL', _kGreen,
                       Icons.lock_outline_rounded),
                   const SizedBox(height: 10),
                   _buildFieldCard(
                     context: context,
                     icon: Icons.lock_outline_rounded,
-                    iconColor: _kOrange,
+                    iconColor: _kGreen,
                     label: 'Mot de passe actuel',
                     hint: 'Votre mot de passe actuel',
                     fieldController: ctrl.currentPasswordController,
@@ -100,7 +99,7 @@ class ChangePasswordPage extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kOrange, _kOrangeDark],
+          colors: [_kGreen, _kGreenDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -193,27 +192,27 @@ class ChangePasswordPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _kOrange.withValues(alpha: 0.07),
+        color: _kGreen.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kOrange.withValues(alpha: 0.20)),
+        border: Border.all(color: _kGreen.withValues(alpha: 0.20)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kOrange.withValues(alpha: 0.14),
+              color: _kGreen.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.shield_outlined,
-                color: _kOrange, size: 18),
+                color: _kGreen, size: 18),
           ),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
               'Choisissez un mot de passe fort et unique pour protéger votre compte.',
               style: TextStyle(
-                  color: _kOrangeDark,
+                  color: _kGreenDark,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   height: 1.4),
@@ -403,7 +402,7 @@ class ChangePasswordPage extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: hasError ? _kRed : _kOrange,
+                color: hasError ? _kRed : _kGreen,
                 width: 2,
               ),
             ),
@@ -447,7 +446,7 @@ class ChangePasswordPage extends StatelessWidget {
             gradient: loading
                 ? null
                 : const LinearGradient(
-                    colors: [_kOrange, _kOrangeDark],
+                    colors: [_kGreen, _kGreenDark],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
@@ -457,7 +456,7 @@ class ChangePasswordPage extends StatelessWidget {
                 ? []
                 : [
                     BoxShadow(
-                      color: _kOrange.withValues(alpha: 0.32),
+                      color: _kGreen.withValues(alpha: 0.32),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),

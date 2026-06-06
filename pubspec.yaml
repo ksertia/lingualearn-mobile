@@ -65,6 +65,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.3
   flutter_test:
     sdk: flutter
+  flutter_tts: ^4.2.5
   animated_text_kit: ^4.2.7
   animate_do: ^2.0.0
   audioplayers: ^5.0.1
@@ -135,6 +136,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/sound/
     - assets/lang/
     - assets/images/logo/
     - assets/icon/

@@ -500,14 +500,14 @@ class _SettingScreenState extends State<SettingScreen>
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF7C3AED), Color(0xFF5B21B6)],
+            colors: [Color(0xFFF27F22), Color(0xFFD95E00)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7C3AED).withValues(alpha: 0.28),
+              color: const Color(0xFFF27F22).withValues(alpha: 0.35),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),

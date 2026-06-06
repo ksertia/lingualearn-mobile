@@ -83,6 +83,21 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bg(context),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.fromLTRB(
+            20, 12, 20, MediaQuery.of(context).padding.bottom + 16),
+        decoration: BoxDecoration(
+          color: AppColors.bg(context),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: _buildButtons(context),
+      ),
       body: Column(
         children: [
           _buildHeader(context),
@@ -103,8 +118,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                         _buildSubtitle(context),
                         const SizedBox(height: 20),
                         _buildList(context),
-                        const SizedBox(height: 28),
-                        _buildButtons(context),
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -432,6 +445,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
       final hasList      = _langCtrl.selectedLanguageLevels.isNotEmpty;
 
       return Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Bouton "Ajouter cette langue" (visible si sélection complète)
           if (hasSelection && hasLevel)

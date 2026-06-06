@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 class EnterPhonenumberPagge extends StatelessWidget {
   const EnterPhonenumberPagge({super.key});
 
-  static const _primary = Color(0xFFFF7043);
-  static const _primaryLight = Color(0xFFFFB74D);
+  static const _primary = Color(0xFF188329);
+  static const _primaryLight = Color(0xFF1EB83A);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
         Get.put(ForgotPasswordController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FF),
+      backgroundColor: const Color(0xFFF4FBF6),
       body: Column(
         children: [
           Container(
@@ -168,7 +168,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Container(
-        color: const Color(0xFFF6F8FF),
+        color: const Color(0xFFF4FBF6),
         padding: const EdgeInsets.only(bottom: 28, top: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

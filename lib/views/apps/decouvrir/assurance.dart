@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:ui';
@@ -19,9 +20,32 @@ class _DecouvertePageState extends State<DecouvertePage>
   late AnimationController _bubbleController;
   late Animation<double> _bubbleScale;
 
+  // ── TTS ────────────────────────────────────────────────────────────────────
+  final FlutterTts _tts = FlutterTts();
+  late String _langueChoisie;
+  late LanguageData? _languageData;
+
+  Future<void> _initTts() async {
+    await _tts.setLanguage('fr-FR');
+    await _tts.setSpeechRate(0.48);
+    await _tts.setVolume(1.0);
+    await _tts.setPitch(1.08);
+  }
+
+  Future<void> _speak() async {
+    await _tts.stop();
+    await _tts.speak(
+        'Génial ! Tu as choisi $_langueChoisie. Es-tu prêt à commencer ?');
+  }
+
   @override
   void initState() {
     super.initState();
+
+    // Récupère la langue dès l'init pour le TTS
+    final dynamic args = Get.arguments;
+    _languageData = args is LanguageData ? args : null;
+    _langueChoisie = _languageData?.language ?? 'la langue';
 
     _bounceController = AnimationController(
       duration: const Duration(milliseconds: 1500),
@@ -38,11 +62,17 @@ class _DecouvertePageState extends State<DecouvertePage>
     _bubbleScale = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _bubbleController, curve: Curves.elasticOut),
     );
-    _bubbleController.forward();
+
+    // Init TTS en avance pendant l'animation de la bulle (~800ms de warmup)
+    _initTts();
+    _bubbleController.forward().then((_) {
+      if (mounted) _speak();
+    });
   }
 
   @override
   void dispose() {
+    _tts.stop();
     _bounceController.dispose();
     _bubbleController.dispose();
     super.dispose();
@@ -50,9 +80,8 @@ class _DecouvertePageState extends State<DecouvertePage>
 
   @override
   Widget build(BuildContext context) {
-    final dynamic args = Get.arguments;
-    final LanguageData? languageData = args is LanguageData ? args : null;
-    final String langueChoisie = languageData?.language ?? 'la langue';
+    final LanguageData? languageData = _languageData;
+    final String langueChoisie = _langueChoisie;
 
     return Scaffold(
       body: Stack(
@@ -112,17 +141,16 @@ class _DecouvertePageState extends State<DecouvertePage>
                       Expanded(
                         child: _buildActionButton(
                           "NON",
-                          Colors.redAccent,
-                          () => Get.back(),
+                          const Color(0xFFFFC107),
+                          () { _tts.stop(); Get.back(); },
                         ),
                       ),
                       const SizedBox(width: 15),
                       Expanded(
                         child: _buildActionButton(
                           "OUI !",
-                          const Color(0xFFFF8F00),
-                          () => Get.toNamed('/decouvrir',
-                              arguments: languageData),
+                          const Color(0xFF188329),
+                          () { _tts.stop(); Get.toNamed('/decouvrir', arguments: languageData); },
                         ),
                       ),
                     ],

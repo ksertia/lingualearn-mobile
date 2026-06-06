@@ -5,10 +5,15 @@ import 'package:fasolingo/models/souscription/souscription_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-const _kOrange = Color(0xFFFF7043);
-const _kAmber  = Color(0xFFFFB74D);
-const _kBg     = Color(0xFFEDE8E3);
-const _kDark   = Color(0xFF1A1A1A);
+const _kGreen      = Color(0xFF188329);
+const _kGreenLight = Color(0xFF1EB83A);
+const _kGreenDark  = Color(0xFF0F5C1C);
+const _kAccent     = Color(0xFFF27F22);  // orange pour les prix uniquement
+const _kBg         = Color(0xFFF4FBF6);
+const _kDark       = Color(0xFF1A1A1A);
+// Alias pour ne pas casser les références existantes
+const _kOrange = _kGreen;
+const _kAmber  = _kGreenLight;
 
 class SubscriptionPlansPage extends StatefulWidget {
   final bool isBottomSheet;
@@ -68,7 +73,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                   width: 44,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade200,
+                    color: const Color(0xFFBBF7D0),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -104,7 +109,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
         children: [
           if (_currentStep > 1)
             IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: Colors.orange.shade700, size: 20),
+              icon: Icon(Icons.arrow_back_ios, color: _kGreen, size: 20),
               onPressed: () => setState(() {
                 if (_currentStep == 3) _resetPaymentState();
                 _currentStep--;
@@ -185,26 +190,90 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 24),
-          _sectionTitle("Moyen de paiement"),
-          const SizedBox(height: 6),
+
+          // Carte forfait sélectionné
           if (_selectedPlan != null)
-            _sectionSubtitle(
-              "Forfait : ${_selectedPlan!.planName}  •  ${_selectedPlan!.priceMonthly} ${_selectedPlan!.currency}",
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2EAB4F),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Offre sélectionnée",
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedPlan!.planName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        "${_selectedPlan!.priceMonthly} ${_selectedPlan!.currency}",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.20),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check_circle_rounded,
+                        color: Colors.white, size: 32),
+                  ),
+                ],
+              ),
             ),
+
           const SizedBox(height: 28),
-          _paymentTile(
-            "Orange Money",
-            "Burkina Faso",
-            const Color(0xFFFF6D00),
-            Icons.account_balance_wallet_rounded,
-            () => setState(() { _selectedMethod = "OM"; _currentStep = 3; }),
+
+          const Text(
+            "Choisissez votre opérateur",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
           ),
-          _paymentTile(
-            "Moov Money",
-            "Moov Africa",
-            const Color(0xFF1565C0),
-            Icons.account_balance_wallet_rounded,
-            () => setState(() { _selectedMethod = "MOOV"; _currentStep = 3; }),
+          const SizedBox(height: 16),
+
+          OperatorTile(
+            label: "Orange Money",
+            logoColor: const Color(0xFFFF6D00),
+            logoIcon: Icons.import_export,
+            onTap: () => setState(() { _selectedMethod = "OM"; _currentStep = 3; }),
+          ),
+          const SizedBox(height: 12),
+          OperatorTile(
+            label: "Moov Money",
+            logoColor: const Color(0xFF1565C0),
+            logoIcon: Icons.waves,
+            onTap: () => setState(() { _selectedMethod = "MOOV"; _currentStep = 3; }),
+          ),
+          const SizedBox(height: 12),
+          OperatorTile(
+            label: "Telecel Money",
+            logoColor: const Color(0xFFE51A1A),
+            logoIcon: Icons.fiber_manual_record,
+            onTap: () => setState(() { _selectedMethod = "TELECEL"; _currentStep = 3; }),
           ),
           const SizedBox(height: 40),
         ],
@@ -216,7 +285,9 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
 
   Widget _buildModalPhoneOTP() {
     final isOrange  = _selectedMethod == "OM";
-    final codeSent  = _paymentRequestId != null; // seulement utilisé pour Moov
+    final isMoov    = _selectedMethod == "MOOV";
+    final isTelecel = _selectedMethod == "TELECEL";
+    final codeSent  = _paymentRequestId != null;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -245,8 +316,6 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
               ),
             ),
             const SizedBox(height: 16),
-
-            // Instruction USSD
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -275,17 +344,12 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                   const SizedBox(height: 8),
                   Text(
                     "Composez *144*4*6*${_selectedPlan!.priceMonthly}# sur votre téléphone Orange, puis entrez le code OTP reçu ci-dessous.",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.orange.shade700,
-                      height: 1.4,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.orange.shade700, height: 1.4),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-
             _labeledField(
               label: "CODE OTP",
               child: TextField(
@@ -293,10 +357,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                 keyboardType: TextInputType.number,
                 maxLength: 6,
                 style: const TextStyle(
-                  color: _kDark,
-                  fontSize: 26,
-                  letterSpacing: 10,
-                  fontWeight: FontWeight.w800,
+                  color: _kDark, fontSize: 26, letterSpacing: 10, fontWeight: FontWeight.w800,
                 ),
                 textAlign: TextAlign.center,
                 decoration: _fieldDeco(hint: "• • • • • •", counterText: ""),
@@ -313,8 +374,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
           // ══════════════════════════════════════════════════════════════
           // MOOV MONEY — 2 phases : d'abord envoi SMS, puis saisie OTP
           // ══════════════════════════════════════════════════════════════
-          if (!isOrange) ...[
-            // Phase 1 : numéro de téléphone
+          if (isMoov) ...[
             if (!codeSent) ...[
               _labeledField(
                 label: "NUMÉRO DE TÉLÉPHONE",
@@ -332,50 +392,70 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                 onTap: _initiatePayment,
               ),
             ],
-
-            // Phase 2 : saisie OTP après réception SMS
             if (codeSent) ...[
+              _buildSmsSentBanner(const Color(0xFF1565C0)),
+              const SizedBox(height: 20),
+              _buildOtpField(),
+              const SizedBox(height: 24),
+              _actionButton(
+                label: "Confirmer le paiement",
+                loading: _isSubmitting,
+                onTap: _confirmPayment,
+              ),
+            ],
+          ],
+
+          // ══════════════════════════════════════════════════════════════
+          // TELECEL MONEY — 2 phases : d'abord envoi SMS, puis saisie OTP
+          // ══════════════════════════════════════════════════════════════
+          if (isTelecel) ...[
+            if (!codeSent) ...[
+              _labeledField(
+                label: "NUMÉRO DE TÉLÉPHONE",
+                child: TextField(
+                  controller: _phoneCtrl,
+                  keyboardType: TextInputType.phone,
+                  style: const TextStyle(color: _kDark, fontWeight: FontWeight.w600),
+                  decoration: _fieldDeco(hint: "+226 78 00 00 00"),
+                ),
+              ),
+              const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade50,
+                  color: const Color(0xFFFFEBEB),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.green.shade200),
+                  border: Border.all(color: const Color(0xFFE51A1A).withValues(alpha: 0.30)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.sms_rounded, color: Colors.green.shade600, size: 18),
+                    const Icon(Icons.info_outline_rounded,
+                        color: Color(0xFFE51A1A), size: 18),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        "Code OTP envoyé par SMS au ${_phoneCtrl.text}",
-                        style: TextStyle(
+                        "Un SMS de confirmation vous sera envoyé sur votre numéro Telecel.",
+                        style: const TextStyle(
                           fontSize: 13,
-                          color: Colors.green.shade700,
-                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFE51A1A),
+                          height: 1.4,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
-              _labeledField(
-                label: "CODE OTP",
-                child: TextField(
-                  controller: _otpCtrl,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  style: const TextStyle(
-                    color: _kDark,
-                    fontSize: 26,
-                    letterSpacing: 10,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  textAlign: TextAlign.center,
-                  decoration: _fieldDeco(hint: "• • • • • •", counterText: ""),
-                ),
+              const SizedBox(height: 24),
+              _actionButton(
+                label: "Envoyer le code SMS",
+                loading: _isSubmitting,
+                onTap: _initiatePayment,
               ),
+            ],
+            if (codeSent) ...[
+              _buildSmsSentBanner(const Color(0xFFE51A1A)),
+              const SizedBox(height: 20),
+              _buildOtpField(),
               const SizedBox(height: 24),
               _actionButton(
                 label: "Confirmer le paiement",
@@ -432,15 +512,61 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
     );
   }
 
+  Widget _buildSmsSentBanner(Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.sms_rounded, color: color, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              "Code OTP envoyé par SMS au ${_phoneCtrl.text}",
+              style: TextStyle(
+                fontSize: 13,
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOtpField() {
+    return _labeledField(
+      label: "CODE OTP",
+      child: TextField(
+        controller: _otpCtrl,
+        keyboardType: TextInputType.number,
+        maxLength: 6,
+        style: const TextStyle(
+          color: _kDark,
+          fontSize: 26,
+          letterSpacing: 10,
+          fontWeight: FontWeight.w800,
+        ),
+        textAlign: TextAlign.center,
+        decoration: _fieldDeco(hint: "• • • • • •", counterText: ""),
+      ),
+    );
+  }
+
   Widget _buildRecap(bool codeSent) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFFFF3E0), Color(0xFFFFF0DC)],
+          colors: [Color(0xFFEDF7ED), Color(0xFFE0F5E0)],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.shade200),
+        border: Border.all(color: Color(0xFFBBF7D0)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -478,7 +604,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                 ? "${_paidAmount?.toStringAsFixed(0)} $_paidCurrency"
                 : "${_selectedPlan!.priceMonthly} ${_selectedPlan!.currency}",
             style: const TextStyle(
-                fontSize: 18, fontWeight: FontWeight.w900, color: _kOrange),
+                fontSize: 18, fontWeight: FontWeight.w900, color: _kAccent),
           ),
         ],
       ),
@@ -487,7 +613,14 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
 
   // ─── LOGIQUE PAIEMENT ────────────────────────────────────────────────────────
 
-  String get _methodApi => _selectedMethod == "OM" ? "orange_money" : "moov_money";
+  String get _methodApi {
+    switch (_selectedMethod) {
+      case "OM":      return "orange_money";
+      case "MOOV":    return "moov_money";
+      case "TELECEL": return "telecel_money";
+      default:        return "moov_money";
+    }
+  }
 
   Future<void> _initiatePayment() async {
     if (_phoneCtrl.text.trim().isEmpty) {
@@ -529,7 +662,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
       Get.snackbar(
         "Abonnement activé !",
         "Votre abonnement est maintenant actif.",
-        backgroundColor: _kOrange,
+        backgroundColor: _kGreen,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
@@ -568,7 +701,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
       Get.snackbar(
         "Abonnement activé !",
         "Votre abonnement est maintenant actif.",
-        backgroundColor: _kOrange,
+        backgroundColor: _kGreen,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
@@ -627,7 +760,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           decoration: BoxDecoration(
-            color: const Color(0xFFF7F2EE),
+            color: _kBg,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: SingleChildScrollView(
@@ -639,7 +772,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                   height: 5,
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade200,
+                    color: const Color(0xFFBBF7D0),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -648,7 +781,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                     if (step > 2)
                       IconButton(
                         icon: Icon(Icons.arrow_back_ios,
-                            color: Colors.orange.shade700, size: 20),
+                            color: _kGreen, size: 20),
                         onPressed: () => setModalState(() => step--),
                       )
                     else
@@ -687,6 +820,10 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                           const Color(0xFF1565C0),
                           Icons.account_balance_wallet_rounded,
                           () => setModalState(() { method = "MOOV"; step = 3; })),
+                      _paymentTile("Telecel Money", "Telecel Africa",
+                          const Color(0xFFD50000),
+                          Icons.account_balance_wallet_rounded,
+                          () => setModalState(() { method = "TELECEL"; step = 3; })),
                     ],
                   ),
 
@@ -700,10 +837,10 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFFFFF3E0), Color(0xFFFFF0DC)],
+                            colors: [Color(0xFFEDF7ED), Color(0xFFDCF5DC)],
                           ),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.orange.shade200),
+                          border: Border.all(color: Color(0xFFBBF7D0)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -732,7 +869,9 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                       Text(
                         method == "OM"
                             ? "Composez *144*4*6*montant# pour l'OTP Orange"
-                            : "Composez *555*montant# pour l'OTP Moov",
+                            : method == "TELECEL"
+                                ? "Composez *134*montant# pour l'OTP Telecel"
+                                : "Composez *555*montant# pour l'OTP Moov",
                         style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
                       ),
                       const SizedBox(height: 24),
@@ -799,7 +938,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isPremium ? _kOrange : Colors.orange.shade100,
+          color: isPremium ? _kGreen : const Color(0xFFDCFCE7),
           width: isPremium ? 2.5 : 1.5,
         ),
         boxShadow: [
@@ -904,13 +1043,13 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: isPremium
-                          ? [const Color(0xFFFFF3E0), const Color(0xFFFFF0DC)]
+                          ? [const Color(0xFFEDF7ED), const Color(0xFFDCF5DC)]
                           : [Colors.grey.shade50, Colors.grey.shade100],
                     ),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isPremium
-                          ? Colors.orange.shade200
+                          ? const Color(0xFFBBF7D0)
                           : Colors.grey.shade200,
                     ),
                   ),
@@ -922,7 +1061,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w900,
-                          color: isPremium ? _kOrange : Colors.grey.shade700,
+                          color: isPremium ? _kAccent : Colors.grey.shade700,
                           height: 1,
                         ),
                       ),
@@ -986,7 +1125,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                     onPressed: onSelect,
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
-                          isPremium ? _kOrange : Colors.grey.shade100,
+                          isPremium ? _kGreen : Colors.grey.shade100,
                       foregroundColor:
                           isPremium ? Colors.white : Colors.grey.shade700,
                       elevation: isPremium ? 0 : 0,
@@ -1168,10 +1307,10 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(colors: [_kOrange, _kAmber]),
+        gradient: const LinearGradient(colors: [_kGreen, _kGreenLight]),
         boxShadow: [
           BoxShadow(
-            color: _kOrange.withValues(alpha: 0.35),
+            color: _kGreen.withValues(alpha: 0.35),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -1245,6 +1384,80 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─── OPERATOR TILE ────────────────────────────────────────────────────────────
+
+class OperatorTile extends StatelessWidget {
+  final String label;
+  final Color logoColor;
+  final IconData logoIcon;
+  final VoidCallback onTap;
+
+  const OperatorTile({
+    super.key,
+    required this.label,
+    required this.logoColor,
+    required this.logoIcon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: logoColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(logoIcon, color: logoColor, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: _kDark,
+                ),
+              ),
+            ),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: logoColor.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(Icons.arrow_forward_ios_rounded,
+                  color: logoColor, size: 14),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -432,32 +432,6 @@ class _BienvenuPageState extends State<BienvenuPage>
             ),
           ),
         ),
-        const SizedBox(height: 14),
-
-        // Lien connexion
-        GestureDetector(
-          onTap: () => Get.toNamed('/login'),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Déjà un compte ?  ',
-                style: TextStyle(
-                  color: AppColors.textSecondary(context),
-                  fontSize: 13,
-                ),
-              ),
-              const Text(
-                'Se connecter',
-                style: TextStyle(
-                  color: _kGreen,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }

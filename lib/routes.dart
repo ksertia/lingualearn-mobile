@@ -1,4 +1,3 @@
-import 'package:confetti/confetti.dart';
 import 'package:fasolingo/views/apps/Onbranding/Onbranding.dart';
 import 'package:fasolingo/views/apps/change_language.dart';
 import 'package:fasolingo/views/apps/decouvrir/assurance.dart';
@@ -9,6 +8,7 @@ import 'package:fasolingo/views/apps/decouvrir/langue_decouvert.dart';
 import 'package:fasolingo/views/apps/decouvrir/selection_langues_page.dart';
 import 'package:fasolingo/views/apps/decouvrir/step_mascotte.dart';
 import 'package:fasolingo/views/apps/history/history_page.dart';
+import 'package:fasolingo/views/apps/notifications/notifications_page.dart';
 import 'package:fasolingo/views/apps/home/module_page.dart';
 import 'package:fasolingo/views/apps/home/home.dart';
 import 'package:fasolingo/views/apps/home/home_page.dart';
@@ -92,14 +92,7 @@ getPageRoute() {
     GetPage(name: '/laguedecouvert', page: () => LanguageDcouvertPage()),
     GetPage(name: '/decouverte', page: () => const DecouvertePage()),
     GetPage(name: '/Onboarding', page: () => const OnboardingTibiPro()),
-    GetPage(
-      name: '/decouvert',
-      page: () => StepSuccess(
-        confettiController: ConfettiController(
-          duration: const Duration(seconds: 2),
-        ),
-      ),
-    ),
+    GetPage(name: '/decouvert', page: () => const StepSuccessPage()),
 
     GetPage(
       name: '/quiz_intro_screen',
@@ -107,6 +100,7 @@ getPageRoute() {
     ),
 
     GetPage(name: '/bienvenue', page: () => const BienvenuPage()),
+    GetPage(name: '/notifications', page: () => const NotificationsPage()),
     GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),
 
     GetPage(name: '/niveau', page: () => const ChoisieNiveauPage()),

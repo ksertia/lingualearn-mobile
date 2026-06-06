@@ -10,9 +10,9 @@ class OtpcodePage extends StatefulWidget {
 }
 
 class _OtpcodePageState extends State<OtpcodePage> {
-  static const _primary = Color(0xFFFF7043);
-  static const _primaryLight = Color(0xFFFFB74D);
-  static const _successColor = Color(0xFF00BB55);
+  static const _primary = Color(0xFF188329);
+  static const _primaryLight = Color(0xFF1EB83A);
+  static const _successColor = Color(0xFF0F5C1C);
 
   final int otpLength = 6;
   late List<TextEditingController> _controllers;
@@ -79,7 +79,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FF),
+      backgroundColor: const Color(0xFFF4FBF6),
       body: Column(
         children: [
           Container(
@@ -261,7 +261,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
         ],
       ),
       bottomNavigationBar: Container(
-        color: const Color(0xFFF6F8FF),
+        color: const Color(0xFFF4FBF6),
         padding: const EdgeInsets.only(bottom: 28, top: 8),
         child: Obx(() => Row(
               mainAxisAlignment: MainAxisAlignment.center,

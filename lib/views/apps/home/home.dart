@@ -15,6 +15,7 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../controller/apps/settings/settings_controller.dart';
+import '../../../controller/apps/notifications/notification_controller.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────
 const _kGreen = Color(0xFF188329);
@@ -47,6 +48,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     with SingleTickerProviderStateMixin {
   final SessionController session = Get.find<SessionController>();
   late final UserProgressController progressCtrl;
+  late final NotificationController _notifCtrl;
   final controller = Get.put(SettingsController());
   late BuildContext _ctx;
 
@@ -69,6 +71,9 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     progressCtrl = Get.isRegistered<UserProgressController>()
         ? Get.find<UserProgressController>()
         : Get.put(UserProgressController());
+    _notifCtrl = Get.isRegistered<NotificationController>()
+        ? Get.find<NotificationController>()
+        : Get.put(NotificationController());
     _loadProgressSafe();
     _checkSubscription();
 
@@ -401,22 +406,53 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  GestureDetector(
-                    onTap: () => Get.toNamed('/notifications'),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          width: 1,
-                        ),
+                  Obx(() {
+                    final count = _notifCtrl.unreadCount.value;
+                    return GestureDetector(
+                      onTap: () => Get.toNamed('/notifications'),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: const Icon(Icons.notifications_rounded,
+                                color: Colors.white, size: 20),
+                          ),
+                          if (count > 0)
+                            Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEF4444),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      color: Colors.white, width: 1.5),
+                                ),
+                                child: Text(
+                                  count > 99 ? '99+' : '$count',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                      child: const Icon(Icons.notifications_rounded,
-                          color: Colors.white, size: 20),
-                    ),
-                  ),
+                    );
+                  }),
                   SizedBox(
                     width: 80,
                     height: 80,

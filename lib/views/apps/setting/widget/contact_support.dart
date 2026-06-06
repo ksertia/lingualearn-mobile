@@ -6,10 +6,14 @@ import 'package:intl/intl.dart';
 
 import '../../../../helpers/utils/ui_mixins.dart';
 
-const Color _csOrange  = Color(0xFFFF7043);
-const Color _csOrange2 = Color(0xFFFFB74D);
-const Color _csBg      = Color(0xFFF0F4FF);
-const Color _csDark    = Color(0xFF1A1A2E);
+const Color _csGreen   = Color(0xFF188329);
+const Color _csGreen2  = Color(0xFF1EB83A);
+const Color _csBg      = Color(0xFFF4FBF6);
+const Color _csDark    = Color(0xFF0F5C1C);
+
+// Couleurs des bulles
+const Color _csBubbleMe       = Color(0xFFE5E5EA); // gris clair (envoyé)
+const Color _csBubbleOther    = Color(0xFF0084FF); // bleu (reçu)
 
 class ContactSupportPage extends StatefulWidget {
   const ContactSupportPage({super.key});
@@ -28,8 +32,15 @@ class _ContactSupportPageState extends State<ContactSupportPage>
   void initState() {
     super.initState();
     _ctrl = Get.put(SupportChatController());
-    // Auto-scroll when new messages arrive
     ever(_ctrl.messages, (_) => _scrollToBottom());
+    // Charger les messages plus anciens quand on scrolle vers le haut
+    _scrollCtrl.addListener(() {
+      if (_scrollCtrl.position.pixels <= 60 &&
+          _ctrl.hasMoreMessages.value &&
+          !_ctrl.isLoadingMore.value) {
+        _ctrl.loadMoreMessages();
+      }
+    });
   }
 
   @override
@@ -74,7 +85,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [_csOrange, _csOrange2],
+            colors: [_csGreen, _csGreen2],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -171,7 +182,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
 
   Widget _buildLoading() {
     return const Center(
-      child: CircularProgressIndicator(color: _csOrange, strokeWidth: 2.5),
+      child: CircularProgressIndicator(color: _csGreen, strokeWidth: 2.5),
     );
   }
 
@@ -186,14 +197,14 @@ class _ContactSupportPageState extends State<ContactSupportPage>
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [_csOrange, _csOrange2],
+                  colors: [_csGreen, _csGreen2],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: _csOrange.withValues(alpha: 0.30),
+                    color: _csGreen.withValues(alpha: 0.30),
                     blurRadius: 22,
                     offset: const Offset(0, 8),
                   ),
@@ -252,7 +263,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: _csOrange, size: 15),
+          Icon(icon, color: _csGreen, size: 15),
           const SizedBox(width: 7),
           Text(label,
               style: const TextStyle(fontSize: 12, color: Color(0xFF555555))),
@@ -266,14 +277,32 @@ class _ContactSupportPageState extends State<ContactSupportPage>
     return ListView.builder(
       controller: _scrollCtrl,
       padding: const EdgeInsets.fromLTRB(14, 16, 14, 12),
-      itemCount: msgs.length,
+      itemCount: msgs.length + 1, // +1 pour l'indicateur de chargement en tête
+
       itemBuilder: (_, i) {
-        final msg = msgs[i];
+        // Index 0 = indicateur "charger plus"
+        if (i == 0) {
+          return Obx(() => _ctrl.isLoadingMore.value
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: Center(
+                    child: SizedBox(
+                      width: 20, height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: _csGreen),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink());
+        }
+        final msg = msgs[i - 1];
         final isMe = msg.isFromUser(_ctrl.currentUserId);
-        final showDate = i == 0 ||
-            !_isSameDay(msgs[i - 1].createdAt, msg.createdAt);
+        final realIndex = i - 1;
+        final showDate = realIndex == 0 ||
+            !_isSameDay(msgs[realIndex - 1].createdAt, msg.createdAt);
         final showAvatar = !isMe &&
-            (i == msgs.length - 1 || msgs[i + 1].isFromUser(_ctrl.currentUserId));
+            (realIndex == msgs.length - 1 ||
+                msgs[realIndex + 1].isFromUser(_ctrl.currentUserId));
 
         return Column(
           children: [
@@ -330,6 +359,9 @@ class _ContactSupportPageState extends State<ContactSupportPage>
 
   Widget _buildBubble(
       SupportMessageModel msg, bool isMe, bool showAvatar) {
+    final bubbleColor = isMe ? _csBubbleMe : _csBubbleOther;
+    final textColor   = isMe ? const Color(0xFF1A1A1A) : Colors.white;
+
     return Padding(
       padding: EdgeInsets.only(
         top: 3,
@@ -342,7 +374,6 @@ class _ContactSupportPageState extends State<ContactSupportPage>
             isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Support avatar
           if (!isMe) ...[
             showAvatar
                 ? _buildAgentAvatar(_ctrl.supportAgentName, size: 28)
@@ -350,46 +381,39 @@ class _ContactSupportPageState extends State<ContactSupportPage>
             const SizedBox(width: 8),
           ],
 
-          // Bubble
           Flexible(
             child: Column(
               crossAxisAlignment:
                   isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    gradient: isMe
-                        ? const LinearGradient(
-                            colors: [_csOrange, _csOrange2],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                        : null,
-                    color: isMe ? null : Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(18),
-                      topRight: const Radius.circular(18),
-                      bottomLeft: Radius.circular(isMe ? 18 : 4),
-                      bottomRight: Radius.circular(isMe ? 4 : 18),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isMe
-                            ? _csOrange.withValues(alpha: 0.25)
-                            : Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
+                GestureDetector(
+                  onLongPress: () => _confirmDelete(msg, isMe),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: bubbleColor,
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(18),
+                        topRight: const Radius.circular(18),
+                        bottomLeft: Radius.circular(isMe ? 18 : 4),
+                        bottomRight: Radius.circular(isMe ? 4 : 18),
                       ),
-                    ],
-                  ),
-                  child: Text(
-                    msg.content,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isMe ? Colors.white : const Color(0xFF1A1A1A),
-                      height: 1.4,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      msg.content,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: textColor,
+                        height: 1.4,
+                      ),
                     ),
                   ),
                 ),
@@ -400,8 +424,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                     Text(
                       DateFormat('HH:mm').format(msg.createdAt.toLocal()),
                       style: TextStyle(
-                          fontSize: 10.5,
-                          color: Colors.grey.shade400),
+                          fontSize: 10.5, color: Colors.grey.shade400),
                     ),
                     if (isMe) ...[
                       const SizedBox(width: 4),
@@ -410,7 +433,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                             ? Icons.done_all_rounded
                             : Icons.done_rounded,
                         size: 13,
-                        color: msg.read ? _csOrange : Colors.grey.shade400,
+                        color: msg.read ? _csGreen : Colors.grey.shade400,
                       ),
                     ],
                   ],
@@ -420,6 +443,48 @@ class _ContactSupportPageState extends State<ContactSupportPage>
           ),
 
           if (isMe) const SizedBox(width: 4),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(SupportMessageModel msg, bool isMe) {
+    // Seul l'expéditeur peut supprimer son message
+    if (!isMe) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Supprimer ce message ?',
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+        ),
+        content: Text(
+          '"${msg.content.length > 60 ? '${msg.content.substring(0, 60)}…' : msg.content}"',
+          style: const TextStyle(fontSize: 13, color: Color(0xFF555555)),
+        ),
+        actionsPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        actions: [
+          TextButton(
+            onPressed: Get.back,
+            child: const Text(
+              'Annuler',
+              style: TextStyle(color: Color(0xFF888888)),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              _ctrl.deleteMessage(msg.id);
+            },
+            child: const Text(
+              'Supprimer',
+              style: TextStyle(
+                  color: Color(0xFFEF4444), fontWeight: FontWeight.w700),
+            ),
+          ),
         ],
       ),
     );
@@ -488,7 +553,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                       gradient: _ctrl.isSending.value
                           ? null
                           : const LinearGradient(
-                              colors: [_csOrange, _csOrange2],
+                              colors: [_csGreen, _csGreen2],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -500,7 +565,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                           ? []
                           : [
                               BoxShadow(
-                                color: _csOrange.withValues(alpha: 0.35),
+                                color: _csGreen.withValues(alpha: 0.35),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -512,7 +577,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2.0, color: _csOrange),
+                                  strokeWidth: 2.0, color: _csGreen),
                             )
                           : const Icon(Icons.send_rounded,
                               color: Colors.white, size: 19),
@@ -534,7 +599,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
       height: size,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_csDark, Color(0xFF16213E)],
+          colors: [_csDark, Color(0xFF188329)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

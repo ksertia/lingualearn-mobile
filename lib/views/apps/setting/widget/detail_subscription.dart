@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-const Color _kGreen  = Color(0xFF188329);
-const Color _kYellow = Color(0xFFF5BF1E);
-const Color _kOrange = Color(0xFFF27F22);
+const Color _kGreen      = Color(0xFF188329);
+const Color _kGreenDark  = Color(0xFF0F5C1C);
+const Color _kYellow     = Color(0xFFF5BF1E);
+const Color _kOrange     = Color(0xFFF27F22);
 const Color _kOrangeDark = Color(0xFFC4611A);
 const Color _kRed    = Color(0xFFEF4444);
 const Color _kPurple = Color(0xFF7C3AED);
@@ -55,7 +56,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
       padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 22),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kOrange, _kOrangeDark],
+          colors: [_kGreen, _kGreenDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

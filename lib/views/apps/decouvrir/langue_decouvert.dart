@@ -2,7 +2,10 @@ import 'package:fasolingo/controller/apps/langue/discover_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:fasolingo/views/apps/decouvrir/deco_page.dart';
+
+const Color _kGreen      = Color(0xFF188329);
+const Color _kGreenDark  = Color(0xFF0F5C1C);
+const Color _kOrange     = Color(0xFFF27F22);
 
 class LanguageDcouvertPage extends StatefulWidget {
   const LanguageDcouvertPage({super.key});
@@ -11,322 +14,513 @@ class LanguageDcouvertPage extends StatefulWidget {
   State<LanguageDcouvertPage> createState() => _LanguageDcouvertPageState();
 }
 
-class _LanguageDcouvertPageState extends State<LanguageDcouvertPage>
-    with TickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late AnimationController _slideController;
-
-  // Utilisation de notre DiscoverController
+class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
   final DiscoverController _controller = DiscoverController();
 
   @override
   void initState() {
     super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    )..forward();
-
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    )..forward();
-
-    // Initialisation : charge les langues au démarrage
     _controller.init();
-
-    // Ecoute les changements du controller pour rafraîchir l'UI
-    _controller.addListener(() {
-      if (mounted) setState(() {});
-    });
+    _controller.addListener(() { if (mounted) setState(() {}); });
   }
 
   @override
   void dispose() {
-    _fadeController.dispose();
-    _slideController.dispose();
     _controller.dispose();
     super.dispose();
   }
 
+  // ── Build ──────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color.fromARGB(160, 255, 216, 61),
-              Color.fromARGB(184, 255, 138, 66),
-              Color.fromARGB(152, 107, 203, 120),
-              Color.fromARGB(185, 77, 151, 255),
-            ],
-            stops: [0.0, 0.3, 0.6, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: FadeTransition(
-                      opacity: _fadeController,
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                                begin: const Offset(0, 0.1), end: Offset.zero)
-                            .animate(CurvedAnimation(
-                                parent: _slideController,
-                                curve: Curves.easeOutBack)),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 20),
-                            _buildBackButton(context),
-                            _buildHeader(),
-                            const SizedBox(height: 40),
-                            _buildLanguageListHeader(),
-                            const SizedBox(height: 16),
-                            _buildMainContent(),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+      body: Stack(
+        children: [
+          // Fond dégradé vert
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF1A9E30),
+                    Color(0xFF188329),
+                    Color(0xFF0F5C1C),
+                  ],
+                  stops: [0.0, 0.5, 1.0],
                 ),
               ),
-              _buildBottomButton(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Center(
-      child: Column(
-        children: [
-          Lottie.asset(
-            'assets/lottie/mascot.json',
-            width: 180,
-            height: 180,
-            errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.auto_awesome, size: 100, color: Colors.orange),
-          ),
-          const Text(
-            "Exploration",
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3436),
-              letterSpacing: -0.5,
             ),
           ),
-          const Text(
-            "Quelle culture souhaitez-vous découvrir ?",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.white),
+
+          // Cercles décoratifs
+          Positioned(
+              top: -55, right: -35,
+              child: _decorCircle(185, 0.07)),
+          Positioned(
+              top: 90, left: -55,
+              child: _decorCircle(150, 0.05)),
+          Positioned(
+              top: 30, right: 60,
+              child: _decorCircle(70, 0.06)),
+
+          // Contenu principal
+          SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(),
+                Expanded(child: _buildSheet()),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLanguageListHeader() {
-    return const Text(
-      "LANGUES DISPONIBLES",
-      style: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w800,
-        color: Colors.orange,
-        letterSpacing: 1.5,
+  Widget _decorCircle(double size, double opacity) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: opacity),
+        ),
+      );
+
+  // ── Header ─────────────────────────────────────────────────────────────────
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      child: Column(
+        children: [
+          // Barre top
+          Row(
+            children: [
+              _buildBackBtn(),
+              const Spacer(),
+              _buildBadge(),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Mascotte
+          Lottie.asset(
+            'assets/lottie/mascot.json',
+            width: 112, height: 112,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.auto_awesome_rounded, size: 72, color: Colors.white),
+          ),
+          const SizedBox(height: 10),
+
+          const Text(
+            'Explorez une langue !',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: -0.4,
+            ),
+          ),
+          const SizedBox(height: 4),
+
+          Text(
+            'Quelle culture souhaitez-vous découvrir ?',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13.5,
+              color: Colors.white.withValues(alpha: 0.88),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
 
-  Widget _buildMainContent() {
-    // Affiche un loader si on n'a pas encore de langues
-    if (_controller.isLoading && _controller.languages.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.only(top: 50),
-          child: CircularProgressIndicator(color: Colors.orange),
+  Widget _buildBackBtn() {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Container(
+        width: 42, height: 42,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+              color: Colors.white.withValues(alpha: 0.30), width: 1),
         ),
-      );
-    }
-
-    // Gestion de l'erreur
-    if (_controller.error != null && _controller.languages.isEmpty) {
-      return Center(
-        child: Column(
-          children: [
-            const Icon(Icons.cloud_off, size: 50, color: Colors.white),
-            const SizedBox(height: 10),
-            Text(_controller.error!,
-                style: const TextStyle(color: Colors.white)),
-            TextButton(
-              onPressed: () => _controller.init(),
-              child: const Text("Réessayer",
-                  style: TextStyle(color: Colors.orange)),
-            )
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: _controller.languages.length,
-      itemBuilder: (context, index) {
-        final langName = _controller.languages[index];
-        return _buildEnhancedCard(langName);
-      },
+        child: const Icon(Icons.arrow_back_ios_new,
+            color: Colors.white, size: 18),
+      ),
     );
   }
 
-  Widget _buildEnhancedCard(String langName) {
-    bool isSelected = _controller.selectedLanguage == langName;
+  Widget _buildBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+            color: Colors.white.withValues(alpha: 0.30), width: 1),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.explore_rounded, color: Colors.white, size: 15),
+          SizedBox(width: 6),
+          Text('Découverte',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
 
-    // Logique d'icône visuelle
-    String displayIcon = langName.toLowerCase().contains("dioula")
-        ? "🌍"
-        : langName.toLowerCase().contains("mooré")
-            ? "☀️"
-            : "🌿";
+  // ── Sheet blanche ──────────────────────────────────────────────────────────
+
+  Widget _buildSheet() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
+        ),
+        boxShadow: [
+          BoxShadow(
+              color: Color(0x22000000),
+              blurRadius: 24,
+              offset: Offset(0, -6)),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Handle
+          Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 4),
+            child: Container(
+              width: 36, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+
+          // Liste scrollable
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionLabel(),
+                  const SizedBox(height: 14),
+                  _buildContent(),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+
+          // Bouton fixe en bas
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 26),
+            child: _buildButton(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel() {
+    return Row(
+      children: [
+        Container(
+          width: 3.5, height: 18,
+          decoration: BoxDecoration(
+            color: _kGreen,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 10),
+        const Text(
+          'LANGUES DISPONIBLES',
+          style: TextStyle(
+            fontSize: 10.5,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFFAAAAAA),
+            letterSpacing: 1.8,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Contenu (loading / erreur / liste) ────────────────────────────────────
+
+  Widget _buildContent() {
+    if (_controller.isLoading && _controller.languages.isEmpty) {
+      return _buildSkeleton();
+    }
+    if (_controller.error != null && _controller.languages.isEmpty) {
+      return _buildError();
+    }
+    return Column(
+      children: _controller.languages
+          .map((name) => _buildCard(name))
+          .toList(),
+    );
+  }
+
+  Widget _buildCard(String name) {
+    final meta = _getMeta(name);
+    final sel = _controller.selectedLanguage == name;
+    final loading = _controller.isLoading && sel;
 
     return GestureDetector(
-      onTap: () => _controller.selectLanguage(langName),
+      onTap: () => _controller.selectLanguage(name),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          color: sel ? _kOrange.withValues(alpha: 0.07) : Colors.white,
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected ? Colors.orange : Colors.transparent,
-            width: 2.5,
+            color: sel ? _kOrange : Colors.grey.shade200,
+            width: sel ? 2.0 : 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: isSelected
-                  ? Colors.orange.withOpacity(0.15)
-                  : Colors.black.withOpacity(0.03),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
+              color: sel
+                  ? _kOrange.withValues(alpha: 0.16)
+                  : Colors.black.withValues(alpha: 0.04),
+              blurRadius: sel ? 18 : 8,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
         child: Row(
           children: [
-            Text(displayIcon, style: const TextStyle(fontSize: 30)),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Text(
-                langName,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.orange.shade900 : Colors.black87,
-                ),
+            // Icône colorée
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 260),
+              width: 50, height: 50,
+              decoration: BoxDecoration(
+                color: sel
+                    ? _kOrange.withValues(alpha: 0.15)
+                    : const Color(0xFFF2F2F2),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Center(
+                child: Text(meta.emoji,
+                    style: const TextStyle(fontSize: 24)),
               ),
             ),
-            if (_controller.isLoading && isSelected)
-              const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.orange),
-              )
-            else if (isSelected)
-              const CircleAvatar(
-                radius: 14,
-                backgroundColor: Colors.orange,
-                child: Icon(Icons.check, color: Colors.white, size: 18),
+            const SizedBox(width: 14),
+
+            // Nom + région
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: sel ? _kOrange : const Color(0xFF1A1A2E),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    meta.region,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      color: Color(0xFFAAAAAA),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
+            ),
+
+            // Indicateur check / chevron
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 260),
+              width: 30, height: 30,
+              decoration: BoxDecoration(
+                color: sel ? _kOrange : const Color(0xFFF2F2F2),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: loading
+                  ? const Padding(
+                      padding: EdgeInsets.all(7),
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : Icon(
+                      sel
+                          ? Icons.check_rounded
+                          : Icons.chevron_right_rounded,
+                      color: sel ? Colors.white : const Color(0xFFCCCCCC),
+                      size: 17,
+                    ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBottomButton() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Container(
-        width: double.infinity,
-        height: 65,
+  Widget _buildSkeleton() {
+    return Column(
+      children: List.generate(3, (i) => Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        height: 78,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: _controller.selectedLanguage != null
-              ? [
-                  BoxShadow(
-                      color: Colors.orange.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10))
-                ]
-              : [],
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(18),
         ),
-        child: ElevatedButton(
-          onPressed:
-              _controller.selectedLanguage == null || _controller.isLoading
-                  ? null
-                  : () {
-                      Get.toNamed(
-                        '/decouverte',
-                        arguments: _controller.languageContent,
-                      );
-                    },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.orange,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor: Colors.grey.shade300,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            elevation: 0,
+      )),
+    );
+  }
+
+  Widget _buildError() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.red.shade100),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.cloud_off_rounded, size: 44, color: Colors.red.shade300),
+          const SizedBox(height: 10),
+          Text(
+            _controller.error!,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.red.shade600, fontSize: 13.5),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                _controller.selectedLanguage == null
-                    ? "Choisissez une langue"
-                    : "C'est parti !",
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-              ),
-              if (_controller.selectedLanguage != null &&
-                  !_controller.isLoading) ...[
-                const SizedBox(width: 10),
-                const Icon(Icons.rocket_launch_rounded),
-              ]
-            ],
+          const SizedBox(height: 14),
+          ElevatedButton.icon(
+            onPressed: _controller.init,
+            icon: const Icon(Icons.refresh_rounded, size: 17),
+            label: const Text('Réessayer'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade400,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildBackButton(BuildContext context) {
-    return Container(
+  // ── Bouton CTA ─────────────────────────────────────────────────────────────
+
+  Widget _buildButton() {
+    final canGo =
+        _controller.selectedLanguage != null && !_controller.isLoading;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+      width: double.infinity,
+      height: 56,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
-        ],
+        gradient: canGo
+            ? const LinearGradient(
+                colors: [Color(0xFF188329), Color(0xFF0F5C1C)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              )
+            : null,
+        color: canGo ? null : const Color(0xFFEEEEEE),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: canGo
+            ? [
+                BoxShadow(
+                  color: _kGreen.withValues(alpha: 0.35),
+                  blurRadius: 18,
+                  offset: const Offset(0, 7),
+                )
+              ]
+            : [],
       ),
-      child: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new,
-            size: 20, color: Colors.black87),
-        onPressed: () => Navigator.pop(context),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: canGo
+              ? () => Get.toNamed('/decouverte',
+                  arguments: _controller.languageContent)
+              : null,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  canGo ? 'Explorer cette langue' : 'Choisissez une langue',
+                  style: TextStyle(
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w800,
+                    color: canGo ? Colors.white : Colors.grey.shade400,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                if (canGo) ...[
+                  const SizedBox(width: 8),
+                  const Icon(Icons.rocket_launch_rounded,
+                      color: Colors.white, size: 19),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
+}
+
+// ── Méta-données par langue ────────────────────────────────────────────────────
+
+class _LangMeta {
+  final String emoji;
+  final Color color;
+  final String region;
+  const _LangMeta(this.emoji, this.color, this.region);
+}
+
+_LangMeta _getMeta(String name) {
+  final n = name.toLowerCase();
+  if (n.contains('dioula') || n.contains('jula')) {
+    return const _LangMeta('🌍', Color(0xFF43A047), "Afrique de l'Ouest");
+  }
+  if (n.contains('mooré') || n.contains('moore') || n.contains('mossi')) {
+    return const _LangMeta('☀️', Color(0xFFF27F22), 'Peuple Mossi, Burkina Faso');
+  }
+  if (n.contains('fulfuldé') || n.contains('fulfulde') || n.contains('peul')) {
+    return const _LangMeta('🌿', Color(0xFF1E88E5), 'Peuple Peul, Sahel');
+  }
+  if (n.contains('bissa') || n.contains('bisa')) {
+    return const _LangMeta('🎵', Color(0xFF8E24AA), 'Peuple Bissa');
+  }
+  if (n.contains('gourmantché') || n.contains('gurma')) {
+    return const _LangMeta('🌺', Color(0xFFE91E63), 'Est du Burkina Faso');
+  }
+  return const _LangMeta('🗣️', Color(0xFF00897B), 'Langue africaine');
 }
