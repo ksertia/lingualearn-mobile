@@ -5,7 +5,7 @@ import 'package:fasolingo/helpers/theme/app_colors.dart';
 import 'package:fasolingo/models/user_progress/user_progress_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
+import 'package:fasolingo/widgets/zaki_mascot.dart';
 import 'package:shimmer/shimmer.dart';
 
 // ── Brand palette ──────────────────────────────────────────────────────────────
@@ -386,8 +386,7 @@ class _ProgresPageState extends State<ProgresPage> {
               ],
             ),
           ),
-          Lottie.asset('assets/lottie/mascot.json',
-              width: 76, height: 76, fit: BoxFit.contain),
+          const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.lg),
         ],
       ),
     );

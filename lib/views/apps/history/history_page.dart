@@ -1,7 +1,7 @@
 import 'package:fasolingo/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
+import 'package:fasolingo/widgets/zaki_mascot.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fasolingo/controller/apps/user_progress/user_progress_controller.dart';
 import 'package:fasolingo/models/user_progress/user_progress_model.dart';
@@ -465,18 +465,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 ],
               ),
             ),
-            Container(
-              width: 68,
-              height: 68,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(18),
-                border:
-                    Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1),
-              ),
-              child: Lottie.asset('assets/lottie/mascot.json',
-                  fit: BoxFit.contain, repeat: true),
-            ),
+            const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.md),
           ],
         ),
       ),
@@ -1117,8 +1106,7 @@ class _HistoryPageState extends State<HistoryPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Lottie.asset('assets/lottie/mascot.json',
-                      width: 150, height: 150),
+                  const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.xl),
                   const SizedBox(height: 20),
                   Text(
                     'Pas encore d\'historique',

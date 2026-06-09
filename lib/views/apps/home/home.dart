@@ -12,7 +12,7 @@ import 'package:fasolingo/views/apps/home/screens/parcours.dart';
 import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
+import 'package:fasolingo/widgets/zaki_mascot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../controller/apps/settings/settings_controller.dart';
 import '../../../controller/apps/notifications/notification_controller.dart';
@@ -335,7 +335,6 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(22, 24, 16, 30),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [_kGreen, _kGreenDark],
@@ -347,137 +346,133 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           bottomRight: Radius.circular(36),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: _kYellow.withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: _kYellow.withValues(alpha: 0.4),
-                          width: 1,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 16, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Ligne 1 : badge "Bonne journée" + cloche ──────────────────
+            Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: _kYellow.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                        color: _kYellow.withValues(alpha: 0.4), width: 1),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.local_fire_department_rounded,
+                          color: _kYellow, size: 13),
+                      SizedBox(width: 4),
+                      Text(
+                        "Bonne journée !",
+                        style: TextStyle(
+                          color: _kYellow,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.local_fire_department_rounded,
-                              color: _kYellow, size: 14),
-                          SizedBox(width: 5),
-                          Text(
-                            "Bonne journée !",
-                            style: TextStyle(
-                              color: _kYellow,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      "Salut, $firstName 👋",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        height: 1.1,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      "Prêt pour ta prochaine leçon ?",
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Obx(() {
-                    final count = _notifCtrl.unreadCount.value;
-                    return GestureDetector(
-                      onTap: () => Get.toNamed('/notifications'),
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                width: 1,
-                              ),
-                            ),
-                            child: const Icon(Icons.notifications_rounded,
-                                color: Colors.white, size: 20),
-                          ),
-                          if (count > 0)
-                            Positioned(
-                              top: -4,
-                              right: -4,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 5, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEF4444),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                      color: Colors.white, width: 1.5),
-                                ),
-                                child: Text(
-                                  count > 99 ? '99+' : '$count',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  }),
-                  SizedBox(
-                    width: 80,
-                    height: 80,
-                    child: Lottie.asset(
-                      'assets/lottie/mascot.json',
-                      fit: BoxFit.contain,
-                      repeat: true,
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildStatChip(Icons.auto_stories_rounded, "Apprends", _kYellow),
-              const SizedBox(width: 10),
-              _buildStatChip(
-                  Icons.emoji_events_rounded, "Progresse", Colors.white),
-              const SizedBox(width: 10),
-              _buildStatChip(Icons.translate_rounded, "Maîtrise", _kOrange),
-            ],
-          ),
-        ],
+                ),
+                const Spacer(),
+                Obx(() {
+                  final count = _notifCtrl.unreadCount.value;
+                  return GestureDetector(
+                    onTap: () => Get.toNamed('/notifications'),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(9),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                width: 1),
+                          ),
+                          child: const Icon(Icons.notifications_rounded,
+                              color: Colors.white, size: 20),
+                        ),
+                        if (count > 0)
+                          Positioned(
+                            top: -4,
+                            right: -4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 5, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEF4444),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: Colors.white, width: 1.5),
+                              ),
+                              child: Text(
+                                count > 99 ? '99+' : '$count',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // ── Ligne 2 : texte (gauche) + Zaki (droite) ──────────────────
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Salut, $firstName 👋",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          height: 1.1,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        "Prêt pour ta prochaine leçon ?",
+                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+                const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.md),
+              ],
+            ),
+            const SizedBox(height: 14),
+            // ── Ligne 3 : chips stats ──────────────────────────────────────
+            Row(
+              children: [
+                _buildStatChip(
+                    Icons.auto_stories_rounded, "Apprends", _kYellow),
+                const SizedBox(width: 8),
+                _buildStatChip(
+                    Icons.emoji_events_rounded, "Progresse", Colors.white),
+                const SizedBox(width: 8),
+                _buildStatChip(Icons.translate_rounded, "Maîtrise", _kOrange),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

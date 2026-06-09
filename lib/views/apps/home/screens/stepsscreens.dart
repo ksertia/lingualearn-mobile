@@ -12,7 +12,6 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fasolingo/models/parcoure/parcour_model.dart';
-import '../../../../widgets/stepsscreens/parcours_item.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────
 const Color _kGreen     = Color(0xFF188329);
@@ -868,7 +867,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
           Expanded(
             child: Builder(
               builder: (context) => ListView.builder(
-                padding: const EdgeInsets.only(top: 4, bottom: 16),
+                padding: const EdgeInsets.only(top: 8, bottom: 16),
                 itemCount: page.steps.length,
                 itemBuilder: (context, i) {
                   final step = page.steps[i];
@@ -881,78 +880,210 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                       stepStatus == 'started' ||
                       stepStatus == 'in_progress' ||
                       isCompleted;
+                  final isLast = i == page.steps.length - 1;
 
-                  final stepItem = Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: ParcoursItem(
-                      label: 'Étape ${i + 1} : ${step.title}',
-                      status: isCompleted
-                          ? 'Terminé'
-                          : (isActive ? 'En cours' : 'Verrouillé'),
-                      mainColor: isActive
-                          ? (isCompleted ? _sCompleted : _sActive)
-                          : _sLocked,
-                      isCompleted: isCompleted,
-                      isActive: isActive,
-                      icon: !isActive
-                          ? Icons.lock_rounded
-                          : (isCompleted
-                              ? Icons.check_rounded
-                              : Icons.play_arrow_rounded),
-                      onTap: isActive
-                          ? () async {
-                              if (i == 0 && pageIndex == 0 && _showGuide) {
-                                _dismissStepsGuide();
-                              }
-                              if (!controller.isSubscriptionActive.value) {
-                                _showSubscriptionRequired(context);
-                                return;
-                              }
-                              final a = Get.arguments;
-                              final userId =
-                                  (a is Map && a['userId'] != null)
-                                      ? a['userId'].toString()
-                                      : (controller.session?.userId.value ??
-                                          '');
-                              if (userId.isNotEmpty &&
-                                  stepStatus == 'unlocked') {
-                                await StepsService.startStep(
-                                    userId: userId, stepId: step.id);
-                              }
-                              final res = await Get.to(
-                                () => StepContentScreen(
-                                    stepId: step.id, userId: userId),
-                                transition: Transition.rightToLeft,
-                              );
-                              if (res == true) await _silentRefresh();
-                            }
-                          : () => Get.snackbar(
-                                '🔒 Étape verrouillée',
-                                'Complète les étapes précédentes pour débloquer celle-ci.',
-                                backgroundColor: const Color(0xFF1A1A1A),
-                                colorText: Colors.white,
-                                snackPosition: SnackPosition.BOTTOM,
-                                margin: const EdgeInsets.all(16),
-                                borderRadius: 16,
-                                icon: const Icon(Icons.lock_rounded,
-                                    color: Colors.white70),
-                              ),
-                    ),
+                  final stepItem = _buildZigzagItem(
+                    context, i, step, stepStatus,
+                    isCompleted, isActive, pageIndex, isLast,
                   );
 
                   if (i == 0 && pageIndex == 0 && _showGuide) {
                     return Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildStepsGuide(),
-                        stepItem,
-                      ],
+                      children: [_buildStepsGuide(), stepItem],
                     );
                   }
                   return stepItem;
                 },
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildZigzagItem(
+    BuildContext context,
+    int i,
+    StepModel step,
+    String stepStatus,
+    bool isCompleted,
+    bool isActive,
+    int pageIndex,
+    bool isLast,
+  ) {
+    final isLeft = i % 2 == 0;
+    final color = isCompleted ? _sCompleted : (isActive ? _sActive : _sLocked);
+    final mins = step.estimatedMinutes > 0 ? '${step.estimatedMinutes} min' : '5 min';
+    final xp = step.stepType == 'quiz' ? '+20 XP' : '+10 XP';
+
+    Future<void> handleTap() async {
+      if (!isActive) {
+        Get.snackbar(
+          '🔒 Étape verrouillée',
+          'Complète les étapes précédentes pour débloquer celle-ci.',
+          backgroundColor: const Color(0xFF1A1A1A),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 16,
+          icon: const Icon(Icons.lock_rounded, color: Colors.white70),
+        );
+        return;
+      }
+      if (i == 0 && pageIndex == 0 && _showGuide) _dismissStepsGuide();
+      if (!controller.isSubscriptionActive.value) {
+        _showSubscriptionRequired(context);
+        return;
+      }
+      final a = Get.arguments;
+      final userId = (a is Map && a['userId'] != null)
+          ? a['userId'].toString()
+          : (controller.session?.userId.value ?? '');
+      if (userId.isNotEmpty && stepStatus == 'unlocked') {
+        await StepsService.startStep(userId: userId, stepId: step.id);
+      }
+      final res = await Get.to(
+        () => StepContentScreen(stepId: step.id, userId: userId),
+        transition: Transition.rightToLeft,
+      );
+      if (res == true) await _silentRefresh();
+    }
+
+    // ── Card ──────────────────────────────────────────────────────────────
+    final card = GestureDetector(
+      onTap: handleTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.95),
+          borderRadius: isLeft
+              ? const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  bottomLeft: Radius.circular(16),
+                  topRight: Radius.circular(6),
+                  bottomRight: Radius.circular(16),
+                )
+              : const BorderRadius.only(
+                  topRight: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                  topLeft: Radius.circular(6),
+                  bottomLeft: Radius.circular(16),
+                ),
+          border: Border.all(color: color.withValues(alpha: 0.22), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.13),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              step.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: isActive
+                    ? const Color(0xFF1A1A1A)
+                    : Colors.grey.shade400,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.timer_outlined, size: 11, color: Colors.grey.shade400),
+                const SizedBox(width: 3),
+                Text(mins,
+                    style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
+                const SizedBox(width: 8),
+                const Icon(Icons.bolt_rounded, size: 11, color: _kYellow),
+                const SizedBox(width: 2),
+                Text(xp,
+                    style: const TextStyle(
+                        fontSize: 10,
+                        color: _kYellow,
+                        fontWeight: FontWeight.w700)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // ── Circle indicator ───────────────────────────────────────────────────
+    final circle = GestureDetector(
+      onTap: handleTap,
+      child: Container(
+        width: 46,
+        height: 46,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.40),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Icon(
+          isCompleted
+              ? Icons.check_rounded
+              : (isActive ? Icons.play_arrow_rounded : Icons.lock_rounded),
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left card or spacer
+          Expanded(
+            child: isLeft
+                ? Padding(
+                    padding: const EdgeInsets.only(right: 8, bottom: 22),
+                    child: Align(alignment: Alignment.centerRight, child: card),
+                  )
+                : const SizedBox(),
+          ),
+          // Center: circle + connecting line
+          Column(
+            children: [
+              circle,
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: isCompleted
+                        ? _sCompleted.withValues(alpha: 0.38)
+                        : _sLocked.withValues(alpha: 0.22),
+                  ),
+                ),
+            ],
+          ),
+          // Right card or spacer
+          Expanded(
+            child: !isLeft
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 8, bottom: 22),
+                    child: Align(alignment: Alignment.centerLeft, child: card),
+                  )
+                : const SizedBox(),
           ),
         ],
       ),
