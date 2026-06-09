@@ -1,4 +1,5 @@
 import 'package:fasolingo/controller/apps/session_controller.dart';
+import 'package:fasolingo/controller/apps/user_progress/user_progress_controller.dart';
 import 'package:fasolingo/helpers/services/langue/langue_service.dart';
 import 'package:fasolingo/models/langue/langue_model.dart';
 import 'package:get/get.dart';
@@ -113,16 +114,21 @@ class LanguagesController extends GetxController {
           "Complet", "Veuillez sélectionner une langue et un niveau.");
       return false;
     }
-    if (selectedLanguageLevels.length >= 2) {
-      _showErrorSnackbar(
-          "Limite atteinte", "Vous pouvez sélectionner maximum 2 langues.");
-      return false;
+    // Use server-authoritative enrolled list for limit/duplicate checks
+    List<String> enrolledIds = [];
+    try {
+      final progressCtrl = Get.find<UserProgressController>();
+      enrolledIds = progressCtrl.progressList.map((e) => e.language.id).toList();
+    } catch (_) {
+      enrolledIds = selectedLanguageLevels
+          .map((e) => e['languageId'] as String? ?? '')
+          .where((id) => id.isNotEmpty)
+          .toList();
     }
-    final isAlreadySelected =
-        selectedLanguageLevels.any((item) => item['languageId'] == languageId);
-    if (isAlreadySelected) {
+
+    if (enrolledIds.contains(languageId)) {
       _showErrorSnackbar(
-          "Déjà sélectionnée", "Cette langue est déjà dans votre sélection.");
+          "Déjà inscrite", "Vous êtes déjà inscrit(e) dans cette langue.");
       return false;
     }
     try {

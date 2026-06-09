@@ -1440,6 +1440,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
         enrolledIds: enrolledIds,
         onSuccess: () {
           _loadProgressSafe();
+          // Retry after 2s — server may need time to propagate the new enrollment
+          Future.delayed(const Duration(seconds: 2), _loadProgressSafe);
           Get.snackbar(
             'Langue ajoutée',
             'La nouvelle langue a été ajoutée avec succès.',

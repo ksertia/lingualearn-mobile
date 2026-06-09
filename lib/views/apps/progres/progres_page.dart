@@ -34,9 +34,13 @@ class _ProgresPageState extends State<ProgresPage> {
   late final UserProgressController _progressCtrl;
   late final SessionController _session;
 
+  String _selectedLangId  = '';
+  String _selectedLevelId = '';
+
   // ── Getters délégués au contrôleur ────────────────────────────────────────
   String get _languageName    => _detailCtrl.languageName;
-  String get _levelName       => _detailCtrl.nameForLevel(_session.selectedLevelId.value);
+  String get _levelName       => _detailCtrl.nameForLevel(
+      _selectedLevelId.isNotEmpty ? _selectedLevelId : _session.selectedLevelId.value);
   int    get _totalXp         => _detailCtrl.totalXp;
   int    get _totalMinutes    => _detailCtrl.totalMinutes;
   int    get _quizScore       => _detailCtrl.avgQuizScore;
@@ -58,24 +62,143 @@ class _ProgresPageState extends State<ProgresPage> {
     _progressCtrl = Get.isRegistered<UserProgressController>()
         ? Get.find<UserProgressController>()
         : Get.put(UserProgressController());
+    _selectedLangId  = _session.selectedLanguageId.value;
+    _selectedLevelId = _session.selectedLevelId.value;
     _load();
   }
 
   Future<void> _load() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
+    final langId = _selectedLangId.isNotEmpty
+        ? _selectedLangId
+        : (_session.selectedLanguageId.value.isNotEmpty
+            ? _session.selectedLanguageId.value
+            : _session.user?.selectedLanguageId ?? '');
     await Future.wait([
       _detailCtrl.load(
-        userId:     _session.userId.value.isNotEmpty
+        userId: _session.userId.value.isNotEmpty
             ? _session.userId.value
             : _session.user?.id ?? '',
-        languageId: _session.selectedLanguageId.value.isNotEmpty
-            ? _session.selectedLanguageId.value
-            : _session.user?.selectedLanguageId ?? '',
+        languageId: langId,
       ),
       _progressCtrl.loadProgress(),
     ]);
     if (mounted) setState(() => _isLoading = false);
+  }
+
+  Future<void> _switchLanguage(UserProgressEntry entry) async {
+    if (_selectedLangId == entry.language.id) return;
+    setState(() {
+      _selectedLangId  = entry.language.id;
+      _selectedLevelId = entry.level.id;
+      _isLoading = true;
+    });
+    await _detailCtrl.load(
+      userId: _session.userId.value.isNotEmpty
+          ? _session.userId.value
+          : _session.user?.id ?? '',
+      languageId: entry.language.id,
+    );
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  // ── Language selector ─────────────────────────────────────────────────────
+
+  Widget _buildLangSelector(BuildContext context) {
+    return Obx(() {
+      final entries = _uniqueLanguages(_progressCtrl.progressList.toList());
+      if (entries.length < 2) return const SizedBox.shrink();
+
+      return Container(
+        color: AppColors.bg(context),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+          child: Row(
+            children: entries.map((e) => Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: _buildSelectorPill(
+                context: context,
+                label: e.language.name,
+                emoji: _langEmoji(e.language.name),
+                pct: e.language.progressPercentage.clamp(0, 100),
+                isSelected: _selectedLangId == e.language.id,
+                onTap: () => _switchLanguage(e),
+              ),
+            )).toList(),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildSelectorPill({
+    required BuildContext context,
+    required String label,
+    required String emoji,
+    required int pct,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? const LinearGradient(
+                  colors: [_kGreen, _kGreenDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isSelected ? null : AppColors.card(context),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: isSelected ? Colors.transparent : _kGreen.withValues(alpha: 0.22),
+            width: 1.5,
+          ),
+          boxShadow: isSelected
+              ? [BoxShadow(color: _kGreen.withValues(alpha: 0.30), blurRadius: 10, offset: const Offset(0, 4))]
+              : [],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 15)),
+            const SizedBox(width: 7),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: isSelected ? Colors.white : AppColors.textPrimary(context),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.22)
+                    : _kGreen.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$pct%',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: isSelected ? Colors.white : _kGreen,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
@@ -157,6 +280,7 @@ class _ProgresPageState extends State<ProgresPage> {
       body: Column(
         children: [
           _buildHeader(context),
+          _buildLangSelector(context),
           Expanded(
             child: RefreshIndicator(
               color: _kGreen,
@@ -187,7 +311,7 @@ class _ProgresPageState extends State<ProgresPage> {
                           _buildSectionTitle(context, 'Mes langues',
                               Icons.language_rounded, _kGreen),
                           const SizedBox(height: 12),
-                          _buildLanguageCards(context),
+                          _buildLanguageCards(context, _selectedLangId),
                           const SizedBox(height: 26),
                           _buildSectionTitle(context, 'Badges & Récompenses',
                               Icons.military_tech_rounded, _kPurple),
@@ -736,13 +860,16 @@ class _ProgresPageState extends State<ProgresPage> {
 
   // ── Language Cards ─────────────────────────────────────────────────────────
 
-  Widget _buildLanguageCards(BuildContext context) {
+  Widget _buildLanguageCards(BuildContext context, String selectedLangId) {
     return Obx(() {
       if (_progressCtrl.isLoading.value && _progressCtrl.progressList.isEmpty) {
         return _langCardShimmer(context);
       }
 
-      final entries = _uniqueLanguages(_progressCtrl.progressList.toList());
+      final all = _uniqueLanguages(_progressCtrl.progressList.toList());
+      final entries = selectedLangId.isNotEmpty
+          ? all.where((e) => e.language.id == selectedLangId).toList()
+          : all;
 
       if (entries.isEmpty) {
         return Container(

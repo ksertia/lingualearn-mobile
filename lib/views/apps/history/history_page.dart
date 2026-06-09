@@ -74,6 +74,7 @@ class HistoryPage extends StatefulWidget {
 class _HistoryPageState extends State<HistoryPage> {
   late final UserProgressController controller;
   late BuildContext _ctx;
+  String? _selectedLangId;
 
   @override
   void initState() {
@@ -196,15 +197,34 @@ class _HistoryPageState extends State<HistoryPage> {
 
         if (groups.isEmpty) return _buildEmptyState();
 
+        final filteredGroups = _selectedLangId == null
+            ? groups
+            : groups.where((g) => g.language.id == _selectedLangId).toList();
+
+        // Header always shows global count
         final totalLangs = groups.length;
-        final totalCompletedModules =
-            groups.fold<int>(0, (sum, g) => sum + g.totalCompletedModulesAll);
-        final avgPct = groups.isEmpty
+        final globalAvgPct = groups.isEmpty
             ? 0
             : groups.map((g) => g.language.progressPercentage).fold(0, (a, b) => a + b) ~/
                 groups.length;
+
+        // Summary stats reflect the current selection
+        final displayGroups = filteredGroups.isEmpty ? groups : filteredGroups;
+        final totalCompletedModules =
+            displayGroups.fold<int>(0, (sum, g) => sum + g.totalCompletedModulesAll);
+        final avgPct = displayGroups.isEmpty
+            ? 0
+            : displayGroups.map((g) => g.language.progressPercentage).fold(0, (a, b) => a + b) ~/
+                displayGroups.length;
         final totalCompletedLevels =
-            groups.fold<int>(0, (sum, g) => sum + g.completedLevels);
+            displayGroups.fold<int>(0, (sum, g) => sum + g.completedLevels);
+        final displayLangs = displayGroups.length;
+
+        final sectionTitle = _selectedLangId == null
+            ? 'Mes apprentissages'
+            : displayGroups.isNotEmpty
+                ? displayGroups.first.language.name
+                : 'Mes apprentissages';
 
         return RefreshIndicator(
           color: _kGreen,
@@ -212,14 +232,18 @@ class _HistoryPageState extends State<HistoryPage> {
           child: CustomScrollView(
             slivers: [
               // ── Header banner ──
-              SliverToBoxAdapter(child: _buildHeader(totalLangs, avgPct)),
+              SliverToBoxAdapter(child: _buildHeader(totalLangs, globalAvgPct)),
+
+              // ── Language selector (visible only if 2+ languages) ──
+              if (groups.length >= 2)
+                SliverToBoxAdapter(child: _buildLangSelector(groups)),
 
               // ── Summary stats ──
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: _buildSummaryCard(
-                      totalLangs, totalCompletedModules, avgPct, totalCompletedLevels),
+                      displayLangs, totalCompletedModules, avgPct, totalCompletedLevels),
                 ),
               ),
 
@@ -239,7 +263,7 @@ class _HistoryPageState extends State<HistoryPage> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Mes apprentissages',
+                        sectionTitle,
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary(_ctx)),
                       ),
@@ -251,7 +275,7 @@ class _HistoryPageState extends State<HistoryPage> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          '$totalLangs langue${totalLangs > 1 ? 's' : ''}',
+                          '$displayLangs langue${displayLangs > 1 ? 's' : ''}',
                           style: const TextStyle(
                               fontSize: 12, color: _kGreen, fontWeight: FontWeight.w700),
                         ),
@@ -268,9 +292,9 @@ class _HistoryPageState extends State<HistoryPage> {
                   delegate: SliverChildBuilderDelegate(
                     (ctx, i) => Padding(
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: _buildLanguageCard(groups[i]),
+                      child: _buildLanguageCard(displayGroups[i]),
                     ),
-                    childCount: groups.length,
+                    childCount: displayGroups.length,
                   ),
                 ),
               ),
@@ -278,6 +302,99 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
         );
       }),
+    );
+  }
+
+  // ── Language selector ─────────────────────────────────────────────────────
+
+  Widget _buildLangSelector(List<_LangGroup> groups) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+      child: Row(
+        children: [
+          _buildSelectorPill(
+            label: 'Toutes',
+            emoji: null,
+            isSelected: _selectedLangId == null,
+            onTap: () => setState(() => _selectedLangId = null),
+          ),
+          ...groups.map((g) => Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: _buildSelectorPill(
+                  label: g.language.name,
+                  emoji: _langEmoji(g.language.name),
+                  isSelected: _selectedLangId == g.language.id,
+                  onTap: () => setState(() => _selectedLangId = g.language.id),
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectorPill({
+    required String label,
+    required String? emoji,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? const LinearGradient(
+                  colors: [_kGreen, _kGreenDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isSelected ? null : AppColors.card(_ctx),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: isSelected
+                ? Colors.transparent
+                : _kGreen.withValues(alpha: 0.22),
+            width: 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: _kGreen.withValues(alpha: 0.30),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : [],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (emoji != null) ...[
+              Text(emoji, style: const TextStyle(fontSize: 15)),
+              const SizedBox(width: 6),
+            ] else ...[
+              Icon(
+                Icons.layers_rounded,
+                size: 14,
+                color: isSelected ? Colors.white : _kGreen,
+              ),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: isSelected ? Colors.white : AppColors.textPrimary(_ctx),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

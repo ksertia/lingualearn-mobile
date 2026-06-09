@@ -69,14 +69,22 @@ class LanguageLevelService {
 
   // --- SAUVEGARDE DE LA LANGUE ---
   Future<bool> selectLanguageForUser({required String userId, required String languageId}) async {
-    try {
-      final String path = '/users/$userId/languages/$languageId/select';
-      
-      final response = await _dio.post(path);
-      
-      return (response.statusCode == 201 || response.statusCode == 200);
-    } on DioException catch (e) {
-      return false;
+    final String path = '/users/$userId/languages/$languageId/select';
+    int attempts = 0;
+
+    while (true) {
+      try {
+        final response = await _dio.post(path);
+        return (response.statusCode == 201 || response.statusCode == 200);
+      } on DioException catch (e) {
+        final int? status = e.response?.statusCode;
+        if (status == 500 && attempts == 0) {
+          attempts++;
+          await Future.delayed(const Duration(milliseconds: 800));
+          continue;
+        }
+        return false;
+      }
     }
   }
 
