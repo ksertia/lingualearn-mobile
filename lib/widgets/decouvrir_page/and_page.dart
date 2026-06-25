@@ -1,9 +1,13 @@
-import 'package:confetti/confetti.dart';
-import 'package:fasolingo/helpers/services/sound_service.dart';
+﻿import 'package:confetti/confetti.dart';
+import 'package:tibi/helpers/services/sound_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+
+
+const Color _kOrange     = Color(0xFFF27F22);
+const Color _kGreenDark  = Color(0xFF0F5C1C);
 
 class StepSuccess {
   /// Affiche le popup de célébration par-dessus la page courante.
@@ -134,16 +138,25 @@ class _StepSuccessDialogState extends State<_StepSuccessDialog>
             child: Container(
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFF0FDF4), Color(0xFFFFFFFF)],
+                  colors: [Color(0xFFF0FDF4), Color(0xFFFFFDE7)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(28.r),
+                border: Border.all(
+                  color: _kOrange.withValues(alpha: 0.35),
+                  width: 1.5,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF188329).withValues(alpha:0.18),
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                  BoxShadow(
+                    color: _kOrange.withValues(alpha: 0.18),
                     blurRadius: 32,
-                    offset: const Offset(0, 12),
+                    offset: const Offset(0, 16),
                   ),
                 ],
               ),
@@ -171,16 +184,19 @@ class _StepSuccessDialogState extends State<_StepSuccessDialog>
                         padding: EdgeInsets.symmetric(
                             horizontal: 14.w, vertical: 7.h),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFDCFCE7),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFDCFCE7), Color(0xFFFFFDE7)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
                           borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                              color: const Color(0xFF4ADE80), width: 1),
+                          border: Border.all(color: _kOrange, width: 1.2),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.emoji_events_rounded,
-                                color: const Color(0xFF16A34A),
+                                color: Colors.black,
                                 size: 16.sp),
                             SizedBox(width: 6.w),
                             Text(
@@ -188,7 +204,7 @@ class _StepSuccessDialogState extends State<_StepSuccessDialog>
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF15803D),
+                                color: _kGreenDark,
                               ),
                             ),
                           ],
@@ -205,18 +221,18 @@ class _StepSuccessDialogState extends State<_StepSuccessDialog>
                         child: Column(
                           children: [
                             Text(
-                              'Bravo, champion ! 🎉',
+                              'Bravo, champion !',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 22.sp,
                                 fontWeight: FontWeight.w900,
-                                color: const Color(0xFF14532D),
+                                color: _kGreenDark,
                                 letterSpacing: 0.4,
                               ),
                             ),
                             SizedBox(height: 10.h),
                             Text(
-                              'Tu as débloqué un super pouvoir ! ✨\n'
+                              'Tu as débloqué un super pouvoir !'
                               'Inscris-toi pour sauvegarder ta progression.',
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -237,12 +253,9 @@ class _StepSuccessDialogState extends State<_StepSuccessDialog>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildBadge('✨ +20', 'Étoiles',
-                              const Color(0xFFFFF9C4)),
-                          _buildBadge('🏅 +1', 'Badge',
-                              const Color(0xFFDCFCE7)),
-                          _buildBadge('💡 top', 'Astuces',
-                              const Color(0xFFE0F2FE)),
+                          _buildBadge('✨ +20', 'Étoiles', _kOrange.withValues(alpha: 0.25)),
+                          _buildBadge('🏅 +1',  'Badge',   Colors.black.withValues(alpha: 0.12)),
+                          _buildBadge('💡 top', 'Astuces', const Color(0xFFE0F2FE)),
                         ],
                       ),
                     ),
@@ -259,18 +272,14 @@ class _StepSuccessDialogState extends State<_StepSuccessDialog>
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF188329),
-                                    Color(0xFF0F5C1C)
-                                  ],
+                                  colors: [_kOrange, _kOrange],
                                   begin: Alignment.centerLeft,
                                   end: Alignment.centerRight,
                                 ),
                                 borderRadius: BorderRadius.circular(14.r),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF188329)
-                                        .withValues(alpha:0.35),
+                                    color: _kOrange.withValues(alpha: 0.40),
                                     blurRadius: 14,
                                     offset: const Offset(0, 6),
                                   ),
@@ -288,7 +297,7 @@ class _StepSuccessDialogState extends State<_StepSuccessDialog>
                                 child: Text(
                                   "COMMENCER L'AVENTURE",
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color:  Colors.white,
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w800,
                                   ),
@@ -300,7 +309,7 @@ class _StepSuccessDialogState extends State<_StepSuccessDialog>
                           TextButton(
                             onPressed: () => _navigate('/login'),
                             style: TextButton.styleFrom(
-                              foregroundColor: Colors.grey[500],
+                              foregroundColor: Colors.black,
                               minimumSize: Size(double.infinity, 40.h),
                             ),
                             child: Row(
@@ -339,13 +348,13 @@ class _StepSuccessDialogState extends State<_StepSuccessDialog>
             numberOfParticles: 35,
             shouldLoop: false,
             colors: const [
-              Color(0xFF188329),
+              _kOrange,
+              _kOrange,
+              Colors.white,
               Color(0xFF4ADE80),
-              Color(0xFFFFA726),
-              Color(0xFFFF5722),
-              Color(0xFF9C27B0),
-              Color(0xFF2196F3),
-              Color(0xFFFFEB3B),
+              Color(0xFFFFF9C4),
+              Color(0xFFDCFCE7),
+              Color(0xFF1A1A1A),
             ],
             gravity: 0.15,
             maxBlastForce: 25,
@@ -399,9 +408,9 @@ class StepSuccessPage extends StatelessWidget {
       if (context.mounted) StepSuccess.show(context);
     });
     return const Scaffold(
-      backgroundColor: Color(0xFFF0FDF4),
+      backgroundColor: Color(0xFFFFFDE7),
       body: Center(
-        child: CircularProgressIndicator(color: Color(0xFF188329)),
+        child: CircularProgressIndicator(color: Colors.black),
       ),
     );
   }

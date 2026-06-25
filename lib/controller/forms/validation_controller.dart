@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:fasolingo/controller/forms/basic_controller.dart';
-import 'package:fasolingo/controller/my_controller.dart';
-import 'package:fasolingo/helpers/my_widgets/my_field_validator.dart';
-import 'package:fasolingo/helpers/my_widgets/my_form_validator.dart';
-import 'package:fasolingo/helpers/my_widgets/my_validators.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:tibi/controller/forms/basic_controller.dart';
+import 'package:tibi/controller/my_controller.dart';
+import 'package:tibi/helpers/my_widgets/my_field_validator.dart';
+import 'package:tibi/helpers/my_widgets/my_form_validator.dart';
+import 'package:tibi/helpers/my_widgets/my_validators.dart';
 
 class GenderValidator extends MyFieldValidatorRule<Gender> {
   @override

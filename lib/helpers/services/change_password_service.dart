@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/helpers/services/error_handling.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/helpers/constant/app_constant.dart';
+import 'package:tibi/helpers/services/error_handling.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../storage/local_storage.dart';
 

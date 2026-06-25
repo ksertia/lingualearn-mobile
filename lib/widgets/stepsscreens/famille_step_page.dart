@@ -1,13 +1,13 @@
-// import 'package:fasolingo/controller/apps/discovery_controller.dart';
-// import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
-// import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
-// import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizQCM.dart';
-// import 'package:fasolingo/widgets/etapefamille/pdf_etape.dart';
-// import 'package:fasolingo/widgets/etapefamille/quiz_clic.dart';
+﻿// import 'package:tibi/controller/apps/discovery_controller.dart';
+// import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
+// import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
+// import 'package:tibi/widgets/decouvrir_page/decouverte/StepQuizQCM.dart';
+// import 'package:tibi/widgets/etapefamille/pdf_etape.dart';
+// import 'package:tibi/widgets/etapefamille/quiz_clic.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:fasolingo/widgets/etapefamille/image_famille.dart';
+// import 'package:tibi/widgets/etapefamille/image_famille.dart';
 
 // class FamilleStepPage extends StatelessWidget {
 //   final dynamic data;

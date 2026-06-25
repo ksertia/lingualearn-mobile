@@ -1,4 +1,4 @@
-import 'package:fasolingo/controller/apps/session_controller.dart';
+﻿import 'package:tibi/controller/apps/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/user_model.dart';
@@ -46,15 +46,20 @@ class LoginController extends GetxController {
       if (response != null && response['success'] == true) {
         final apiData = response['data'];
         final String accessToken = apiData['tokens']['accessToken'];
+        final String? refreshToken = apiData['tokens']['refreshToken'];
         final session = Get.find<SessionController>();
         await LocalStorage.setAuthToken(accessToken);
+        if (refreshToken != null && refreshToken.isNotEmpty) {
+          await LocalStorage.setRefreshToken(refreshToken);
+        }
         final profileRes = await session.dio.get('/users/me');
         UserModel loggedInUser;
         if (profileRes.statusCode == 200 &&
             profileRes.data['success'] == true) {
           loggedInUser = UserModel.fromJson(profileRes.data['data']);
         } else {
-          loggedInUser = UserModel.fromJson(apiData);
+          // Fallback sur les données du login — user est dans data.user
+          loggedInUser = UserModel.fromJson(apiData['user'] ?? apiData);
         }
         await LocalStorage.setUserID(loggedInUser.id);
         await LocalStorage.setEmail(loggedInUser.email);

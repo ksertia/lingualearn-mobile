@@ -1,10 +1,10 @@
-// ignore_for_file: prefer_typing_uninitialized_variables, non_constant_identifier_names, constant_identifier_names
+﻿// ignore_for_file: prefer_typing_uninitialized_variables, non_constant_identifier_names, constant_identifier_names
 
 import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/my_widgets/my_page_indicator.dart';
+import 'package:tibi/helpers/my_widgets/my_page_indicator.dart';
 
 class MyPageDragger extends StatefulWidget {
   final canDragLeftToRight;

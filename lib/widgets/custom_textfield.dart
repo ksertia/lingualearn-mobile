@@ -1,7 +1,7 @@
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/utils/ui_mixins.dart';
-import 'package:fasolingo/helpers/my_widgets/my_spacing.dart';
-import 'package:fasolingo/helpers/my_widgets/my_text_style.dart';
+﻿import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/utils/ui_mixins.dart';
+import 'package:tibi/helpers/my_widgets/my_spacing.dart';
+import 'package:tibi/helpers/my_widgets/my_text_style.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

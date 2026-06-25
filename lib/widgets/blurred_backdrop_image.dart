@@ -1,7 +1,7 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
-import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/helpers/my_widgets/my_spacing.dart';
+import 'package:tibi/helpers/constant/app_constant.dart';
+import 'package:tibi/helpers/my_widgets/my_spacing.dart';
 import 'package:flutter/material.dart';
 
 class BlurredBackdropImage extends StatelessWidget {

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/auth/register_controller.dart';
 
+const Color _kOrange     = Color(0xFFF27F22);
+
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -17,9 +20,7 @@ class _RegisterPageState extends State<RegisterPage>
   late AnimationController _animCtrl;
   late Animation<double> _fadeAnim;
 
-  static const _primary      = Color(0xFF188329);
-  static const _primaryLight = Color(0xFF1EB83A);
-  static const _green        = Color(0xFF188329);
+  // static const _green       = Color(0xFF188329);
 
   @override
   void initState() {
@@ -63,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4FBF6),
+      backgroundColor: const Color(0xFFFFFDE7),
       body: Column(
         children: [
           Container(
@@ -72,7 +73,7 @@ class _RegisterPageState extends State<RegisterPage>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [_primary, _primaryLight],
+                colors: [_kOrange, _kOrange],
               ),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(32),
@@ -124,7 +125,7 @@ class _RegisterPageState extends State<RegisterPage>
                               height: 5,
                               decoration: BoxDecoration(
                                 color: i < currentStep
-                                    ? const Color(0xFF4ADE80)
+                                    ?  Colors.white
                                     : i == currentStep
                                         ? Colors.white
                                         : Colors.white.withValues(alpha: 0.35),
@@ -152,24 +153,24 @@ class _RegisterPageState extends State<RegisterPage>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF16A34A).withValues(alpha: 0.25),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                  color: const Color(0xFF4ADE80).withValues(alpha: 0.50),
+                                  color: Colors.white.withValues(alpha: 0.50),
                                   width: 1),
                             ),
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.check_circle_rounded,
-                                    color: Color(0xFF86EFAC), size: 11),
+                                    color: Colors.black, size: 11),
                                 SizedBox(width: 4),
                                 Text(
                                   'Étape 1 complète',
                                   style: TextStyle(
-                                    color: Color(0xFF86EFAC),
+                                    color: Colors.black,
                                     fontSize: 10,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
@@ -208,14 +209,14 @@ class _RegisterPageState extends State<RegisterPage>
                       onPressed: previousStep,
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: const BorderSide(color: _primary, width: 1.5),
+                        side: const BorderSide(color: _kOrange, width: 1.5),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
                       child: const Text(
                         "Précédent",
                         style: TextStyle(
-                            color: _primary, fontWeight: FontWeight.w600),
+                            color: _kOrange, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
@@ -226,7 +227,7 @@ class _RegisterPageState extends State<RegisterPage>
                         onPressed:
                             controller.isLoading.value ? null : nextStep,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _primary,
+                          backgroundColor: _kOrange,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -237,14 +238,14 @@ class _RegisterPageState extends State<RegisterPage>
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2),
+                                    color: _kOrange, strokeWidth: 2),
                               )
                             : Text(
                                 currentStep == 1 ? "S'inscrire" : "Suivant",
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                       )),
@@ -256,7 +257,7 @@ class _RegisterPageState extends State<RegisterPage>
       ),
       bottomNavigationBar: currentStep == 0
           ? Container(
-              color: const Color(0xFFF4FBF6),
+              color: const Color(0xFFFFFDE7),
               padding: const EdgeInsets.only(bottom: 24, top: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -272,7 +273,7 @@ class _RegisterPageState extends State<RegisterPage>
                       "Se connecter",
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: _green,
+                        color: _kOrange,
                         fontSize: 14,
                       ),
                     ),
@@ -374,9 +375,9 @@ class _RegisterPageState extends State<RegisterPage>
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF0FDF4),
+            color: const Color.fromARGB(65, 242, 176, 34),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFBBF7D0), width: 1.5),
+            border: Border.all(color: _kOrange, width: 1.5),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,11 +387,11 @@ class _RegisterPageState extends State<RegisterPage>
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDCFCE7),
+                      color: const Color.fromARGB(255, 252, 236, 220),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.card_giftcard_rounded,
-                        color: Color(0xFF16A34A), size: 16),
+                        color: Colors.black, size: 16),
                   ),
                   const SizedBox(width: 8),
                   const Text(
@@ -398,7 +399,7 @@ class _RegisterPageState extends State<RegisterPage>
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF15803D),
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -412,7 +413,7 @@ class _RegisterPageState extends State<RegisterPage>
                       'Optionnel',
                       style: TextStyle(
                         fontSize: 10,
-                        color: Color(0xFF16A34A),
+                        color: Colors.black,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -433,7 +434,7 @@ class _RegisterPageState extends State<RegisterPage>
                 'Si quelqu\'un vous a partagé son code, entrez-le ici.',
                 style: TextStyle(
                   fontSize: 11,
-                  color: Color(0xFF4ADE80),
+                  color: Colors.black,
                   height: 1.4,
                 ),
               ),
@@ -503,7 +504,7 @@ class _RegisterPageState extends State<RegisterPage>
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _primary, width: 1.5),
+        borderSide: const BorderSide(color: _kOrange, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),

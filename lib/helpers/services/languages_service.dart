@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/models/language_model.dart';
-import 'package:fasolingo/models/level_model.dart';
-import 'package:fasolingo/models/child_progress_models.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/helpers/constant/app_constant.dart';
+import 'package:tibi/models/language_model.dart';
+import 'package:tibi/models/level_model.dart';
+import 'package:tibi/models/child_progress_models.dart';
 import 'package:get/get.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 

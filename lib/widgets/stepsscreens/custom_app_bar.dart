@@ -14,11 +14,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       systemOverlayStyle: SystemUiOverlayStyle.light,
       flexibleSpace: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF188329), Color(0xFF0F5C1C)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Color(0xFFF27F22),
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
         ),
       ),

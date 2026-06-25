@@ -1,5 +1,5 @@
-import 'package:get/get_state_manager/get_state_manager.dart';
-import 'package:fasolingo/helpers/theme/theme_customizer.dart';
+﻿import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:tibi/helpers/theme/theme_customizer.dart';
 
 abstract class MyController extends GetxController {
   @override

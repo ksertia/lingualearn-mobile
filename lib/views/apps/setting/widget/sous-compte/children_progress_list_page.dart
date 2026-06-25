@@ -1,16 +1,14 @@
-import 'package:fasolingo/controller/apps/settings/children_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
-import 'package:fasolingo/models/child_model.dart';
-import 'package:fasolingo/views/apps/setting/widget/sous-compte/child_progress_detail_page.dart';
+﻿import 'package:tibi/controller/apps/settings/children_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/models/child_model.dart';
+import 'package:tibi/views/apps/setting/widget/sous-compte/child_progress_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
-const Color _kGreen      = Color(0xFF188329);
-const Color _kGreenDark  = Color(0xFF0F5C1C);
-const Color _kYellow     = Color(0xFFF5BF1E);
+
 const Color _kOrange     = Color(0xFFF27F22);
-const Color _kOrangeDark = Color(0xFFC4611A);
+
 
 class ChildrenProgressListPage extends StatefulWidget {
   const ChildrenProgressListPage({super.key});
@@ -69,7 +67,7 @@ class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
         padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 22),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [_kGreen, _kGreenDark],
+            colors: [_kOrange, _kOrange],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -96,9 +94,9 @@ class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _kYellow,
+                      color: _kOrange,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: _kYellow.withValues(alpha: 0.40), blurRadius: 8, offset: const Offset(0, 3))],
+                      boxShadow: [BoxShadow(color: _kOrange.withValues(alpha: 0.40), blurRadius: 8, offset: const Offset(0, 3))],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -172,7 +170,7 @@ class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
                 Container(
                   width: 88, height: 88,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [_kOrange, _kOrangeDark], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    gradient: const LinearGradient(colors: [_kOrange, _kOrange], begin: Alignment.topLeft, end: Alignment.bottomRight),
                     shape: BoxShape.circle,
                     boxShadow: [BoxShadow(color: _kOrange.withValues(alpha: 0.28), blurRadius: 20, offset: const Offset(0, 8))],
                   ),
@@ -256,7 +254,7 @@ class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _kYellow,
+                          color: _kOrange,
                           borderRadius: BorderRadius.circular(7),
                           border: Border.all(color: Colors.white, width: 1.5),
                         ),
@@ -285,7 +283,7 @@ class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF3EB),
+                    color: const Color(0xFFFFF9E0),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: _kOrange.withValues(alpha: 0.25)),
                   ),
@@ -309,10 +307,10 @@ class _ChildrenProgressListPageState extends State<ChildrenProgressListPage> {
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
             child: Row(
               children: [
-                const Icon(Icons.show_chart_rounded, size: 14, color: _kGreen),
+                const Icon(Icons.show_chart_rounded, size: 14, color: _kOrange),
                 const SizedBox(width: 5),
                 const Text('Voir la progression',
-                    style: TextStyle(fontSize: 12, color: _kGreen, fontWeight: FontWeight.w700)),
+                    style: TextStyle(fontSize: 12, color: _kOrange, fontWeight: FontWeight.w700)),
                 const Spacer(),
                 const Text('Détails',
                     style: TextStyle(fontSize: 12, color: Color(0xFFBBBBBB), fontWeight: FontWeight.w500)),

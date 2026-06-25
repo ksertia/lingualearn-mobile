@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/constant/app_constant.dart';
 import 'package:get/get.dart';
 
 class PaymentService extends GetxService {

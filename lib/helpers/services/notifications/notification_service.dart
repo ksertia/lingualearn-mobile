@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/models/notifications/notification_model.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/models/notifications/notification_model.dart';
 import 'package:get/get.dart';
 
 class NotificationService {

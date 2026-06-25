@@ -1,7 +1,7 @@
-import 'package:fasolingo/widgets/decouvrir_page/and_page.dart';
+﻿import 'package:tibi/widgets/decouvrir_page/and_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/controller/apps/discovery_controller.dart';
+import 'package:tibi/controller/apps/discovery_controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class StepQuizDrag extends StatefulWidget {

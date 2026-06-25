@@ -1,15 +1,17 @@
-import 'package:fasolingo/controller/apps/discovery_controller.dart';
-import 'package:fasolingo/models/langue/decouverte_model.dart';
-import 'package:fasolingo/widgets/decouvrir_page/and_page.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryImage.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizDrag.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepQuizQCM.dart';
+﻿import 'package:tibi/controller/apps/discovery_controller.dart';
+import 'package:tibi/models/langue/decouverte_model.dart';
+import 'package:tibi/widgets/decouvrir_page/and_page.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryImage.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/StepQuizDrag.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/StepQuizQCM.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/step_discovery_audio_player.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/step_discovery_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+const Color _kOrange     = Color(0xFFF27F22);
 
 class DiscoveryStep {
   final Widget widget;
@@ -47,6 +49,7 @@ class DiscoveryPage extends StatelessWidget {
             audioUrl: content.questionValue,
             answerType: content.answerType,
             answerValue: content.answerValue,
+            stepIndex: allSteps.length,
           );
         }
         else if (content.questionType == "video") {
@@ -76,7 +79,7 @@ class DiscoveryPage extends StatelessWidget {
             texteOriginal: content.questionValue,
             answerType: content.answerType,
             answerValue: content.answerValue,
-            lottie: 'assets/lottie/mascot.json',
+            stepIndex: allSteps.length,
           );
         }
 
@@ -169,7 +172,7 @@ class DiscoveryPage extends StatelessWidget {
           flexibleSpace: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF188329), Color(0xFF0F5C1C)],
+                colors: [_kOrange, _kOrange],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -213,7 +216,7 @@ class DiscoveryPage extends StatelessWidget {
                     minHeight: 8.h,
                     backgroundColor: Colors.grey[300],
                     valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color(0xFF188329),
+                      _kOrange,
                     ),
                   ),
                 );
@@ -270,8 +273,8 @@ class DiscoveryPage extends StatelessWidget {
                           icon: Icon(Icons.arrow_back_ios, size: 14.sp),
                           label: const Text("Précédent"),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF188329),
-                            side: const BorderSide(color: Color(0xFF188329)),
+                            foregroundColor: _kOrange,
+                            side: const BorderSide(color: _kOrange),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.r),
                             ),
@@ -286,7 +289,7 @@ class DiscoveryPage extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: handleNext,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF188329),
+                          backgroundColor: _kOrange,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.r),
                           ),

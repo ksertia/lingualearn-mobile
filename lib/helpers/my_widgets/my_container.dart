@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/theme/app_theme.dart';
-import 'package:fasolingo/helpers/my_widgets/my_spacing.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:tibi/helpers/theme/app_theme.dart';
+import 'package:tibi/helpers/my_widgets/my_spacing.dart';
 
 class MyContainer extends StatelessWidget {
   final Widget? child;

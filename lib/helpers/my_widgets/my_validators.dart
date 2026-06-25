@@ -1,5 +1,5 @@
-import 'package:fasolingo/helpers/utils/my_string_utils.dart';
-import 'package:fasolingo/helpers/my_widgets/my_field_validator.dart';
+﻿import 'package:tibi/helpers/utils/my_string_utils.dart';
+import 'package:tibi/helpers/my_widgets/my_field_validator.dart';
 
 class MyEmailValidator extends MyFieldValidatorRule<String> {
   @override

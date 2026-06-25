@@ -1,5 +1,5 @@
-import 'package:fasolingo/helpers/my_widgets/my_text.dart';
-import 'package:fasolingo/helpers/utils/ui_mixins.dart';
+﻿import 'package:tibi/helpers/my_widgets/my_text.dart';
+import 'package:tibi/helpers/utils/ui_mixins.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 

@@ -1,8 +1,8 @@
-
+﻿
 import 'package:flutter/material.dart';
-import 'package:fasolingo/widgets/quiz/circular_score.dart';
-import 'package:fasolingo/widgets/quiz/confetti_widget.dart';
-import 'package:fasolingo/widgets/quiz/stars_animation.dart';
+import 'package:tibi/widgets/quiz/circular_score.dart';
+import 'package:tibi/widgets/quiz/confetti_widget.dart';
+import 'package:tibi/widgets/quiz/stars_animation.dart';
 
 class QuizSuccessDialog extends StatelessWidget {
   final int score;

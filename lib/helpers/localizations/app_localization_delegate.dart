@@ -1,7 +1,7 @@
-import 'package:fasolingo/helpers/localizations/language.dart';
-import 'package:fasolingo/helpers/logger/logger.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/theme/app_notifier.dart';
+﻿import 'package:tibi/helpers/localizations/language.dart';
+import 'package:tibi/helpers/logger/logger.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/theme/app_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

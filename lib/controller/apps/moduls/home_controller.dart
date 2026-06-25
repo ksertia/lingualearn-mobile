@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/services/module_service.dart';
-import 'package:fasolingo/helpers/services/souscription/sousciption_service.dart';
-import 'package:fasolingo/models/modules/modul_model.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/services/module_service.dart';
+import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
+import 'package:tibi/models/modules/modul_model.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {

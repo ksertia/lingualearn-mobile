@@ -1,8 +1,8 @@
-import 'package:fasolingo/models/quiz/question_model.dart';
+﻿import 'package:tibi/models/quiz/question_model.dart';
 import 'package:flutter/material.dart';
-import 'package:fasolingo/views/ui/dialogs/quiz_correct_dialog.dart';
-import 'package:fasolingo/views/ui/dialogs/quiz_wrong_dialog.dart';
-import 'package:fasolingo/views/Quiz/quiz_result_screen.dart';
+import 'package:tibi/views/ui/dialogs/quiz_correct_dialog.dart';
+import 'package:tibi/views/ui/dialogs/quiz_wrong_dialog.dart';
+import 'package:tibi/views/Quiz/quiz_result_screen.dart';
 
 class QuizQuestionScreen extends StatefulWidget {
   const QuizQuestionScreen({super.key});

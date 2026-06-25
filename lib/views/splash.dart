@@ -1,19 +1,16 @@
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/models/user_model.dart';
+﻿import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 const Color _bg      = Color(0xFFFFF6F1); 
-const Color _orange  = Color(0xFFFF6B35);
+const Color _orange  = Color(0xFFF27F22);
 const Color _orange2 = Color(0xFFFFB347);
 const Color _green   = Color(0xFF188329);
-const Color _green2  = Color(0xFF0F5C1C);
-const Color _grey    = Color(0xFF7A7A8A);
 const Color _dark    = Color(0xFF1A1A2E);
 
-// ─────────────────────────────────────────────────────────────────────────────
 
 class SplashCree extends StatefulWidget {
   const SplashCree({super.key});
@@ -157,7 +154,6 @@ class _SplashCreeState extends State<SplashCree>
         backgroundColor: _bg,
         body: Stack(
           children: [
-            // ── Blobs fond ───────────────────────────────────────────────
             _Blobs(size: size),
 
             // ── Contenu ──────────────────────────────────────────────────
@@ -193,7 +189,7 @@ class _SplashCreeState extends State<SplashCree>
                           children: [
                             // Primaire
                             _PrimaryBtn(
-                              label: "C'est parti !",
+                              label: "C'EST PARTI !",
                               onTap: () {
                                 session.vientDeLaDecouverte = true;
                                 _open('/step');
@@ -202,7 +198,7 @@ class _SplashCreeState extends State<SplashCree>
                             const SizedBox(height: 14),
                             // Secondaire
                             _SecondaryBtn(
-                              label: "J'ai déjà un compte",
+                              label: "J'AI DÉJÀ UN COMPTE",
                               onTap: () {
                                 session.vientDeLaDecouverte = false;
                                 _open('/login');
@@ -295,7 +291,7 @@ class _SplashCreeState extends State<SplashCree>
         // Tagline
         ShaderMask(
           shaderCallback: (b) => const LinearGradient(
-            colors: [_orange, _orange2],
+            colors: [_orange, _orange],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ).createShader(b),
@@ -374,14 +370,14 @@ class _PrimaryBtn extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [_green, _green2],
+            colors: [_orange, _orange],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: _green.withValues(alpha: 0.35),
+              color: _orange.withValues(alpha: 0.45),
               blurRadius: 24,
               spreadRadius: -2,
               offset: const Offset(0, 10),
@@ -396,22 +392,14 @@ class _PrimaryBtn extends StatelessWidget {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16)),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "C'est parti !",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.3,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward_rounded,
-                  color: Colors.white, size: 18),
-            ],
+          child: const Text(
+            "C'EST PARTI !",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.3,
+            ),
           ),
         ),
       ),
@@ -435,7 +423,7 @@ class _SecondaryBtn extends StatelessWidget {
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
           foregroundColor: _dark,
-          side: BorderSide(color: Colors.grey.shade300, width: 1.2),
+          side: const BorderSide(color: _orange, width: 1.8),
           backgroundColor: Colors.white.withValues(alpha: 0.60),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16)),
@@ -496,7 +484,7 @@ class _Blobs extends StatelessWidget {
             width: 140, height: 140,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _orange.withValues(alpha: 0.05),
+              color: _orange2.withValues(alpha: 0.05),
             ),
           ),
         ),

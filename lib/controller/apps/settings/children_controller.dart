@@ -1,8 +1,8 @@
-import 'package:fasolingo/controller/my_controller.dart';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/services/children_service.dart';
-import 'package:fasolingo/helpers/utils/app_snackbar.dart';
-import 'package:fasolingo/models/child_model.dart';
+﻿import 'package:tibi/controller/my_controller.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/services/children_service.dart';
+import 'package:tibi/helpers/utils/app_snackbar.dart';
+import 'package:tibi/models/child_model.dart';
 import 'package:get/get.dart';
 
 class ChildrenController extends MyController {

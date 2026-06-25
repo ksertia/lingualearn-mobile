@@ -1,7 +1,7 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:developer';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/routes.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

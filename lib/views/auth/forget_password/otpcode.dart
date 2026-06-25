@@ -1,6 +1,9 @@
-import 'package:fasolingo/controller/auth/password/ForgotPasswordController.dart';
+﻿import 'package:tibi/controller/auth/password/ForgotPasswordController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+
+const Color _kOrange     = Color(0xFFF27F22);
 
 class OtpcodePage extends StatefulWidget {
   const OtpcodePage({super.key});
@@ -10,8 +13,6 @@ class OtpcodePage extends StatefulWidget {
 }
 
 class _OtpcodePageState extends State<OtpcodePage> {
-  static const _primary = Color(0xFF188329);
-  static const _primaryLight = Color(0xFF1EB83A);
   static const _successColor = Color(0xFF0F5C1C);
 
   final int otpLength = 6;
@@ -79,7 +80,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4FBF6),
+      backgroundColor: const Color(0xFFFFFDE7),
       body: Column(
         children: [
           Container(
@@ -88,7 +89,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [_primary, _primaryLight],
+                colors: [_kOrange, _kOrange],
               ),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(32),
@@ -162,7 +163,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
                       final Color borderColor = _isError[index]
                           ? Colors.red
                           : (isFocused
-                              ? _primary
+                              ? _kOrange
                               : (_isFilled[index]
                                   ? _successColor
                                   : Colors.grey.shade200));
@@ -170,7 +171,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
                       final Color bgColor = _isFilled[index]
                           ? _successColor.withValues(alpha: 0.06)
                           : (isFocused
-                              ? _primary.withValues(alpha: 0.04)
+                              ? _kOrange.withValues(alpha: 0.04)
                               : Colors.white);
 
                       return AnimatedContainer(
@@ -184,7 +185,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
                           boxShadow: isFocused
                               ? [
                                   BoxShadow(
-                                    color: _primary.withValues(alpha: 0.15),
+                                    color: _kOrange.withValues(alpha: 0.15),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   )
@@ -232,7 +233,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
                                   }
                                 },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _primary,
+                            backgroundColor: _kOrange,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
@@ -242,14 +243,14 @@ class _OtpcodePageState extends State<OtpcodePage> {
                                   height: 22,
                                   width: 22,
                                   child: CircularProgressIndicator(
-                                      color: Colors.white, strokeWidth: 2.5),
+                                      color: _kOrange, strokeWidth: 2.5),
                                 )
                               : const Text(
                                   "Confirmer",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
-                                    color: Colors.white,
+                                    color: Color(0xFF1A1A1A),
                                   ),
                                 ),
                         )),
@@ -261,7 +262,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
         ],
       ),
       bottomNavigationBar: Container(
-        color: const Color(0xFFF4FBF6),
+        color: const Color(0xFFFFFDE7),
         padding: const EdgeInsets.only(bottom: 28, top: 8),
         child: Obx(() => Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -281,7 +282,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
                       fontWeight: FontWeight.w700,
                       color: controller.isLoading.value
                           ? Colors.grey
-                          : _primary,
+                          : _kOrange,
                       fontSize: 14,
                     ),
                   ),

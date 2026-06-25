@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:fasolingo/helpers/theme/app_theme.dart';
+import 'package:tibi/helpers/theme/app_theme.dart';
 
 extension IconExtension on Icon {
   Icon autoDirection() {

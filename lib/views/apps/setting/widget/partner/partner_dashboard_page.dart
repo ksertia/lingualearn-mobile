@@ -1,9 +1,11 @@
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+﻿import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-const Color _green = Color(0xFF16A34A);
+const Color _kGreen      = Color(0xFF188329);
+const Color _kOrange     = Color(0xFFF27F22);
+
 const String _staticCode = 'TIBI-X7K2M';
 
 // ── Modèle retrait ────────────────────────────────────────────────────────────
@@ -78,8 +80,8 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
     return SliverAppBar(
       expandedHeight: 180,
       pinned: true,
-      backgroundColor: _green,
-      surfaceTintColor: _green,
+      backgroundColor: _kOrange,
+      surfaceTintColor: _kOrange,
       leading: GestureDetector(
         onTap: () => Get.back(),
         child: Container(
@@ -103,7 +105,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF14532D), _green],
+                  colors: [_kOrange, _kOrange],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -182,8 +184,8 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
               label: 'Inscrits via code',
               value: '12',
               icon: Icons.people_alt_rounded,
-              iconColor: const Color(0xFF7C3AED),
-              iconBg: const Color(0xFFEDE9FF),
+              iconColor:  Colors.black,
+              iconBg:  Colors.grey.shade200,
               trend: '+3 ce mois',
               trendUp: true,
             ),
@@ -193,8 +195,8 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
               value: '24 500',
               unit: 'FCFA',
               icon: Icons.account_balance_wallet_rounded,
-              iconColor: _green,
-              iconBg: const Color(0xFFDCFCE7),
+              iconColor: Colors.black,
+              iconBg: Colors.grey.shade200,
               trend: '+8 000 ce mois',
               trendUp: true,
             ),
@@ -208,8 +210,8 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
               value: '8 000',
               unit: 'FCFA',
               icon: Icons.savings_rounded,
-              iconColor: const Color(0xFFD97706),
-              iconBg: const Color(0xFFFEF3C7),
+              iconColor:  Colors.black,
+              iconBg:  Colors.grey.shade200,
               trend: 'Retrait possible',
               trendUp: true,
               trendColor: const Color(0xFFD97706),
@@ -220,8 +222,8 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
               value: '16 500',
               unit: 'FCFA',
               icon: Icons.move_to_inbox_rounded,
-              iconColor: const Color(0xFF0EA5E9),
-              iconBg: const Color(0xFFE0F2FE),
+              iconColor:  Colors.black,
+              iconBg:  Colors.grey.shade200,
               trend: '3 retraits',
               trendUp: null,
             ),
@@ -244,7 +246,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
   }) {
     final Color tc = trendColor ??
         (trendUp == true
-            ? _green
+            ? Colors.black
             : trendUp == false
                 ? Colors.redAccent
                 : const Color(0xFF9CA3AF));
@@ -334,8 +336,8 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
               children: [
                 Container(
                   width: 38, height: 38,
-                  decoration: BoxDecoration(color: const Color(0xFFDCFCE7), borderRadius: BorderRadius.circular(11)),
-                  child: const Icon(Icons.qr_code_rounded, color: _green, size: 20),
+                  decoration: BoxDecoration(color: const Color(0xFFFFF9E0), borderRadius: BorderRadius.circular(11)),
+                  child: const Icon(Icons.qr_code_rounded, color: _kOrange, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -351,13 +353,13 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: const Color(0xFFDCFCE7), borderRadius: BorderRadius.circular(20)),
+                  decoration: BoxDecoration(color: const Color(0xFFFFF9E0), borderRadius: BorderRadius.circular(20)),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.circle, color: _green, size: 7),
+                      Icon(Icons.circle, color: _kOrange, size: 7),
                       SizedBox(width: 5),
-                      Text('Actif', style: TextStyle(color: _green, fontSize: 11, fontWeight: FontWeight.w700)),
+                      Text('Actif', style: TextStyle(color: _kOrange, fontSize: 11, fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ),
@@ -372,18 +374,18 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
               padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+                  colors: [Color(0xFFFFFBEB), Color(0xFFFFF9E0)],
                   begin: Alignment.topLeft, end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _green.withValues(alpha: 0.30), width: 1.5),
+                border: Border.all(color: _kOrange.withValues(alpha: 0.30), width: 1.5),
               ),
               child: const Center(
                 child: Text(
                   _staticCode,
                   style: TextStyle(
                     fontSize: 26, fontWeight: FontWeight.w800,
-                    color: Color(0xFF14532D), letterSpacing: 3,
+                    color: Color(0xFF1A1A1A), letterSpacing: 3,
                   ),
                 ),
               ),
@@ -397,13 +399,13 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                 Expanded(
                   child: _actionBtn(
                     icon: Icons.copy_rounded, label: 'Copier',
-                    color: _green, bg: const Color(0xFFDCFCE7),
+                    color:  Colors.black, bg:  Color(0xFF1A1A1A).withValues(alpha: 0.05),
                     onTap: () {
                       Clipboard.setData(const ClipboardData(text: _staticCode));
                       Get.snackbar(
                         'Copie !', 'Code copie dans le presse-papiers.',
                         snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: _green, colorText: Colors.white,
+                        backgroundColor: _kOrange, colorText: Colors.white,
                         margin: const EdgeInsets.all(16), borderRadius: 14,
                         duration: const Duration(seconds: 2),
                       );
@@ -414,7 +416,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                 Expanded(
                   child: _actionBtn(
                     icon: Icons.share_rounded, label: 'Partager',
-                    color: const Color(0xFF0EA5E9), bg: const Color(0xFFE0F2FE),
+                    color:  Colors.black, bg:  Colors.grey.shade200,
                     onTap: () {},
                   ),
                 ),
@@ -482,8 +484,8 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: isMax
-                                    ? [_green, const Color(0xFF4ADE80)]
-                                    : [const Color(0xFFBBF7D0), const Color(0xFF86EFAC)],
+                                    ? [_kOrange, const Color(0xFFFDE68A)]
+                                    : [const Color(0xFFFEF3C7), const Color(0xFFFDE68A)],
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
                               ),
@@ -496,7 +498,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: isMax ? FontWeight.w700 : FontWeight.w500,
-                              color: isMax ? _green : const Color(0xFF9CA3AF),
+                              color: isMax ? _kOrange : const Color(0xFF9CA3AF),
                             ),
                           ),
                         ],
@@ -533,7 +535,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
             children: _withdrawals.asMap().entries.map((e) {
               final i = e.key;
               final item = e.value;
-              final Color iconColor = item.isPaid ? _green : const Color(0xFFD97706);
+              final Color iconColor = item.isPaid ? _kGreen : const Color(0xFFD97706);
               final Color iconBg = item.isPaid ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7);
               return Column(
                 children: [
@@ -598,12 +600,12 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF14532D), _green],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft, end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: _green.withValues(alpha: 0.35), blurRadius: 14, offset: const Offset(0, 6)),
+          BoxShadow(color: _kOrange.withValues(alpha: 0.35), blurRadius: 14, offset: const Offset(0, 6)),
         ],
       ),
       child: Material(
@@ -611,21 +613,14 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
         child: InkWell(
           onTap: () => Get.toNamed('/partenaire/retrait'),
           borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 18),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 18),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.20),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.savings_rounded, color: Colors.white, size: 18),
-                ),
-                const SizedBox(width: 10),
-                const Text(
+                Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 20),
+                SizedBox(width: 10),
+                Text(
                   'Demander un retrait',
                   style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
                 ),

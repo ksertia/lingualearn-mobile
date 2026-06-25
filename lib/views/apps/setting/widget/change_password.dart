@@ -1,5 +1,5 @@
-import 'package:fasolingo/controller/apps/settings/change_password_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+﻿import 'package:tibi/controller/apps/settings/change_password_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

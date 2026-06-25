@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/services/progression/progression_detail_service.dart';
-import 'package:fasolingo/models/progression/progression_detail_model.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/helpers/services/progression/progression_detail_service.dart';
+import 'package:tibi/models/progression/progression_detail_model.dart';
 import 'package:get/get.dart';
 
 class ProgressionDetailController extends GetxController {

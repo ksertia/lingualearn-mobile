@@ -1,10 +1,10 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/services/etapes/etape_service.dart';
-import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
-import 'package:fasolingo/helpers/services/souscription/sousciption_service.dart';
-import 'package:fasolingo/models/parcoure/parcour_model.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/services/etapes/etape_service.dart';
+import 'package:tibi/helpers/services/parcoure/parcoure_service.dart';
+import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
+import 'package:tibi/models/parcoure/parcour_model.dart';
 import 'package:get/get.dart';
 
 class StepsController extends GetxController {

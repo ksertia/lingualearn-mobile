@@ -1,7 +1,7 @@
-// ignore_for_file: annotate_overrides, overridden_fields
+﻿// ignore_for_file: annotate_overrides, overridden_fields
 
 import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/my_widgets/my_text_style.dart';
+import 'package:tibi/helpers/my_widgets/my_text_style.dart';
 
 class MyText extends StatelessWidget {
   //Key

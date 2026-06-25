@@ -1,6 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
+const Color _kOrange     = Color(0xFFF27F22);
+
 class AnswerSection extends StatefulWidget {
   final String? answerType;
   final String? answerValue;
@@ -75,18 +77,18 @@ class _AnswerSectionState extends State<AnswerSection> {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFFFF8F0), Color(0xFFFFFBF5)],
+          colors: [Colors.white, Colors.white],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFFFF8F00).withValues(alpha: 0.25),
+          color: _kOrange.withValues(alpha: 0.25),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFF8F00).withValues(alpha: 0.12),
+            color: _kOrange.withValues(alpha: 0.12),
             blurRadius: 16,
             offset: const Offset(0, 5),
           ),
@@ -106,7 +108,7 @@ class _AnswerSectionState extends State<AnswerSection> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF8F00).withValues(alpha: 0.10),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -117,7 +119,7 @@ class _AnswerSectionState extends State<AnswerSection> {
                           ? Icons.volume_up_rounded
                           : Icons.translate_rounded,
                       size: 13,
-                      color: const Color(0xFFFF8F00),
+                      color: _kOrange,
                     ),
                     const SizedBox(width: 5),
                     Text(
@@ -125,7 +127,7 @@ class _AnswerSectionState extends State<AnswerSection> {
                       style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFFFF8F00),
+                        color: _kOrange,
                         letterSpacing: 1.0,
                       ),
                     ),
@@ -151,8 +153,7 @@ class _AnswerSectionState extends State<AnswerSection> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.transparent,
-              const Color(0xFFFF8F00).withValues(alpha: 0.45),
+              Colors.white.withValues(alpha: 0.45),
             ],
           ),
           borderRadius: BorderRadius.circular(2),
@@ -185,14 +186,10 @@ class _AnswerSectionState extends State<AnswerSection> {
             height: 52,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFF8F00), Color(0xFFFFB74D)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: _kOrange,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF8F00)
+                  color: _kOrange
                       .withValues(alpha: _isPlaying ? 0.55 : 0.28),
                   blurRadius: _isPlaying ? 20 : 8,
                   offset: const Offset(0, 3),
@@ -203,13 +200,13 @@ class _AnswerSectionState extends State<AnswerSection> {
                 ? const Padding(
                     padding: EdgeInsets.all(13),
                     child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2.5),
+                        color: Color(0xFF1A1A1A), strokeWidth: 2.5),
                   )
                 : Icon(
                     _isPlaying
                         ? Icons.pause_rounded
                         : Icons.play_arrow_rounded,
-                    color: Colors.white,
+                    color:  Colors.white,
                     size: 30,
                   ),
           ),
@@ -225,7 +222,7 @@ class _AnswerSectionState extends State<AnswerSection> {
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color:
-                    _isPlaying ? const Color(0xFFFF8F00) : Colors.black87,
+                    _isPlaying ? _kOrange : Colors.black87,
               ),
             ),
             const SizedBox(height: 2),

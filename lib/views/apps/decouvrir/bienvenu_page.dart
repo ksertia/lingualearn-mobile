@@ -1,13 +1,10 @@
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+﻿import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
-// ── Palette ───────────────────────────────────────────────────────────────────
-const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
-const Color _kYellow    = Color(0xFFF5BF1E);
-const Color _kOrange    = Color(0xFFF27F22);
+
+const Color _kOrange     = Color(0xFFF27F22);
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -175,10 +172,10 @@ class _BienvenuPageState extends State<BienvenuPage>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
-            color: _kGreen.withValues(alpha: 0.10),
+            color: Colors.white.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(30),
             border: Border.all(
-                color: _kGreen.withValues(alpha: 0.25), width: 1),
+                color: _kOrange.withValues(alpha: 0.25), width: 1),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -186,13 +183,13 @@ class _BienvenuPageState extends State<BienvenuPage>
               Container(
                 width: 7, height: 7,
                 decoration: const BoxDecoration(
-                    color: _kGreen, shape: BoxShape.circle),
+                    color: _kOrange, shape: BoxShape.circle),
               ),
               const SizedBox(width: 7),
               const Text(
                 'Bienvenue sur TiBi !',
                 style: TextStyle(
-                  color: _kGreen,
+                  color: _kOrange,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.3,
@@ -217,7 +214,7 @@ class _BienvenuPageState extends State<BienvenuPage>
               TextSpan(text: 'Découvrez les langues\n'),
               TextSpan(
                 text: 'de vos racines',
-                style: TextStyle(color: _kGreen),
+                style: TextStyle(color: _kOrange),
               ),
             ],
           ),
@@ -244,7 +241,7 @@ class _BienvenuPageState extends State<BienvenuPage>
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(colors: [
-          _kGreen.withValues(alpha: 0.10),
+          _kOrange.withValues(alpha: 0.10),
           Colors.transparent,
         ]),
       ),
@@ -254,11 +251,11 @@ class _BienvenuPageState extends State<BienvenuPage>
         errorBuilder: (_, __, ___) => Container(
           width: 160, height: 160,
           decoration: BoxDecoration(
-            color: _kGreen.withValues(alpha: 0.10),
+            color: _kOrange.withValues(alpha: 0.10),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.emoji_emotions_rounded,
-              size: 80, color: _kGreen),
+              size: 80, color: _kOrange),
         ),
       ),
     );
@@ -275,7 +272,7 @@ class _BienvenuPageState extends State<BienvenuPage>
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: _kGreen.withValues(alpha: 0.08),
+            color: _kOrange.withValues(alpha: 0.08),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -290,7 +287,7 @@ class _BienvenuPageState extends State<BienvenuPage>
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [_kGreen, _kGreenDark],
+                    colors: [_kOrange, _kOrange],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -334,12 +331,12 @@ class _BienvenuPageState extends State<BienvenuPage>
           Row(
             children: [
               _feature(context, icon: Icons.speed_rounded,
-                  label: 'À ton rythme', color: _kGreen),
+                  label: 'À ton rythme', color: _kOrange),
               _feature(context, icon: Icons.headphones_rounded,
                   label: 'Audio inclus', color: _kOrange),
               _feature(context, icon: Icons.emoji_events_rounded,
-                  label: 'Progressif', color: _kYellow,
-                  textColor: const Color(0xFF8B6B00)),
+                  label: 'Progressif', color: _kOrange,
+                  ),
             ],
           ),
         ],
@@ -391,14 +388,14 @@ class _BienvenuPageState extends State<BienvenuPage>
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [_kGreen, _kGreenDark],
+                colors: [_kOrange, _kOrange],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: _kGreen.withValues(alpha: 0.32),
+                  color: _kOrange.withValues(alpha: 0.32),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -412,22 +409,14 @@ class _BienvenuPageState extends State<BienvenuPage>
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Commencer',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_rounded,
-                      color: Colors.white, size: 18),
-                ],
+              child: Text(
+                'Commencer',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.3,
+                ),
               ),
             ),
           ),
@@ -456,7 +445,7 @@ class _Background extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(colors: [
-                _kGreen.withValues(alpha: 0.09),
+                _kOrange.withValues(alpha: 0.09),
                 Colors.transparent,
               ]),
             ),
@@ -486,7 +475,7 @@ class _Background extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(colors: [
-                _kGreen.withValues(alpha: 0.07),
+                _kOrange.withValues(alpha: 0.07),
                 Colors.transparent,
               ]),
             ),

@@ -1,6 +1,6 @@
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart'; // Import nécessaire
-import 'package:fasolingo/models/user_model.dart';          // Import nécessaire
+﻿import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/storage/local_storage.dart'; // Import nécessaire
+import 'package:tibi/models/user_model.dart';          // Import nécessaire
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

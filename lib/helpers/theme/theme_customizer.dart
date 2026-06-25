@@ -1,18 +1,18 @@
-/*
+﻿/*
 * File : App Theme Notifier (Listener)
 * Version : 1.0.0
 * */
 
 import 'dart:convert';
 
-import 'package:fasolingo/helpers/localizations/language.dart';
-import 'package:fasolingo/helpers/localizations/translator.dart';
-import 'package:fasolingo/helpers/logger/logger.dart';
-import 'package:fasolingo/helpers/services/json_decoder.dart';
-import 'package:fasolingo/helpers/services/navigation_service.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/theme/app_notifier.dart';
-import 'package:fasolingo/helpers/theme/app_style.dart';
+import 'package:tibi/helpers/localizations/language.dart';
+import 'package:tibi/helpers/localizations/translator.dart';
+import 'package:tibi/helpers/logger/logger.dart';
+import 'package:tibi/helpers/services/json_decoder.dart';
+import 'package:tibi/helpers/services/navigation_service.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/theme/app_notifier.dart';
+import 'package:tibi/helpers/theme/app_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

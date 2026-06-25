@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/my_widgets/my_middleware.dart';
-import 'package:fasolingo/helpers/my_widgets/my_route.dart';
-import 'package:fasolingo/helpers/my_widgets/my_route_exception.dart';
-import 'package:fasolingo/helpers/my_widgets/my_routes.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:tibi/helpers/my_widgets/my_middleware.dart';
+import 'package:tibi/helpers/my_widgets/my_route.dart';
+import 'package:tibi/helpers/my_widgets/my_route_exception.dart';
+import 'package:tibi/helpers/my_widgets/my_routes.dart';
 
 class MyRouter {
   static T? getArgs<T>(BuildContext context) {

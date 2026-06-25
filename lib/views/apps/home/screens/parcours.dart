@@ -1,28 +1,29 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:dio/dio.dart';
-import 'package:fasolingo/controller/apps/parcoure/parcoure_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+import 'package:tibi/controller/apps/parcoure/parcoure_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
-import 'package:fasolingo/helpers/services/module_service.dart';
-import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
-import 'package:fasolingo/models/modules/modul_model.dart';
-import 'package:fasolingo/models/parcoure/parcour_model.dart';
-import '../../../../widgets/parcourspage/ParcoursStepItem.dart';
+import 'package:tibi/helpers/services/module_service.dart';
+import 'package:tibi/helpers/services/parcoure/parcoure_service.dart';
+import 'package:tibi/models/modules/modul_model.dart';
+import 'package:tibi/models/parcoure/parcour_model.dart';
 import '../../../../widgets/stepsscreens/custom_app_bar.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────
-const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
-const Color _kYellow    = Color(0xFFF5BF1E);
-const Color _kOrange    = Color(0xFFF27F22);
-
-const Color _pCompleted = _kGreen;
-const Color _pActive    = _kOrange;
+const Color _kGreen      = Color(0xFF188329);
 const Color _pLocked    = Color(0xFFB0BEC5);
+const Color _kOrange = Color(0xFFF27F22);
+
+
+
+const List<double> _kNodeWave = [0.20, 0.50, 0.78, 0.50];
+const double _kNodeSize  = 72.0;
+const double _kNodeSlot  = 122.0;
+const double _kConnH     = 38.0;
 
 void _showSubscriptionRequired(BuildContext context) {
   showModalBottomSheet(
@@ -49,11 +50,7 @@ void _showSubscriptionRequired(BuildContext context) {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [_kOrange, _kYellow],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: _kOrange,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -64,7 +61,7 @@ void _showSubscriptionRequired(BuildContext context) {
               ],
             ),
             child: const Icon(Icons.workspace_premium_rounded,
-                color: Colors.white, size: 38),
+                color: Color(0xFF1A1A1A), size: 38),
           ),
           const SizedBox(height: 22),
           Text(
@@ -91,14 +88,14 @@ void _showSubscriptionRequired(BuildContext context) {
                 Get.toNamed('/subscription_plans');
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kGreen,
+                backgroundColor: _kOrange,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
               ),
               child: const Text('Voir les forfaits',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF1A1A1A),
                       fontWeight: FontWeight.w700,
                       fontSize: 16)),
             ),
@@ -269,11 +266,7 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [_kOrange, Color(0xFFBF5A0F)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: _kOrange,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -286,7 +279,7 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.lightbulb_rounded, color: _kYellow, size: 20),
+                const Icon(Icons.lightbulb_rounded, color: Color(0xFF1A1A1A), size: 20),
                 const SizedBox(width: 10),
                 const Expanded(
                   child: Text(
@@ -317,8 +310,6 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
           ),
           const SizedBox(height: 4),
 
-          // Doigt animé — le 1er item est aligné centerRight, widthFactor 0.92
-          // Centre du card depuis la gauche ≈ 0.08*w + 0.92*w/2 = 0.54*w
           LayoutBuilder(
             builder: (_, constraints) {
               final fingerX = constraints.maxWidth * 0.54 - 15;
@@ -435,7 +426,7 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
                 });
               } catch (_) {}
             },
-            color: _kGreen,
+            color: _kOrange,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: ConstrainedBox(
@@ -447,11 +438,6 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
                         height: MediaQuery.of(context).padding.top +
                             kToolbarHeight +
                             16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: _buildHeaderCard(pages),
-                    ),
-                    const SizedBox(height: 16),
                     _buildPagesSection(context, pages),
                     const SizedBox(height: 32),
                   ],
@@ -460,221 +446,6 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
             ),
           );
         }),
-      ),
-    );
-  }
-
-  // ── Header card ───────────────────────────────────────────────────────────
-
-  Widget _buildHeaderCard(List<_PageData> pages) {
-    final totalPaths = pages.fold<int>(0, (s, p) => s + p.paths.length);
-    final donePaths = pages.fold<int>(0, (s, p) {
-      return s +
-          p.paths.where((path) {
-            final st =
-                (path.progress?['status'] ?? path.status ?? 'locked')
-                    .toString()
-                    .toLowerCase();
-            return st == 'completed';
-          }).length;
-    });
-    final inProgressPaths = pages.fold<int>(0, (s, p) {
-      return s +
-          p.paths.where((path) {
-            final st =
-                (path.progress?['status'] ?? path.status ?? 'locked')
-                    .toString()
-                    .toLowerCase();
-            return st == 'unlocked' ||
-                st == 'started' ||
-                st == 'in_progress';
-          }).length;
-    });
-    final lockedPaths = (totalPaths - donePaths - inProgressPaths).clamp(0, totalPaths);
-    final pct = totalPaths > 0 ? donePaths / totalPaths : 0.0;
-    final lottie = pages.isNotEmpty ? pages[0].lottie : _lotties[0];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.card(_ctx),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: _kGreen.withValues(alpha: 0.20),
-            blurRadius: 28,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Green gradient banner
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [_kGreen, _kGreenDark],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '📚 ${pages.length} module${pages.length > 1 ? 's' : ''}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Mes Parcours',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Continue ton apprentissage !',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.75),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 68,
-                  height: 68,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25), width: 1),
-                  ),
-                  child: Lottie.asset(lottie, fit: BoxFit.contain, repeat: true),
-                ),
-              ],
-            ),
-          ),
-          // Progress + stats
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Progression globale',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                            colors: [_kGreen, Color(0xFF22A63B)]),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '${(pct * 100).toInt()}%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: pct,
-                    minHeight: 7,
-                    backgroundColor: _kGreen.withValues(alpha: 0.08),
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(_kGreen),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _buildStatPill(Icons.check_circle_rounded,
-                        '$donePaths', 'Terminés', _kGreen),
-                    const SizedBox(width: 6),
-                    _buildStatPill(Icons.play_circle_filled,
-                        '$inProgressPaths', 'En cours', _kOrange),
-                    const SizedBox(width: 6),
-                    _buildStatPill(
-                        Icons.lock_rounded, '$lockedPaths', 'À venir', _pLocked),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatPill(
-      IconData icon, String count, String label, Color color) {
-    return Expanded(
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-              color: color.withValues(alpha: 0.15), width: 1),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 15),
-            const SizedBox(height: 3),
-            Text(count,
-                style: TextStyle(
-                    color: color,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900)),
-            Text(label,
-                style: TextStyle(
-                    color: Colors.grey.shade500,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600)),
-          ],
-        ),
       ),
     );
   }
@@ -701,12 +472,12 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
                         borderRadius: BorderRadius.circular(50),
                         border: Border.all(
                             color:
-                                _kGreen.withValues(alpha: 0.15),
+                                _kOrange.withValues(alpha: 0.15),
                             width: 1),
                         boxShadow: [
                           BoxShadow(
                             color:
-                                _kGreen.withValues(alpha: 0.10),
+                                _kOrange.withValues(alpha: 0.10),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -758,13 +529,7 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
                           width: isActive ? 24.0 : 8.0,
                           height: 8,
                           decoration: BoxDecoration(
-                            gradient: isActive
-                                ? const LinearGradient(
-                                    colors: [_kGreen, _kYellow])
-                                : null,
-                            color: isActive
-                                ? null
-                                : _kGreen.withValues(alpha: 0.22),
+                            color: isActive ? _kOrange : _kOrange.withValues(alpha: 0.22),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         );
@@ -795,18 +560,18 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
         padding: const EdgeInsets.all(7),
         decoration: BoxDecoration(
           color: enabled
-              ? _kGreen.withValues(alpha: 0.12)
+              ? _kOrange.withValues(alpha: 0.12)
               : Colors.grey.withValues(alpha: 0.08),
           shape: BoxShape.circle,
         ),
         child: Icon(icon,
             size: 15,
-            color: enabled ? _kGreen : Colors.grey.shade400),
+            color: enabled ? _kOrange : Colors.grey.shade400),
       ),
     );
   }
 
-  // ── Page d'un module ──────────────────────────────────────────────────────
+  // ── Page d'un module  ───────────────────────────────
 
   Widget _buildPathsPage(_PageData page, int pageIndex) {
     return Padding(
@@ -817,148 +582,356 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
           if (page.module != null)
             _buildModuleHeader(page.module!, page.lottie, pageIndex),
           if (page.module == null)
-            // _buildFallbackHeader('Parcours disponibles'),
           const SizedBox(height: 8),
           Expanded(
             child: Builder(
-              builder: (context) => ListView.builder(
-                padding: const EdgeInsets.only(top: 4, bottom: 16),
-                itemCount: page.paths.length,
-                itemBuilder: (context, i) {
-                  final path = page.paths[i];
-                  final pathStatus = (path.progress != null &&
-                          path.progress!['status'] != null)
-                      ? path.progress!['status'].toString().toLowerCase()
-                      : (path.status ?? 'locked').toLowerCase();
-                  final isCompleted = pathStatus == 'completed';
-                  final isActive = pathStatus == 'unlocked' ||
-                      pathStatus == 'started' ||
-                      pathStatus == 'in_progress' ||
-                      isCompleted;
-                  final accent = isCompleted
-                      ? _pCompleted
-                      : (isActive ? _pActive : _pLocked);
-
-                  final itemWidget = Align(
-                    alignment: i % 2 == 0
-                        ? Alignment.centerRight
-                        : Alignment.centerLeft,
-                    child: FractionallySizedBox(
-                      widthFactor: 0.92,
-                      child: Padding(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 8),
-                        child: ParcoursStepItem(
-                          number: '${i + 1}',
-                          title: path.title,
-                          statusText: isCompleted
-                              ? 'Terminé'
-                              : (isActive ? 'En cours' : 'Verrouillé'),
-                          subtitle: isActive
-                              ? path.description
-                              : 'Terminez le parcours précédent',
-                          color: accent,
-                          isCompleted: isCompleted,
-                          isActive: isActive,
-                          icon: !isActive
-                              ? Icons.lock_rounded
-                              : (isCompleted
-                                  ? Icons.check_rounded
-                                  : Icons.play_arrow_rounded),
-                          onTap: isActive
-                              ? () async {
-                                  if (i == 0 && pageIndex == 0 && _showGuide) {
-                                    _dismissParcoursGuide();
-                                  }
-                                  if (!controller
-                                      .isSubscriptionActive.value) {
-                                    _showSubscriptionRequired(context);
-                                    return;
-                                  }
-                                  final a = Get.arguments;
-                                  final userId = (a is Map &&
-                                          a['userId'] != null)
-                                      ? a['userId'].toString()
-                                      : '';
-                                  if (userId.isNotEmpty &&
-                                      pathStatus == 'unlocked') {
-                                    await LearningPathService.startPath(
-                                        userId: userId,
-                                        pathId: path.id);
-                                  }
-                                  final res = await Get.toNamed(
-                                      '/stepsscreens',
-                                      arguments: {
-                                        'moduleId': path.moduleId,
-                                        'pathId': path.id,
-                                        'userId': userId,
-                                        'moduleLottie': page.lottie,
-                                      });
-                                  if (res == true ||
-                                      res == 'completed' ||
-                                      res == 'finished') {
-                                    await _silentRefresh();
-                                    final allPaths = controller.items
-                                        .whereType<LearningPathModel>()
-                                        .where((p) =>
-                                            p.moduleId == path.moduleId)
-                                        .toList();
-                                    final allDone = allPaths.isNotEmpty &&
-                                        allPaths.every((p) {
-                                          final st = (p.progress !=
-                                                      null &&
-                                                  p.progress!['status'] !=
-                                                      null)
-                                              ? p.progress!['status']
-                                                  .toString()
-                                                  .toLowerCase()
-                                              : (p.status ?? 'locked')
-                                                  .toLowerCase();
-                                          return st == 'completed';
-                                        });
-                                    if (userId.isNotEmpty &&
-                                        path.moduleId.isNotEmpty &&
-                                        allDone) {
-                                      await ModuleService.completeModule(
-                                          userId: userId,
-                                          moduleId: path.moduleId);
-                                    }
-                                    Get.back(result: true);
-                                  }
-                                }
-                              : () => Get.snackbar(
-                                    '🔒 Parcours verrouillé',
-                                    'Terminez le parcours précédent pour débloquer celui-ci.',
-                                    snackPosition: SnackPosition.BOTTOM,
-                                    backgroundColor:
-                                        const Color(0xFF1A1A1A),
-                                    colorText: Colors.white,
-                                    margin: const EdgeInsets.all(15),
-                                    borderRadius: 16,
-                                    icon: const Icon(Icons.lock_rounded,
-                                        color: Colors.white70),
-                                  ),
-                        ),
-                      ),
-                    ),
-                  );
-
-                  if (i == 0 && pageIndex == 0 && _showGuide) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildParcoursGuide(),
-                        itemWidget,
-                      ],
-                    );
-                  }
-                  return itemWidget;
-                },
+              builder: (context) => ListView(
+                padding: const EdgeInsets.only(top: 18, bottom: 24),
+                children: _buildDuoNodes(page, pageIndex, context),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // ─────────────────────────────────────
+
+  List<Widget> _buildDuoNodes(
+      _PageData page, int pageIndex, BuildContext context) {
+    final paths = page.paths;
+    final List<Widget> widgets = [];
+
+    for (int i = 0; i < paths.length; i++) {
+      final path = paths[i];
+      final pathStatus =
+          (path.progress != null && path.progress!['status'] != null)
+              ? path.progress!['status'].toString().toLowerCase()
+              : (path.status ?? 'locked').toLowerCase();
+      final isCompleted = pathStatus == 'completed';
+      final isActive = pathStatus == 'unlocked' ||
+          pathStatus == 'started' ||
+          pathStatus == 'in_progress' ||
+          isCompleted;
+      final accent =
+          isCompleted ? _kGreen : (isActive ? _kOrange : _pLocked);
+
+      if (i == 0 && pageIndex == 0 && _showGuide) {
+        widgets.add(_buildParcoursGuide());
+      }
+
+      if (i > 0) {
+        final prevPath = paths[i - 1];
+        final prevStatus =
+            (prevPath.progress?['status'] ?? prevPath.status ?? 'locked')
+                .toString()
+                .toLowerCase();
+        final prevCompleted = prevStatus == 'completed';
+        final prevActive = prevCompleted ||
+            prevStatus == 'unlocked' ||
+            prevStatus == 'started' ||
+            prevStatus == 'in_progress';
+        widgets.add(_buildNodeConnector(
+          _kNodeWave[(i - 1) % _kNodeWave.length],
+          _kNodeWave[i % _kNodeWave.length],
+          prevCompleted,
+          prevActive || isActive,
+        ));
+      }
+
+      widgets.add(_buildDuoNode(
+        path: path,
+        index: i,
+        pageIndex: pageIndex,
+        isCompleted: isCompleted,
+        isActive: isActive,
+        accent: accent,
+        page: page,
+        context: context,
+      ));
+    }
+
+    return widgets;
+  }
+
+  Widget _buildNodeConnector(
+      double fromFrac, double toFrac, bool completed, bool active) {
+    final color = completed
+        ? _kGreen.withValues(alpha: 0.45)
+        : active
+            ? _kOrange.withValues(alpha: 0.40)
+            : _pLocked.withValues(alpha: 0.22);
+
+    return LayoutBuilder(builder: (_, c) {
+      final w = c.maxWidth;
+      return SizedBox(
+        height: _kConnH,
+        child: CustomPaint(
+          size: Size(w, _kConnH),
+          painter: _DuoConnectorPainter(
+            from: Offset(w * fromFrac, 0),
+            to: Offset(w * toFrac, _kConnH),
+            color: color,
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildDuoNode({
+    required LearningPathModel path,
+    required int index,
+    required int pageIndex,
+    required bool isCompleted,
+    required bool isActive,
+    required Color accent,
+    required _PageData page,
+    required BuildContext context,
+  }) {
+    const double nodeSize = _kNodeSize;
+    const double labelW = 132.0;
+    final xFrac = _kNodeWave[index % _kNodeWave.length];
+
+    Future<void> handleTap() async {
+      if (index == 0 && pageIndex == 0 && _showGuide) {
+        _dismissParcoursGuide();
+      }
+      if (!controller.isSubscriptionActive.value) {
+        _showSubscriptionRequired(context);
+        return;
+      }
+      final a = Get.arguments;
+      final userId =
+          (a is Map && a['userId'] != null) ? a['userId'].toString() : '';
+      final ps =
+          (path.progress?['status'] ?? path.status ?? 'locked')
+              .toString()
+              .toLowerCase();
+      if (userId.isNotEmpty && ps == 'unlocked') {
+        await LearningPathService.startPath(userId: userId, pathId: path.id);
+      }
+      final res = await Get.toNamed('/stepsscreens', arguments: {
+        'moduleId': path.moduleId,
+        'pathId': path.id,
+        'userId': userId,
+        'moduleLottie': page.lottie,
+      });
+      if (res == true || res == 'completed' || res == 'finished') {
+        final allPaths = controller.items
+            .whereType<LearningPathModel>()
+            .where((p) => p.moduleId == path.moduleId)
+            .toList();
+        final allDone = allPaths.isNotEmpty &&
+            allPaths.every((p) {
+              final st =
+                  (p.progress != null && p.progress!['status'] != null)
+                      ? p.progress!['status'].toString().toLowerCase()
+                      : (p.status ?? 'locked').toLowerCase();
+              return st == 'completed';
+            });
+        if (userId.isNotEmpty && path.moduleId.isNotEmpty && allDone) {
+          await ModuleService.completeModule(
+              userId: userId, moduleId: path.moduleId);
+        }
+        Get.back(result: true);
+      }
+    }
+
+    void onLockedTap() => Get.snackbar(
+          '🔒 Parcours verrouillé',
+          'Terminez le parcours précédent pour débloquer celui-ci.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF1A1A1A),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(15),
+          borderRadius: 16,
+          icon: const Icon(Icons.lock_rounded, color: Colors.white70),
+        );
+
+    return SizedBox(
+      height: _kNodeSlot,
+      child: LayoutBuilder(builder: (_, c) {
+        final w = c.maxWidth;
+        final centerX = w * xFrac;
+        final circleLeft =
+            (centerX - nodeSize / 2).clamp(0.0, w - nodeSize);
+        final labelLeft = (centerX - labelW / 2).clamp(0.0, w - labelW);
+
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Outer glow for active node
+            if (isActive && !isCompleted)
+              Positioned(
+                left: circleLeft - 10,
+                top: -10,
+                child: Container(
+                  width: nodeSize + 20,
+                  height: nodeSize + 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: accent.withValues(alpha: 0.16),
+                  ),
+                ),
+              ),
+
+            // Number badge (floats above circle)
+            Positioned(
+              left: circleLeft - 2,
+              top: -12,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: accent.withValues(alpha: 0.30),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+
+            // Circle node
+            Positioned(
+              left: circleLeft,
+              top: 0,
+              child: GestureDetector(
+                onTap: isActive ? () { handleTap(); } : onLockedTap,
+                child: Container(
+                  width: nodeSize,
+                  height: nodeSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: isCompleted
+                          ? [_kGreen, const Color(0xFF22A63B)]
+                          : isActive
+                              ? [_kOrange, const Color(0xFFFFB347)]
+                              : [
+                                  const Color(0xFFCFD8DC),
+                                  const Color(0xFFB0BEC5),
+                                ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: isActive
+                        ? [
+                            BoxShadow(
+                              color: accent.withValues(alpha: 0.44),
+                              blurRadius: 24,
+                              offset: const Offset(0, 7),
+                            ),
+                          ]
+                        : [],
+                    border: Border.all(color: Colors.white, width: 3.5),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      isCompleted
+                          ? Icons.star_rounded
+                          : (isActive
+                              ? Icons.play_arrow_rounded
+                              : Icons.lock_rounded),
+                      color: Colors.white,
+                      size: isCompleted ? 34 : 30,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Label badge below circle
+            Positioned(
+              left: labelLeft,
+              top: nodeSize + 6,
+              width: labelW,
+              child: GestureDetector(
+                onTap: isActive ? () { handleTap(); } : onLockedTap,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.96),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: accent.withValues(
+                          alpha: isActive ? 0.35 : 0.12),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.10),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        path.title,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: isActive
+                              ? const Color(0xFF1A1A1A)
+                              : Colors.grey.shade500,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isCompleted
+                                ? Icons.check_circle_rounded
+                                : isActive
+                                    ? Icons.play_circle_filled
+                                    : Icons.lock_rounded,
+                            color: accent,
+                            size: 10,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            isCompleted
+                                ? 'Terminé'
+                                : (isActive ? 'En cours' : 'Verrouillé'),
+                            style: TextStyle(
+                              color: accent,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -968,18 +941,18 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            _kGreen.withValues(alpha: 0.10),
-            _kYellow.withValues(alpha: 0.05),
+            _kOrange.withValues(alpha: 0.10),
+            _kOrange.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(22),
         border:
-            Border.all(color: _kGreen.withValues(alpha: 0.20), width: 1.5),
+            Border.all(color: _kOrange.withValues(alpha: 0.20), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: _kGreen.withValues(alpha: 0.08),
+            color: _kOrange.withValues(alpha: 0.08),
             blurRadius: 14,
             offset: const Offset(0, 5),
           ),
@@ -993,15 +966,11 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
               width: 62,
               height: 62,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [_kGreen, Color(0xFF22A63B)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: _kOrange,
                 borderRadius: BorderRadius.circular(17),
                 boxShadow: [
                   BoxShadow(
-                    color: _kGreen.withValues(alpha: 0.35),
+                    color: _kOrange.withValues(alpha: 0.35),
                     blurRadius: 14,
                     offset: const Offset(0, 5),
                   ),
@@ -1021,13 +990,13 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: _kGreen.withValues(alpha: 0.10),
+                      color: _kOrange.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       'Module ${index + 1}',
                       style: const TextStyle(
-                        color: _kGreen,
+                        color: _kOrange,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1051,32 +1020,15 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: _kGreen.withValues(alpha: 0.08),
+                color: _kOrange.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.menu_book_rounded,
-                  color: _kGreen, size: 20),
+                  color: _kOrange, size: 20),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildFallbackHeader(String title) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.94),
-        borderRadius: BorderRadius.circular(18),
-        border:
-            Border.all(color: _kGreen.withValues(alpha: 0.12), width: 1),
-      ),
-      child: Text(title,
-          style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF1A1A1A))),
     );
   }
 
@@ -1135,8 +1087,8 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Réessayer'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGreen,
-                  foregroundColor: Colors.white,
+                  backgroundColor: _kOrange,
+                  foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 28, vertical: 14),
@@ -1163,7 +1115,7 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: _kGreen.withValues(alpha: 0.10),
+                color: _kOrange.withValues(alpha: 0.10),
                 blurRadius: 28,
                 offset: const Offset(0, 12),
               ),
@@ -1176,13 +1128,13 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [
-                    _kGreen.withValues(alpha: 0.10),
-                    _kYellow.withValues(alpha: 0.08),
+                    _kOrange.withValues(alpha: 0.10),
+                    _kOrange.withValues(alpha: 0.08),
                   ]),
                   shape: BoxShape.circle,
                 ),
                 child:
-                    const Icon(Icons.map_outlined, color: _kGreen, size: 44),
+                    const Icon(Icons.map_outlined, color: _kOrange, size: 44),
               ),
               const SizedBox(height: 20),
               const Text(
@@ -1208,8 +1160,8 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Réessayer'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGreen,
-                  foregroundColor: Colors.white,
+                  backgroundColor: _kOrange,
+                  foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 28, vertical: 14),
@@ -1258,28 +1210,102 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
               ),
             );
           }
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Align(
-              alignment: i % 2 == 0
-                  ? Alignment.centerRight
-                  : Alignment.centerLeft,
-              child: FractionallySizedBox(
-                widthFactor: 0.92,
-                child: Container(
-                  height: 92,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
+          // Circle node placeholder
+          final xFrac = _kNodeWave[(i - 2) % _kNodeWave.length];
+          return LayoutBuilder(builder: (_, c) {
+            final w = c.maxWidth;
+            final cx = w * xFrac;
+            final cl = (cx - _kNodeSize / 2).clamp(0.0, w - _kNodeSize);
+            final ll = (cx - 66.0).clamp(0.0, w - 132.0);
+            return SizedBox(
+              height: _kNodeSlot + (i > 2 ? _kConnH : 0),
+              child: Stack(
+                children: [
+                  if (i > 2)
+                    Positioned(
+                      left: cx - 1.5,
+                      top: 0,
+                      child: Container(
+                        width: 3,
+                        height: _kConnH,
+                        color: Colors.white,
+                      ),
+                    ),
+                  Positioned(
+                    left: cl,
+                    top: i > 2 ? _kConnH : 0,
+                    child: Container(
+                      width: _kNodeSize,
+                      height: _kNodeSize,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                   ),
-                ),
+                  Positioned(
+                    left: ll,
+                    top: (i > 2 ? _kConnH : 0) + _kNodeSize + 8,
+                    child: Container(
+                      width: 132,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          );
+            );
+          });
         },
       ),
     );
   }
+}
+
+// ── Dashed connector between Duolingo nodes ───────────────────────────────────
+
+class _DuoConnectorPainter extends CustomPainter {
+  final Offset from;
+  final Offset to;
+  final Color color;
+  const _DuoConnectorPainter(
+      {required this.from, required this.to, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    const dashLen = 6.0;
+    const gapLen  = 5.0;
+
+    final dx = to.dx - from.dx;
+    final dy = to.dy - from.dy;
+    final dist = Offset(dx, dy).distance;
+    final ux = dx / dist;
+    final uy = dy / dist;
+    final steps = (dist / (dashLen + gapLen)).floor();
+
+    for (int i = 0; i < steps; i++) {
+      final s = i * (dashLen + gapLen);
+      final e = s + dashLen;
+      canvas.drawLine(
+        Offset(from.dx + ux * s, from.dy + uy * s),
+        Offset(from.dx + ux * e, from.dy + uy * e),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DuoConnectorPainter o) =>
+      o.from != from || o.to != to || o.color != color;
 }
 
 // ── Modèle de page ────────────────────────────────────────────────────────────

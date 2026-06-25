@@ -1,13 +1,13 @@
-/*
+﻿/*
 * File : App Theme
 * Version : 1.0.0
 * */
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fasolingo/helpers/theme/custom_theme.dart';
-import 'package:fasolingo/helpers/theme/theme_type.dart';
-import 'package:fasolingo/helpers/my_widgets/my_text_style.dart';
+import 'package:tibi/helpers/theme/custom_theme.dart';
+import 'package:tibi/helpers/theme/theme_type.dart';
+import 'package:tibi/helpers/my_widgets/my_text_style.dart';
 
 export 'custom_theme.dart';
 export 'navigation_theme.dart';

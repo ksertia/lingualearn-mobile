@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/models/support/support_models.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/models/support/support_models.dart';
 import 'package:get/get.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 

@@ -1,38 +1,10 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import '../../../models/etapes/steps_model.dart'; // Notre Master Model
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:get/get.dart';
+import '../../../models/etapes/steps_model.dart';
 
 class StepService {
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: AppConstant.baseURl,
-    connectTimeout: const Duration(seconds: 10),
-    headers: {
-      'Accept': 'application/json',
-    },
-  ))
-    ..interceptors.add(PrettyDioLogger(
-      requestHeader: true,
-      requestBody: true,
-      responseHeader: false,
-      responseBody: true,
-      error: true,
-      compact: true,
-      maxWidth: 90,
-    ));
-
-  StepService() {
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        final token = LocalStorage.getAuthToken();
-        if (token != null && token.isNotEmpty) {
-          options.headers['Authorization'] = 'Bearer $token';
-        }
-        return handler.next(options);
-      },
-    ));
-  }
+  Dio get _dio => Get.find<SessionController>().dio;
 
   Future<StepData?> getStepContent(String stepId, {String? userId}) async {
     try {
@@ -53,11 +25,7 @@ class StepService {
         return StepData.fromJson(data);
       }
       return null;
-    } on DioException catch (e) {
-      print("Erreur Dio : ${e.message}");
-      return null;
-    } catch (e) {
-      print("Erreur inattendue : $e");
+    } catch (_) {
       return null;
     }
   }

@@ -1,14 +1,14 @@
-import 'dart:developer';
+﻿import 'dart:developer';
 import 'dart:ui';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/extensions/string.dart';
-import 'package:fasolingo/helpers/localizations/language.dart';
-import 'package:fasolingo/helpers/services/auth_services.dart';
-import 'package:fasolingo/helpers/services/setting_service.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/utils/app_snackbar.dart';
-import 'package:fasolingo/models/user_model.dart';
-import 'package:fasolingo/widgets/bottom_bar/navigation_provider.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/extensions/string.dart';
+import 'package:tibi/helpers/localizations/language.dart';
+import 'package:tibi/helpers/services/auth_services.dart';
+import 'package:tibi/helpers/services/setting_service.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/utils/app_snackbar.dart';
+import 'package:tibi/models/user_model.dart';
+import 'package:tibi/widgets/bottom_bar/navigation_provider.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 

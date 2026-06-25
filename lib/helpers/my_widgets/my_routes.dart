@@ -1,4 +1,4 @@
-import 'package:fasolingo/helpers/my_widgets/my_route.dart';
+﻿import 'package:tibi/helpers/my_widgets/my_route.dart';
 
 class MyRoutes {
   static List<MyRoute> _routes = [];

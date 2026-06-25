@@ -1,4 +1,4 @@
-import 'package:fasolingo/helpers/services/auth_services.dart';
+﻿import 'package:tibi/helpers/services/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';

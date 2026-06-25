@@ -1,19 +1,18 @@
-import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+﻿import 'package:tibi/controller/apps/langue/langue_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
-const Color _kOrange    = Color(0xFFF27F22);
-const Color _kPurple    = Color(0xFF7C3AED);
+const Color _kblack    = Colors.black;
+const Color _kOrange     = Color(0xFFF27F22);
 
 // ── Niveau colors & icons ─────────────────────────────────────────────────────
 const _levelMeta = [
-  _LevelMeta(_kGreen,  Icons.grass_rounded,   'Niveau de base'),
+  _LevelMeta(_kblack,  Icons.grass_rounded,   'Niveau de base'),
   _LevelMeta(_kOrange, Icons.park_rounded,    'Niveau intermédiaire'),
-  _LevelMeta(_kPurple, Icons.forest_rounded,  'Niveau avancé'),
+  _LevelMeta(_kGreen, Icons.forest_rounded,  'Niveau avancé'),
 ];
 
 class _LevelMeta {
@@ -96,7 +95,7 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
           20, MediaQuery.of(context).padding.top + 16, 20, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -396,7 +395,7 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
           decoration: BoxDecoration(
             gradient: hasLevel
                 ? const LinearGradient(
-                    colors: [_kGreen, _kGreenDark],
+                    colors: [_kOrange, _kOrange],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   )
@@ -406,7 +405,7 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
             boxShadow: hasLevel
                 ? [
                     BoxShadow(
-                      color: _kGreen.withValues(alpha: 0.30),
+                      color: _kOrange.withValues(alpha: 0.30),
                       blurRadius: 18,
                       offset: const Offset(0, 7),
                     ),
@@ -479,9 +478,9 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
           SizedBox(
             width: 48, height: 48,
             child: CircularProgressIndicator(
-              color: _kGreen,
+              color: _kOrange,
               strokeWidth: 3,
-              backgroundColor: _kGreen.withValues(alpha: 0.12),
+              backgroundColor: _kOrange.withValues(alpha: 0.12),
             ),
           ),
           const SizedBox(height: 16),
@@ -505,11 +504,11 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: _kGreen.withValues(alpha: 0.08),
+              color: _kOrange.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.layers_rounded,
-                color: _kGreen, size: 38),
+                color: _kOrange, size: 38),
           ),
           const SizedBox(height: 16),
           Text(

@@ -1,11 +1,11 @@
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryImage.dart';
+﻿import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryImage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
-import 'package:fasolingo/widgets/lessons/qcm.dart';
-import '../../../controller/apps/etapes/stepController.dart';
-import '../../../models/etapes/steps_model.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
+import 'package:tibi/widgets/lessons/qcm.dart';
+import '../../../../controller/apps/etapes/stepController.dart';
+import '../../../../models/etapes/steps_model.dart';
 
 const Color _cOrange  = Color(0xFFFF7043);
 const Color _cOrange2 = Color(0xFFFFB74D);
@@ -413,9 +413,7 @@ class StepContentScreen extends StatelessWidget {
           question: currentQuestion.text,
           options: currentQuestion.options,
           correctOption: currentQuestion.answer,
-          lottieQuestion: 'assets/lottie/mascot.json',
-          lottieCorrect: 'assets/lottie/Happy mascot.json',
-          lottieIncorrect: 'assets/lottie/Sad mascot.json',
+          questionIndex: controller.currentQuestionIndex.value,
           onNext: () => _handleQuizNext(context, controller, questionsList),
         );
       }

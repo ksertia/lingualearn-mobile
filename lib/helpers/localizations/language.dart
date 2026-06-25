@@ -1,7 +1,7 @@
-import 'package:fasolingo/helpers/logger/logger.dart';
+﻿import 'package:tibi/helpers/logger/logger.dart';
 import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/theme/theme_customizer.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/theme/theme_customizer.dart';
 
 class Language {
   final Locale locale;

@@ -1,6 +1,6 @@
-import 'package:fasolingo/controller/apps/notifications/notification_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
-import 'package:fasolingo/models/notifications/notification_model.dart';
+﻿import 'package:tibi/controller/apps/notifications/notification_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/models/notifications/notification_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

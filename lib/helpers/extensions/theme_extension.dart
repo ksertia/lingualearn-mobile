@@ -1,4 +1,4 @@
-import 'package:fasolingo/helpers/theme/theme_type.dart';
+﻿import 'package:tibi/helpers/theme/theme_type.dart';
 
 extension ThemeExtension on ThemeType {
   String get toText {

@@ -1,26 +1,29 @@
-import 'dart:math';
-import 'package:fasolingo/helpers/services/sound_service.dart';
+﻿import 'dart:math';
+import 'package:tibi/helpers/services/sound_service.dart';
+import 'package:tibi/widgets/mascots/quiz_mascot.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 
 class QuizQCM extends StatefulWidget {
   final String question;
   final List<String> options;
+  final String correctOption;
+  final VoidCallback onNext;
+  final int questionIndex;
+  // conservés pour compatibilité ascendante (ignorés)
   final String lottieQuestion;
   final String lottieCorrect;
   final String lottieIncorrect;
-  final String correctOption;
-  final VoidCallback onNext;
 
   const QuizQCM({
     super.key,
     required this.question,
     required this.options,
-    required this.lottieQuestion,
-    required this.lottieCorrect,
-    required this.lottieIncorrect,
     required this.correctOption,
     required this.onNext,
+    this.questionIndex = 0,
+    this.lottieQuestion = '',
+    this.lottieCorrect = '',
+    this.lottieIncorrect = '',
   });
 
   @override
@@ -29,7 +32,7 @@ class QuizQCM extends StatefulWidget {
 
 class _QuizQCMState extends State<QuizQCM> with TickerProviderStateMixin {
   int? selectedIndex;
-  String? currentLottie;
+  QuizMascotMood _mascotMood = QuizMascotMood.speaking;
   bool hasValidated = false;
 
   late final AnimationController _shakeCtrl;
@@ -38,7 +41,6 @@ class _QuizQCMState extends State<QuizQCM> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    currentLottie = widget.lottieQuestion;
     _shakeCtrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 480));
     _correctCtrl = AnimationController(
@@ -402,12 +404,10 @@ class _QuizQCMState extends State<QuizQCM> with TickerProviderStateMixin {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      width: 120,
-                      height: 120,
-                      child: currentLottie != null
-                          ? Lottie.asset(currentLottie!)
-                          : const SizedBox(),
+                    QuizMascotSelector(
+                      questionIndex: widget.questionIndex,
+                      mood: _mascotMood,
+                      size: 100,
                     ),
                     const SizedBox(width: 8),
                     Flexible(
@@ -502,9 +502,9 @@ class _QuizQCMState extends State<QuizQCM> with TickerProviderStateMixin {
                               widget.correctOption;
                       setState(() {
                         hasValidated = true;
-                        currentLottie = isCorrect
-                            ? widget.lottieCorrect
-                            : widget.lottieIncorrect;
+                        _mascotMood = isCorrect
+                            ? QuizMascotMood.correct
+                            : QuizMascotMood.incorrect;
                       });
                       if (isCorrect) {
                         _correctCtrl.forward(from: 0);

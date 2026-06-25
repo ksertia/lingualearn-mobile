@@ -1,6 +1,6 @@
-import 'dart:math';
+﻿import 'dart:math';
 
-import 'package:fasolingo/helpers/extensions/string.dart';
+import 'package:tibi/helpers/extensions/string.dart';
 
 class MyTextUtils {
   static const String _dummyText =

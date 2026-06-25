@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/helpers/services/auth_services.dart';
+import 'package:tibi/helpers/services/auth_services.dart';
 
 class ForgotPasswordController extends GetxController {
   final emailController = TextEditingController();

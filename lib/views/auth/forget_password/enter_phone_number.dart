@@ -1,12 +1,13 @@
-import 'package:fasolingo/controller/auth/password/ForgotPasswordController.dart';
+﻿import 'package:tibi/controller/auth/password/ForgotPasswordController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class EnterPhonenumberPagge extends StatelessWidget {
   const EnterPhonenumberPagge({super.key});
 
-  static const _primary = Color(0xFF188329);
-  static const _primaryLight = Color(0xFF1EB83A);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +15,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
         Get.put(ForgotPasswordController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4FBF6),
+      backgroundColor: const Color(0xFFFFFDE7),
       body: Column(
         children: [
           Container(
@@ -23,7 +24,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [_primary, _primaryLight],
+                colors: [_kOrange, _kOrange],
               ),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(32),
@@ -126,7 +127,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: const BorderSide(
-                            color: _primary, width: 1.5),
+                            color: _kOrange, width: 1.5),
                       ),
                     ),
                   ),
@@ -139,7 +140,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
                               ? null
                               : () => controller.requestOtp(),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _primary,
+                            backgroundColor: _kOrange,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
@@ -149,12 +150,12 @@ class EnterPhonenumberPagge extends StatelessWidget {
                                   height: 22,
                                   width: 22,
                                   child: CircularProgressIndicator(
-                                      color: Colors.white, strokeWidth: 2.5),
+                                      color: _kOrange, strokeWidth: 2.5),
                                 )
                               : const Text(
                                   "Envoyer le code",
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: Color(0xFF1A1A1A),
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -168,7 +169,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Container(
-        color: const Color(0xFFF4FBF6),
+        color: const Color(0xFFFFFDE7),
         padding: const EdgeInsets.only(bottom: 28, top: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -184,7 +185,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
                 "Se connecter",
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: _primary,
+                  color: _kOrange,
                   fontSize: 14,
                 ),
               ),

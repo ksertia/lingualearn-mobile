@@ -1,18 +1,16 @@
-import 'package:fasolingo/controller/apps/settings/subscription_details_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
-import 'package:fasolingo/models/souscription/subscription_status_model.dart';
+﻿import 'package:tibi/controller/apps/settings/subscription_details_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/models/souscription/subscription_status_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 const Color _kGreen      = Color(0xFF188329);
-const Color _kGreenDark  = Color(0xFF0F5C1C);
-const Color _kYellow     = Color(0xFFF5BF1E);
-const Color _kOrange     = Color(0xFFF27F22);
-const Color _kOrangeDark = Color(0xFFC4611A);
 const Color _kRed    = Color(0xFFEF4444);
 const Color _kPurple = Color(0xFF7C3AED);
 const Color _kBlue   = Color(0xFF0EA5E9);
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class SubscriptionDetailsPage extends StatefulWidget {
   const SubscriptionDetailsPage({super.key});
@@ -56,7 +54,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
       padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 22),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -134,7 +132,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 13),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [_kOrange, _kOrangeDark]),
+                  gradient: const LinearGradient(colors: [_kOrange, _kOrange]),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
@@ -243,7 +241,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [_kOrange, _kOrangeDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -274,7 +272,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
                   width: 65, height: 65,
                   decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: _kYellow.withValues(alpha: 0.15))),
+                      color: _kOrange.withValues(alpha: 0.15))),
             ),
             Padding(
               padding: const EdgeInsets.all(22),
@@ -327,7 +325,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: _kYellow,
+                            color: _kOrange,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(cycle,
@@ -391,7 +389,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
                             decoration: BoxDecoration(
                               color: daysLeft <= 7
                                   ? const Color(0xFFFC8181)
-                                  : _kYellow,
+                                  : _kOrange,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -466,7 +464,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
       if ((plan.reducePrice ?? '').isNotEmpty &&
           (plan.percentage ?? '').isNotEmpty) ...[
         _divider(),
-        _row(Icons.local_offer_rounded, const Color(0xFFFEF9C3), _kYellow,
+        _row(Icons.local_offer_rounded, const Color(0xFFFEF9C3), _kOrange,
             'Prix réduit',
             '${_formatPrice(plan.reducePrice!)} ${plan.currency}  (−${plan.percentage}%)'),
       ],
@@ -635,7 +633,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [_kOrange, _kOrangeDark]),
+              gradient: const LinearGradient(colors: [_kOrange, _kOrange]),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -670,7 +668,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
               padding: const EdgeInsets.symmetric(vertical: 15),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                    colors: [_kOrange, _kOrangeDark]),
+                    colors: [_kOrange, _kOrange]),
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(

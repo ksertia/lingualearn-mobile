@@ -1,5 +1,5 @@
-import 'package:fasolingo/helpers/my_widgets/my_display_type.dart';
-import 'package:fasolingo/helpers/my_widgets/my_screen_media_type.dart';
+﻿import 'package:tibi/helpers/my_widgets/my_display_type.dart';
+import 'package:tibi/helpers/my_widgets/my_screen_media_type.dart';
 
 class MyScreenMedia {
   static int flexColumns = 12;

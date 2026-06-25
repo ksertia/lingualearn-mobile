@@ -1,6 +1,6 @@
-import 'package:fasolingo/helpers/my_widgets/my_text.dart';
-import 'package:fasolingo/helpers/my_widgets/my_text_style.dart';
-import 'package:fasolingo/helpers/theme/admin_theme.dart';
+﻿import 'package:tibi/helpers/my_widgets/my_text.dart';
+import 'package:tibi/helpers/my_widgets/my_text_style.dart';
+import 'package:tibi/helpers/theme/admin_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

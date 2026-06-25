@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/controller/my_controller.dart';
-import 'package:fasolingo/helpers/extensions/date_time_extention.dart';
-import 'package:fasolingo/helpers/my_widgets/my_form_validator.dart';
-import 'package:fasolingo/helpers/my_widgets/my_validators.dart';
+import 'package:tibi/controller/my_controller.dart';
+import 'package:tibi/helpers/extensions/date_time_extention.dart';
+import 'package:tibi/helpers/my_widgets/my_form_validator.dart';
+import 'package:tibi/helpers/my_widgets/my_validators.dart';
 
 class WizardController extends MyController {
   // int selectedTab = 0;

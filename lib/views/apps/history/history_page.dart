@@ -1,19 +1,16 @@
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+﻿import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/widgets/zaki_mascot.dart';
+import 'package:tibi/widgets/mascots/zaki_mascot.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:fasolingo/controller/apps/user_progress/user_progress_controller.dart';
-import 'package:fasolingo/models/user_progress/user_progress_model.dart';
+import 'package:tibi/controller/apps/user_progress/user_progress_controller.dart';
+import 'package:tibi/models/user_progress/user_progress_model.dart';
 
 // ── Palette (matches app-wide design) ────────────────────────────────────────
-const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
-const Color _kYellow    = Color(0xFFF5BF1E);
-const Color _kOrange    = Color(0xFFF27F22);
-const Color _kBlue      = Color(0xFF0EA5E9);
-const Color _kPurple    = Color(0xFF7C3AED);
+const Color _kGreen      = Color(0xFF188329);
 const Color _kLocked    = Color(0xFFB0BEC5);
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 // ── Groups all levels for the same language ───────────────────────────────────
 class _LangGroup {
@@ -32,7 +29,6 @@ class _LangGroup {
     });
   }
 
-  // Un niveau est terminé si : status 'completed', OU completedModules >= totalModules > 0, OU progressPercentage == 100
   static bool _isLevelDone(ProgressLevelInfo lvl) {
     if (lvl.status.toLowerCase() == 'completed') return true;
     if (lvl.totalModules > 0 && lvl.completedModules >= lvl.totalModules) return true;
@@ -148,15 +144,6 @@ class _HistoryPageState extends State<HistoryPage> {
     }
   }
 
-  String _langEmoji(String name) {
-    final n = name.toLowerCase();
-  
-    if (n.contains('moore') || n.contains('mooré') || n.contains('more')) return '🇧🇫';
-    if (n.contains('dioula') || n.contains('dyula')) return '🇧🇫';
-    if (n.contains('bissa') || n.contains('bisa')) return '🇧🇫';
-    return '🌐';
-  }
-
   // Group entries by language.id, sorted by most recently accessed
   List<_LangGroup> _groupByLanguage(List<UserProgressEntry> entries) {
     final map = <String, List<UserProgressEntry>>{};
@@ -227,7 +214,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 : 'Mes apprentissages';
 
         return RefreshIndicator(
-          color: _kGreen,
+          color: _kOrange,
           onRefresh: controller.loadProgress,
           child: CustomScrollView(
             slivers: [
@@ -256,10 +243,10 @@ class _HistoryPageState extends State<HistoryPage> {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: _kGreen.withValues(alpha: 0.12),
+                          color: _kOrange.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.history_rounded, color: _kGreen, size: 16),
+                        child: const Icon(Icons.history_rounded, color: _kOrange, size: 16),
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -271,13 +258,13 @@ class _HistoryPageState extends State<HistoryPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _kGreen.withValues(alpha: 0.10),
+                          color: _kOrange.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           '$displayLangs langue${displayLangs > 1 ? 's' : ''}',
                           style: const TextStyle(
-                              fontSize: 12, color: _kGreen, fontWeight: FontWeight.w700),
+                              fontSize: 12, color: _kOrange, fontWeight: FontWeight.w700),
                         ),
                       ),
                     ],
@@ -323,7 +310,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 padding: const EdgeInsets.only(left: 8),
                 child: _buildSelectorPill(
                   label: g.language.name,
-                  emoji: _langEmoji(g.language.name),
+                  emoji: null,
                   isSelected: _selectedLangId == g.language.id,
                   onTap: () => setState(() => _selectedLangId = g.language.id),
                 ),
@@ -347,7 +334,7 @@ class _HistoryPageState extends State<HistoryPage> {
         decoration: BoxDecoration(
           gradient: isSelected
               ? const LinearGradient(
-                  colors: [_kGreen, _kGreenDark],
+                  colors: [_kOrange, _kOrange],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
@@ -357,13 +344,13 @@ class _HistoryPageState extends State<HistoryPage> {
           border: Border.all(
             color: isSelected
                 ? Colors.transparent
-                : _kGreen.withValues(alpha: 0.22),
+                : _kOrange.withValues(alpha: 0.35),
             width: 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: _kGreen.withValues(alpha: 0.30),
+                    color: _kOrange.withValues(alpha: 0.30),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   )
@@ -380,7 +367,7 @@ class _HistoryPageState extends State<HistoryPage> {
               Icon(
                 Icons.layers_rounded,
                 size: 14,
-                color: isSelected ? Colors.white : _kGreen,
+                color: isSelected ? Colors.white : _kOrange,
               ),
               const SizedBox(width: 6),
             ],
@@ -407,7 +394,7 @@ class _HistoryPageState extends State<HistoryPage> {
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-              color: _kGreen.withValues(alpha: 0.18),
+              color: _kOrange.withValues(alpha: 0.18),
               blurRadius: 24,
               offset: const Offset(0, 8)),
         ],
@@ -421,7 +408,7 @@ class _HistoryPageState extends State<HistoryPage> {
         ),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [_kGreen, _kGreenDark],
+            colors: [_kOrange, _kOrange],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -483,7 +470,7 @@ class _HistoryPageState extends State<HistoryPage> {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-              color: _kGreen.withValues(alpha: 0.13),
+              color: _kOrange.withValues(alpha: 0.13),
               blurRadius: 16,
               offset: const Offset(0, 6)),
         ],
@@ -491,7 +478,7 @@ class _HistoryPageState extends State<HistoryPage> {
       child: Row(
         children: [
           _buildSummaryPill(
-              Icons.language_rounded, '$langs', 'Langue${langs > 1 ? 's' : ''}', _kBlue),
+              Icons.language_rounded, '$langs', 'Langue${langs > 1 ? 's' : ''}', _kOrange),
           _buildSummaryDivider(),
           _buildSummaryPill(
               Icons.check_circle_rounded, '$completedMods', 'Modules', _kGreen),
@@ -500,7 +487,7 @@ class _HistoryPageState extends State<HistoryPage> {
               Icons.military_tech_rounded, '$completedLevels', 'Niveaux', _kOrange),
           _buildSummaryDivider(),
           _buildSummaryPill(
-              Icons.trending_up_rounded, '$avgPct%', 'Progression', _kPurple),
+              Icons.trending_up_rounded, '$avgPct%', 'Progression', _kGreen),
         ],
       ),
     );
@@ -551,10 +538,10 @@ class _HistoryPageState extends State<HistoryPage> {
     final pct = lang.progressPercentage.clamp(0, 100).toDouble();
 
     final List<Color> stripeColors = lang.status.toLowerCase() == 'completed'
-        ? [_kGreen, _kYellow]
+        ? [_kGreen, _kOrange]
         : (lang.status.toLowerCase() == 'locked'
             ? [_kLocked, const Color(0xFFCFD8DC)]
-            : [_kOrange, _kYellow]);
+            : [_kOrange, _kOrange]);
 
     return Container(
       decoration: BoxDecoration(
@@ -618,9 +605,9 @@ class _HistoryPageState extends State<HistoryPage> {
                                 ),
                               ],
                             ),
-                            child: Center(
-                              child: Text(_langEmoji(lang.name),
-                                  style: const TextStyle(fontSize: 24)),
+                            child: const Center(
+                              child: Icon(Icons.language_rounded,
+                                  color: Colors.white, size: 26),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -874,21 +861,21 @@ class _HistoryPageState extends State<HistoryPage> {
       decoration: BoxDecoration(
         color: AppColors.cardAlt(_ctx),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kGreen.withValues(alpha: 0.12)),
+        border: Border.all(color: _kOrange.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.my_location_rounded, size: 13, color: _kGreen),
+              Icon(Icons.my_location_rounded, size: 13, color: _kOrange),
               const SizedBox(width: 5),
               Text(
                 'Activité en cours',
                 style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: _kGreen,
+                    color: _kOrange,
                     letterSpacing: 0.4),
               ),
             ],
@@ -900,14 +887,14 @@ class _HistoryPageState extends State<HistoryPage> {
                 module.status),
           if (path != null) ...[
             if (module != null) const SizedBox(height: 8),
-            _buildActivityRow(Icons.route_rounded, _kBlue, 'Parcours', path.title,
+            _buildActivityRow(Icons.route_rounded, _kOrange, 'Parcours', path.title,
                 '${path.completedSteps}/${path.totalSteps} étapes', path.status),
           ],
           if (step != null) ...[
             if (path != null || module != null) const SizedBox(height: 8),
             _buildActivityRow(
               _stepTypeIcon(step.stepType),
-              _kPurple,
+              _kOrange,
               _stepTypeLabel(step.stepType),
               step.title,
               step.score != null ? 'Score: ${step.score}%' : _statusLabel(step.status),
@@ -1130,11 +1117,11 @@ class _HistoryPageState extends State<HistoryPage> {
                           horizontal: 28, vertical: 14),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                            colors: [_kGreen, _kGreenDark]),
+                            colors: [_kOrange, _kOrange]),
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
-                              color: _kGreen.withValues(alpha: 0.30),
+                              color: _kOrange.withValues(alpha: 0.30),
                               blurRadius: 10,
                               offset: const Offset(0, 4)),
                         ],
@@ -1205,11 +1192,11 @@ class _HistoryPageState extends State<HistoryPage> {
                           horizontal: 28, vertical: 14),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                            colors: [_kGreen, _kGreenDark]),
+                            colors: [_kOrange, _kOrange]),
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
-                              color: _kGreen.withValues(alpha: 0.30),
+                              color: _kOrange.withValues(alpha: 0.30),
                               blurRadius: 10,
                               offset: const Offset(0, 4)),
                         ],

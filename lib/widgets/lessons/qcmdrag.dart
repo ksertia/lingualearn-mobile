@@ -1,14 +1,16 @@
-import 'dart:math';
-import 'package:fasolingo/helpers/services/sound_service.dart';
+﻿import 'dart:math';
+import 'package:tibi/helpers/services/sound_service.dart';
+import 'package:tibi/widgets/mascots/quiz_mascot.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/controller/apps/discovery_controller.dart';
-import 'package:lottie/lottie.dart';
+import 'package:tibi/controller/apps/discovery_controller.dart';
 
 class StepQuizTranslate extends StatefulWidget {
   final String question;
   final List<String> words;
   final String correctFullSentence;
+  final int questionIndex;
+  // conservés pour compatibilité ascendante (ignorés)
   final String lottieQuestion;
   final String lottieCorrect;
   final String lottieIncorrect;
@@ -18,9 +20,10 @@ class StepQuizTranslate extends StatefulWidget {
     required this.question,
     required this.words,
     required this.correctFullSentence,
-    required this.lottieQuestion,
-    required this.lottieCorrect,
-    required this.lottieIncorrect,
+    this.questionIndex = 0,
+    this.lottieQuestion = '',
+    this.lottieCorrect = '',
+    this.lottieIncorrect = '',
   });
 
   @override
@@ -33,7 +36,7 @@ class _StepQuizTranslateState extends State<StepQuizTranslate>
 
   List<String> selectedWords = [];
   List<String> availableWords = [];
-  String? currentLottie;
+  QuizMascotMood _mascotMood = QuizMascotMood.speaking;
   bool hasValidated = false;
 
   // Shake sur la zone de réponse quand la phrase est mauvaise
@@ -42,7 +45,6 @@ class _StepQuizTranslateState extends State<StepQuizTranslate>
   @override
   void initState() {
     super.initState();
-    currentLottie = widget.lottieQuestion;
     availableWords = List.from(widget.words);
     _shakeCtrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 480));
@@ -169,10 +171,10 @@ class _StepQuizTranslateState extends State<StepQuizTranslate>
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      width: 110,
-                      height: 110,
-                      child: Lottie.asset(currentLottie!),
+                    QuizMascotSelector(
+                      questionIndex: widget.questionIndex,
+                      mood: _mascotMood,
+                      size: 100,
                     ),
                     const SizedBox(width: 5),
                     Flexible(
@@ -383,9 +385,9 @@ class _StepQuizTranslateState extends State<StepQuizTranslate>
                           widget.correctFullSentence.trim().toLowerCase();
                       setState(() {
                         hasValidated = true;
-                        currentLottie = isCorrect
-                            ? widget.lottieCorrect
-                            : widget.lottieIncorrect;
+                        _mascotMood = isCorrect
+                            ? QuizMascotMood.correct
+                            : QuizMascotMood.incorrect;
                       });
                       if (isCorrect) {
                         SoundService.playCorrect();

@@ -1,7 +1,10 @@
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/answer_section.dart';
+﻿import 'package:tibi/widgets/decouvrir_page/decouverte/answer_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
+import 'package:tibi/helpers/constant/app_constant.dart';
+
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class StepDiscoveryImage extends StatefulWidget {
   final String title;
@@ -129,19 +132,19 @@ class _StepDiscoveryImageState extends State<StepDiscoveryImage> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF8F00).withValues(alpha: 0.10),
+              color: Colors.white.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(30.r),
               border: Border.all(
-                color: const Color(0xFFFF8F00).withValues(alpha: 0.30),
+                color: _kOrange.withValues(alpha: 0.30),
               ),
             ),
             child: Text(
               widget.title.toUpperCase(),
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 22,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFFFF8F00),
+                color: Colors.black,
                 letterSpacing: 0.6,
               ),
             ),
@@ -211,7 +214,7 @@ class _StepDiscoveryImageState extends State<StepDiscoveryImage> {
             }
 
             return const Center(
-              child: CircularProgressIndicator(color: Colors.orange),
+              child: CircularProgressIndicator(color: _kOrange),
             );
           },
 
@@ -224,7 +227,7 @@ class _StepDiscoveryImageState extends State<StepDiscoveryImage> {
                 _tryPortFallback();
               });
               return const Center(
-                child: CircularProgressIndicator(color: Colors.orange),
+                child: CircularProgressIndicator(color: _kOrange),
               );
             }
 
@@ -233,7 +236,7 @@ class _StepDiscoveryImageState extends State<StepDiscoveryImage> {
                 _tryHttpsFallback();
               });
               return const Center(
-                child: CircularProgressIndicator(color: Colors.orange),
+                child: CircularProgressIndicator(color: _kOrange),
               );
             }
 
@@ -248,7 +251,7 @@ class _StepDiscoveryImageState extends State<StepDiscoveryImage> {
             }
 
             return const Center(
-              child: CircularProgressIndicator(color: Colors.orange),
+              child: CircularProgressIndicator(color: _kOrange),
             );
           },
         ),

@@ -1,26 +1,23 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:dio/dio.dart';
-import 'package:fasolingo/controller/apps/etapes/etapes_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+import 'package:tibi/controller/apps/etapes/etapes_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fasolingo/helpers/services/etapes/etape_service.dart';
-import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
-import 'package:fasolingo/views/apps/home/StepContentScreen.dart';
-import 'package:fasolingo/widgets/stepsscreens/custom_app_bar.dart';
+import 'package:tibi/helpers/services/etapes/etape_service.dart';
+import 'package:tibi/helpers/services/parcoure/parcoure_service.dart';
+import 'package:tibi/views/apps/home/screens/StepContentScreen.dart';
+import 'package:tibi/widgets/stepsscreens/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:fasolingo/models/parcoure/parcour_model.dart';
+import 'package:tibi/models/parcoure/parcour_model.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────
-const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
-const Color _kYellow    = Color(0xFFF5BF1E);
-const Color _kOrange    = Color(0xFFF27F22);
+const Color _kGreen      = Color(0xFF188329);
+const Color _kYellow     = Color(0xFFF5BF1E);
+const Color _kYellowDark = Color(0xFF8B6B00);
+const Color _kOrange     = Color(0xFFF27F22);
 
-const Color _sCompleted = _kGreen;
-const Color _sActive    = _kOrange;
 const Color _sLocked    = Color(0xFFB0BEC5);
 
 void _showSubscriptionRequired(BuildContext context) {
@@ -47,20 +44,17 @@ void _showSubscriptionRequired(BuildContext context) {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                  colors: [_kOrange, _kYellow],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight),
+              color: _kOrange,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                    color: _kOrange.withValues(alpha: 0.35),
+                    color: _kYellow.withValues(alpha: 0.35),
                     blurRadius: 20,
                     offset: const Offset(0, 8))
               ],
             ),
             child: const Icon(Icons.workspace_premium_rounded,
-                color: Colors.white, size: 38),
+                color: Color(0xFF1A1A1A), size: 38),
           ),
           const SizedBox(height: 22),
           Text('Abonnement requis',
@@ -85,14 +79,14 @@ void _showSubscriptionRequired(BuildContext context) {
                 Get.toNamed('/subscription_plans');
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kGreen,
+                backgroundColor: _kYellow,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
               ),
               child: const Text('Voir les forfaits',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF1A1A1A),
                       fontWeight: FontWeight.w700,
                       fontSize: 16)),
             ),
@@ -253,15 +247,11 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [_kGreen, _kGreenDark],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: _kOrange,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: _kGreen.withValues(alpha: 0.30),
+                  color: _kYellow.withValues(alpha: 0.30),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -270,7 +260,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.lightbulb_rounded, color: _kYellow, size: 20),
+                const Icon(Icons.lightbulb_rounded, color: Color(0xFF1A1A1A), size: 20),
                 const SizedBox(width: 10),
                 const Expanded(
                   child: Text(
@@ -322,11 +312,11 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                         children: [
                           CustomPaint(
                             size: const Size(14, 7),
-                            painter: _StepsTrianglePainter(color: _kGreen),
+                            painter: _StepsTrianglePainter(color: _kYellow),
                           ),
                           const SizedBox(height: 2),
                           const Icon(Icons.touch_app_rounded,
-                              color: _kGreen, size: 30),
+                              color: _kYellowDark, size: 30),
                         ],
                       ),
                     ),
@@ -345,12 +335,6 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
   @override
   Widget build(BuildContext context) {
     _ctx = context;
-    final dynamic args = Get.arguments;
-    final String moduleLottie =
-        (args is Map && args['moduleLottie'] != null)
-            ? args['moduleLottie'].toString()
-            : 'assets/lottie/Lion.json';
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: const CustomAppBar(title: 'Mes Étapes'),
@@ -406,7 +390,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                     });
                   } catch (_) {}
                 },
-                color: _kGreen,
+                color: _kYellow,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: ConstrainedBox(
@@ -418,12 +402,6 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                             height: MediaQuery.of(context).padding.top +
                                 kToolbarHeight +
                                 16),
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 16),
-                          child: _buildHeaderCard(moduleLottie, pages),
-                        ),
-                        const SizedBox(height: 16),
                         _buildPagesSection(context, pages),
                         const SizedBox(height: 90),
                       ],
@@ -465,15 +443,11 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
 
                       return Container(
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [_kGreen, _kGreenDark],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                          color: _kOrange,
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: _kGreen.withValues(alpha: 0.40),
+                              color: _kYellow.withValues(alpha: 0.40),
                               blurRadius: 16,
                               offset: const Offset(0, 6),
                             ),
@@ -501,11 +475,11 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.check_circle_rounded,
-                                  color: Colors.white, size: 20),
+                                  color: Color(0xFF1A1A1A), size: 20),
                               SizedBox(width: 8),
                               Text('Parcours terminé !',
                                   style: TextStyle(
-                                      color: Colors.white,
+                                      color: Color(0xFF1A1A1A),
                                       fontWeight: FontWeight.w800,
                                       fontSize: 16)),
                             ],
@@ -519,217 +493,6 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
             ],
           );
         }),
-      ),
-    );
-  }
-
-  // ── Header card ───────────────────────────────────────────────────────────
-
-  Widget _buildHeaderCard(String lottie, List<_PageData> pages) {
-    final totalSteps =
-        pages.fold<int>(0, (sum, p) => sum + p.steps.length);
-    final doneSteps = pages.fold<int>(0, (sum, p) {
-      return sum +
-          p.steps.where((s) {
-            final st = (s.progress != null && s.progress!['status'] != null)
-                ? s.progress!['status'].toString().toLowerCase()
-                : (s.status ?? 'locked').toLowerCase();
-            return st == 'completed';
-          }).length;
-    });
-    final activeSteps = pages.fold<int>(0, (sum, p) {
-      return sum +
-          p.steps.where((s) {
-            final st = (s.progress != null && s.progress!['status'] != null)
-                ? s.progress!['status'].toString().toLowerCase()
-                : (s.status ?? 'locked').toLowerCase();
-            return st == 'unlocked' || st == 'started' || st == 'in_progress';
-          }).length;
-    });
-    final lockedSteps =
-        (totalSteps - doneSteps - activeSteps).clamp(0, totalSteps);
-    final pct = totalSteps > 0 ? doneSteps / totalSteps : 0.0;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.card(_ctx),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: _kGreen.withValues(alpha: 0.20),
-            blurRadius: 28,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Green gradient banner
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [_kGreen, _kGreenDark],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '🎯 $totalSteps étape${totalSteps > 1 ? 's' : ''}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Mes Étapes',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Progresse étape par étape !',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.75),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 68,
-                  height: 68,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25), width: 1),
-                  ),
-                  child: Lottie.asset(lottie, fit: BoxFit.contain, repeat: true),
-                ),
-              ],
-            ),
-          ),
-          // Progress + stats
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Progression globale',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                            colors: [_kGreen, Color(0xFF22A63B)]),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '${(pct * 100).toInt()}%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: pct,
-                    minHeight: 7,
-                    backgroundColor: _kGreen.withValues(alpha: 0.08),
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(_kGreen),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _buildStatPill(Icons.check_circle_rounded,
-                        '$doneSteps', 'Terminées', _kGreen),
-                    const SizedBox(width: 6),
-                    _buildStatPill(Icons.play_circle_filled,
-                        '$activeSteps', 'En cours', _kOrange),
-                    const SizedBox(width: 6),
-                    _buildStatPill(Icons.lock_rounded,
-                        '$lockedSteps', 'À venir', _sLocked),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatPill(
-      IconData icon, String count, String label, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(14),
-          border:
-              Border.all(color: color.withValues(alpha: 0.15), width: 1),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 15),
-            const SizedBox(height: 3),
-            Text(count,
-                style: TextStyle(
-                    color: color,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900)),
-            Text(label,
-                style: TextStyle(
-                    color: Colors.grey.shade500,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600)),
-          ],
-        ),
       ),
     );
   }
@@ -754,10 +517,10 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                         color: Colors.white.withValues(alpha: 0.95),
                         borderRadius: BorderRadius.circular(50),
                         border: Border.all(
-                            color: _kGreen.withValues(alpha: 0.15), width: 1),
+                            color: _kYellow.withValues(alpha: 0.15), width: 1),
                         boxShadow: [
                           BoxShadow(
-                            color: _kGreen.withValues(alpha: 0.10),
+                            color: _kYellow.withValues(alpha: 0.10),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -806,13 +569,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                           width: isActive ? 24.0 : 8.0,
                           height: 8,
                           decoration: BoxDecoration(
-                            gradient: isActive
-                                ? const LinearGradient(
-                                    colors: [_kGreen, _kYellow])
-                                : null,
-                            color: isActive
-                                ? null
-                                : _kGreen.withValues(alpha: 0.22),
+                            color: isActive ? _kOrange : _kOrange.withValues(alpha: 0.22),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         );
@@ -842,13 +599,13 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
         padding: const EdgeInsets.all(7),
         decoration: BoxDecoration(
           color: enabled
-              ? _kGreen.withValues(alpha: 0.12)
+              ? _kYellow.withValues(alpha: 0.12)
               : Colors.grey.withValues(alpha: 0.08),
           shape: BoxShape.circle,
         ),
         child: Icon(icon,
             size: 15,
-            color: enabled ? _kGreen : Colors.grey.shade400),
+            color: enabled ? _kYellowDark : Colors.grey.shade400),
       ),
     );
   }
@@ -914,8 +671,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
     bool isLast,
   ) {
     final isLeft = i % 2 == 0;
-    final color = isCompleted ? _sCompleted : (isActive ? _sActive : _sLocked);
-    final mins = step.estimatedMinutes > 0 ? '${step.estimatedMinutes} min' : '5 min';
+    final color = isCompleted ? _kGreen : (isActive ? _kOrange : _sLocked);
     final xp = step.stepType == 'quiz' ? '+20 XP' : '+10 XP';
 
     Future<void> handleTap() async {
@@ -944,11 +700,41 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
       if (userId.isNotEmpty && stepStatus == 'unlocked') {
         await StepsService.startStep(userId: userId, stepId: step.id);
       }
-      final res = await Get.to(
+      await Get.to(
         () => StepContentScreen(stepId: step.id, userId: userId),
         transition: Transition.rightToLeft,
       );
-      if (res == true) await _silentRefresh();
+    }
+
+    // ── Couleurs & styles par statut ──────────────────────────────────────
+    final Color cardBg;
+    final Color borderColor;
+    final String badgeLabel;
+    final Color badgeColor;
+    final IconData badgeIcon;
+    final Color titleColor;
+
+    if (isCompleted) {
+      cardBg      = const Color(0xFFE8F5E9); // vert clair solide
+      borderColor = _kGreen;
+      badgeLabel  = 'Terminée';
+      badgeColor  = _kGreen;
+      badgeIcon   = Icons.check_circle_rounded;
+      titleColor  = const Color(0xFF1B5E20);
+    } else if (isActive) {
+      cardBg      = Colors.white;
+      borderColor = _kOrange;
+      badgeLabel  = 'En cours';
+      badgeColor  = _kOrange;
+      badgeIcon   = Icons.play_circle_rounded;
+      titleColor  = const Color(0xFF1A1A1A);
+    } else {
+      cardBg      = const Color(0xFFF0F0F0); // gris clair solide
+      borderColor = _sLocked;
+      badgeLabel  = 'Verrouillée';
+      badgeColor  = _sLocked;
+      badgeIcon   = Icons.lock_rounded;
+      titleColor  = Colors.grey.shade500;
     }
 
     // ── Card ──────────────────────────────────────────────────────────────
@@ -957,7 +743,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.95),
+          color: cardBg,
           borderRadius: isLeft
               ? const BorderRadius.only(
                   topLeft: Radius.circular(16),
@@ -971,19 +757,52 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                   topLeft: Radius.circular(6),
                   bottomLeft: Radius.circular(16),
                 ),
-          border: Border.all(color: color.withValues(alpha: 0.22), width: 1),
+          border: Border.all(color: borderColor, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.13),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
+              color: Colors.black.withValues(alpha: 0.18),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
+            if (isActive && !isCompleted)
+              BoxShadow(
+                color: _kOrange.withValues(alpha: 0.30),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Badge statut
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: badgeColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: badgeColor.withValues(alpha: 0.25), width: 1),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(badgeIcon, size: 9, color: badgeColor),
+                  const SizedBox(width: 3),
+                  Text(
+                    badgeLabel,
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.w800,
+                      color: badgeColor,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 6),
+            // Titre
             Text(
               step.title,
               maxLines: 2,
@@ -991,26 +810,21 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: isActive
-                    ? const Color(0xFF1A1A1A)
-                    : Colors.grey.shade400,
+                color: titleColor,
               ),
             ),
             const SizedBox(height: 5),
+            // XP uniquement
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.timer_outlined, size: 11, color: Colors.grey.shade400),
-                const SizedBox(width: 3),
-                Text(mins,
-                    style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
-                const SizedBox(width: 8),
-                const Icon(Icons.bolt_rounded, size: 11, color: _kYellow),
+                Icon(Icons.bolt_rounded, size: 11,
+                    color: isActive ? _kYellow : Colors.grey.shade300),
                 const SizedBox(width: 2),
                 Text(xp,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 10,
-                        color: _kYellow,
+                        color: isActive ? _kYellow : Colors.grey.shade300,
                         fontWeight: FontWeight.w700)),
               ],
             ),
@@ -1070,7 +884,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                   child: Container(
                     width: 2,
                     color: isCompleted
-                        ? _sCompleted.withValues(alpha: 0.38)
+                        ? _kGreen.withValues(alpha: 0.38)
                         : _sLocked.withValues(alpha: 0.22),
                   ),
                 ),
@@ -1096,18 +910,18 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            _kGreen.withValues(alpha: 0.10),
-            _kYellow.withValues(alpha: 0.05),
+            _kYellow.withValues(alpha: 0.10),
+            _kYellowDark.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border:
-            Border.all(color: _kGreen.withValues(alpha: 0.20), width: 1.5),
+            Border.all(color: _kYellow.withValues(alpha: 0.20), width: 1.5),
         boxShadow: [
           BoxShadow(
-              color: _kGreen.withValues(alpha: 0.08),
+              color: _kYellow.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4)),
         ],
@@ -1117,21 +931,17 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
           Container(
             padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [_kGreen, Color(0xFF22A63B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: _kOrange,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                    color: _kGreen.withValues(alpha: 0.30),
+                    color: _kYellow.withValues(alpha: 0.30),
                     blurRadius: 8,
                     offset: const Offset(0, 3)),
               ],
             ),
             child: const Icon(Icons.route_rounded,
-                color: Colors.white, size: 18),
+                color: Color(0xFF1A1A1A), size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1153,7 +963,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
         color: Colors.white.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(18),
         border:
-            Border.all(color: _kGreen.withValues(alpha: 0.12), width: 1),
+            Border.all(color: _kYellow.withValues(alpha: 0.12), width: 1),
       ),
       child: Text('Étapes du parcours',
           style: TextStyle(
@@ -1213,8 +1023,8 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Réessayer'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGreen,
-                  foregroundColor: Colors.white,
+                  backgroundColor: _kYellow,
+                  foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 28, vertical: 14),
@@ -1241,7 +1051,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                  color: _kGreen.withValues(alpha: 0.10),
+                  color: _kYellow.withValues(alpha: 0.10),
                   blurRadius: 28,
                   offset: const Offset(0, 12))
             ],
@@ -1253,13 +1063,13 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [
-                    _kGreen.withValues(alpha: 0.10),
-                    _kYellow.withValues(alpha: 0.08),
+                    _kYellow.withValues(alpha: 0.12),
+                    _kYellowDark.withValues(alpha: 0.08),
                   ]),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.flag_outlined,
-                    color: _kGreen, size: 44),
+                    color: _kYellowDark, size: 44),
               ),
               const SizedBox(height: 20),
               Text('Aucune étape disponible',
@@ -1282,8 +1092,8 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Réessayer'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGreen,
-                  foregroundColor: Colors.white,
+                  backgroundColor: _kYellow,
+                  foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 28, vertical: 14),

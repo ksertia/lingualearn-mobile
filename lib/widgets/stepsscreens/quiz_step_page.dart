@@ -1,4 +1,4 @@
-import 'package:fasolingo/views/Quiz/quiz_question_screen.dart';
+﻿import 'package:tibi/views/Quiz/quiz_question_screen.dart';
 import 'package:flutter/material.dart';
 
 class QuizStepPage extends StatelessWidget {

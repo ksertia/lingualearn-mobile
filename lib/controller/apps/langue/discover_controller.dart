@@ -1,5 +1,5 @@
-import 'package:fasolingo/helpers/services/langue/discover_service.dart';
-import 'package:fasolingo/models/langue/decouverte_model.dart';
+﻿import 'package:tibi/helpers/services/langue/discover_service.dart';
+import 'package:tibi/models/langue/decouverte_model.dart';
 import 'package:flutter/material.dart';
 
 class DiscoverController extends ChangeNotifier {

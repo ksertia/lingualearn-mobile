@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import '../../controller/auth/login_controller.dart';
 import '../../helpers/theme/app_colors.dart';
 
+const Color _kOrange     = Color(0xFFF27F22);
+
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -11,10 +14,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  static const _primary      = Color(0xFF188329);
-  static const _primaryLight = Color(0xFF1EB83A);
-  static const _green        = Color(0xFF188329);
-
   late LoginController controller;
 
   @override
@@ -47,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [_primary, _primaryLight],
+                  colors: [_kOrange, _kOrange],
                 ),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(40),
@@ -77,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
                         errorBuilder: (ctx, e, st) => const Icon(
                             Icons.school_rounded,
                             size: 54,
-                            color: Color(0xFF188329)),
+                            color: _kOrange),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -189,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: const Text(
                             "Mot de passe oublié ?",
                             style: TextStyle(
-                              color: _primary,
+                              color: _kOrange,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -203,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 56,
                       child: Obx(() => ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _primary,
+                              backgroundColor: _kOrange,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14)),
@@ -216,14 +215,14 @@ class _LoginPageState extends State<LoginPage> {
                                     height: 22,
                                     width: 22,
                                     child: CircularProgressIndicator(
-                                        color: Colors.white, strokeWidth: 2.5),
+                                        color: _kOrange, strokeWidth: 2.5),
                                   )
                                 : const Text(
                                     "Se connecter",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.bold,
                                       letterSpacing: 0.4,
                                     ),
                                   ),
@@ -287,7 +286,7 @@ class _LoginPageState extends State<LoginPage> {
                 "S'inscrire",
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: _green,
+                  color: _kOrange,
                   fontSize: 14,
                 ),
               ),
@@ -338,7 +337,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _primary, width: 1.5),
+        borderSide: const BorderSide(color: _kOrange, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),

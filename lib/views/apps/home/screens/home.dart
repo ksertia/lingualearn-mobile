@@ -1,28 +1,27 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
-import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/controller/apps/user_progress/user_progress_controller.dart';
-import 'package:fasolingo/helpers/services/souscription/sousciption_service.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
-import 'package:fasolingo/models/user_progress/user_progress_model.dart';
-import 'package:fasolingo/views/apps/home/module_page.dart';
-import 'package:fasolingo/views/apps/home/screens/parcours.dart';
-import 'package:fasolingo/views/apps/home/screens/stepsscreens.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/controller/apps/langue/langue_controller.dart';
+import 'package:tibi/controller/apps/moduls/home_controller.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/controller/apps/user_progress/user_progress_controller.dart';
+import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/models/user_progress/user_progress_model.dart';
+import 'package:tibi/views/apps/home/screens/module_page.dart';
+import 'package:tibi/views/apps/home/screens/parcours.dart';
+import 'package:tibi/views/apps/home/screens/etapes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/widgets/zaki_mascot.dart';
+import 'package:tibi/widgets/mascots/zaki_mascot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../controller/apps/settings/settings_controller.dart';
-import '../../../controller/apps/notifications/notification_controller.dart';
+import '../../../../controller/apps/settings/settings_controller.dart';
+import '../../../../controller/apps/notifications/notification_controller.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────
 const _kGreen = Color(0xFF188329);
 const _kGreenDark = Color(0xFF0F5C1C);
-const _kYellow = Color(0xFFF5BF1E);
-const _kYellowDark = Color(0xFF8B6B00);
-const _kOrange = Color(0xFFF27F22);
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 const _kLangColors = [
   [Color(0xFF188329), Color(0xFF0F5C1C)],
@@ -61,6 +60,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
 
   // ─── Guide ────────────────────────────────────────────────────────────────
   bool _showGuide = false;
+  bool _isFirstVisit = false;
   late final AnimationController _bounceCtrl;
   late final Animation<double> _bounceAnim;
 
@@ -91,6 +91,12 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   Future<void> _initGuide() async {
     final prefs = await SharedPreferences.getInstance();
     final shown = prefs.getBool('home_guide_shown') ?? false;
+    final visited = prefs.getBool('home_first_visit_done') ?? false;
+    if (!mounted) return;
+    setState(() => _isFirstVisit = !visited);
+    if (!visited) {
+      await prefs.setBool('home_first_visit_done', true);
+    }
     if (!shown && mounted) {
       await Future.delayed(const Duration(milliseconds: 800));
       if (!mounted) return;
@@ -208,7 +214,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [_kOrange, _kYellow],
+                  colors: [_kOrange, _kOrange],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -222,7 +228,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 ],
               ),
               child: const Icon(Icons.workspace_premium_rounded,
-                  color: Colors.white, size: 38),
+                  color: Color(0xFF1A1A1A), size: 38),
             ),
             const SizedBox(height: 22),
             Text(
@@ -337,7 +343,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -347,7 +353,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 16, 20),
+        padding: const EdgeInsets.fromLTRB(20, 10, 16, 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -358,26 +364,18 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: _kYellow.withValues(alpha: 0.18),
+                    color: Colors.white.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: _kYellow.withValues(alpha: 0.4), width: 1),
+                        color: Colors.white.withValues(alpha: 0.4), width: 1),
                   ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.local_fire_department_rounded,
-                          color: _kYellow, size: 13),
-                      SizedBox(width: 4),
-                      Text(
-                        "Bonne journée !",
-                        style: TextStyle(
-                          color: _kYellow,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    "Content de te voir !",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 const Spacer(),
@@ -429,7 +427,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 }),
               ],
             ),
-            const SizedBox(height: 8),
+            // const SizedBox(height: 4),
             // ── Ligne 2 : texte (gauche) + Zaki (droite) ──────────────────
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -439,7 +437,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Salut, $firstName 👋",
+                        "Salut, $firstName",
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -448,9 +446,11 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        "Prêt pour ta prochaine leçon ?",
-                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                      Text(
+                        _isFirstVisit
+                            ? "Prêt pour commencer ?"
+                            : "Bon retour parmi nous ! Prêt pour continuer ?",
+                        style: const TextStyle(color: Colors.white70, fontSize: 13),
                       ),
                     ],
                   ),
@@ -458,17 +458,17 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.md),
               ],
             ),
-            const SizedBox(height: 14),
+            // const SizedBox(height: 8),
             // ── Ligne 3 : chips stats ──────────────────────────────────────
             Row(
               children: [
                 _buildStatChip(
-                    Icons.auto_stories_rounded, "Apprends", _kYellow),
+                    Icons.auto_stories_rounded, "Apprends",  Colors.white),
                 const SizedBox(width: 8),
                 _buildStatChip(
                     Icons.emoji_events_rounded, "Progresse", Colors.white),
                 const SizedBox(width: 8),
-                _buildStatChip(Icons.translate_rounded, "Maîtrise", _kOrange),
+                _buildStatChip(Icons.translate_rounded, "Maîtrise", Colors.white),
               ],
             ),
           ],
@@ -476,6 +476,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
       ),
     );
   }
+
+  //------------------------------------------------------------------------
 
   Widget _buildStatChip(IconData icon, String label, Color color) {
     return Container(
@@ -548,8 +550,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                     height: 6,
                     decoration: BoxDecoration(
                       color: _currentLangPage.value == i
-                          ? _kGreen
-                          : _kGreen.withValues(alpha: 0.2),
+                          ? _kOrange
+                          : _kOrange.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -624,9 +626,6 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     final pctInt = entry.language.progressPercentage;
     final code = entry.language.code.toUpperCase();
     final shortCode = code.length >= 2 ? code.substring(0, 2) : code;
-    final colors = _langColors(entry.language.name);
-    final c1 = colors[0];
-    final c2 = colors[1];
     final currentModule = entry.module?.title;
     final currentStep = entry.step?.title;
 
@@ -634,17 +633,14 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [c1, c2],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: _kOrange, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: c1.withValues(alpha: 0.35),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
+            color: _kOrange.withValues(alpha: 0.18),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -657,7 +653,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 height: 52,
                 width: 52,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.22),
+                  color: _kOrange,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
@@ -677,7 +673,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                     Text(
                       entry.language.name,
                       style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 19,
                           fontWeight: FontWeight.w800),
                     ),
@@ -686,13 +682,13 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 9, vertical: 3),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: _kOrange.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         entry.level.name,
                         style: const TextStyle(
-                            color: Colors.white,
+                            color: _kOrange,
                             fontSize: 11,
                             fontWeight: FontWeight.w600),
                       ),
@@ -706,16 +702,20 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    CircularProgressIndicator(
-                      value: pct,
-                      strokeWidth: 4.5,
-                      backgroundColor: Colors.white.withValues(alpha: 0.25),
-                      valueColor: const AlwaysStoppedAnimation(Colors.white),
+                    SizedBox(
+                      width: 52,
+                      height: 52,
+                      child: CircularProgressIndicator(
+                        value: pct,
+                        strokeWidth: 4.5,
+                        backgroundColor: _kOrange.withValues(alpha: 0.15),
+                        valueColor: const AlwaysStoppedAnimation(_kOrange),
+                      ),
                     ),
                     Text(
                       '$pctInt%',
                       style: const TextStyle(
-                          color: Colors.white,
+                          color: _kOrange,
                           fontSize: 11,
                           fontWeight: FontWeight.w900),
                     ),
@@ -730,8 +730,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             child: LinearProgressIndicator(
               value: pct,
               minHeight: 7,
-              backgroundColor: Colors.white.withValues(alpha: 0.25),
-              valueColor: const AlwaysStoppedAnimation(Colors.white),
+              backgroundColor: _kOrange.withValues(alpha: 0.12),
+              valueColor: const AlwaysStoppedAnimation(_kOrange),
             ),
           ),
           const SizedBox(height: 12),
@@ -741,7 +741,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 currentModule != null
                     ? Icons.menu_book_rounded
                     : Icons.flag_outlined,
-                color: Colors.white70,
+                color: Colors.grey[500],
                 size: 14,
               ),
               const SizedBox(width: 6),
@@ -751,7 +751,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                       (currentStep?.isNotEmpty == true
                           ? currentStep!
                           : "Continue ton aventure !"),
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -785,7 +785,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [
                 _kGreen.withValues(alpha: 0.10),
-                _kYellow.withValues(alpha: 0.08),
+                _kOrange.withValues(alpha: 0.08),
               ]),
               shape: BoxShape.circle,
             ),
@@ -828,7 +828,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: [
           _kGreen.withValues(alpha: 0.10),
-          _kYellow.withValues(alpha: 0.05),
+          _kOrange.withValues(alpha: 0.05),
         ]),
         borderRadius: BorderRadius.circular(26),
       ),
@@ -854,7 +854,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
               child: _buildNavBtn(
                 Icons.menu_book_rounded,
                 "Modules",
-                _kGreen,
+                _kOrange,
                 () {
                   if (_showGuide) _dismissGuide();
                   _showLanguagePickerSheet();
@@ -892,7 +892,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           child: _buildNavBtn(
             Icons.flag_rounded,
             "Étapes",
-            _kYellow,
+            _kOrange,
             () {
               if (!_isSubscriptionActive) {
                 _showSubscriptionRequired();
@@ -928,14 +928,14 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [_kGreen, _kGreenDark],
+              colors: [_kOrange, _kOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: _kGreen.withValues(alpha: 0.30),
+                color: _kOrange.withValues(alpha: 0.30),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -944,7 +944,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.lightbulb_rounded, color: _kYellow, size: 20),
+              const Icon(Icons.lightbulb_rounded, color: Color(0xFF1A1A1A), size: 20),
               const SizedBox(width: 10),
               const Expanded(
                 child: Text(
@@ -999,11 +999,11 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                       children: [
                         CustomPaint(
                           size: const Size(14, 7),
-                          painter: _TrianglePainter(color: _kGreen),
+                          painter: _TrianglePainter(color: _kOrange),
                         ),
                         const SizedBox(height: 2),
                         const Icon(Icons.touch_app_rounded,
-                            color: _kGreen, size: 30),
+                            color: _kOrange, size: 30),
                       ],
                     ),
                   ),
@@ -1018,10 +1018,6 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
 
   Widget _buildNavBtn(
       IconData icon, String label, Color color, VoidCallback onTap) {
-    final isYellow = color == _kYellow;
-    final iconColor = isYellow ? const Color(0xFF1A1A1A) : Colors.white;
-    final labelColor = isYellow ? _kYellowDark : color;
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1031,9 +1027,9 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.16),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -1043,21 +1039,10 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [color, color.withValues(alpha: 0.78)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.28),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
-              child: Icon(icon, color: iconColor, size: 24),
+              child: Icon(icon, color: Colors.black, size: 24),
             ),
             const SizedBox(height: 10),
             Text(
@@ -1066,7 +1051,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
               style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
-                  color: labelColor),
+                  color: AppColors.textPrimary(_ctx)),
             ),
           ],
         ),
@@ -1092,19 +1077,22 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           height: 120,
           decoration: BoxDecoration(
             gradient: LinearGradient(colors: [
-              _kGreen.withValues(alpha: 0.06),
-              _kYellow.withValues(alpha: 0.04),
+              _kOrange.withValues(alpha: 0.06),
+
             ]),
             borderRadius: BorderRadius.circular(26),
           ),
           child: const Center(
               child:
-                  CircularProgressIndicator(color: _kGreen, strokeWidth: 2)),
+                  CircularProgressIndicator(color: _kOrange, strokeWidth: 2)),
         );
       }
 
-      final entry = progressCtrl.mostRecentEntry;
-      if (entry == null || entry.module == null) return _buildNoPathCard();
+      final entries = progressCtrl.progressList;
+      if (entries.isEmpty) return _buildNoPathCard();
+      final idx = _currentLangPage.value.clamp(0, entries.length - 1);
+      final entry = entries[idx];
+      if (entry.module == null) return _buildNoPathCard();
 
       final modulePct = entry.module!.progressPercentage;
       final moduleName = entry.module!.title;
@@ -1119,7 +1107,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           borderRadius: BorderRadius.circular(26),
           boxShadow: [
             BoxShadow(
-              color: _kGreen.withValues(alpha: 0.08),
+              color: _kOrange.withValues(alpha: 0.08),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -1133,22 +1121,11 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 Container(
                   padding: const EdgeInsets.all(11),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [_kGreen, _kGreenDark],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _kGreen.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: const Icon(Icons.rocket_launch_rounded,
-                      color: Colors.white, size: 22),
+                      color: Colors.black, size: 22),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1170,16 +1147,13 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      _kGreen.withValues(alpha: 0.12),
-                      _kYellow.withValues(alpha: 0.08),
-                    ]),
+                    color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '$modulePct%',
                     style: const TextStyle(
-                        color: _kGreen,
+                        color: _kOrange,
                         fontWeight: FontWeight.w800,
                         fontSize: 13),
                   ),
@@ -1188,7 +1162,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             ),
             const SizedBox(height: 18),
             _buildPathItem(
-                Icons.menu_book_rounded, "Module", moduleName, _kGreen),
+                Icons.menu_book_rounded, "Module", moduleName, _kOrange),
             if (pathName != null) ...[
               const SizedBox(height: 8),
               _buildPathItem(
@@ -1197,7 +1171,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             if (stepName != null) ...[
               const SizedBox(height: 8),
               _buildPathItem(
-                  Icons.flag_rounded, "Étape", stepName, _kYellow),
+                  Icons.flag_rounded, "Étape", stepName, _kOrange),
             ],
             const SizedBox(height: 18),
             ClipRRect(
@@ -1205,8 +1179,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
               child: LinearProgressIndicator(
                 value: modulePct / 100.0,
                 minHeight: 8,
-                backgroundColor: _kGreen.withValues(alpha: 0.10),
-                valueColor: const AlwaysStoppedAnimation(_kGreen),
+                backgroundColor: _kOrange.withValues(alpha: 0.10),
+                valueColor: const AlwaysStoppedAnimation(_kOrange),
               ),
             ),
             const SizedBox(height: 18),
@@ -1215,8 +1189,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
               child: ElevatedButton(
                 onPressed: _showLanguagePickerSheet,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGreen,
-                  foregroundColor: Colors.white,
+                  backgroundColor: _kOrange,
+                  foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -1224,7 +1198,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 ),
                 child: const Text("Explorer les modules",
                     style:
-                        TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white)),
               ),
             ),
           ],
@@ -1234,17 +1208,15 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   }
 
   Widget _buildPathItem(IconData icon, String type, String value, Color color) {
-    final isYellow = color == _kYellow;
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: isYellow ? 0.15 : 0.10),
+            color: Colors.grey[200],
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon,
-              color: isYellow ? _kYellowDark : color, size: 14),
+          child: Icon(icon, color: Colors.black, size: 14),
         ),
         const SizedBox(width: 10),
         Text("$type : ",
@@ -1332,7 +1304,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           height: 20,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [_kGreen, _kYellow],
+              colors: [_kOrange,_kOrange ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -1360,7 +1332,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   height: 20,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [_kGreen, _kYellow],
+                      colors: [_kOrange, _kOrange],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -1382,23 +1354,18 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 7),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      _kGreen.withValues(alpha: 0.10),
-                      _kYellow.withValues(alpha: 0.08),
-                    ]),
+                    color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                        color: _kGreen.withValues(alpha: 0.2), width: 1),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.add_rounded, color: _kGreen, size: 15),
+                      const Icon(Icons.add_rounded, color: _kOrange, size: 15),
                       const SizedBox(width: 4),
                       Text(
                         subtitle,
                         style: const TextStyle(
-                          color: _kGreen,
+                          color: _kOrange,
                           fontWeight: FontWeight.w700,
                           fontSize: 12,
                         ),
@@ -1521,163 +1488,13 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
       return;
     }
 
-    if (entries.length == 1) {
-      _navigateToModules(entries.first);
-      return;
-    }
-
-    Get.bottomSheet(
-      Container(
-        decoration: BoxDecoration(
-          color: AppColors.bg(context),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 44,
-                height: 4,
-                decoration: BoxDecoration(
-                    color: AppColors.divider(context),
-                    borderRadius: BorderRadius.circular(2)),
-              ),
-            ),
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                Container(
-                  width: 4,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [_kGreen, _kYellow],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text("Choisir une langue",
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary(context))),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.only(left: 14),
-              child: Text("Sélectionne la langue pour voir ses modules",
-                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary(context))),
-            ),
-            const SizedBox(height: 18),
-            ...entries.map((entry) {
-              final pct = entry.language.progressPercentage;
-              final code = entry.language.code.toUpperCase();
-              final shortCode = code.length >= 2 ? code.substring(0, 2) : code;
-              final colors = _langColors(entry.language.name);
-              final c1 = colors[0];
-
-              return GestureDetector(
-                onTap: () {
-                  Get.back();
-                  _navigateToModules(entry);
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.card(context),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                          color: c1.withValues(alpha: 0.10),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4)),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [c1, c1.withValues(alpha: 0.72)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(shortCode,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 15)),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(entry.language.name,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 15,
-                                    color: AppColors.textPrimary(context))),
-                            const SizedBox(height: 2),
-                            Text(entry.level.name,
-                                style: TextStyle(
-                                    fontSize: 12, color: AppColors.textSecondary(context))),
-                            const SizedBox(height: 8),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: LinearProgressIndicator(
-                                value: pct / 100.0,
-                                minHeight: 6,
-                                backgroundColor: Colors.grey[100],
-                                valueColor: AlwaysStoppedAnimation<Color>(c1),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text('$pct% complété',
-                                style: TextStyle(
-                                    fontSize: 11,
-                                    color: c1,
-                                    fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: _kGreen.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.chevron_right_rounded,
-                            color: _kGreen, size: 20),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ],
-        ),
-      ),
-      isScrollControlled: true,
-    );
+    // Navigue vers la langue actuellement visible dans le PageView
+    final idx = _currentLangPage.value.clamp(0, entries.length - 1);
+    _navigateToModules(entries[idx]);
   }
 }
 
-// ─── Add Language Bottom Sheet ───────────────────────────────────────────────
+
 
 // ─── Triangle pointer for guide tooltip ─────────────────────────────────────
 
@@ -1760,7 +1577,7 @@ class _AddLanguageSheetState extends State<_AddLanguageSheet> {
               height: 20,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [_kGreen, _kYellow],
+                  colors: [_kOrange, _kOrange],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -1868,7 +1685,7 @@ class _AddLanguageSheetState extends State<_AddLanguageSheet> {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: isEnrolled
-                                  ? [_kGreen, _kGreenDark]
+                                  ? [_kOrange]
                                   : [c1, c1.withValues(alpha: 0.72)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,

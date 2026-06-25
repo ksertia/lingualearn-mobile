@@ -1,9 +1,9 @@
-/*
+﻿/*
 * File : Admin Theme
 * Version : 1.0.0
 * */
 
-import 'package:fasolingo/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
 import 'package:flutter/material.dart';
 
 enum LeftBarThemeType { light, dark }

@@ -1,53 +1,10 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/models/langue/langue_model.dart';
-import 'package:get/get.dart'; 
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/models/langue/langue_model.dart';
+import 'package:get/get.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
 
 class LanguageLevelService {
-  late final Dio _dio;
-
-  LanguageLevelService() {
-    _dio = Dio(BaseOptions(
-      baseUrl: AppConstant.baseURl, 
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-      headers: {
-        'accept': '*/*',
-        'Content-Type': 'application/json',
-      },
-    ))..interceptors.add(PrettyDioLogger(
-      requestHeader: true,
-      requestBody: true,
-      responseHeader: false,
-      responseBody: true,
-      error: true,
-      compact: true,
-      maxWidth: 90,
-    ));
-
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        try {
-          final session = Get.find<SessionController>();
-          
-          String? tokenToUse = session.token.value.isNotEmpty 
-              ? session.token.value 
-              : null;
-          
-          tokenToUse ??= LocalStorage.getAuthToken();
-          
-          if (tokenToUse != null && tokenToUse.isNotEmpty && tokenToUse != "null") {
-            options.headers['Authorization'] = 'Bearer $tokenToUse';
-          }
-        } catch (e) {
-        }
-        return handler.next(options);
-      },
-    ));
-  }
+  Dio get _dio => Get.find<SessionController>().dio;
 
   // --- RÉCUPÉRATION DES LANGUES ---
   Future<List<LanguageModel>> fetchLanguages({required String userId}) async {
@@ -62,7 +19,7 @@ class LanguageLevelService {
     .toList();
       }
       return [];
-    } on DioException catch (e) {
+    } catch (_) {
       return [];
     }
   }

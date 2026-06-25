@@ -1,10 +1,11 @@
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+﻿import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-const Color _green = Color(0xFF16A34A);
 const double _soldeDisponible = 8000;
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class PartnerWithdrawPage extends StatefulWidget {
   const PartnerWithdrawPage({super.key});
@@ -24,7 +25,7 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
 
   static const _methods = [
     _PayMethod(name: 'Orange Money', logo: Icons.circle, color: Color(0xFFFF6900), bg: Color(0xFFFFF0E5)),
-    _PayMethod(name: 'Moov Money',   logo: Icons.circle, color: Color(0xFF0066CC), bg: Color(0xFFE5F0FF)),
+    _PayMethod(name: 'Moov Money',   logo: Icons.circle, color: Color(0xFF0066CC), bg: Color(0xFFFFF0E5)),
   ];
 
   double get _montantSaisi =>
@@ -65,8 +66,8 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
             const SizedBox(height: 32),
             Container(
               width: 72, height: 72,
-              decoration: const BoxDecoration(color: Color(0xFFDCFCE7), shape: BoxShape.circle),
-              child: const Icon(Icons.check_rounded, color: _green, size: 36),
+              decoration: const BoxDecoration(color: Color(0xFFFFF9E0), shape: BoxShape.circle),
+              child: const Icon(Icons.check_rounded, color: _kOrange, size: 36),
             ),
             const SizedBox(height: 20),
             Text(
@@ -88,7 +89,7 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
                   Get.back();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _green, foregroundColor: Colors.white,
+                  backgroundColor: _kOrange, foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -151,12 +152,12 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF14532D), _green],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft, end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: _green.withValues(alpha: 0.30), blurRadius: 16, offset: const Offset(0, 6)),
+          BoxShadow(color: _kOrange.withValues(alpha: 0.30), blurRadius: 16, offset: const Offset(0, 6)),
         ],
       ),
       child: Row(
@@ -164,7 +165,7 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
           Container(
             width: 48, height: 48,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
+              color: Colors.black.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.savings_rounded, color: Colors.white, size: 24),
@@ -177,7 +178,7 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
                 Text(
                   'Solde disponible',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.75),
+                    color: Colors.white,
                     fontSize: 13, fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -194,7 +195,7 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
+              color: Colors.black.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Text(
@@ -213,8 +214,8 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
     return _section(
       title: 'Montant a retirer',
       icon: Icons.payments_rounded,
-      iconColor: _green,
-      iconBg: const Color(0xFFDCFCE7),
+      iconColor: _kOrange,
+      iconBg: const Color(0xFFFFF9E0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -243,7 +244,7 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: _green, width: 1.5),
+                borderSide: const BorderSide(color: _kOrange, width: 1.5),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -277,17 +278,17 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                     decoration: BoxDecoration(
-                      color: _montantSaisi == v ? _green : AppColors.card(_ctx),
+                      color: _montantSaisi == v ? _kOrange : AppColors.card(_ctx),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: _montantSaisi == v ? _green : const Color(0xFFE5E7EB),
+                        color: _montantSaisi == v ? _kOrange : const Color(0xFFE5E7EB),
                       ),
                     ),
                     child: Text(
                       label,
                       style: TextStyle(
                         fontSize: 12, fontWeight: FontWeight.w600,
-                        color: _montantSaisi == v ? Colors.white : const Color(0xFF6B7280),
+                        color: _montantSaisi == v ? const Color(0xFF1A1A1A) : const Color(0xFF6B7280),
                       ),
                     ),
                   ),
@@ -306,8 +307,8 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
     return _section(
       title: 'Methode de paiement',
       icon: Icons.account_balance_wallet_rounded,
-      iconColor: const Color(0xFF7C3AED),
-      iconBg: const Color(0xFFEDE9FF),
+      iconColor:  Colors.black,
+      iconBg:  Colors.grey.shade200,
       child: Column(
         children: _methods.asMap().entries.map((e) {
           final i = e.key;
@@ -376,8 +377,8 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
     return _section(
       title: 'Numero ${_methods[_selectedMethodIndex].name}',
       icon: Icons.phone_android_rounded,
-      iconColor: const Color(0xFF0EA5E9),
-      iconBg: const Color(0xFFE0F2FE),
+      iconColor:  Colors.black,
+      iconBg: Colors.grey.shade200,
       child: TextFormField(
         controller: _phoneCtrl,
         keyboardType: TextInputType.phone,
@@ -398,7 +399,7 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: _green, width: 1.5),
+            borderSide: const BorderSide(color: _kOrange, width: 1.5),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
@@ -465,7 +466,7 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
             style: TextStyle(
               fontSize: isTotal ? 15 : 13,
               fontWeight: isTotal ? FontWeight.w800 : FontWeight.w600,
-              color: isTotal ? _green : const Color(0xFF1A1A1A),
+              color: isTotal ? _kOrange : const Color(0xFF1A1A1A),
             )),
       ],
     );
@@ -479,15 +480,15 @@ class _PartnerWithdrawPageState extends State<PartnerWithdrawPage> {
       child: ElevatedButton(
         onPressed: _isSubmitting ? null : _submit,
         style: ElevatedButton.styleFrom(
-          backgroundColor: _green, foregroundColor: Colors.white,
-          disabledBackgroundColor: _green.withValues(alpha: 0.5),
+          backgroundColor: _kOrange, foregroundColor: const Color(0xFF1A1A1A),
+          disabledBackgroundColor: _kOrange.withValues(alpha: 0.5),
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         child: _isSubmitting
             ? const SizedBox(
                 width: 22, height: 22,
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                child: CircularProgressIndicator(color: Color(0xFF1A1A1A), strokeWidth: 2.5),
               )
             : const Row(
                 mainAxisAlignment: MainAxisAlignment.center,

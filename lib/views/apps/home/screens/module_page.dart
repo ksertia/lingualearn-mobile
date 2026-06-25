@@ -1,28 +1,19 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:fasolingo/controller/apps/moduls/home_controller.dart';
-import 'package:fasolingo/helpers/services/module_service.dart';
-import 'package:fasolingo/models/modules/modul_model.dart';
-
-// kept for backward compat
-const Color colorProBlue = Color(0xFF00008B);
-const Color primaryBlue  = Color(0xFF00CED1);
+import 'package:tibi/controller/apps/moduls/home_controller.dart';
+import 'package:tibi/helpers/services/module_service.dart';
+import 'package:tibi/models/modules/modul_model.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────
-const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
-const Color _kYellow    = Color(0xFFF5BF1E);
-const Color _kOrange    = Color(0xFFF27F22);
+const Color _kGreen  = Color(0xFF188329);
+const Color _kLocked = Color(0xFFB0BEC5);
+const Color _kOrange = Color(0xFFF27F22);
 
-const Color _kCompleted = Color(0xFF188329);
-const Color _kActive    = Color(0xFFF27F22);
-const Color _kLocked    = Color(0xFFB0BEC5);
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -34,7 +25,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> 
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   late HomeController controller;
-  late BuildContext _ctx;
 
   bool _hasNetworkError = false;
   String _networkErrorMsg = '';
@@ -61,8 +51,8 @@ class _HomePageState extends State<HomePage>
   String _animal(int i) => _animals[i % _animals.length];
 
   Color _accent(String s) {
-    if (s == 'completed') return _kCompleted;
-    if (s == 'unlocked' || s == 'started') return _kActive;
+    if (s == 'completed') return _kGreen;
+    if (s == 'unlocked' || s == 'started') return _kOrange;
     return _kLocked;
   }
 
@@ -199,15 +189,11 @@ class _HomePageState extends State<HomePage>
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [_kGreen, _kGreenDark],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: _kOrange,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: _kGreen.withValues(alpha: 0.30),
+                color: _kOrange.withValues(alpha: 0.30),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -216,7 +202,7 @@ class _HomePageState extends State<HomePage>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.lightbulb_rounded, color: _kYellow, size: 20),
+              const Icon(Icons.lightbulb_rounded, color: Color(0xFF1A1A1A), size: 20),
               const SizedBox(width: 10),
               const Expanded(
                 child: Text(
@@ -273,11 +259,11 @@ class _HomePageState extends State<HomePage>
                       children: [
                         CustomPaint(
                           size: const Size(14, 7),
-                          painter: _ModuleTrianglePainter(color: _kGreen),
+                          painter: _ModuleTrianglePainter(color: _kOrange),
                         ),
                         const SizedBox(height: 2),
                         const Icon(Icons.touch_app_rounded,
-                            color: _kGreen, size: 30),
+                            color: _kOrange, size: 30),
                       ],
                     ),
                   ),
@@ -294,7 +280,6 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    _ctx = context;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: _buildAppBar(),
@@ -333,7 +318,7 @@ class _HomePageState extends State<HomePage>
                 });
               } catch (_) {}
             },
-            color: _kGreen,
+            color: _kOrange,
             child: ListView.builder(
               padding: EdgeInsets.fromLTRB(
                 20,
@@ -341,17 +326,9 @@ class _HomePageState extends State<HomePage>
                 20,
                 48,
               ),
-              itemCount: modules.length + 1,
+              itemCount: modules.length,
               itemBuilder: (_, index) {
-                // Summary header (first item)
-                if (index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: _buildSummaryCard(modules),
-                  );
-                }
-
-                final moduleIndex = index - 1;
+                final moduleIndex = index;
                 final module = modules[moduleIndex];
                 final bool isLast = moduleIndex == modules.length - 1;
                 final String st =
@@ -430,213 +407,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ── Summary card ──────────────────────────────────────────────────────────
-
-  Widget _buildSummaryCard(List<ModuleModel> modules) {
-    int completed = 0, active = 0;
-    for (final m in modules) {
-      final st =
-          (controller.moduleDisplayStatus[m.id] ?? 'locked').toLowerCase();
-      if (st == 'completed') {
-        completed++;
-      } else if (st == 'unlocked' || st == 'started') {
-        active++;
-      }
-    }
-    final locked =
-        (modules.length - completed - active).clamp(0, modules.length);
-    final pct = modules.isNotEmpty ? completed / modules.length : 0.0;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.card(_ctx),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: _kGreen.withValues(alpha: 0.20),
-            blurRadius: 28,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Green gradient banner
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [_kGreen, _kGreenDark],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '📚 ${modules.length} module${modules.length > 1 ? 's' : ''}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Mes Modules',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Continue ton parcours d\'apprentissage !',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.75),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 68,
-                  height: 68,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25), width: 1),
-                  ),
-                  child: Lottie.asset(
-                    _animal(completed),
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.contain,
-                    alignment: Alignment.center,
-                    repeat: true,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Progress + stats
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Progression globale',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textSecondary(_ctx),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                            colors: [_kGreen, Color(0xFF22A63B)]),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '${(pct * 100).toInt()}%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: pct,
-                    minHeight: 7,
-                    backgroundColor: _kGreen.withValues(alpha: 0.08),
-                    valueColor: const AlwaysStoppedAnimation<Color>(_kGreen),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _buildStatPill(Icons.check_circle_rounded,
-                        '$completed', 'Terminés', _kGreen),
-                    const SizedBox(width: 6),
-                    _buildStatPill(Icons.play_circle_filled,
-                        '$active', 'En cours', _kOrange),
-                    const SizedBox(width: 6),
-                    _buildStatPill(Icons.lock_rounded,
-                        '$locked', 'À venir', _kLocked),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatPill(
-      IconData icon, String count, String label, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-              color: color.withValues(alpha: 0.15), width: 1),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 15),
-            const SizedBox(height: 3),
-            Text(count,
-                style: TextStyle(
-                    color: color,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900)),
-            Text(label,
-                style: TextStyle(
-                    color: AppColors.textSecondary(_ctx),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600)),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ── AppBar ────────────────────────────────────────────────────────────────
 
   PreferredSizeWidget _buildAppBar() {
@@ -645,11 +415,7 @@ class _HomePageState extends State<HomePage>
       backgroundColor: Colors.transparent,
       flexibleSpace: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [_kGreen, _kGreenDark],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: _kOrange,
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
         ),
       ),
@@ -784,17 +550,15 @@ class _HomePageState extends State<HomePage>
     VoidCallback? onBeforeTap,
   }) {
     final isCompleted = st == 'completed';
-    final isYellow = accent == _kYellow;
+    final isOrange = accent == _kOrange;
 
     final List<Color> stripeColors = isCompleted
-        ? [_kGreen, _kYellow]
+        ? [_kGreen, const Color(0xFF22A63B)]
         : isUnlocked
-            ? [_kOrange, _kYellow]
+            ? [_kOrange, const Color(0xFFFFB347)]
             : [const Color(0xFFCFD8DC), const Color(0xFFB0BEC5)];
 
-    return Opacity(
-      opacity: isUnlocked ? 1.0 : 0.65,
-      child: GestureDetector(
+    return GestureDetector(
         onTap: !isUnlocked
             ? () => Get.snackbar(
                   '🔒 Module verrouillé',
@@ -852,7 +616,6 @@ class _HomePageState extends State<HomePage>
                   'moduleLottie': _animal(index),
                 });
                 _autoUnlockNext();
-                _silentRefresh();
               },
         child: Container(
           constraints: const BoxConstraints(minHeight: 118),
@@ -891,57 +654,10 @@ class _HomePageState extends State<HomePage>
                     ),
                   ),
                 ),
-                // Lottie in gradient circle bg
-                Positioned(
-                  right: 4, top: 0, bottom: 0,
-                  child: SizedBox(
-                    width: 96,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 74,
-                          height: 74,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                accent.withValues(
-                                    alpha: isUnlocked ? 0.10 : 0.04),
-                                accent.withValues(
-                                    alpha: isUnlocked ? 0.04 : 0.01),
-                              ],
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        Opacity(
-                          opacity: isUnlocked ? 1.0 : 0.15,
-                          child: ColorFiltered(
-                            colorFilter: isUnlocked
-                                ? const ColorFilter.mode(
-                                    Colors.transparent, BlendMode.multiply)
-                                : const ColorFilter.mode(
-                                    Colors.grey, BlendMode.srcIn),
-                            child: RepaintBoundary(
-                              child: Lottie.asset(
-                                _animal(index),
-                                width: 80,
-                                height: 80,
-                                animate: isUnlocked,
-                                fit: BoxFit.contain,
-                                alignment: Alignment.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
                 // Text content
                 Positioned.fill(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 10, 106, 10),
+                    padding: const EdgeInsets.fromLTRB(18, 10, 16, 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -949,24 +665,24 @@ class _HomePageState extends State<HomePage>
                         Row(
                           children: [
                             _buildStatusBadge(
-                                st, isUnlocked, accent, isYellow),
+                                st, isUnlocked, accent, isOrange),
                             if (isCompleted) ...[
                               const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 7, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: _kYellow.withValues(alpha: 0.15),
+                                  color: _kOrange.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(7),
                                   border: Border.all(
-                                      color: _kYellow.withValues(alpha: 0.3),
+                                      color: _kOrange.withValues(alpha: 0.3),
                                       width: 1),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: const [
                                     Icon(Icons.star_rounded,
-                                        color: _kYellow, size: 10),
+                                        color: _kOrange, size: 10),
                                     SizedBox(width: 3),
                                     Text(
                                       'BRAVO',
@@ -1062,12 +778,11 @@ class _HomePageState extends State<HomePage>
             ),
           ),
         ),
-      ),
     );
   }
 
   Widget _buildStatusBadge(
-      String st, bool isUnlocked, Color accent, bool isYellow) {
+      String st, bool isUnlocked, Color accent, bool isOrange) {
     final String label;
     final IconData icon;
     if (st == 'completed') {
@@ -1093,7 +808,7 @@ class _HomePageState extends State<HomePage>
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon,
-              color: isYellow ? const Color(0xFF8B6B00) : accent,
+              color: isOrange ? const Color(0xFF8B6B00) : accent,
               size: 10),
           const SizedBox(width: 3),
           Text(
@@ -1101,7 +816,7 @@ class _HomePageState extends State<HomePage>
             style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w800,
-              color: isYellow ? const Color(0xFF8B6B00) : accent,
+              color: isOrange ? const Color(0xFF8B6B00) : accent,
               letterSpacing: 0.8,
             ),
           ),
@@ -1124,7 +839,7 @@ class _HomePageState extends State<HomePage>
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: _kGreen.withValues(alpha: 0.10),
+                color: _kOrange.withValues(alpha: 0.10),
                 blurRadius: 28,
                 offset: const Offset(0, 12),
               ),
@@ -1137,13 +852,13 @@ class _HomePageState extends State<HomePage>
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [
-                    _kGreen.withValues(alpha: 0.10),
-                    _kYellow.withValues(alpha: 0.08),
+                    _kOrange.withValues(alpha: 0.12),
+                    _kOrange.withValues(alpha: 0.08),
                   ]),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.menu_book_outlined,
-                    color: _kGreen, size: 44),
+                    color: _kOrange, size: 44),
               ),
               const SizedBox(height: 20),
               Text(
@@ -1170,8 +885,8 @@ class _HomePageState extends State<HomePage>
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Réessayer'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGreen,
-                  foregroundColor: Colors.white,
+                  backgroundColor: _kOrange,
+                  foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 28, vertical: 14),
@@ -1243,8 +958,8 @@ class _HomePageState extends State<HomePage>
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Réessayer'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGreen,
-                  foregroundColor: Colors.white,
+                  backgroundColor: _kOrange,
+                  foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 28, vertical: 14),
@@ -1285,11 +1000,7 @@ class _HomePageState extends State<HomePage>
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [_kOrange, _kYellow],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: _kOrange,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -1327,8 +1038,8 @@ class _HomePageState extends State<HomePage>
                 child: ElevatedButton(
                   onPressed: () => Get.toNamed('/subscription_plans'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _kGreen,
-                    foregroundColor: Colors.white,
+                    backgroundColor: _kOrange,
+                    foregroundColor: const Color(0xFF1A1A1A),
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -1388,11 +1099,7 @@ class _HomePageState extends State<HomePage>
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [_kOrange, _kYellow],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: _kOrange,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -1434,7 +1141,7 @@ class _HomePageState extends State<HomePage>
                   Get.toNamed('/subscription_plans');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGreen,
+                  backgroundColor: _kOrange,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
@@ -1442,7 +1149,7 @@ class _HomePageState extends State<HomePage>
                 child: const Text(
                   'Voir les forfaits',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF1A1A1A),
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),

@@ -1,6 +1,6 @@
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/answer_section.dart';
+﻿import 'package:tibi/widgets/mascots/audio_mascots.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/answer_section.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 
 class StepDiscoveryAudio extends StatelessWidget {
   final String texteOriginal;
@@ -8,6 +8,8 @@ class StepDiscoveryAudio extends StatelessWidget {
   final String? answerType;
   final String? answerValue;
   final String lottie;
+  final int stepIndex;
+  final bool isPlaying;
 
   const StepDiscoveryAudio({
     super.key,
@@ -15,7 +17,9 @@ class StepDiscoveryAudio extends StatelessWidget {
     required this.title,
     this.answerType,
     this.answerValue,
-    required this.lottie,
+    this.lottie = '',
+    this.stepIndex = 0,
+    this.isPlaying = false,
   });
 
   @override
@@ -57,10 +61,10 @@ class StepDiscoveryAudio extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        width: 120,
-                        height: 120,
-                        child: Lottie.asset(lottie),
+                      AudioMascotPair(
+                        stepIndex: stepIndex,
+                        mood: isPlaying ? AudioMascotMood.speaking : AudioMascotMood.idle,
+                        size: AudioMascotSize.md,
                       ),
                       const SizedBox(width: 8),
                       Flexible(

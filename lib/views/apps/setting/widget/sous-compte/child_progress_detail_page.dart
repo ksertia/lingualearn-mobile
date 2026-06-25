@@ -1,16 +1,15 @@
-import 'package:fasolingo/controller/apps/settings/child_progress_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
-import 'package:fasolingo/models/child_model.dart';
-import 'package:fasolingo/models/child_progress_models.dart';
+﻿import 'package:tibi/controller/apps/settings/child_progress_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/models/child_model.dart';
+import 'package:tibi/models/child_progress_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
 
-const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
-const Color _kYellow    = Color(0xFFF5BF1E);
-const Color _kOrange    = Color(0xFFF27F22);
+const Color _kGreen      = Color(0xFF188329);
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class ChildProgressDetailPage extends StatefulWidget {
   final ChildModel child;
@@ -36,14 +35,23 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
     controller.fetchProgress(widget.child.id);
   }
 
+  String _relativeTime(DateTime date) {
+    final diff = DateTime.now().difference(date);
+    if (diff.inSeconds < 60)  return 'À l\'instant';
+    if (diff.inMinutes < 60)  return 'Il y a ${diff.inMinutes}min';
+    if (diff.inHours < 24)    return 'Il y a ${diff.inHours}h';
+    if (diff.inDays < 30)     return 'Il y a ${diff.inDays}j';
+    final months = diff.inDays ~/ 30;
+    if (months < 12)          return 'Il y a ${months}mois';
+    final years = diff.inDays ~/ 365;
+    return 'Il y a $years an${years > 1 ? 's' : ''}';
+  }
+
   String _formatRelativeTime(String? dateStr) {
     if (dateStr == null) return 'Jamais';
     final date = DateTime.tryParse(dateStr);
     if (date == null) return dateStr;
-    final diff = DateTime.now().difference(date);
-    if (diff.inDays > 0) return 'Il y a ${diff.inDays}j';
-    if (diff.inHours > 0) return 'Il y a ${diff.inHours}h';
-    return 'Récemment';
+    return _relativeTime(date);
   }
 
   String _mostRecentActivity(List<ChildProgressItemModel> items) {
@@ -53,29 +61,13 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
       if (d != null && (latest == null || d.isAfter(latest))) latest = d;
     }
     if (latest == null) return 'Jamais';
-    final diff = DateTime.now().difference(latest);
-    if (diff.inDays > 0) return 'Il y a ${diff.inDays}j';
-    if (diff.inHours > 0) return 'Il y a ${diff.inHours}h';
-    return 'Récemment';
+    return _relativeTime(latest);
   }
 
   String? _extractName(dynamic field) {
     if (field == null) return null;
     if (field is Map) return field['name']?.toString();
     return null;
-  }
-
-  String _langEmoji(String? name) {
-    if (name == null) return '🌐';
-    final n = name.toLowerCase();
-    if (n.contains('francais') || n.contains('french'))  return '🇫🇷';
-    if (n.contains('english') || n.contains('anglais'))  return '🇬🇧';
-    if (n.contains('espagnol') || n.contains('spanish')) return '🇪🇸';
-    if (n.contains('moore') || n.contains('moré'))       return '🇧🇫';
-    if (n.contains('dioula') || n.contains('dyula'))     return '🇧🇫';
-    if (n.contains('allemand') || n.contains('german'))  return '🇩🇪';
-    if (n.contains('arabe') || n.contains('arabic'))     return '🇸🇦';
-    return '🌐';
   }
 
   int _compareLastAccessed(ChildProgressItemModel a, ChildProgressItemModel b) {
@@ -119,7 +111,7 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
                   (a.level?.progressPercentage ?? 0) >= (b.level?.progressPercentage ?? 0) ? a : b);
 
               return RefreshIndicator(
-                color: _kGreen,
+                color: _kOrange,
                 onRefresh: () => controller.fetchProgress(widget.child.id),
                 child: CustomScrollView(
                   slivers: [
@@ -192,7 +184,7 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
       padding: EdgeInsets.fromLTRB(16, topPad + 16, 0, 0),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -208,7 +200,7 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
           Positioned(right: 130, bottom: 20,
             child: Container(width: 30, height: 30,
               decoration: BoxDecoration(shape: BoxShape.circle,
-                color: _kYellow.withValues(alpha: 0.20)))),
+                color: _kOrange.withValues(alpha: 0.20)))),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -279,7 +271,7 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-              color: _kGreen.withValues(alpha: 0.10),
+              color: _kOrange.withValues(alpha: 0.10),
               blurRadius: 20,
               offset: const Offset(0, 6)),
         ],
@@ -296,26 +288,26 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
               children: [
                 _overviewRow(
                   icon: Icons.school_rounded,
-                  iconColor: _kOrange,
+                  iconColor: _kGreen,
                   label: 'Modules terminés',
                   value: '$totalCompleted / $totalModules',
-                  valueColor: _kOrange,
-                ),
-                const SizedBox(height: 12),
-                _overviewRow(
-                  icon: Icons.access_time_rounded,
-                  iconColor: _kGreen,
-                  label: 'Dernière activité',
-                  value: lastActivity,
                   valueColor: _kGreen,
                 ),
                 const SizedBox(height: 12),
                 _overviewRow(
+                  icon: Icons.access_time_rounded,
+                  iconColor: _kOrange,
+                  label: 'Dernière activité',
+                  value: lastActivity,
+                  valueColor: _kOrange,
+                ),
+                const SizedBox(height: 12),
+                _overviewRow(
                   icon: Icons.emoji_events_rounded,
-                  iconColor: _kYellow,
+                  iconColor: _kGreen,
                   label: 'Meilleure langue',
                   value: '$bestLangName  $bestLangPct%',
-                  valueColor: const Color(0xFF1A1A1A),
+                  valueColor: _kGreen,
                 ),
               ],
             ),
@@ -411,7 +403,6 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
     final langPercent    = (lang?.progressPercentage ?? 0.0).clamp(0.0, 100.0);
     final lvlPercent     = (lvl?.progressPercentage ?? 0.0).clamp(0.0, 100.0);
     final moduleName     = _extractName(it.module) ?? _extractName(it.path);
-    final emoji          = _langEmoji(lang?.name);
 
     // Badge état
     final String stateLabel;
@@ -448,7 +439,7 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
               height: 4,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [_kGreen, _kYellow, _kOrange],
+                  colors: [_kOrange, _kOrange],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -465,12 +456,12 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
                       Container(
                         width: 52, height: 52,
                         decoration: BoxDecoration(
-                          color: _kGreen.withValues(alpha: 0.07),
+                          color: _kOrange.withValues(alpha: 0.07),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: _kGreen.withValues(alpha: 0.12)),
+                          border: Border.all(color: _kOrange.withValues(alpha: 0.12)),
                         ),
                         alignment: Alignment.center,
-                        child: Text(emoji, style: const TextStyle(fontSize: 26)),
+                        child: const Icon(Icons.language_rounded, size: 26, color: _kOrange),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -529,7 +520,7 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
                   // ── Barres de progression ─────────────────────────────
                   _progressBar('Progression langue', langPercent, _kGreen),
                   const SizedBox(height: 10),
-                  _progressBar('Progression niveau', lvlPercent, _kYellow),
+                  _progressBar('Progression niveau', lvlPercent, _kGreen),
 
                   const SizedBox(height: 14),
 
@@ -537,13 +528,13 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4F7F4),
+                      color: const Color(0xFFFFF9E0),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _kGreen.withValues(alpha: 0.12)),
+                      border: Border.all(color: _kOrange.withValues(alpha: 0.12)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.school_rounded, size: 18, color: _kGreen),
+                        const Icon(Icons.school_rounded, size: 18, color: _kOrange),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(levelName,
@@ -716,14 +707,14 @@ class _ChildProgressDetailPageState extends State<ChildProgressDetailPage>
                 padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [_kGreen, _kGreenDark],
+                    colors: [_kOrange, _kOrange],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                        color: _kGreen.withValues(alpha: 0.35),
+                        color: _kOrange.withValues(alpha: 0.35),
                         blurRadius: 12,
                         offset: const Offset(0, 5)),
                   ],

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:fasolingo/widgets/quiz/confetti_widget.dart'; // Assure-toi que le chemin est correct
+﻿import 'package:flutter/material.dart';
+import 'package:tibi/widgets/quiz/confetti_widget.dart'; // Assure-toi que le chemin est correct
 
 class QuizCorrectDialog extends StatefulWidget {
   final int xpReward;

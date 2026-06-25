@@ -1,19 +1,15 @@
-import 'package:fasolingo/controller/apps/subscription/subscription_controller.dart';
-import 'package:fasolingo/helpers/services/souscription/payment_service.dart';
-import 'package:fasolingo/helpers/utils/ui_mixins.dart';
-import 'package:fasolingo/models/souscription/souscription_model.dart';
+﻿import 'package:tibi/controller/apps/subscription/subscription_controller.dart';
+import 'package:tibi/helpers/services/souscription/payment_service.dart';
+import 'package:tibi/helpers/utils/ui_mixins.dart';
+import 'package:tibi/models/souscription/souscription_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-const _kGreen      = Color(0xFF188329);
-const _kGreenLight = Color(0xFF1EB83A);
-const _kGreenDark  = Color(0xFF0F5C1C);
-const _kAccent     = Color(0xFFF27F22);  // orange pour les prix uniquement
+
 const _kBg         = Color(0xFFF4FBF6);
 const _kDark       = Color(0xFF1A1A1A);
-// Alias pour ne pas casser les références existantes
-const _kOrange = _kGreen;
-const _kAmber  = _kGreenLight;
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class SubscriptionPlansPage extends StatefulWidget {
   final bool isBottomSheet;
@@ -109,7 +105,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
         children: [
           if (_currentStep > 1)
             IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: _kGreen, size: 20),
+              icon: Icon(Icons.arrow_back_ios, color: _kOrange, size: 20),
               onPressed: () => setState(() {
                 if (_currentStep == 3) _resetPaymentState();
                 _currentStep--;
@@ -604,7 +600,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                 ? "${_paidAmount?.toStringAsFixed(0)} $_paidCurrency"
                 : "${_selectedPlan!.priceMonthly} ${_selectedPlan!.currency}",
             style: const TextStyle(
-                fontSize: 18, fontWeight: FontWeight.w900, color: _kAccent),
+                fontSize: 18, fontWeight: FontWeight.w900, color: _kOrange),
           ),
         ],
       ),
@@ -662,7 +658,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
       Get.snackbar(
         "Abonnement activé !",
         "Votre abonnement est maintenant actif.",
-        backgroundColor: _kGreen,
+        backgroundColor: _kOrange,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
@@ -701,7 +697,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
       Get.snackbar(
         "Abonnement activé !",
         "Votre abonnement est maintenant actif.",
-        backgroundColor: _kGreen,
+        backgroundColor: _kOrange,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
@@ -781,7 +777,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                     if (step > 2)
                       IconButton(
                         icon: Icon(Icons.arrow_back_ios,
-                            color: _kGreen, size: 20),
+                            color: _kOrange, size: 20),
                         onPressed: () => setModalState(() => step--),
                       )
                     else
@@ -938,7 +934,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isPremium ? _kGreen : const Color(0xFFDCFCE7),
+          color: isPremium ? _kOrange : const Color(0xFFDCFCE7),
           width: isPremium ? 2.5 : 1.5,
         ),
         boxShadow: [
@@ -960,7 +956,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
               child: Container(
                 height: 4,
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(colors: [_kOrange, _kAmber]),
+                  gradient: LinearGradient(colors: [_kOrange, _kOrange]),
                   borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
                 ),
               ),
@@ -1020,7 +1016,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                             horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                              colors: [_kOrange, _kAmber]),
+                              colors: [_kOrange, _kOrange]),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
@@ -1061,7 +1057,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w900,
-                          color: isPremium ? _kAccent : Colors.grey.shade700,
+                          color: isPremium ? _kOrange : Colors.grey.shade700,
                           height: 1,
                         ),
                       ),
@@ -1125,7 +1121,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                     onPressed: onSelect,
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
-                          isPremium ? _kGreen : Colors.grey.shade100,
+                          isPremium ? _kOrange : Colors.grey.shade100,
                       foregroundColor:
                           isPremium ? Colors.white : Colors.grey.shade700,
                       elevation: isPremium ? 0 : 0,
@@ -1307,10 +1303,10 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(colors: [_kGreen, _kGreenLight]),
+        gradient: const LinearGradient(colors: [_kOrange, _kOrange]),
         boxShadow: [
           BoxShadow(
-            color: _kGreen.withValues(alpha: 0.35),
+            color: _kOrange.withValues(alpha: 0.35),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),

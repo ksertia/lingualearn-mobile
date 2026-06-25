@@ -1,7 +1,7 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
-import 'package:fasolingo/helpers/theme/app_theme.dart';
-import 'package:fasolingo/helpers/theme/theme_type.dart';
+import 'package:tibi/helpers/theme/app_theme.dart';
+import 'package:tibi/helpers/theme/theme_type.dart';
 
 @Deprecated('message')
 class MaterialTheme {

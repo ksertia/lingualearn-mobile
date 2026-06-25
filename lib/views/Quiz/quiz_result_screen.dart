@@ -1,7 +1,7 @@
-import 'package:fasolingo/views/Quiz/quizFinalExamenFinal.dart';
-import 'package:fasolingo/views/apps/home/screens/parcours.dart';
+﻿import 'package:tibi/views/Quiz/quizFinalExamenFinal.dart';
+import 'package:tibi/views/apps/home/screens/parcours.dart';
 import 'package:flutter/material.dart';
-import 'package:fasolingo/widgets/quiz/confetti_widget.dart';
+import 'package:tibi/widgets/quiz/confetti_widget.dart';
 class QuizResultScreen extends StatelessWidget {
   final int correctAnswers;
   final int total;

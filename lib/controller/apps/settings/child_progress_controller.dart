@@ -1,7 +1,7 @@
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/controller/my_controller.dart';
-import 'package:fasolingo/helpers/services/languages_service.dart';
-import 'package:fasolingo/models/child_progress_models.dart';
+﻿import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/controller/my_controller.dart';
+import 'package:tibi/helpers/services/languages_service.dart';
+import 'package:tibi/models/child_progress_models.dart';
 import 'package:get/get.dart';
 
 class ChildProgressController extends MyController {

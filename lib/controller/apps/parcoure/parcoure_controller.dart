@@ -1,7 +1,7 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/services/module_service.dart';
-import 'package:fasolingo/helpers/services/parcoure/parcoure_service.dart';
-import 'package:fasolingo/helpers/services/souscription/sousciption_service.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/helpers/services/module_service.dart';
+import 'package:tibi/helpers/services/parcoure/parcoure_service.dart';
+import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

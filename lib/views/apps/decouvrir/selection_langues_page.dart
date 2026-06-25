@@ -1,15 +1,13 @@
-import 'package:fasolingo/controller/apps/langue/langue_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+﻿import 'package:tibi/controller/apps/langue/langue_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
-// ── Palette ───────────────────────────────────────────────────────────────────
-const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
-const Color _kYellow    = Color(0xFFF5BF1E);
 
-// ─────────────────────────────────────────────────────────────────────────────
+const Color _kOrange     = Color(0xFFF27F22);
+
+
 
 class LanguageSelectionPage extends StatefulWidget {
   const LanguageSelectionPage({super.key});
@@ -49,34 +47,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
     super.dispose();
   }
 
-  // ── Lang emoji ─────────────────────────────────────────────────────────────
-
-  String _emoji(String? name) {
-    if (name == null) return '🌍';
-    final n = name.toLowerCase();
-    if (n.contains('moore') || n.contains('mooré'))   return '🌍';
-    if (n.contains('dioula') || n.contains('dyula'))  return '🌿';
-    if (n.contains('fulfuldé') || n.contains('peul')) return '☀️';
-    if (n.contains('bissa') || n.contains('bisa'))    return '🎶';
-    if (n.contains('français') || n.contains('french')) return '📖';
-    if (n.contains('anglais') || n.contains('english')) return '🗣️';
-    if (n.contains('arabe') || n.contains('arabic'))  return '📜';
-    return '🌍';
-  }
-
-  static const List<List<Color>> _palette = [
-    [Color(0xFF188329), Color(0xFF0F5C1C)],
-    [Color(0xFFF27F22), Color(0xFFBF5A0F)],
-    [Color(0xFF0EA5E9), Color(0xFF0369A1)],
-    [Color(0xFF7C3AED), Color(0xFF5B21B6)],
-    [Color(0xFFF5BF1E), Color(0xFF8B6B00)],
-  ];
-
-  List<Color> _colors(String name) {
-    final i = name.isNotEmpty ? name.codeUnitAt(0) % _palette.length : 0;
-    return _palette[i];
-  }
-
   // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
@@ -107,7 +77,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
               child: SlideTransition(
                 position: _slideAnim,
                 child: RefreshIndicator(
-                  color: _kGreen,
+                  color: _kOrange,
                   onRefresh: _langCtrl.loadAllLanguages,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -139,7 +109,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
           20, MediaQuery.of(context).padding.top + 16, 20, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -214,7 +184,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
           width: 4, height: 20,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [_kGreen, _kYellow],
+              colors: [_kOrange, _kOrange],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -265,9 +235,6 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
 
   Widget _buildLangCard(BuildContext context, dynamic lang,
       bool isSelected, int index) {
-    final colors = _colors(lang.name ?? '');
-    final c1 = colors[0];
-
     return GestureDetector(
       onTap: () => _langCtrl.selectLanguage(lang),
       child: AnimatedContainer(
@@ -275,17 +242,17 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? c1.withValues(alpha: 0.06)
+              ? _kOrange.withValues(alpha: 0.06)
               : AppColors.card(context),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? c1 : AppColors.border(context),
+            color: isSelected ? _kOrange : AppColors.border(context),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? c1.withValues(alpha: 0.14)
+                  ? _kOrange.withValues(alpha: 0.14)
                   : AppColors.shadow(context),
               blurRadius: isSelected ? 18 : 8,
               offset: const Offset(0, 4),
@@ -300,17 +267,20 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: isSelected
-                      ? [c1, colors[1]]
-                      : [c1.withValues(alpha: 0.12),
-                         c1.withValues(alpha: 0.06)],
+                      ? [_kOrange, _kOrange]
+                      : [_kOrange.withValues(alpha: 0.12),
+                         _kOrange.withValues(alpha: 0.06)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Center(
-                child: Text(_emoji(lang.name),
-                    style: const TextStyle(fontSize: 26)),
+                child: Icon(
+                  Icons.language_rounded,
+                  color: isSelected ? Colors.white : _kOrange,
+                  size: 26,
+                ),
               ),
             ),
             const SizedBox(width: 14),
@@ -324,7 +294,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: isSelected ? c1 : AppColors.textPrimary(context),
+                      color: isSelected ? _kOrange : AppColors.textPrimary(context),
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -344,14 +314,14 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(
-                        color: c1.withValues(alpha: 0.10),
+                        color: _kOrange.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         lang.code.toString().toUpperCase(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 10,
-                          color: c1,
+                          color: _kOrange,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -365,7 +335,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
               width: 28, height: 28,
               decoration: BoxDecoration(
                 gradient: isSelected
-                    ? LinearGradient(colors: [c1, colors[1]])
+                    ? const LinearGradient(colors: [_kOrange, _kOrange])
                     : null,
                 color: isSelected ? null : AppColors.cardAlt(context),
                 shape: BoxShape.circle,
@@ -414,11 +384,11 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: _kGreen.withValues(alpha: 0.08),
+                color: _kOrange.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.language_rounded,
-                  color: _kGreen, size: 40),
+                  color: _kOrange, size: 40),
             ),
             const SizedBox(height: 16),
             Text(
@@ -465,7 +435,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
             context,
             label: hasList
                 ? 'Continuons !'
-                : (hasSelection ? 'Choisir le niveau →' : 'Sélectionner une langue'),
+                : (hasSelection ? 'Choisir le niveau' : 'Sélectionner une langue'),
             isPrimary: hasSelection || hasList,
             isLoading: isLoading,
             onTap: (!hasSelection && !hasList) || isLoading
@@ -504,7 +474,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
               decoration: BoxDecoration(
                 gradient: onTap != null
                     ? const LinearGradient(
-                        colors: [_kGreen, _kGreenDark],
+                        colors: [_kOrange, _kOrange],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                       )
@@ -514,7 +484,7 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
                 boxShadow: onTap != null
                     ? [
                         BoxShadow(
-                          color: _kGreen.withValues(alpha: 0.28),
+                          color: _kOrange.withValues(alpha: 0.28),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
@@ -550,15 +520,15 @@ class _LanguageSelectionPageState extends State<LanguageSelectionPage>
               onPressed: isLoading ? null : onTap,
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
-                    color: _kGreen.withValues(alpha: 0.40), width: 1.5),
-                backgroundColor: _kGreen.withValues(alpha: 0.04),
+                    color: _kOrange.withValues(alpha: 0.40), width: 1.5),
+                backgroundColor: _kOrange.withValues(alpha: 0.04),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
               ),
               child: Text(
                 label,
                 style: const TextStyle(
-                  color: _kGreen,
+                  color: _kOrange,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),

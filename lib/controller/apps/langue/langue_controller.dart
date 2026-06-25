@@ -1,7 +1,7 @@
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/controller/apps/user_progress/user_progress_controller.dart';
-import 'package:fasolingo/helpers/services/langue/langue_service.dart';
-import 'package:fasolingo/models/langue/langue_model.dart';
+﻿import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/controller/apps/user_progress/user_progress_controller.dart';
+import 'package:tibi/helpers/services/langue/langue_service.dart';
+import 'package:tibi/models/langue/langue_model.dart';
 import 'package:get/get.dart';
 
 class LanguagesController extends GetxController {

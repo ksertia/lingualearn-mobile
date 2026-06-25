@@ -1,8 +1,9 @@
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+﻿import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-const Color _green = Color(0xFF16A34A);
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class PartnerPage extends StatelessWidget {
   const PartnerPage({super.key});
@@ -40,8 +41,8 @@ class PartnerPage extends StatelessWidget {
     return SliverAppBar(
       expandedHeight: 240,
       pinned: true,
-      backgroundColor: _green,
-      surfaceTintColor: _green,
+      backgroundColor: _kOrange,
+      surfaceTintColor: _kOrange,
       leading: GestureDetector(
         onTap: () => Get.back(),
         child: Container(
@@ -67,7 +68,7 @@ class PartnerPage extends StatelessWidget {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF14532D), _green],
+                  colors: [_kOrange, _kOrange],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -138,11 +139,11 @@ class PartnerPage extends StatelessWidget {
   Widget _buildStatsChipsRow(BuildContext context) {
     return Row(
       children: [
-        _buildChip(context, icon: Icons.percent_rounded,    label: 'Commission',  sub: 'par paiement', color: _green,                 bg: const Color(0xFFDCFCE7)),
+        _buildChip(context, icon: Icons.percent_rounded,    label: 'Commission',  sub: 'par paiement', color: Colors.black,            bg: Colors.grey.shade200),
         const SizedBox(width: 12),
-        _buildChip(context, icon: Icons.people_alt_rounded,  label: 'Parrainages', sub: 'illimites',    color: const Color(0xFF7C3AED), bg: const Color(0xFFEDE9FF)),
+        _buildChip(context, icon: Icons.people_alt_rounded,  label: 'Parrainages', sub: 'illimites',    color:  Colors.black, bg:  Colors.grey.shade200),
         const SizedBox(width: 12),
-        _buildChip(context, icon: Icons.bolt_rounded,        label: 'Activation',  sub: 'instantanee',  color: const Color(0xFFD97706), bg: const Color(0xFFFEF3C7)),
+        _buildChip(context, icon: Icons.bolt_rounded,        label: 'Activation',  sub: 'instantanee',  color: Colors.black, bg: Colors.grey.shade200),
       ],
     );
   }
@@ -211,10 +212,10 @@ class PartnerPage extends StatelessWidget {
                 Container(
                   width: 38, height: 38,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDCFCE7),
+                    color: const Color(0xFFFFF9E0),
                     borderRadius: BorderRadius.circular(11),
                   ),
-                  child: const Icon(Icons.qr_code_rounded, color: _green, size: 20),
+                  child: const Icon(Icons.qr_code_rounded, color: _kOrange, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -264,19 +265,12 @@ class PartnerPage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Get.toNamed('/partenaire/dashboard'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _green, foregroundColor: Colors.white,
+                  backgroundColor: _kOrange, foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.auto_awesome_rounded, size: 18),
-                    SizedBox(width: 8),
-                    Text('Generer mon code',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                  ],
-                ),
+                child: Text('Generer mon code',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold,color: Colors.white.withValues(alpha: 0.95))),
               ),
             ),
           ),
@@ -289,9 +283,9 @@ class PartnerPage extends StatelessWidget {
 
   Widget _buildHowItWorks(BuildContext context) {
     final steps = [
-      (num: '01', icon: Icons.auto_awesome_rounded, iconColor: const Color(0xFF7C3AED), iconBg: const Color(0xFFEDE9FF), title: 'Generez votre code',    desc: 'Obtenez votre code unique personnel en un seul clic.'),
-      (num: '02', icon: Icons.share_rounded,         iconColor: const Color(0xFF0EA5E9), iconBg: const Color(0xFFE0F2FE), title: 'Partagez-le',            desc: 'Diffusez-le a vos proches, amis ou sur vos reseaux sociaux.'),
-      (num: '03', icon: Icons.percent_rounded,       iconColor: _green,                  iconBg: const Color(0xFFDCFCE7), title: 'Gagnez des commissions', desc: 'Recevez une commission sur chaque abonnement souscrit avec votre code.'),
+      (num: '01', icon: Icons.auto_awesome_rounded, iconColor:  Colors.black, iconBg: Colors.grey.shade200, title: 'Generez votre code',    desc: 'Obtenez votre code unique personnel en un seul clic.'),
+      (num: '02', icon: Icons.share_rounded,         iconColor: Colors.black, iconBg: Colors.grey.shade200, title: 'Partagez-le',            desc: 'Diffusez-le a vos proches, amis ou sur vos reseaux sociaux.'),
+      (num: '03', icon: Icons.percent_rounded,       iconColor: Colors.black,            iconBg: Colors.grey.shade200, title: 'Gagnez des commissions', desc: 'Recevez une commission sur chaque abonnement souscrit avec votre code.'),
     ];
 
     return Column(

@@ -1,5 +1,5 @@
-import 'dart:async';
-import 'package:fasolingo/views/Quiz/Certification_Screen.dart';
+﻿import 'dart:async';
+import 'package:tibi/views/Quiz/Certification_Screen.dart';
 import 'package:flutter/material.dart';
 
 // --- Palette de couleurs centralisée ---

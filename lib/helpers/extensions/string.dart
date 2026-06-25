@@ -1,6 +1,6 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
-import 'package:fasolingo/helpers/localizations/translator.dart';
+import 'package:tibi/helpers/localizations/translator.dart';
 
 extension StringUtil on String {
   Color get toColor {

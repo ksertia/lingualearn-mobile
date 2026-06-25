@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get_utils/get_utils.dart';
-import 'package:fasolingo/helpers/my_widgets/my_field_validator.dart';
+import 'package:tibi/helpers/my_widgets/my_field_validator.dart';
 
 class MyFormValidator {
   Map<String, dynamic> errors = {};

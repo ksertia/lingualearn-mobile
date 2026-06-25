@@ -1,11 +1,11 @@
-import 'dart:developer';
+﻿import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/helpers/logger/logger.dart';
-import 'package:fasolingo/helpers/remote/api_service.dart';
-import 'package:fasolingo/helpers/services/error_handling.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/constant/app_constant.dart';
+import 'package:tibi/helpers/logger/logger.dart';
+import 'package:tibi/helpers/remote/api_service.dart';
+import 'package:tibi/helpers/services/error_handling.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
 
 class ProfileService {
   /// ************************* Update Profile Data *************************///

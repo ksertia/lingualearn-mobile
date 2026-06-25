@@ -1,4 +1,4 @@
-import 'package:fasolingo/models/parcoure/parcour_model.dart';
+﻿import 'package:tibi/models/parcoure/parcour_model.dart';
 
 
 class ModuleProgress {

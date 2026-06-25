@@ -1,4 +1,4 @@
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+﻿import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 const Color _kGreen  = Color(0xFF188329);

@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:ui';
 import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:fasolingo/models/langue/decouverte_model.dart';
+import 'package:tibi/models/langue/decouverte_model.dart';
+
+const Color _kOrange     = Color(0xFFF27F22);
 
 class DecouvertePage extends StatefulWidget {
   const DecouvertePage({super.key});
@@ -12,7 +14,6 @@ class DecouvertePage extends StatefulWidget {
   @override
   State<DecouvertePage> createState() => _DecouvertePageState();
 }
-
 class _DecouvertePageState extends State<DecouvertePage>
     with TickerProviderStateMixin {
   late AnimationController _bounceController;
@@ -141,16 +142,16 @@ class _DecouvertePageState extends State<DecouvertePage>
                       Expanded(
                         child: _buildActionButton(
                           "NON",
-                          const Color(0xFFFFC107),
                           () { _tts.stop(); Get.back(); },
+                          isPrimary: false,
                         ),
                       ),
                       const SizedBox(width: 15),
                       Expanded(
                         child: _buildActionButton(
                           "OUI !",
-                          const Color(0xFF188329),
                           () { _tts.stop(); Get.toNamed('/decouvrir', arguments: languageData); },
+                          isPrimary: true,
                         ),
                       ),
                     ],
@@ -198,7 +199,7 @@ class _DecouvertePageState extends State<DecouvertePage>
                     bottomLeft: Radius.circular(5),
                   ),
                   border: Border.all(
-                    color: const Color(0xFFFFD54F),
+                    color: _kOrange,
                     width: 3,
                   ),
                   boxShadow: [
@@ -233,7 +234,7 @@ class _DecouvertePageState extends State<DecouvertePage>
             bottom: 12,
             child: CustomPaint(
               size: const Size(12, 18),
-              painter: TrianglePainter(const Color(0xFFFFD54F)),
+              painter: TrianglePainter(_kOrange),
             ),
           ),
         ],
@@ -246,7 +247,7 @@ class _DecouvertePageState extends State<DecouvertePage>
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: const LinearGradient(
-          colors: [Color(0xFFFFD54F), Color(0xFFFF8F00)],
+          colors: [Color(0xFFF27F22), Color(0xFFFF8F00)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -266,25 +267,43 @@ class _DecouvertePageState extends State<DecouvertePage>
     );
   }
 
-  Widget _buildActionButton(String label, Color color, VoidCallback onTap) {
+  Widget _buildActionButton(String label, VoidCallback onTap,
+      {bool isPrimary = false}) {
     return SizedBox(
       height: 55,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
-            side: const BorderSide(color: Colors.white, width: 2),
-          ),
-          elevation: 4,
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ),
+      child: isPrimary
+          ? ElevatedButton(
+              onPressed: onTap,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _kOrange,
+                foregroundColor:  Colors.white,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            )
+          : OutlinedButton(
+              onPressed: onTap,
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor:  _kOrange,
+                side: const BorderSide(color: _kOrange, width: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
     );
   }
 }

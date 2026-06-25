@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/helpers/my_widgets/my_spacing.dart';
-import 'package:fasolingo/views/ui/catch_network_image.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
+import 'package:tibi/helpers/constant/app_constant.dart';
+import 'package:tibi/helpers/my_widgets/my_spacing.dart';
+import 'package:tibi/views/ui/catch_network_image.dart';
 import 'package:flutter/material.dart';
 
 class GetNetworkImage extends StatefulWidget {

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/theme/app_theme.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:tibi/helpers/theme/app_theme.dart';
 
 extension IntUtil on int {
   String textFromSeconds(

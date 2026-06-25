@@ -1,30 +1,36 @@
-import 'dart:math';
-import 'package:fasolingo/helpers/services/sound_service.dart';
+﻿import 'dart:math';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:tibi/helpers/services/sound_service.dart';
+import 'package:tibi/widgets/mascots/kadoua_mascot.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/controller/apps/discovery_controller.dart';
-import 'package:lottie/lottie.dart';
+import 'package:tibi/controller/apps/discovery_controller.dart';
+
+
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class StepQuizQCM extends StatefulWidget {
   final String question;
   final String title;
   final List<String> options;
+  final String correctOption;
+  final VoidCallback? onContinue;
+  // conservés pour compatibilité ascendante (ignorés)
   final String lottieQuestion;
   final String lottieCorrect;
   final String lottieIncorrect;
-  final String correctOption;
-  final VoidCallback? onContinue;
 
   const StepQuizQCM({
     super.key,
     required this.question,
     required this.title,
     required this.options,
-    required this.lottieQuestion,
-    required this.lottieCorrect,
-    required this.lottieIncorrect,
     required this.correctOption,
     this.onContinue,
+    this.lottieQuestion = '',
+    this.lottieCorrect = '',
+    this.lottieIncorrect = '',
   });
 
   @override
@@ -36,7 +42,7 @@ class _StepQuizQCMState extends State<StepQuizQCM>
   final DiscoveryController controller = Get.find();
 
   int? selectedIndex;
-  String? currentLottie;
+  KadouaMood _kadouaMood = KadouaMood.speaking;
   bool hasValidated = false;
 
   late final AnimationController _shakeCtrl;
@@ -45,7 +51,6 @@ class _StepQuizQCMState extends State<StepQuizQCM>
   @override
   void initState() {
     super.initState();
-    currentLottie = widget.lottieQuestion;
     _shakeCtrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 480));
     _correctCtrl = AnimationController(
@@ -59,7 +64,7 @@ class _StepQuizQCMState extends State<StepQuizQCM>
     super.dispose();
   }
 
-  // ── Bottom sheet feedback ──────────────────────────────────────────────────
+  // ── Bottom sheet ───────────────────────────────────────────────────────────
 
   void _showResultBottomSheet(bool isCorrect) {
     showModalBottomSheet(
@@ -68,56 +73,100 @@ class _StepQuizQCMState extends State<StepQuizQCM>
       enableDrag: false,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
         decoration: BoxDecoration(
-          color: isCorrect ? const Color(0xFFD7FFB8) : const Color(0xFFFFDFE0),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          gradient: LinearGradient(
+            colors: isCorrect
+                ? [const Color(0xFFF0FFDB), const Color(0xFFD7FFB8)]
+                : [const Color(0xFFFFE7E2), const Color(0xFFFFDFE0)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 18,
+              offset: const Offset(0, -6),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(
-                  isCorrect ? Icons.check_circle : Icons.cancel,
-                  color: isCorrect
-                      ? const Color(0xFF58CC02)
-                      : const Color(0xFFEE2B2B),
-                  size: 30,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  isCorrect ? "Bravo 🥳!" : "Désolé 😥!",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isCorrect
-                        ? const Color(0xFF58CC02)
-                        : const Color(0xFFEE2B2B),
-                  ),
-                ),
-              ],
+            Container(
+              width: 60,
+              height: 6,
+              decoration: BoxDecoration(
+                color: Colors.white70,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Icon(
+              isCorrect ? Icons.emoji_events : Icons.sentiment_dissatisfied,
+              color: isCorrect
+                  ? _kOrange
+                  : const Color(0xFFEE2B2B),
+              size: 40,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              isCorrect ? "Bravo champion !" : "Oups... presque !",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: isCorrect
+                    ? const Color(0xFF3C7D00)
+                    : const Color(0xFFB00020),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              isCorrect
+                  ? "Tu as choisi la bonne réponse. Prêt pour la prochaine ?"
+                  : "Regarde bien la réponse et retente ta chance.",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 15, color: Colors.black87, height: 1.4),
             ),
             if (!isCorrect) ...[
-              const SizedBox(height: 10),
-              const Text(
-                "Bonne réponse :",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFEE2B2B)),
-              ),
-              Text(
-                widget.correctOption,
-                style:
-                    const TextStyle(fontSize: 16, color: Color(0xFFEE2B2B)),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF0F0),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Bonne réponse",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFB00020),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      widget.correctOption,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFB00020),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: 22),
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 54,
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
@@ -132,12 +181,12 @@ class _StepQuizQCMState extends State<StepQuizQCM>
                       ? const Color(0xFF58CC02)
                       : const Color(0xFFEE2B2B),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
+                      borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
-                child: Text(
-                  isCorrect ? "CONTINUER" : "D'ACCORD",
-                  style: const TextStyle(
+                child: const Text(
+                  "CONTINUER",
+                  style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.white),
@@ -153,44 +202,43 @@ class _StepQuizQCMState extends State<StepQuizQCM>
   // ── Helpers couleurs ───────────────────────────────────────────────────────
 
   Color _getBorderColor(int index) {
-    final optionText = widget.options[index];
-    final isSelected = selectedIndex == index;
     if (!hasValidated) {
-      return isSelected ? const Color(0xFF188329) : Colors.grey.shade300;
+      return selectedIndex == index
+          ? _kOrange
+          : Colors.grey.shade300;
     }
-    if (isSelected) {
-      return optionText == widget.correctOption
-          ? const Color(0xFF58CC02)
-          : const Color(0xFFEE2B2B);
+    if (widget.options[index] == widget.correctOption) {
+      return const Color(0xFF58CC02);
     }
-    if (optionText == widget.correctOption) return const Color(0xFF58CC02);
+    if (selectedIndex == index) return const Color(0xFFEE2B2B);
     return Colors.grey.shade300;
   }
 
   Color _getBackgroundColor(int index) {
+    final isCorrectOption = widget.options[index] == widget.correctOption;
     final isSelected = selectedIndex == index;
-    final isCorrect = widget.options[index] == widget.correctOption;
     if (!hasValidated) {
-      return isSelected ? const Color(0xFFE8F6DC) : Colors.white;
+      return isSelected
+          ? _kOrange.withValues(alpha: 0.10)
+          : Colors.white;
     }
-    if (isCorrect) return const Color(0xFFE8F6DC);
+    if (isCorrectOption) return const Color(0xFFE8F6DC);
     if (isSelected) return const Color(0xFFFFE8E5);
     return Colors.white;
   }
 
-  // ── Construction d'une option avec animations ─────────────────────────────
+  // ── Option avec animations ─────────────────────────────────────────────────
 
   Widget _buildOption(int index) {
     final isSelected = selectedIndex == index;
     final isCorrectOption = widget.options[index] == widget.correctOption;
     final isWrongSelected = hasValidated && isSelected && !isCorrectOption;
     final isCorrectValidated = hasValidated && isCorrectOption;
+    final baseColor = _getBorderColor(index);
 
     return TweenAnimationBuilder<double>(
-      // La clé change quand l'item devient sélectionné → rejoue le bounce
       key: ValueKey('opt-$index-$isSelected'),
-      tween: Tween(
-          begin: isSelected && !hasValidated ? 0.88 : 1.0, end: 1.0),
+      tween: Tween(begin: isSelected && !hasValidated ? 0.95 : 1.0, end: 1.0),
       duration: const Duration(milliseconds: 380),
       curve: Curves.elasticOut,
       builder: (_, bounceScale, __) => Transform.scale(
@@ -198,15 +246,11 @@ class _StepQuizQCMState extends State<StepQuizQCM>
         child: AnimatedBuilder(
           animation: Listenable.merge([_shakeCtrl, _correctCtrl]),
           builder: (_, __) {
-            // Shake horizontal sur mauvaise réponse
             final shakeX = isWrongSelected
-                ? sin(_shakeCtrl.value * pi * 5) *
-                    7 *
-                    (1 - _shakeCtrl.value)
+                ? sin(_shakeCtrl.value * pi * 5) * 8 * (1 - _shakeCtrl.value)
                 : 0.0;
-            // Pulse scale sur bonne réponse
             final correctScale = isCorrectValidated
-                ? 1.0 + 0.06 * sin(_correctCtrl.value * pi)
+                ? 1.0 + 0.05 * sin(_correctCtrl.value * pi)
                 : 1.0;
 
             return Transform.translate(
@@ -218,53 +262,71 @@ class _StepQuizQCMState extends State<StepQuizQCM>
                       ? null
                       : () {
                           SoundService.playSelect();
-                          setState(() {
-                            selectedIndex = index;
-                            currentLottie = widget.lottieQuestion;
-                          });
+                          setState(() => selectedIndex = index);
                         },
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(18),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 220),
-                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 18, horizontal: 18),
                     decoration: BoxDecoration(
                       color: _getBackgroundColor(index),
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: _getBorderColor(index),
-                        width: (isSelected ||
-                                (hasValidated && isCorrectOption))
-                            ? 2.5
-                            : 1.0,
+                        color: baseColor,
+                        width:
+                            (isSelected || (hasValidated && isCorrectOption))
+                                ? 2.2
+                                : 1.2,
                       ),
                       boxShadow: isSelected && !hasValidated
                           ? [
                               BoxShadow(
-                                color: const Color(0xFF188329)
-                                    .withValues(alpha: 0.12),
-                                blurRadius: 10,
+                                color: _kOrange.withValues(alpha: 0.15),
+                                blurRadius: 12,
                                 offset: const Offset(0, 4),
                               )
                             ]
                           : [],
                     ),
-                    child: Text(
-                      widget.options[index],
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: isSelected
-                            ? FontWeight.w800
-                            : FontWeight.bold,
-                        color: hasValidated
-                            ? (isCorrectOption
-                                ? const Color(0xFF3C7D00)
-                                : isSelected
-                                    ? const Color(0xFFB00020)
-                                    : Colors.black87)
-                            : (isSelected
-                                ? const Color(0xFF188329)
-                                : Colors.black87),
-                      ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.options[index],
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isSelected ? baseColor : Colors.black87,
+                            ),
+                          ),
+                        ),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          transitionBuilder: (child, anim) =>
+                              ScaleTransition(scale: anim, child: child),
+                          child: hasValidated
+                              ? isCorrectOption
+                                  ? const Icon(Icons.check_circle,
+                                      color: Color(0xFF58CC02),
+                                      key: ValueKey('correct'))
+                                  : isSelected
+                                      ? const Icon(Icons.close,
+                                          color: Color(0xFFEE2B2B),
+                                          key: ValueKey('wrong'))
+                                      : const SizedBox(
+                                          width: 0,
+                                          height: 0,
+                                          key: ValueKey('empty'))
+                              : const SizedBox(
+                                  width: 0,
+                                  height: 0,
+                                  key: ValueKey('empty')),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -283,59 +345,100 @@ class _StepQuizQCMState extends State<StepQuizQCM>
     return Stack(
       children: [
         SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 100),
+          padding: const EdgeInsets.only(bottom: 120),
           child: Column(
             children: [
               const SizedBox(height: 30),
-              Text(widget.title,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.black54)),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: currentLottie != null
-                    ? Lottie.asset(currentLottie!, height: 140, repeat: true)
-                    : const SizedBox(height: 140),
-              ),
+
+              Text("CHOISIE LA BONNE REPONSE", style: const TextStyle(
+               fontSize: 22,
+               fontWeight: FontWeight.bold,
+                color: Color(0xFF1A1A1A),
+              )),
+
+              const SizedBox(height: 22),
+              // Mascotte + bulle question
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.volume_up,
-                          color: Colors.blueAccent, size: 28),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Text(widget.question,
-                            style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold)),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    KadouaMascot(
+                      mood: _kadouaMood,
+                      size: KadouaSize.md,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 15),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                  color: Colors.grey.shade300, width: 1.5),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.volume_up,
+                                    color: Colors.blueAccent, size: 24),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    widget.question,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Pointe de bulle
+                          Positioned(
+                            left: -6.5,
+                            top: 22,
+                            child: RotationTransition(
+                              turns:
+                                  const AlwaysStoppedAnimation(-45 / 360),
+                              child: Container(
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border(
+                                    left: BorderSide(
+                                        color: Colors.grey.shade300,
+                                        width: 1.5),
+                                    top: BorderSide(
+                                        color: Colors.grey.shade300,
+                                        width: 1.5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 24),
+              // Liste des options
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GridView.builder(
+                child: ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: widget.options.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 2.1,
-                  ),
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (_, index) => _buildOption(index),
                 ),
               ),
@@ -345,7 +448,7 @@ class _StepQuizQCMState extends State<StepQuizQCM>
 
         // Bouton VALIDER
         Positioned(
-          bottom: 20,
+          bottom: 25,
           left: 20,
           right: 20,
           child: SizedBox(
@@ -353,14 +456,13 @@ class _StepQuizQCMState extends State<StepQuizQCM>
             child: ElevatedButton(
               onPressed: selectedIndex != null && !hasValidated
                   ? () {
-                      final isCorrect =
-                          widget.options[selectedIndex!] ==
-                              widget.correctOption;
+                      final isCorrect = widget.options[selectedIndex!] ==
+                          widget.correctOption;
                       setState(() {
                         hasValidated = true;
-                        currentLottie = isCorrect
-                            ? widget.lottieCorrect
-                            : widget.lottieIncorrect;
+                        _kadouaMood = isCorrect
+                            ? KadouaMood.correct
+                            : KadouaMood.incorrect;
                       });
                       if (isCorrect) {
                         _correctCtrl.forward(from: 0);
@@ -373,16 +475,19 @@ class _StepQuizQCMState extends State<StepQuizQCM>
                     }
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF9800),
+                backgroundColor: _kOrange,
                 disabledBackgroundColor: Colors.grey.shade300,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15)),
+                elevation: 4,
               ),
-              child: const Text("VALIDER",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white)),
+              child: const Text(
+                "VALIDER",
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1A1A)),
+              ),
             ),
           ),
         ),

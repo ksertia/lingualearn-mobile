@@ -1,6 +1,6 @@
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/services/notifications/notification_service.dart';
-import 'package:fasolingo/models/notifications/notification_model.dart';
+﻿import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/services/notifications/notification_service.dart';
+import 'package:tibi/models/notifications/notification_model.dart';
 import 'package:get/get.dart';
 
 class NotificationController extends GetxController {

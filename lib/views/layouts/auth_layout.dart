@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
-import 'package:fasolingo/controller/layouts/auth_layout_controller.dart';
-import 'package:fasolingo/helpers/theme/admin_theme.dart';
-import 'package:fasolingo/helpers/my_widgets/my_container.dart';
-import 'package:fasolingo/helpers/my_widgets/my_flex.dart';
-import 'package:fasolingo/helpers/my_widgets/my_flex_item.dart';
-import 'package:fasolingo/helpers/my_widgets/my_responsive.dart';
-import 'package:fasolingo/helpers/my_widgets/my_spacing.dart';
+import 'package:tibi/controller/layouts/auth_layout_controller.dart';
+import 'package:tibi/helpers/theme/admin_theme.dart';
+import 'package:tibi/helpers/my_widgets/my_container.dart';
+import 'package:tibi/helpers/my_widgets/my_flex.dart';
+import 'package:tibi/helpers/my_widgets/my_flex_item.dart';
+import 'package:tibi/helpers/my_widgets/my_responsive.dart';
+import 'package:tibi/helpers/my_widgets/my_spacing.dart';
 
 class AuthLayout extends StatelessWidget {
   final Widget? child;

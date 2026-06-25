@@ -1,6 +1,4 @@
 ﻿import 'dart:async';
-
-// import 'package:ffmpeg_kit_flutter_min/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:media_kit/media_kit.dart';
@@ -333,7 +331,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
         Text(
           widget.videoTitle,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 15.h),
         Expanded(

@@ -1,7 +1,7 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/my_widgets/my_pages.dart';
+import 'package:tibi/helpers/my_widgets/my_pages.dart';
 
 class MyPagerIndicator extends StatelessWidget {
   final PagerIndicatorViewModel? viewModel;

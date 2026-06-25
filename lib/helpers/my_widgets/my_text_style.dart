@@ -1,11 +1,11 @@
-// ignore_for_file: prefer_generic_function_type_aliases
+﻿// ignore_for_file: prefer_generic_function_type_aliases
 
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fasolingo/helpers/theme/app_theme.dart';
+import 'package:tibi/helpers/theme/app_theme.dart';
 
 enum MyTextType {
   displayLarge,

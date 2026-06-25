@@ -1,7 +1,7 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/models/child_model.dart';
-import 'package:fasolingo/models/children_response_model.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/helpers/constant/app_constant.dart';
+import 'package:tibi/models/child_model.dart';
+import 'package:tibi/models/children_response_model.dart';
 import 'package:get/get.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 

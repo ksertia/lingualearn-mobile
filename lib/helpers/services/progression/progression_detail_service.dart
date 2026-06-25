@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/remote/api_service.dart';
-import 'package:fasolingo/models/progression/progression_detail_model.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/helpers/remote/api_service.dart';
+import 'package:tibi/models/progression/progression_detail_model.dart';
 
 class ProgressionDetailService {
   /// GET /progression/user/{userId}/language/{languageId}

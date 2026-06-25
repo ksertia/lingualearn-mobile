@@ -1,10 +1,10 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/my_widgets/my_page_dragger.dart';
-import 'package:fasolingo/helpers/my_widgets/my_page_indicator.dart';
-import 'package:fasolingo/helpers/my_widgets/my_page_reveal.dart';
-import 'package:fasolingo/helpers/my_widgets/my_pages.dart';
+import 'package:tibi/helpers/my_widgets/my_page_dragger.dart';
+import 'package:tibi/helpers/my_widgets/my_page_indicator.dart';
+import 'package:tibi/helpers/my_widgets/my_page_reveal.dart';
+import 'package:tibi/helpers/my_widgets/my_pages.dart';
 
 class MyOnBoarding extends StatefulWidget {
   final List<PageViewModel> pages;

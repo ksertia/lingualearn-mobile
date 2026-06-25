@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/theme/app_theme.dart';
-import 'package:fasolingo/helpers/utils/ui_mixins.dart';
-import 'package:fasolingo/helpers/my_widgets/my_spacing.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:tibi/helpers/theme/app_theme.dart';
+import 'package:tibi/helpers/utils/ui_mixins.dart';
+import 'package:tibi/helpers/my_widgets/my_spacing.dart';
 
 class CustomSwitch extends StatefulWidget {
   final bool value;

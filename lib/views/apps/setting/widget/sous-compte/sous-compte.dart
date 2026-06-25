@@ -1,15 +1,13 @@
-import 'package:fasolingo/controller/apps/settings/children_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
-import 'package:fasolingo/views/apps/setting/widget/sous-compte/child_languages_page.dart';
+﻿import 'package:tibi/controller/apps/settings/children_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/views/apps/setting/widget/sous-compte/child_languages_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/models/child_model.dart';
+import 'package:tibi/models/child_model.dart';
 
 const Color _kGreen      = Color(0xFF188329);
-const Color _kGreenDark  = Color(0xFF0F5C1C);
-const Color _kYellow     = Color(0xFFF5BF1E);
 const Color _kOrange     = Color(0xFFF27F22);
-const Color _kOrangeDark = Color(0xFFC4611A);
+
 
 class SousCompte extends StatefulWidget {
   const SousCompte({super.key});
@@ -55,9 +53,9 @@ class _SousCompteState extends State<SousCompte> {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [_kGreen, _kGreenDark], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                gradient: const LinearGradient(colors: [_kOrange, _kOrange], begin: Alignment.topLeft, end: Alignment.bottomRight),
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: _kGreen.withValues(alpha: 0.30), blurRadius: 18, offset: const Offset(0, 7))],
+                boxShadow: [BoxShadow(color: _kOrange.withValues(alpha: 0.30), blurRadius: 18, offset: const Offset(0, 7))],
               ),
               child: const Icon(Icons.check_rounded, color: Colors.white, size: 32),
             ),
@@ -76,12 +74,12 @@ class _SousCompteState extends State<SousCompte> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGreen,
+                  backgroundColor: _kOrange,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   elevation: 0,
                 ),
                 child: const Text('Compris !',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
+                    style: TextStyle(color: Color(0xFF1A1A1A), fontWeight: FontWeight.w700, fontSize: 15)),
               ),
             ),
           ],
@@ -139,7 +137,7 @@ class _SousCompteState extends State<SousCompte> {
         padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 22),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [_kGreen, _kGreenDark],
+            colors: [_kOrange, _kOrange],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -168,9 +166,9 @@ class _SousCompteState extends State<SousCompte> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _kYellow,
+                    color: _kOrange,
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [BoxShadow(color: _kYellow.withValues(alpha: 0.45), blurRadius: 8, offset: const Offset(0, 3))],
+                    boxShadow: [BoxShadow(color: _kOrange.withValues(alpha: 0.45), blurRadius: 8, offset: const Offset(0, 3))],
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -307,7 +305,7 @@ class _SousCompteState extends State<SousCompte> {
                   width: 90, height: 90,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                        colors: [_kOrange, _kOrangeDark], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                        colors: [_kOrange, _kOrange], begin: Alignment.topLeft, end: Alignment.bottomRight),
                     shape: BoxShape.circle,
                     boxShadow: [BoxShadow(color: _kOrange.withValues(alpha: 0.30), blurRadius: 24, offset: const Offset(0, 8))],
                   ),
@@ -328,7 +326,7 @@ class _SousCompteState extends State<SousCompte> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 13),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [_kOrange, _kOrangeDark]),
+                      gradient: const LinearGradient(colors: [_kOrange, _kOrange]),
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [BoxShadow(color: _kOrange.withValues(alpha: 0.32), blurRadius: 14, offset: const Offset(0, 5))],
                     ),
@@ -527,13 +525,13 @@ class _SousCompteState extends State<SousCompte> {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(color: _kGreen.withValues(alpha: 0.42), blurRadius: 16, offset: const Offset(0, 6)),
+          BoxShadow(color: _kOrange.withValues(alpha: 0.42), blurRadius: 16, offset: const Offset(0, 6)),
         ],
       ),
       child: FloatingActionButton(
@@ -640,7 +638,7 @@ class _CreateSubAccountBottomSheetState extends State<_CreateSubAccountBottomShe
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF3EB),
+                    color: const Color(0xFFFFF9E0),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: _kOrange.withValues(alpha: 0.22)),
                   ),
@@ -712,7 +710,7 @@ class _CreateSubAccountBottomSheetState extends State<_CreateSubAccountBottomShe
                   decoration: BoxDecoration(
                     gradient: loading
                         ? null
-                        : const LinearGradient(colors: [_kOrange, _kOrangeDark], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                        : const LinearGradient(colors: [_kOrange, _kOrange], begin: Alignment.centerLeft, end: Alignment.centerRight),
                     color: loading ? const Color(0xFFF3F4F6) : null,
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: loading

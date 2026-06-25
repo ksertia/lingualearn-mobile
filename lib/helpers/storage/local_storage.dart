@@ -1,8 +1,8 @@
-import 'package:flutter/cupertino.dart';
+﻿import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fasolingo/helpers/localizations/language.dart';
-import 'package:fasolingo/helpers/services/auth_services.dart';
-import 'package:fasolingo/helpers/theme/theme_customizer.dart';
+import 'package:tibi/helpers/localizations/language.dart';
+import 'package:tibi/helpers/services/auth_services.dart';
+import 'package:tibi/helpers/theme/theme_customizer.dart';
 
 class LocalStorage {
   static const String _loggedInUserKey = "user";
@@ -16,6 +16,7 @@ class LocalStorage {
 
   static const String _userNameKey = "user_name";
   static const String _authToken = "auth_token";
+  static const String _refreshToken = "refresh_token";
   static const String _phoneNumber = "phone";
   static const String _email = "email";
   static const String _theme = "theme";
@@ -167,6 +168,14 @@ class LocalStorage {
     return preferences.getString(_authToken);
   }
 
+  static Future<bool> setRefreshToken(String token) {
+    return preferences.setString(_refreshToken, token);
+  }
+
+  static String? getRefreshToken() {
+    return preferences.getString(_refreshToken);
+  }
+
   static Future<bool> setPhoneNumber(String phone) {
     return preferences.setString(_phoneNumber, phone);
   }
@@ -240,6 +249,7 @@ class LocalStorage {
     preferences.remove(_languageKey);
     preferences.remove(_userIDKey);
     preferences.remove(_authToken);
+    preferences.remove(_refreshToken);
     preferences.remove(_loggedInUserKey);
     preferences.remove(_password);
   }

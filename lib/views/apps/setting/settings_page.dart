@@ -1,23 +1,22 @@
-import 'package:fasolingo/controller/apps/settings/settings_controller.dart';
-import 'package:fasolingo/helpers/constant/images.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
-import 'package:fasolingo/helpers/theme/app_notifier.dart';
-import 'package:fasolingo/helpers/utils/ui_mixins.dart';
-import 'package:fasolingo/views/apps/setting/widget/contact_support.dart';
-import 'package:fasolingo/views/apps/setting/widget/help.dart';
-import 'package:fasolingo/views/apps/setting/widget/logout_bottom_sheet.dart';
-import 'package:fasolingo/views/apps/setting/widget/subsciption_plan.dart';
-import 'package:fasolingo/views/ui/apploader.dart';
+﻿import 'package:tibi/controller/apps/settings/settings_controller.dart';
+import 'package:tibi/helpers/constant/images.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/helpers/theme/app_notifier.dart';
+import 'package:tibi/helpers/utils/ui_mixins.dart';
+import 'package:tibi/views/apps/setting/widget/contact_support.dart';
+import 'package:tibi/views/apps/setting/widget/help.dart';
+import 'package:tibi/views/apps/setting/widget/logout_bottom_sheet.dart';
+import 'package:tibi/views/apps/setting/widget/abonnement/subsciption_plan.dart';
+import 'package:tibi/views/ui/apploader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
-const Color _kYellow    = Color(0xFFF5BF1E);
-const Color _kOrange    = Color(0xFFF27F22);
+const Color _kGreen      = Color(0xFF188329);
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -97,17 +96,6 @@ class _SettingScreenState extends State<SettingScreen>
                                 onTap: () => Get.toNamed('/souscomptes'),
                               ),
                               _buildItem(
-                                icon: Icons.bar_chart_rounded,
-                                iconBg: const Color(0xFFE0F2FE),
-                                iconColor: const Color(0xFF0EA5E9),
-                                title: 'Parcours du compte rattaché',
-                                textColor: textPrimary,
-                                dividerColor: dividerColor,
-                                showDivider: true,
-                                onTap: () =>
-                                    Get.toNamed('/children_progress'),
-                              ),
-                              _buildItem(
                                 icon: Icons.credit_card_rounded,
                                 iconBg: const Color(0xFFFFF3E0),
                                 iconColor: _kOrange,
@@ -175,24 +163,7 @@ class _SettingScreenState extends State<SettingScreen>
                               onTap: () =>
                                   Get.to(() => const ContactSupportPage()),
                             ),
-                            // _buildItem(
-                            //   icon: Icons.star_outline_rounded,
-                            //   iconBg: const Color(0xFFFFF9E6),
-                            //   iconColor: const Color(0xFFF59E0B),
-                            //   title: "Noter l'application",
-                            //   textColor: textPrimary,
-                            //   dividerColor: dividerColor,
-                            //   showDivider: false,
-                            //   onTap: () => Get.snackbar(
-                            //     'Merci !',
-                            //     'Votre avis nous aide à nous améliorer.',
-                            //     snackPosition: SnackPosition.BOTTOM,
-                            //     backgroundColor: Colors.black87,
-                            //     colorText: Colors.white,
-                            //     margin: const EdgeInsets.all(16),
-                            //     borderRadius: 14,
-                            //   ),
-                            // ),
+                            
                           ]),
 
                           const SizedBox(height: 24),
@@ -224,7 +195,7 @@ class _SettingScreenState extends State<SettingScreen>
                     child: Container(
                       color: Colors.black.withValues(alpha: 0.35),
                       child: const Center(
-                          child: CircularProgressIndicator(color: _kGreen)),
+                          child: CircularProgressIndicator(color: _kOrange)),
                     ),
                   ),
               ],
@@ -267,7 +238,7 @@ class _SettingScreenState extends State<SettingScreen>
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -317,7 +288,7 @@ class _SettingScreenState extends State<SettingScreen>
                       width: 14,
                       height: 14,
                       decoration: BoxDecoration(
-                        color: _kYellow,
+                        color: Colors.white,
                         shape: BoxShape.circle,
                         border:
                             Border.all(color: Colors.white, width: 2.5),
@@ -377,7 +348,7 @@ class _SettingScreenState extends State<SettingScreen>
                       Text(
                         subtitle,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.72),
+                          color: Colors.white.withValues(alpha: 0.75),
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -388,103 +359,13 @@ class _SettingScreenState extends State<SettingScreen>
                   ],
                 ),
               ),
-              // Edit button
-              GestureDetector(
-                onTap: () => Get.toNamed('/edit_profile'),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25),
-                        width: 1),
-                  ),
-                  child: const Icon(Icons.edit_rounded,
-                      color: Colors.white, size: 18),
-                ),
-              ),
             ],
           ),
 
-          const SizedBox(height: 20),
-
-          // Quick-access strip
-          Container(
-            padding:
-                const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.15), width: 1),
-            ),
-            child: Row(
-              children: [
-                _buildHeaderTile(
-                  Icons.auto_stories_rounded,
-                  'Mon profil',
-                  'Voir',
-                  onTap: () => Get.toNamed('/edit_profile'),
-                ),
-                _buildHeaderDivider(),
-                _buildHeaderTile(
-                  Icons.history_rounded,
-                  'Historique',
-                  'Parcours',
-                  onTap: null,
-                ),
-                _buildHeaderDivider(),
-                _buildHeaderTile(
-                  Icons.workspace_premium_rounded,
-                  isSub ? 'Sous-compte' : 'Gratuit',
-                  'Statut',
-                  onTap: null,
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
   }
-
-  Widget _buildHeaderTile(IconData icon, String value, String label,
-      {VoidCallback? onTap}) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: Colors.white.withValues(alpha: 0.90), size: 18),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.60), fontSize: 10),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderDivider() => Container(
-        width: 1,
-        height: 36,
-        color: Colors.white.withValues(alpha: 0.18),
-      );
 
   // ── Premium banner ─────────────────────────────────────────────────────────
 
@@ -576,7 +457,7 @@ class _SettingScreenState extends State<SettingScreen>
           height: 16,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [_kGreen, _kYellow],
+              colors: [_kOrange, _kOrange],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -738,13 +619,13 @@ class _SettingScreenState extends State<SettingScreen>
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _kGreen.withValues(alpha: 0.08),
+                    color: _kOrange.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     _getCurrentLanguageName(),
                     style: const TextStyle(
-                        color: _kGreen,
+                        color: _kOrange,
                         fontSize: 12,
                         fontWeight: FontWeight.w700),
                   ),
@@ -802,7 +683,7 @@ class _SettingScreenState extends State<SettingScreen>
             scale: 0.85,
             child: CupertinoSwitch(
               value: LocalStorage.getTheme() == 'Dark',
-              activeTrackColor: _kGreen,
+              activeTrackColor: _kOrange,
               onChanged: (val) {
                 LocalStorage.setTheme(val ? 'Dark' : 'Light');
                 Provider.of<AppNotifier>(context, listen: false)

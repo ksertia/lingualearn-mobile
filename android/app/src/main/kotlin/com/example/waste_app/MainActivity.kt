@@ -1,4 +1,4 @@
-package com.example.fasolingo
+package com.example.tibi
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

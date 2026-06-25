@@ -1,7 +1,11 @@
-import 'package:fasolingo/controller/auth/password/ForgotPasswordController.dart';
-import 'package:fasolingo/controller/auth/login_controller.dart';
+﻿import 'package:tibi/controller/auth/password/ForgotPasswordController.dart';
+import 'package:tibi/controller/auth/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class NewPasswordPage extends StatefulWidget {
   const NewPasswordPage({super.key});
@@ -11,8 +15,6 @@ class NewPasswordPage extends StatefulWidget {
 }
 
 class _NewPasswordPageState extends State<NewPasswordPage> {
-  static const _primary = Color(0xFF188329);
-  static const _primaryLight = Color(0xFF1EB83A);
 
   final ForgotPasswordController controller =
       Get.find<ForgotPasswordController>();
@@ -51,14 +53,14 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF22C55E), Color(0xFF16A34A)],
+                  colors: [_kOrange, _kOrange],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.check_rounded,
-                  color: Colors.white, size: 48),
+                  color: Color(0xFF1A1A1A), size: 48),
             ),
             const SizedBox(height: 24),
             const Text(
@@ -86,7 +88,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                   Get.offAllNamed("/login");
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _primary,
+                  backgroundColor: _kOrange,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
@@ -94,7 +96,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                 child: const Text(
                   "Se connecter",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF1A1A1A),
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
@@ -110,7 +112,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4FBF6),
+      backgroundColor: const Color(0xFFFFFDE7),
       body: Column(
         children: [
           Container(
@@ -119,7 +121,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [_primary, _primaryLight],
+                colors: [_kOrange, _kOrange],
               ),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(32),
@@ -226,7 +228,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                               ? null
                               : _handleConfirm,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _primary,
+                            backgroundColor: _kOrange,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14)),
@@ -236,12 +238,12 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                                   height: 22,
                                   width: 22,
                                   child: CircularProgressIndicator(
-                                      color: Colors.white, strokeWidth: 2.5),
+                                      color: _kOrange, strokeWidth: 2.5),
                                 )
                               : const Text(
                                   "Réinitialiser le mot de passe",
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: Color(0xFF1A1A1A),
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -295,7 +297,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _primary, width: 1.5),
+        borderSide: const BorderSide(color: _kOrange, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),

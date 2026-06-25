@@ -1,21 +1,15 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
-const Color _kGreen  = Color(0xFF188329);
-const Color _kOrange = Color(0xFFF27F22);
-const Color _kYellow = Color(0xFFFFC107);
+const Color _kOrange     = Color(0xFFF27F22);
 
 // ── Texte ─────────────────────────────────────────────────────────────────────
 const String _bubbleText =
     "Salut 👋 moi c'est TiBi !\nPrêt à découvrir les langues du Faso ?";
-
-const String _ttsText =
-    "Salut ! Moi c'est TiBi, "
-    "ta mascotte. Prêt à découvrir les langues du Faso ?";
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -29,8 +23,8 @@ class StepMascotte extends StatefulWidget {
 class _StepMascotteState extends State<StepMascotte>
     with TickerProviderStateMixin {
 
-  // ── TTS ────────────────────────────────────────────────────────────────────
-  final FlutterTts _tts = FlutterTts();
+  // ── Audio ──────────────────────────────────────────────────────────────────
+  final AudioPlayer _player = AudioPlayer();
   bool _isSpeaking = false;
   bool _textDone   = false;
 
@@ -117,8 +111,8 @@ class _StepMascotteState extends State<StepMascotte>
         CurvedAnimation(parent: _btnCtrl, curve: Curves.elasticOut));
     _btnFade  = CurvedAnimation(parent: _btnCtrl, curve: Curves.easeIn);
 
-    // ── Init TTS en avance (pendant les animations d'entrée) ─────────────────
-    _initTts();
+    // ── Init audio player ────────────────────────────────────────────────────
+    _initPlayer();
 
     // ── Séquence d'entrée ────────────────────────────────────────────────────
     _logoCtrl.forward().then((_) {
@@ -136,7 +130,7 @@ class _StepMascotteState extends State<StepMascotte>
 
   @override
   void dispose() {
-    _tts.stop();
+    _player.dispose();
     for (final c in [_logoCtrl, _bubbleCtrl, _mascotCtrl,
         _floatCtrl, _glowCtrl, _pulseCtrl, _btnCtrl]) {
       c.dispose();
@@ -144,31 +138,22 @@ class _StepMascotteState extends State<StepMascotte>
     super.dispose();
   }
 
-  // ── TTS ────────────────────────────────────────────────────────────────────
+  // ── Audio ──────────────────────────────────────────────────────────────────
 
-  Future<void> _initTts() async {
-    await _tts.setLanguage('fr-FR');
-    await _tts.setSpeechRate(0.48);
-    await _tts.setVolume(1.0);
-    await _tts.setPitch(1.08);
-    _tts.setStartHandler(() {
-      if (mounted) setState(() => _isSpeaking = true);
-    });
-    _tts.setCompletionHandler(() {
-      if (mounted) setState(() => _isSpeaking = false);
-    });
-    _tts.setCancelHandler(() {
-      if (mounted) setState(() => _isSpeaking = false);
+  void _initPlayer() {
+    _player.onPlayerStateChanged.listen((state) {
+      if (!mounted) return;
+      setState(() => _isSpeaking = state == PlayerState.playing);
     });
   }
 
   Future<void> _speak() async {
-    await _tts.stop();
-    await _tts.speak(_ttsText);
+    await _player.stop();
+    await _player.play(AssetSource('sound/salut.m4a'));
   }
 
   Future<void> _toggleAudio() async {
-    _isSpeaking ? await _tts.stop() : await _speak();
+    _isSpeaking ? await _player.stop() : await _speak();
   }
 
   void _onTypewriterDone() {
@@ -298,7 +283,7 @@ class _StepMascotteState extends State<StepMascotte>
       child: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new,
             color: Colors.black87, size: 18),
-        onPressed: () { _tts.stop(); Get.offAllNamed('/splash'); },
+        onPressed: () { _player.stop(); Get.offAllNamed('/splash'); },
         padding: EdgeInsets.zero,
       ),
     );
@@ -314,13 +299,13 @@ class _StepMascotteState extends State<StepMascotte>
         width: 42, height: 42,
         decoration: BoxDecoration(
           color: _isSpeaking
-              ? _kGreen.withValues(alpha: 0.90)
+              ? _kOrange.withValues(alpha: 0.90)
               : Colors.white,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
               color: _isSpeaking
-                  ? _kGreen.withValues(alpha: 0.40)
+                  ? _kOrange.withValues(alpha: 0.40)
                   : Colors.black.withValues(alpha: 0.12),
               blurRadius: _isSpeaking ? 14 : 10,
               offset: const Offset(0, 4),
@@ -348,7 +333,7 @@ class _StepMascotteState extends State<StepMascotte>
           left: 6, right: -6, top: 6, bottom: -6,
           child: Container(
             decoration: BoxDecoration(
-              color: _kYellow.withValues(alpha: 0.35),
+              color: _kOrange.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(24),
             ),
           ),
@@ -362,10 +347,10 @@ class _StepMascotteState extends State<StepMascotte>
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: _kYellow, width: 2.5),
+            border: Border.all(color: _kOrange, width: 2.5),
             boxShadow: [
               BoxShadow(
-                color: _kYellow.withValues(alpha: 0.25),
+                color: _kOrange.withValues(alpha: 0.25),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -381,12 +366,12 @@ class _StepMascotteState extends State<StepMascotte>
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     children: [
-                      _AudioDots(color: _kGreen),
+                      _AudioDots(color: _kOrange),
                       const SizedBox(width: 6),
                       Text('TiBi parle…',
                           style: TextStyle(
                               fontSize: 10,
-                              color: _kGreen,
+                              color: _kOrange,
                               fontWeight: FontWeight.w700)),
                     ],
                   ),
@@ -426,8 +411,8 @@ class _StepMascotteState extends State<StepMascotte>
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: const Border(
-                  right: BorderSide(color: _kYellow, width: 2.5),
-                  bottom: BorderSide(color: _kYellow, width: 2.5),
+                  right: BorderSide(color: _kOrange, width: 2.5),
+                  bottom: BorderSide(color: _kOrange, width: 2.5),
                 ),
               ),
             ),
@@ -507,14 +492,14 @@ class _StepMascotteState extends State<StepMascotte>
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFFF8F00), Color(0xFFFF6B00)],
+                  colors: [_kOrange, Color(0xFFF27F22)],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: _kOrange.withValues(alpha: 0.42),
+                    color: _kOrange.withValues(alpha: 0.45),
                     blurRadius: 22,
                     offset: const Offset(0, 9),
                   ),
@@ -522,31 +507,23 @@ class _StepMascotteState extends State<StepMascotte>
               ),
               child: ElevatedButton(
                 onPressed: () {
-                  _tts.stop();
+                  _player.stop();
                   Get.toNamed('/laguedecouvert');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "C'EST PARTI !",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Icon(Icons.rocket_launch_rounded,
-                        color: Colors.white, size: 20),
-                  ],
+                child: Text(
+                  "C'EST PARTI !",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
                 ),
               ),
             ),

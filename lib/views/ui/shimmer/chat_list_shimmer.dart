@@ -1,6 +1,6 @@
-import 'package:fasolingo/helpers/theme/admin_theme.dart';
-import 'package:fasolingo/helpers/my_widgets/my_container.dart';
-import 'package:fasolingo/helpers/my_widgets/my_spacing.dart';
+﻿import 'package:tibi/helpers/theme/admin_theme.dart';
+import 'package:tibi/helpers/my_widgets/my_container.dart';
+import 'package:tibi/helpers/my_widgets/my_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';

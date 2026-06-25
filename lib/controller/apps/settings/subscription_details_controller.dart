@@ -1,5 +1,5 @@
-import 'package:fasolingo/helpers/services/souscription/subscription_status_service.dart';
-import 'package:fasolingo/models/souscription/subscription_status_model.dart';
+﻿import 'package:tibi/helpers/services/souscription/subscription_status_service.dart';
+import 'package:tibi/models/souscription/subscription_status_model.dart';
 import 'package:get/get.dart';
 
 class SubscriptionDetailsController extends GetxController {

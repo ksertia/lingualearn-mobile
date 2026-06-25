@@ -1,23 +1,23 @@
-import 'package:fasolingo/controller/apps/progression/progression_detail_controller.dart';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/controller/apps/user_progress/user_progress_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
-import 'package:fasolingo/models/user_progress/user_progress_model.dart';
+﻿import 'package:tibi/controller/apps/progression/progression_detail_controller.dart';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/controller/apps/settings/children_controller.dart';
+import 'package:tibi/controller/apps/user_progress/user_progress_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/models/child_model.dart';
+import 'package:tibi/models/user_progress/user_progress_model.dart';
+import 'package:tibi/views/apps/setting/widget/sous-compte/child_progress_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:fasolingo/widgets/zaki_mascot.dart';
+import 'package:lottie/lottie.dart';
+import 'package:tibi/widgets/mascots/zaki_mascot.dart';
 import 'package:shimmer/shimmer.dart';
 
 // ── Brand palette ──────────────────────────────────────────────────────────────
-const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
-const Color _kYellow    = Color(0xFFF5BF1E);
-const Color _kOrange    = Color(0xFFF27F22);
-const Color _kBlue      = Color(0xFF0EA5E9);
-const Color _kPurple    = Color(0xFF7C3AED);
+const Color _kGreen      = Color(0xFF188329);
 const Color _kLocked    = Color(0xFFB0BEC5);
+const Color _kOrange     = Color(0xFFF27F22);
 
-// ─────────────────────────────────────────────────────────────────────────────
+
 
 class ProgresPage extends StatefulWidget {
   const ProgresPage({super.key});
@@ -28,14 +28,15 @@ class ProgresPage extends StatefulWidget {
 
 class _ProgresPageState extends State<ProgresPage> {
   bool _isLoading = true;
-  static const int _targetXp = 1000;
 
   late final ProgressionDetailController _detailCtrl;
   late final UserProgressController _progressCtrl;
   late final SessionController _session;
+  late final ChildrenController _childrenCtrl;
 
   String _selectedLangId  = '';
   String _selectedLevelId = '';
+  bool   _childrenExpanded = false;
 
   // ── Getters délégués au contrôleur ────────────────────────────────────────
   String get _languageName    => _detailCtrl.languageName;
@@ -44,7 +45,6 @@ class _ProgresPageState extends State<ProgresPage> {
   int    get _totalXp         => _detailCtrl.totalXp;
   int    get _totalMinutes    => _detailCtrl.totalMinutes;
   int    get _quizScore       => _detailCtrl.avgQuizScore;
-  int    get _currentLevelXp  => _detailCtrl.xpForLevel(_session.selectedLevelId.value);
   int    get _completedModules  => _detailCtrl.completedModules;
   int    get _inProgressModules => _detailCtrl.inProgressModules;
   int    get _lockedModules     => _detailCtrl.lockedModules;
@@ -62,6 +62,9 @@ class _ProgresPageState extends State<ProgresPage> {
     _progressCtrl = Get.isRegistered<UserProgressController>()
         ? Get.find<UserProgressController>()
         : Get.put(UserProgressController());
+    _childrenCtrl = Get.isRegistered<ChildrenController>()
+        ? Get.find<ChildrenController>()
+        : Get.put(ChildrenController());
     _selectedLangId  = _session.selectedLanguageId.value;
     _selectedLevelId = _session.selectedLevelId.value;
     _load();
@@ -83,6 +86,7 @@ class _ProgresPageState extends State<ProgresPage> {
         languageId: langId,
       ),
       _progressCtrl.loadProgress(),
+      _childrenCtrl.fetchMyChildren(),
     ]);
     if (mounted) setState(() => _isLoading = false);
   }
@@ -103,13 +107,32 @@ class _ProgresPageState extends State<ProgresPage> {
     if (mounted) setState(() => _isLoading = false);
   }
 
+  List<UserProgressEntry> _uniqueLanguages(List<UserProgressEntry> all) {
+    final map = <String, UserProgressEntry>{};
+    for (final e in all) {
+      final ex = map[e.language.id];
+      if (ex == null) { map[e.language.id] = e; continue; }
+      final et = e.language.lastAccessedAt;
+      final ext = ex.language.lastAccessedAt;
+      if (et != null && (ext == null || et.isAfter(ext))) map[e.language.id] = e;
+    }
+    return map.values.toList()
+      ..sort((a, b) {
+        final at = a.language.lastAccessedAt;
+        final bt = b.language.lastAccessedAt;
+        if (at == null && bt == null) return 0;
+        if (at == null) return 1;
+        if (bt == null) return -1;
+        return bt.compareTo(at);
+      });
+  }
+
   // ── Language selector ─────────────────────────────────────────────────────
 
   Widget _buildLangSelector(BuildContext context) {
     return Obx(() {
       final entries = _uniqueLanguages(_progressCtrl.progressList.toList());
       if (entries.length < 2) return const SizedBox.shrink();
-
       return Container(
         color: AppColors.bg(context),
         child: SingleChildScrollView(
@@ -121,8 +144,6 @@ class _ProgresPageState extends State<ProgresPage> {
               child: _buildSelectorPill(
                 context: context,
                 label: e.language.name,
-                emoji: _langEmoji(e.language.name),
-                pct: e.language.progressPercentage.clamp(0, 100),
                 isSelected: _selectedLangId == e.language.id,
                 onTap: () => _switchLanguage(e),
               ),
@@ -136,8 +157,6 @@ class _ProgresPageState extends State<ProgresPage> {
   Widget _buildSelectorPill({
     required BuildContext context,
     required String label,
-    required String emoji,
-    required int pct,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
@@ -148,51 +167,29 @@ class _ProgresPageState extends State<ProgresPage> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
           gradient: isSelected
-              ? const LinearGradient(
-                  colors: [_kGreen, _kGreenDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
+              ? const LinearGradient(colors: [_kOrange, _kOrange])
               : null,
           color: isSelected ? null : AppColors.card(context),
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: isSelected ? Colors.transparent : _kGreen.withValues(alpha: 0.22),
+            color: isSelected ? Colors.transparent : _kOrange.withValues(alpha: 0.35),
             width: 1.5,
           ),
           boxShadow: isSelected
-              ? [BoxShadow(color: _kGreen.withValues(alpha: 0.30), blurRadius: 10, offset: const Offset(0, 4))]
+              ? [BoxShadow(color: _kOrange.withValues(alpha: 0.30), blurRadius: 10, offset: const Offset(0, 4))]
               : [],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 15)),
+            Icon(Icons.language_rounded,
+                size: 14,
+                color: isSelected ? Colors.white : _kOrange),
             const SizedBox(width: 7),
-            Text(
-              label,
+            Text(label,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
+                fontSize: 13, fontWeight: FontWeight.w700,
                 color: isSelected ? Colors.white : AppColors.textPrimary(context),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Colors.white.withValues(alpha: 0.22)
-                    : _kGreen.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$pct%',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: isSelected ? Colors.white : _kGreen,
-                ),
               ),
             ),
           ],
@@ -216,60 +213,7 @@ class _ProgresPageState extends State<ProgresPage> {
     return '$xp';
   }
 
-  String _langEmoji(String name) {
-    final n = name.toLowerCase();
-    if (n.contains('franc') || n.contains('french'))    return '🇫🇷';
-    if (n.contains('anglais') || n.contains('english')) return '🇬🇧';
-    if (n.contains('espagnol') || n.contains('spanish'))return '🇪🇸';
-    if (n.contains('moore') || n.contains('mooré'))     return '🇧🇫';
-    if (n.contains('dioula') || n.contains('dyula'))    return '🇧🇫';
-    if (n.contains('arabe') || n.contains('arabic'))    return '🇸🇦';
-    if (n.contains('allemand') || n.contains('german')) return '🇩🇪';
-    return '🌐';
-  }
 
-  String _relativeTime(DateTime? dt) {
-    if (dt == null) return 'Jamais';
-    final d = DateTime.now().difference(dt);
-    if (d.inMinutes < 1)  return "À l'instant";
-    if (d.inMinutes < 60) return 'Il y a ${d.inMinutes}min';
-    if (d.inHours < 24)   return 'Il y a ${d.inHours}h';
-    if (d.inDays == 1)    return 'Hier';
-    if (d.inDays < 7)     return 'Il y a ${d.inDays}j';
-    return 'Il y a ${(d.inDays / 7).floor()}sem';
-  }
-
-  // Regroupe les entrées par langue (garde la plus récemment accédée)
-  List<UserProgressEntry> _uniqueLanguages(List<UserProgressEntry> all) {
-    final map = <String, UserProgressEntry>{};
-    for (final e in all) {
-      final ex = map[e.language.id];
-      if (ex == null) { map[e.language.id] = e; continue; }
-      final et = e.language.lastAccessedAt;
-      final ext = ex.language.lastAccessedAt;
-      if (et != null && (ext == null || et.isAfter(ext))) map[e.language.id] = e;
-    }
-    final list = map.values.toList()
-      ..sort((a, b) {
-        final at = a.language.lastAccessedAt;
-        final bt = b.language.lastAccessedAt;
-        if (at == null && bt == null) return 0;
-        if (at == null) return 1;
-        if (bt == null) return -1;
-        return bt.compareTo(at);
-      });
-    return list;
-  }
-
-  List<_BadgeData> get _badges => [
-    _BadgeData('Premiers pas',       '👣', 'Démarrer l\'apprentissage',
-        _inProgressModules > 0 || _completedModules > 0),
-    _BadgeData('Explorateur',        '🔍', 'Terminer 1 module',      _completedModules >= 1),
-    _BadgeData('Persévérant',        '💪', 'Terminer 5 modules',     _completedModules >= 5),
-    _BadgeData('Quiz Master',        '🎯', 'Score quiz ≥ 80%',       _quizScore >= 80),
-    _BadgeData('1h d\'apprentissage','⏱',  'Passer 1h à apprendre',  _totalMinutes >= 60),
-    _BadgeData('XP 1 000',          '⚡',  'Accumuler 1 000 XP',     _totalXp >= 1000),
-  ];
 
   // ── Build ──────────────────────────────────────────────────────────────────
 
@@ -283,7 +227,7 @@ class _ProgresPageState extends State<ProgresPage> {
           _buildLangSelector(context),
           Expanded(
             child: RefreshIndicator(
-              color: _kGreen,
+              color: _kOrange,
               onRefresh: _load,
               child: _isLoading
                   ? _buildShimmer(context)
@@ -304,19 +248,11 @@ class _ProgresPageState extends State<ProgresPage> {
                           _buildStatsRow(context),
                           const SizedBox(height: 26),
                           _buildSectionTitle(context, 'Progression des modules',
-                              Icons.bar_chart_rounded, _kBlue),
+                              Icons.bar_chart_rounded, _kOrange),
                           const SizedBox(height: 12),
                           _buildModuleProgress(context),
                           const SizedBox(height: 26),
-                          _buildSectionTitle(context, 'Mes langues',
-                              Icons.language_rounded, _kGreen),
-                          const SizedBox(height: 12),
-                          _buildLanguageCards(context, _selectedLangId),
-                          const SizedBox(height: 26),
-                          _buildSectionTitle(context, 'Badges & Récompenses',
-                              Icons.military_tech_rounded, _kPurple),
-                          const SizedBox(height: 12),
-                          _buildBadges(context),
+                          _buildChildrenSection(context),
                         ],
                       ),
                     ),
@@ -336,7 +272,7 @@ class _ProgresPageState extends State<ProgresPage> {
       ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -349,21 +285,6 @@ class _ProgresPageState extends State<ProgresPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    '📊 Suivi de progression',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700),
-                  ),
-                ),
-                const SizedBox(height: 8),
                 const Text(
                   'Ma Progression',
                   style: TextStyle(
@@ -386,7 +307,7 @@ class _ProgresPageState extends State<ProgresPage> {
               ],
             ),
           ),
-          const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.lg),
+          const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.sm),
         ],
       ),
     );
@@ -425,7 +346,7 @@ class _ProgresPageState extends State<ProgresPage> {
           width: 4, height: 20,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [color, _kYellow],
+              colors: [color, _kOrange],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -453,23 +374,24 @@ class _ProgresPageState extends State<ProgresPage> {
     );
   }
 
-  // ── XP Card ────────────────────────────────────────────────────────────────
+  // ── Language Progress Circle Card ──────────────────────────────────────────
 
   Widget _buildXpCard(BuildContext context) {
-    final progress = (_currentLevelXp / _targetXp).clamp(0.0, 1.0);
+    final progress = _totalModules > 0
+        ? (_completedModules / _totalModules).clamp(0.0, 1.0)
+        : 0.0;
     final pct = (progress * 100).round();
-    final remaining = (_targetXp - _currentLevelXp).clamp(0, _targetXp);
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       decoration: BoxDecoration(
         color: AppColors.card(context),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: _kGreen.withValues(alpha: 0.15), width: 1.5),
+        border: Border.all(color: Colors.grey.shade200, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: _kGreen.withValues(alpha: 0.10),
+            color: _kOrange.withValues(alpha: 0.12),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -478,160 +400,164 @@ class _ProgresPageState extends State<ProgresPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Cercle gauche + infos droite ───────────────────────────
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [_kGreen, _kGreenDark],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              // Cercle 120px — SizedBox explicite sur l'indicateur pour forcer la taille
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: progress),
+                duration: const Duration(milliseconds: 1000),
+                curve: Curves.easeOutCubic,
+                builder: (_, value, __) => SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        height: 120,
+                        child: CircularProgressIndicator(
+                          value: value,
+                          strokeWidth: 11,
+                          strokeCap: StrokeCap.round,
+                          backgroundColor: _kOrange.withValues(alpha: 0.10),
+                          valueColor: const AlwaysStoppedAnimation(_kOrange),
+                        ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '$pct%',
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.textPrimary(context),
+                              height: 1.0,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'progression',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _kGreen.withValues(alpha: 0.30),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
-                child: const Icon(Icons.bolt_rounded, color: Colors.white, size: 22),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 20),
+              // Langue + niveau — alignés à gauche du côté droit
               Expanded(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('XP du niveau actuel',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary(context),
-                            fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 2),
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          _formatXp(_currentLevelXp),
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.textPrimary(context),
-                            height: 1.1,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 3, left: 4),
-                          child: Text(
-                            '/ ${_formatXp(_targetXp)} XP',
-                            style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textSecondary(context),
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [_kGreen, Color(0xFF22A63B)],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '$pct%',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          // Barre XP animée
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.0, end: progress),
-            duration: const Duration(milliseconds: 900),
-            curve: Curves.easeOutCubic,
-            builder: (_, value, __) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Stack(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          height: 12,
-                          color: _kGreen.withValues(alpha: 0.10),
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: _kOrange.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.language_rounded,
+                              color: _kOrange, size: 15),
                         ),
-                        FractionallySizedBox(
-                          widthFactor: value,
-                          child: Container(
-                            height: 12,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [_kGreen, Color(0xFF4ADE80)],
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _languageName.isNotEmpty ? _languageName : '—',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.textPrimary(context),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.trending_up_rounded,
-                              color: _kGreen, size: 14),
-                          const SizedBox(width: 5),
-                          Text(
-                            remaining > 0
-                                ? 'Encore $remaining XP pour le prochain niveau'
-                                : 'Niveau atteint ! 🎉',
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary(context),
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ],
-                      ),
+                    if (_levelName.isNotEmpty) ...[
+                      const SizedBox(height: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: _kGreen.withValues(alpha: 0.10),
-                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: Colors.grey.shade200, width: 1),
                         ),
                         child: Text(
-                          '${(value * 100).round()}%',
+                          _levelName,
                           style: const TextStyle(
-                              color: _kGreen,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800),
+                            fontSize: 12,
+                            color: _kOrange,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ],
-                  ),
-                ],
-              );
-            },
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // ── Stats en bas ───────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.bg(context),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _circleStatCol(context, Icons.check_circle_rounded,
+                    '$_completedModules', 'Terminés', _kGreen),
+                Container(width: 1, height: 32, color: AppColors.border(context)),
+                _circleStatCol(context, Icons.play_circle_rounded,
+                    '$_inProgressModules', 'En cours', _kOrange),
+                Container(width: 1, height: 32, color: AppColors.border(context)),
+                _circleStatCol(context, Icons.lock_rounded,
+                    '$_lockedModules', 'Verrouillés', _kLocked),
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _circleStatCol(BuildContext context, IconData icon, String value,
+      String label, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: color, size: 18),
+        const SizedBox(height: 4),
+        Text(value,
+            style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                color: AppColors.textPrimary(context))),
+        const SizedBox(height: 2),
+        Text(label,
+            style: TextStyle(
+                fontSize: 10,
+                color: AppColors.textSecondary(context),
+                fontWeight: FontWeight.w500)),
+      ],
     );
   }
 
@@ -641,13 +567,13 @@ class _ProgresPageState extends State<ProgresPage> {
     return Row(
       children: [
         _statCard(context, Icons.bolt_rounded, _formatXp(_totalXp),
-            'Total XP', _kOrange),
+            'Total XP', Colors.black),
         const SizedBox(width: 12),
         _statCard(context, Icons.timer_rounded, _formatTime(_totalMinutes),
-            'Temps total', _kBlue),
+            'Temps total', Colors.black),
         const SizedBox(width: 12),
         _statCard(context, Icons.quiz_rounded, '$_quizScore%',
-            'Score quiz', _kGreen),
+            'Score quiz', Colors.black),
       ],
     );
   }
@@ -857,287 +783,284 @@ class _ProgresPageState extends State<ProgresPage> {
     );
   }
 
-  // ── Language Cards ─────────────────────────────────────────────────────────
+  // ── Children Section ──────────────────────────────────────────────────────
 
-  Widget _buildLanguageCards(BuildContext context, String selectedLangId) {
+  static const List<String> _animalLotties = [
+    'dino.json', 'elephant.json', 'cat.json',
+    'Dog.json',  'Lion.json',     'Chicken.json', 'poulet.json',
+  ];
+
+  Widget _buildChildrenSection(BuildContext context) {
     return Obx(() {
-      if (_progressCtrl.isLoading.value && _progressCtrl.progressList.isEmpty) {
-        return _langCardShimmer(context);
-      }
+      final children = _childrenCtrl.children.toList();
+      if (children.isEmpty) return const SizedBox.shrink();
 
-      final all = _uniqueLanguages(_progressCtrl.progressList.toList());
-      final entries = selectedLangId.isNotEmpty
-          ? all.where((e) => e.language.id == selectedLangId).toList()
-          : all;
-
-      if (entries.isEmpty) {
-        return Container(
-          padding: const EdgeInsets.all(24),
+      return GestureDetector(
+        onTap: () => setState(() => _childrenExpanded = !_childrenExpanded),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
             color: AppColors.card(context),
             borderRadius: BorderRadius.circular(20),
-          ),
-          child: Center(
-            child: Text(
-              'Aucune langue inscrite',
-              style: TextStyle(
-                  color: AppColors.textSecondary(context), fontSize: 14),
+            border: Border.all(
+              color: _childrenExpanded
+                  ? _kOrange.withValues(alpha: 0.35)
+                  : AppColors.border(context),
+              width: 1.5,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: _childrenExpanded
+                    ? _kOrange.withValues(alpha: 0.10)
+                    : Colors.black.withValues(alpha: 0.04),
+                blurRadius: _childrenExpanded ? 16 : 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        );
-      }
-
-      return Column(
-        children: entries.map((e) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _langCard(context, e),
-        )).toList(),
+          child: Column(
+            children: [
+              // ── Header ───────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _kOrange.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.people_rounded,
+                          color: _kOrange, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Mes apprenants',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary(context)),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${children.length} compte${children.length > 1 ? 's' : ''} rattaché${children.length > 1 ? 's' : ''}',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary(context),
+                                fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Badge nombre
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _kOrange.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${children.length}',
+                        style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: _kOrange),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    AnimatedRotation(
+                      turns: _childrenExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 250),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: _childrenExpanded
+                            ? _kOrange
+                            : AppColors.textSecondary(context),
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // ── Liste dépliable ───────────────────────────────────
+              AnimatedSize(
+                duration: const Duration(milliseconds: 280),
+                curve: Curves.easeOutCubic,
+                child: _childrenExpanded
+                    ? Column(
+                        children: [
+                          const Divider(height: 1),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                            child: Column(
+                              children: children.map((child) => Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: GestureDetector(
+                                  onTap: () => Get.to(() =>
+                                      ChildProgressDetailPage(child: child)),
+                                  child: _buildChildCard(context, child),
+                                ),
+                              )).toList(),
+                            ),
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ),
       );
     });
   }
 
-  Widget _langCard(BuildContext context, UserProgressEntry e) {
-    final pct    = e.language.progressPercentage.clamp(0, 100).toDouble();
-    final emoji  = _langEmoji(e.language.name);
-    final done   = e.level.completedModules;
-    final total  = e.level.totalModules;
-    final lastAt = e.language.lastAccessedAt;
-
-    const List<List<Color>> palette = [
-      [Color(0xFF188329), Color(0xFF0F5C1C)],
-      [Color(0xFFF27F22), Color(0xFFBF5A0F)],
-      [Color(0xFF0EA5E9), Color(0xFF0369A1)],
-      [Color(0xFF7C3AED), Color(0xFF5B21B6)],
-    ];
-    final idx = e.language.name.isNotEmpty
-        ? e.language.name.codeUnitAt(0) % palette.length
-        : 0;
-    final c1 = palette[idx][0];
-    final c2 = palette[idx][1];
+  Widget _buildChildCard(BuildContext context, ChildModel child) {
+    final name     = child.displayName;
+    final initial  = name.isNotEmpty ? name.characters.first.toUpperCase() : 'U';
+    final subtitle = (child.username ?? '').isNotEmpty
+        ? '@${child.username}'
+        : (child.email ?? '').isNotEmpty
+            ? child.email!
+            : '—';
+    final idx    = name.hashCode.abs() % _animalLotties.length;
+    final animal = _animalLotties[idx];
 
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.card(context),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: c1.withValues(alpha: 0.15), width: 1.5),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: c1.withValues(alpha: 0.08),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 12,
-              offset: const Offset(0, 4)),
+              offset: const Offset(0, 3)),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          // Avatar emoji
-          Container(
-            width: 52, height: 52,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [c1, c2],
-                  begin: Alignment.topLeft, end: Alignment.bottomRight),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                    color: c1.withValues(alpha: 0.28),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4)),
-              ],
-            ),
-            child: Center(
-              child: Text(emoji, style: const TextStyle(fontSize: 24)),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+            child: Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(e.language.name,
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary(context))),
-                    Text(_relativeTime(lastAt),
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary(context))),
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Row(
+                // Avatar animal Lottie + initiale
+                Stack(
+                  clipBehavior: Clip.none,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
+                      width: 54, height: 54,
                       decoration: BoxDecoration(
-                        color: c1.withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(6),
+                        shape: BoxShape.circle,
+                        color: const Color(0xFFF5F5F5),
+                        border: Border.all(
+                            color: const Color(0xFFEEEEEE), width: 1.5),
                       ),
-                      child: Text(e.level.name,
-                          style: TextStyle(
-                              fontSize: 10,
-                              color: c1,
-                              fontWeight: FontWeight.w700)),
+                      child: ClipOval(
+                          child: Lottie.asset('assets/lottie/$animal',
+                              fit: BoxFit.cover)),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      total > 0 ? '$done/$total modules' : 'Aucun module',
-                      style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textSecondary(context),
-                          fontWeight: FontWeight.w500),
+                    Positioned(
+                      bottom: -2, right: -4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _kOrange,
+                          borderRadius: BorderRadius.circular(7),
+                          border:
+                              Border.all(color: Colors.white, width: 1.5),
+                        ),
+                        child: Text(initial,
+                            style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF1A1A1A))),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.0, end: pct / 100.0),
-                  duration: const Duration(milliseconds: 800),
-                  curve: Curves.easeOutCubic,
-                  builder: (_, v, __) => ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
-                      value: v,
-                      minHeight: 6,
-                      backgroundColor: c1.withValues(alpha: 0.10),
-                      valueColor: AlwaysStoppedAnimation<Color>(c1),
-                    ),
+                const SizedBox(width: 14),
+                // Nom + sous-titre
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary(context))),
+                      const SizedBox(height: 3),
+                      Text(subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 12, color: Color(0xFF9CA3AF))),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${pct.toInt()}% accompli',
-                  style: TextStyle(
-                      fontSize: 10,
-                      color: c1,
-                      fontWeight: FontWeight.w600),
+                // Badge Actif
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF9E0),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                        color: _kOrange.withValues(alpha: 0.25)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                          width: 6, height: 6,
+                          decoration: const BoxDecoration(
+                              color: _kOrange, shape: BoxShape.circle)),
+                      const SizedBox(width: 5),
+                      const Text('Actif',
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: _kOrange,
+                              fontWeight: FontWeight.w700)),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _langCardShimmer(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.shimmerBase(context),
-      highlightColor: AppColors.shimmerHighlight(context),
-      child: Column(
-        children: List.generate(2, (_) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Container(
-            height: 110,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-        )),
-      ),
-    );
-  }
-
-  // ── Badges ─────────────────────────────────────────────────────────────────
-
-  Widget _buildBadges(BuildContext context) {
-    final badges = _badges;
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 0.68,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-      ),
-      itemCount: badges.length,
-      itemBuilder: (_, i) => _badgeCard(context, badges[i]),
-    );
-  }
-
-  Widget _badgeCard(BuildContext context, _BadgeData b) {
-    return AnimatedOpacity(
-      opacity: b.earned ? 1.0 : 0.40,
-      duration: const Duration(milliseconds: 400),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        decoration: BoxDecoration(
-          color: b.earned
-              ? _kPurple.withValues(alpha: 0.08)
-              : AppColors.cardAlt(context),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: b.earned
-                ? _kPurple.withValues(alpha: 0.25)
-                : AppColors.border(context),
-            width: 1.5,
-          ),
-          boxShadow: b.earned
-              ? [
-                  BoxShadow(
-                    color: _kPurple.withValues(alpha: 0.10),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Emoji dans cercle
-            Container(
-              width: 40, height: 40,
-              decoration: BoxDecoration(
-                color: b.earned
-                    ? _kPurple.withValues(alpha: 0.12)
-                    : AppColors.cardAlt(context),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(b.emoji,
-                    style: const TextStyle(fontSize: 20)),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              b.label,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: b.earned
-                    ? AppColors.textPrimary(context)
-                    : AppColors.textSecondary(context),
-                height: 1.25,
-              ),
-            ),
-            if (b.earned) ...[
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 7, vertical: 2),
-                decoration: BoxDecoration(
-                  color: _kPurple,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text('✓ Obtenu',
+          const Divider(height: 1, indent: 14, endIndent: 14,
+              color: Color(0xFFF5F5F5)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+            child: Row(
+              children: [
+                const Icon(Icons.show_chart_rounded,
+                    size: 14, color: _kOrange),
+                const SizedBox(width: 5),
+                const Text('Voir la progression',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w800)),
-              ),
-            ],
-          ],
-        ),
+                        fontSize: 12,
+                        color: _kOrange,
+                        fontWeight: FontWeight.w700)),
+                const Spacer(),
+                const Text('Détails',
+                    style: TextStyle(
+                        fontSize: 12, color: Color(0xFFBBBBBB))),
+                const SizedBox(width: 3),
+                const Icon(Icons.arrow_forward_ios_rounded,
+                    size: 11, color: Color(0xFFBBBBBB)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1184,17 +1107,6 @@ class _ProgresPageState extends State<ProgresPage> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(22)),
             ),
-            const SizedBox(height: 24),
-            // Language cards
-            ...List.generate(2, (_) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Container(
-                height: 110,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20)),
-              ),
-            )),
           ],
         ),
       ),
@@ -1212,8 +1124,3 @@ class _ModuleStat {
   const _ModuleStat(this.label, this.count, this.color, this.icon);
 }
 
-class _BadgeData {
-  final String label, emoji, desc;
-  final bool earned;
-  const _BadgeData(this.label, this.emoji, this.desc, this.earned);
-}

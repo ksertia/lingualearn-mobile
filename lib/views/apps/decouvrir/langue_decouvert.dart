@@ -1,10 +1,8 @@
-import 'package:fasolingo/controller/apps/langue/discover_controller.dart';
+﻿import 'package:tibi/controller/apps/langue/discover_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
-const Color _kGreen      = Color(0xFF188329);
-const Color _kGreenDark  = Color(0xFF0F5C1C);
 const Color _kOrange     = Color(0xFFF27F22);
 
 class LanguageDcouvertPage extends StatefulWidget {
@@ -37,7 +35,7 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Fond dégradé vert
+          // Fond dégradé jaune
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -45,9 +43,9 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFF1A9E30),
-                    Color(0xFF188329),
-                    Color(0xFF0F5C1C),
+                    Color(0xFFF27F22),
+                    Color(0xFFF27F22),
+                    Color(0xFFF27F22),
                   ],
                   stops: [0.0, 0.5, 1.0],
                 ),
@@ -187,7 +185,14 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
   Widget _buildSheet() {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFFF8F9FA),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white,
+            Colors.white,
+          ],
+        ),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(28),
           topRight: Radius.circular(28),
@@ -207,7 +212,7 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
             child: Container(
               width: 36, height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color:  Colors.white.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -246,7 +251,7 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
         Container(
           width: 3.5, height: 18,
           decoration: BoxDecoration(
-            color: _kGreen,
+            color: _kOrange,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -444,7 +449,7 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
       decoration: BoxDecoration(
         gradient: canGo
             ? const LinearGradient(
-                colors: [Color(0xFF188329), Color(0xFF0F5C1C)],
+                colors: [_kOrange, _kOrange],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               )
@@ -454,7 +459,7 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
         boxShadow: canGo
             ? [
                 BoxShadow(
-                  color: _kGreen.withValues(alpha: 0.35),
+                  color: _kOrange.withValues(alpha: 0.45),
                   blurRadius: 18,
                   offset: const Offset(0, 7),
                 )
@@ -470,24 +475,14 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
                   arguments: _controller.languageContent)
               : null,
           child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  canGo ? 'Explorer cette langue' : 'Choisissez une langue',
-                  style: TextStyle(
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w800,
-                    color: canGo ? Colors.white : Colors.grey.shade400,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-                if (canGo) ...[
-                  const SizedBox(width: 8),
-                  const Icon(Icons.rocket_launch_rounded,
-                      color: Colors.white, size: 19),
-                ],
-              ],
+            child: Text(
+              canGo ? 'Explorer cette langue' : 'Choisissez une langue',
+              style: TextStyle(
+                fontSize: 15.5,
+                fontWeight: FontWeight.w800,
+                color: canGo ?  Colors.white : Colors.grey.shade400,
+                letterSpacing: 0.2,
+              ),
             ),
           ),
         ),

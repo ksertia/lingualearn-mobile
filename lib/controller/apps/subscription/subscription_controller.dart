@@ -1,5 +1,5 @@
-import 'package:fasolingo/helpers/services/souscription/sousciption_service.dart';
-import 'package:fasolingo/models/souscription/souscription_model.dart';
+﻿import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
+import 'package:tibi/models/souscription/souscription_model.dart';
 import 'package:get/get.dart';
 
 class PlanController extends GetxController {

@@ -1,6 +1,6 @@
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/services/user_progress_service.dart';
-import 'package:fasolingo/models/user_progress/user_progress_model.dart';
+﻿import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/services/user_progress_service.dart';
+import 'package:tibi/models/user_progress/user_progress_model.dart';
 import 'package:get/get.dart';
 
 class UserProgressController extends GetxController {

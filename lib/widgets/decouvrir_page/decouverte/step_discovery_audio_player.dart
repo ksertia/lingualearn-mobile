@@ -1,15 +1,15 @@
-import 'dart:math';
-
+﻿import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/answer_section.dart';
+import 'package:tibi/widgets/mascots/audio_mascots.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/answer_section.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 
 class StepDiscoveryAudioPlayer extends StatefulWidget {
   final String title;
   final String audioUrl;
   final String? answerType;
   final String? answerValue;
+  final int stepIndex;
 
   const StepDiscoveryAudioPlayer({
     super.key,
@@ -17,6 +17,7 @@ class StepDiscoveryAudioPlayer extends StatefulWidget {
     required this.audioUrl,
     this.answerType,
     this.answerValue,
+    this.stepIndex = 0,
   });
 
   @override
@@ -27,7 +28,6 @@ class StepDiscoveryAudioPlayer extends StatefulWidget {
 class _StepDiscoveryAudioPlayerState extends State<StepDiscoveryAudioPlayer>
     with TickerProviderStateMixin {
   final AudioPlayer _player = AudioPlayer();
-  late final AnimationController _lottieController;
   late final AnimationController _barsController;
 
   bool _isPlaying = false;
@@ -39,7 +39,6 @@ class _StepDiscoveryAudioPlayerState extends State<StepDiscoveryAudioPlayer>
   void initState() {
     super.initState();
 
-    _lottieController = AnimationController(vsync: this);
     _barsController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -50,10 +49,8 @@ class _StepDiscoveryAudioPlayerState extends State<StepDiscoveryAudioPlayer>
       final playing = state == PlayerState.playing;
       setState(() => _isPlaying = playing);
       if (playing) {
-        _lottieController.repeat();
         _barsController.repeat();
       } else {
-        _lottieController.stop();
         _barsController.stop();
       }
       if (state == PlayerState.completed) {
@@ -73,7 +70,6 @@ class _StepDiscoveryAudioPlayerState extends State<StepDiscoveryAudioPlayer>
   @override
   void dispose() {
     _player.dispose();
-    _lottieController.dispose();
     _barsController.dispose();
     super.dispose();
   }
@@ -135,18 +131,10 @@ class _StepDiscoveryAudioPlayerState extends State<StepDiscoveryAudioPlayer>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Mascotte lottie animée quand l'audio joue
-                SizedBox(
-                  width: 110,
-                  height: 110,
-                  child: Lottie.asset(
-                    'assets/lottie/mascot.json',
-                    controller: _lottieController,
-                    onLoaded: (comp) {
-                      _lottieController.duration = comp.duration;
-                    },
-                    fit: BoxFit.contain,
-                  ),
+                AudioMascotPair(
+                  stepIndex: widget.stepIndex,
+                  mood: _isPlaying ? AudioMascotMood.speaking : AudioMascotMood.idle,
+                  size: AudioMascotSize.md,
                 ),
                 const SizedBox(width: 8),
 

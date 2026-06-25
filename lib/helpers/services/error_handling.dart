@@ -1,7 +1,7 @@
-import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/services/auth_services.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/utils/app_snackbar.dart';
+﻿import 'package:dio/dio.dart';
+import 'package:tibi/helpers/services/auth_services.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/utils/app_snackbar.dart';
 import 'package:get/get.dart' hide Response;
 
 /// To handle all the error app wide
@@ -14,9 +14,7 @@ void letMeHandleAllErrors(DioException e) {
       appSnackbar(heading: "", message: "Bad Request");
       break;
     case 401:
-      Get.offAllNamed("/splash");
-      AuthService.isLoggedIn = false;
-      LocalStorage.removeLoggedInUser();
+      // Géré par l'intercepteur de SessionController (refresh → retry → logout)
       break;
     case 408:
       // appSnackbar(heading: "", message: "Request Timeout");

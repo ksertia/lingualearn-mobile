@@ -1,9 +1,9 @@
-import 'package:fasolingo/helpers/theme/app_colors.dart';
+﻿import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-const Color _kGreen     = Color(0xFF188329);
-const Color _kGreenDark = Color(0xFF0F5C1C);
+
+const Color _kOrange     = Color(0xFFF27F22);
 
 class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -91,7 +91,7 @@ class _NavTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
-    final activeColor   = _kGreen;
+    final activeColor   = _kOrange;
     final inactiveColor = AppColors.textSecondary(context);
 
     return GestureDetector(
@@ -103,7 +103,7 @@ class _NavTab extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
           color: isActive
-              ? _kGreen.withValues(alpha: 0.10)
+              ? _kOrange.withValues(alpha: 0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
@@ -130,19 +130,6 @@ class _NavTab extends StatelessWidget {
                 color: isActive ? activeColor : inactiveColor,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                 letterSpacing: isActive ? 0.1 : 0,
-              ),
-            ),
-            // Indicateur actif
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              margin: const EdgeInsets.only(top: 5),
-              width: isActive ? 24 : 0,
-              height: isActive ? 3 : 0,
-              decoration: BoxDecoration(
-                gradient: isActive
-                    ? const LinearGradient(colors: [_kGreen, _kGreenDark])
-                    : null,
-                borderRadius: BorderRadius.circular(4),
               ),
             ),
           ],

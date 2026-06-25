@@ -1,16 +1,16 @@
-/*
+﻿/*
 * File : App Theme
 * Version : 1.0.0
 * */
 import 'dart:io';
 import 'dart:math';
 
-import 'package:fasolingo/helpers/logger/logger.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/my_widgets/my.dart';
-import 'package:fasolingo/helpers/my_widgets/my_breadcrumb_item.dart';
-import 'package:fasolingo/helpers/my_widgets/my_constant.dart';
-import 'package:fasolingo/helpers/my_widgets/my_text_style.dart';
+import 'package:tibi/helpers/logger/logger.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/my_widgets/my.dart';
+import 'package:tibi/helpers/my_widgets/my_breadcrumb_item.dart';
+import 'package:tibi/helpers/my_widgets/my_constant.dart';
+import 'package:tibi/helpers/my_widgets/my_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

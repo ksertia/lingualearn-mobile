@@ -1,6 +1,6 @@
-import 'dart:developer';
+﻿import 'dart:developer';
 
-import 'package:fasolingo/helpers/my_widgets/my_exception.dart';
+import 'package:tibi/helpers/my_widgets/my_exception.dart';
 
 class BaseException extends MyException {
   StackTrace? stackTrace;

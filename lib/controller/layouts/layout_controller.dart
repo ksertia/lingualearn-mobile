@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:fasolingo/controller/my_controller.dart';
-import 'package:fasolingo/helpers/theme/theme_customizer.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:tibi/controller/my_controller.dart';
+import 'package:tibi/helpers/theme/theme_customizer.dart';
 
 class LayoutController extends MyController {
   ThemeCustomizer themeCustomizer = ThemeCustomizer();

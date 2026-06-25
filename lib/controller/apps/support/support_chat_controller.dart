@@ -1,7 +1,7 @@
-import 'dart:async';
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/services/support/support_chat_service.dart';
-import 'package:fasolingo/models/support/support_models.dart';
+﻿import 'dart:async';
+import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/services/support/support_chat_service.dart';
+import 'package:tibi/models/support/support_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

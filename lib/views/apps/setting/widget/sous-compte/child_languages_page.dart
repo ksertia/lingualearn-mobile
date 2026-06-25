@@ -1,15 +1,27 @@
-import 'package:fasolingo/controller/apps/settings/child_language_assign_controller.dart';
-import 'package:fasolingo/helpers/theme/app_colors.dart';
-import 'package:fasolingo/models/child_model.dart';
-import 'package:fasolingo/models/language_model.dart';
+﻿import 'package:tibi/controller/apps/settings/child_language_assign_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/models/child_model.dart';
+import 'package:tibi/models/language_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 const Color _kGreen      = Color(0xFF188329);
-const Color _kGreenDark  = Color(0xFF0F5C1C);
-const Color _kYellow     = Color(0xFFF5BF1E);
 const Color _kOrange     = Color(0xFFF27F22);
-const Color _kOrangeDark = Color(0xFFC4611A);
+const Color _kblack      = Color(0xFF374151);
+
+class _LevelMeta {
+  final Color    color;
+  final IconData icon;
+  final String   label;
+  const _LevelMeta(this.color, this.icon, this.label);
+}
+
+const _levelMeta = [
+  _LevelMeta(_kblack,  Icons.grass_rounded,  'Niveau de base'),
+  _LevelMeta(_kOrange, Icons.park_rounded,   'Niveau intermédiaire'),
+  _LevelMeta(_kGreen,  Icons.forest_rounded, 'Niveau avancé'),
+];
+
 
 class ChildLanguagesPage extends StatefulWidget {
   final ChildModel child;
@@ -51,19 +63,6 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
       Color(0xFFEA580C), Color(0xFF0891B2), Color(0xFFDB2777),
     ];
     return colors[name.hashCode.abs() % colors.length];
-  }
-
-  String _langEmoji(String? name) {
-    if (name == null) return '🌐';
-    final n = name.toLowerCase();
-    if (n.contains('francais') || n.contains('french'))  return '🇫🇷';
-    if (n.contains('english') || n.contains('anglais'))  return '🇬🇧';
-    if (n.contains('espagnol') || n.contains('spanish')) return '🇪🇸';
-    if (n.contains('moore') || n.contains('moré'))       return '🇧🇫';
-    if (n.contains('dioula') || n.contains('dyula'))     return '🇧🇫';
-    if (n.contains('allemand') || n.contains('german'))  return '🇩🇪';
-    if (n.contains('arabe') || n.contains('arabic'))     return '🇸🇦';
-    return '🌐';
   }
 
   Future<void> _openLevelsBottomSheetForSelected() async {
@@ -129,7 +128,7 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
       padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 22),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -353,7 +352,7 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
                 Container(
                   height: 3,
                   decoration: const BoxDecoration(
-                    gradient: LinearGradient(colors: [_kOrange, _kYellow]),
+                    gradient: LinearGradient(colors: [_kOrange, _kOrange]),
                   ),
                 ),
               Padding(
@@ -368,7 +367,15 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                       alignment: Alignment.center,
-                      child: Text(_langEmoji(lang.name), style: const TextStyle(fontSize: 26)),
+                      child: Icon(
+                        Icons.language_rounded,
+                        size: 26,
+                        color: isSelected
+                            ? _kOrange
+                            : isEnrolled
+                                ? _kGreen
+                                : const Color(0xFF9CA3AF),
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -401,7 +408,7 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
                         width: 30, height: 30,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [_kOrange, _kOrangeDark],
+                            colors: [_kOrange, _kOrange],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -458,7 +465,7 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
         height: 54,
         decoration: BoxDecoration(
           gradient: active
-              ? const LinearGradient(colors: [_kOrange, _kOrangeDark], begin: Alignment.centerLeft, end: Alignment.centerRight)
+              ? const LinearGradient(colors: [_kOrange, _kOrange], begin: Alignment.centerLeft, end: Alignment.centerRight)
               : null,
           color: active ? null : const Color(0xFFEEEEEE),
           borderRadius: BorderRadius.circular(16),
@@ -472,7 +479,7 @@ class _ChildLanguagesPageState extends State<ChildLanguagesPage> {
             Icon(Icons.layers_rounded, color: active ? Colors.white : Colors.grey.shade400, size: 20),
             const SizedBox(width: 8),
             Text(
-              active ? 'Choisir un niveau →' : 'Sélectionnez une langue',
+              active ? 'Choisir un niveau' : 'Sélectionnez une langue',
               style: TextStyle(
                 color: active ? Colors.white : Colors.grey.shade400,
                 fontSize: 15,
@@ -525,7 +532,7 @@ class _LevelsBottomSheet extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFF3EB),
+                      color: const Color(0xFFFFF9E0),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: _kOrange.withValues(alpha: 0.22)),
                     ),
@@ -599,6 +606,7 @@ class _LevelsBottomSheet extends StatelessWidget {
                       final id    = level.id;
                       final name  = (level.name ?? '').toString();
                       final desc  = (level.description ?? '').toString();
+                      final meta  = _levelMeta[idx % _levelMeta.length];
 
                       return Obx(() {
                         final selected = controller.selectedLevelId.value == id;
@@ -611,13 +619,13 @@ class _LevelsBottomSheet extends StatelessWidget {
                               color: AppColors.card(context),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: selected ? _kGreen : const Color(0xFFEEEEEE),
+                                color: selected ? _kOrange : const Color(0xFFEEEEEE),
                                 width: selected ? 2 : 1.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
                                   color: selected
-                                      ? _kGreen.withValues(alpha: 0.14)
+                                      ? _kOrange.withValues(alpha: 0.14)
                                       : Colors.black.withValues(alpha: 0.04),
                                   blurRadius: selected ? 16 : 8,
                                   offset: const Offset(0, 4),
@@ -628,43 +636,38 @@ class _LevelsBottomSheet extends StatelessWidget {
                               borderRadius: BorderRadius.circular(15),
                               child: Column(
                                 children: [
-                                  // Barre verte en haut si sélectionné
                                   if (selected)
                                     Container(
                                       height: 3,
                                       decoration: const BoxDecoration(
-                                        gradient: LinearGradient(colors: [_kGreen, _kYellow]),
+                                        gradient: LinearGradient(
+                                          colors: [_kOrange, _kOrange],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ),
                                       ),
                                     ),
                                   Padding(
                                     padding: const EdgeInsets.all(14),
                                     child: Row(
                                       children: [
-                                        // Badge numéro niveau
+                                        // Icône niveau
                                         Container(
                                           width: 42, height: 42,
                                           decoration: BoxDecoration(
-                                            gradient: selected
-                                                ? const LinearGradient(
-                                                    colors: [_kGreen, _kGreenDark],
-                                                    begin: Alignment.topLeft,
-                                                    end: Alignment.bottomRight,
-                                                  )
-                                                : null,
-                                            color: selected ? null : const Color(0xFFF3F4F6),
+                                            color: selected
+                                                ? _kOrange
+                                                : meta.color.withValues(alpha: 0.10),
                                             borderRadius: BorderRadius.circular(12),
                                             boxShadow: selected
-                                                ? [BoxShadow(color: _kGreen.withValues(alpha: 0.35), blurRadius: 10, offset: const Offset(0, 4))]
+                                                ? [BoxShadow(color: _kOrange.withValues(alpha: 0.35), blurRadius: 10, offset: const Offset(0, 4))]
                                                 : [],
                                           ),
                                           alignment: Alignment.center,
-                                          child: Text(
-                                            (idx + 1).toString().padLeft(2, '0'),
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w900,
-                                              color: selected ? Colors.white : const Color(0xFFBBBBBB),
-                                            ),
+                                          child: Icon(
+                                            meta.icon,
+                                            size: 22,
+                                            color: selected ? Colors.white : meta.color,
                                           ),
                                         ),
                                         const SizedBox(width: 14),
@@ -677,17 +680,25 @@ class _LevelsBottomSheet extends StatelessWidget {
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w700,
-                                                  color: selected ? _kGreen : AppColors.textPrimary(context),
+                                                  color: selected ? _kOrange : AppColors.textPrimary(context),
                                                 ),
                                               ),
-                                              if (desc.trim().isNotEmpty) ...[
-                                                const SizedBox(height: 4),
+                                              const SizedBox(height: 4),
+                                              if (desc.trim().isNotEmpty)
                                                 Text(desc,
                                                     maxLines: 2,
                                                     overflow: TextOverflow.ellipsis,
                                                     style: const TextStyle(
-                                                        fontSize: 12, color: Color(0xFF9CA3AF), height: 1.4)),
-                                              ],
+                                                        fontSize: 12, color: Color(0xFF9CA3AF), height: 1.4))
+                                              else
+                                                Text(
+                                                  meta.label,
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: meta.color.withValues(alpha: 0.70),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
                                             ],
                                           ),
                                         ),
@@ -697,13 +708,9 @@ class _LevelsBottomSheet extends StatelessWidget {
                                           Container(
                                             width: 28, height: 28,
                                             decoration: BoxDecoration(
-                                              gradient: const LinearGradient(
-                                                colors: [_kGreen, _kGreenDark],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ),
+                                              color: _kOrange,
                                               shape: BoxShape.circle,
-                                              boxShadow: [BoxShadow(color: _kGreen.withValues(alpha: 0.35), blurRadius: 8, offset: const Offset(0, 3))],
+                                              boxShadow: [BoxShadow(color: _kOrange.withValues(alpha: 0.35), blurRadius: 8, offset: const Offset(0, 3))],
                                             ),
                                             child: const Icon(Icons.check_rounded, color: Colors.white, size: 15),
                                           )
@@ -752,7 +759,7 @@ class _LevelsBottomSheet extends StatelessWidget {
                           decoration: BoxDecoration(
                             gradient: canAssign
                                 ? const LinearGradient(
-                                    colors: [_kGreen, _kGreenDark],
+                                    colors: [_kOrange, _kOrange],
                                     begin: Alignment.centerLeft,
                                     end: Alignment.centerRight,
                                   )
@@ -760,7 +767,7 @@ class _LevelsBottomSheet extends StatelessWidget {
                             color: canAssign ? null : const Color(0xFFEEEEEE),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: canAssign
-                                ? [BoxShadow(color: _kGreen.withValues(alpha: 0.32), blurRadius: 14, offset: const Offset(0, 5))]
+                                ? [BoxShadow(color: _kOrange.withValues(alpha: 0.32), blurRadius: 14, offset: const Offset(0, 5))]
                                 : [],
                           ),
                           child: Center(

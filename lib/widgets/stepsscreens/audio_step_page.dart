@@ -1,9 +1,9 @@
-/*
-import 'package:fasolingo/controller/apps/discovery_controller.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
-import 'package:fasolingo/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
-import 'package:fasolingo/widgets/lessons/qcm.dart';
-import 'package:fasolingo/widgets/lessons/qcmdrag.dart';
+﻿/*
+import 'package:tibi/controller/apps/discovery_controller.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
+import 'package:tibi/widgets/lessons/qcm.dart';
+import 'package:tibi/widgets/lessons/qcmdrag.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -118,26 +118,22 @@ class AudioStepPage extends StatelessWidget {
                         "I ni su"
                       ],
                       correctOption: "I ni sɔgɔma",
-                      lottieQuestion: 'assets/lottie/mascot.json',
-                      lottieCorrect: 'assets/lottie/Happy mascot.json',
-                      lottieIncorrect: 'assets/lottie/Sad mascot.json',
+                      questionIndex: 0,
                     ),
 
                     const QuizQCM(
                       question: "Si on te dit 'I ka kɛnɛ ?', tu réponds :",
                       options: [
-                        "Tana tɛ", 
+                        "Tana tɛ",
                         "A bɛ sɔrɔ",
                         "I ni sɔgɔma",
                         "I bɛ min ?"
                       ],
                       correctOption: "Tana tɛ",
-                      lottieQuestion: 'assets/lottie/mascot.json',
-                      lottieCorrect: 'assets/lottie/Happy mascot.json',
-                      lottieIncorrect: 'assets/lottie/Sad mascot.json',
+                      questionIndex: 1,
                     ),
 
-                    StepQuizTranslate(
+                    const StepQuizTranslate(
                       question: "I ni sɔgɔma",
                       words: [
                         "Bonjour",
@@ -147,17 +143,13 @@ class AudioStepPage extends StatelessWidget {
                         "Monsieur"
                       ],
                       correctFullSentence: "Bonjour",
-                      lottieQuestion: 'assets/lottie/mascot.json',
-                      lottieCorrect: 'assets/lottie/Happy mascot.json',
-                      lottieIncorrect: 'assets/lottie/Sad mascot.json',
+                      questionIndex: 2,
                     ),
-                    StepQuizTranslate(
+                    const StepQuizTranslate(
                       question: "Bonjour, ça va ?",
                       words: ["I", "ni", "sɔgɔma", "ka", "kɛnɛ", "tana"],
                       correctFullSentence: "I ni sɔgɔma ka kɛnɛ",
-                      lottieQuestion: 'assets/lottie/mascot.json',
-                      lottieCorrect: 'assets/lottie/Happy mascot.json',
-                      lottieIncorrect: 'assets/lottie/Sad mascot.json',
+                      questionIndex: 3,
                     ),
                   ],
                 ),

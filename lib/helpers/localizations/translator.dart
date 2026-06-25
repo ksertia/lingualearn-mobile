@@ -1,7 +1,7 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:developer';
 
-import 'package:fasolingo/helpers/localizations/language.dart';
+import 'package:tibi/helpers/localizations/language.dart';
 import 'package:flutter/services.dart';
 import 'package:get/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';

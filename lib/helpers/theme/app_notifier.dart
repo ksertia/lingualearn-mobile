@@ -1,4 +1,4 @@
-/*
+﻿/*
 * File : App Theme Notifier (Listener)
 * Version : 1.0.0
 * */
@@ -9,13 +9,13 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/helpers/logger/logger.dart';
-import 'package:fasolingo/helpers/remote/api_service.dart';
-import 'package:fasolingo/helpers/storage/local_storage.dart';
-import 'package:fasolingo/helpers/theme/app_style.dart';
-//import 'package:fasolingo/models/charging_stations_wise_charging_connector_response.dart';
-import 'package:fasolingo/models/enumaration_model.dart';
+import 'package:tibi/helpers/constant/app_constant.dart';
+import 'package:tibi/helpers/logger/logger.dart';
+import 'package:tibi/helpers/remote/api_service.dart';
+import 'package:tibi/helpers/storage/local_storage.dart';
+import 'package:tibi/helpers/theme/app_style.dart';
+//import 'package:tibi/models/charging_stations_wise_charging_connector_response.dart';
+import 'package:tibi/models/enumaration_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:intl/intl.dart';

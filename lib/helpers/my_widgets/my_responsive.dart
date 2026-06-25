@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/my_widgets/my_screen_media.dart';
-import 'package:fasolingo/helpers/my_widgets/my_screen_media_type.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:tibi/helpers/my_widgets/my_screen_media.dart';
+import 'package:tibi/helpers/my_widgets/my_screen_media_type.dart';
 
 class MyResponsive extends StatelessWidget {
   final Widget Function(BuildContext, BoxConstraints, MyScreenMediaType)

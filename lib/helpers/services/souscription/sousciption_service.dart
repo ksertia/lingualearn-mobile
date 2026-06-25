@@ -1,6 +1,6 @@
-import 'package:fasolingo/controller/apps/session_controller.dart';
-import 'package:fasolingo/helpers/constant/app_constant.dart';
-import 'package:fasolingo/models/souscription/souscription_model.dart';
+﻿import 'package:tibi/controller/apps/session_controller.dart';
+import 'package:tibi/helpers/constant/app_constant.dart';
+import 'package:tibi/models/souscription/souscription_model.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio_package;
 

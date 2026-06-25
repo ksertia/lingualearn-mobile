@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:fasolingo/helpers/my_widgets/my_flex_item.dart';
-import 'package:fasolingo/helpers/my_widgets/my_list_extension.dart';
-import 'package:fasolingo/helpers/my_widgets/my_responsive.dart';
-import 'package:fasolingo/helpers/my_widgets/my_spacing.dart';
-import 'package:fasolingo/helpers/my_widgets/responsive.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:tibi/helpers/my_widgets/my_flex_item.dart';
+import 'package:tibi/helpers/my_widgets/my_list_extension.dart';
+import 'package:tibi/helpers/my_widgets/my_responsive.dart';
+import 'package:tibi/helpers/my_widgets/my_spacing.dart';
+import 'package:tibi/helpers/my_widgets/responsive.dart';
 
 class MyFlex extends StatelessWidget {
   final List<MyFlexItem> children;

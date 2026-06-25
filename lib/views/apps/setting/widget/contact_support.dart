@@ -1,5 +1,5 @@
-import 'package:fasolingo/controller/apps/support/support_chat_controller.dart';
-import 'package:fasolingo/models/support/support_models.dart';
+﻿import 'package:tibi/controller/apps/support/support_chat_controller.dart';
+import 'package:tibi/models/support/support_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
