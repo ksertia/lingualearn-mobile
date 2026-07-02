@@ -98,4 +98,33 @@ class ModuleService {
       return false;
     }
   }
+
+  static Future<List<ModuleModel>> getModulesByLanguageLevel({
+    required String languageId,
+    required String levelId,
+  }) async {
+    try {
+      final response = await session.dio.get(
+        '/languages/$languageId/levels/$levelId/modules',
+      );
+      if (response.statusCode == 200) {
+        dynamic data = response.data['data'];
+        List modulesData = [];
+        if (data is Map && data['modules'] != null) {
+          modulesData = data['modules'];
+        } else if (data is List) {
+          modulesData = data;
+        }
+        return modulesData
+            .map<ModuleModel>(
+                (m) => ModuleModel.fromJson(Map<String, dynamic>.from(m)))
+            .toList();
+      }
+      return [];
+    } on DioException catch (_) {
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
 }

@@ -452,7 +452,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 ],
               ),
             ),
-            const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.md),
+            const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.sm),
           ],
         ),
       ),
@@ -1093,7 +1093,7 @@ class _HistoryPageState extends State<HistoryPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.xl),
+                  const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.sm),
                   const SizedBox(height: 20),
                   Text(
                     'Pas encore d\'historique',

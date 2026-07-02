@@ -74,4 +74,17 @@ class NotificationService {
       return false;
     }
   }
+
+  // ── DELETE /notifications/user/{userId} ───────────────────────────────────
+
+  static Future<bool> deleteAll({required String userId}) async {
+    try {
+      final response =
+          await _session.dio.delete('/notifications/user/$userId');
+      return response.statusCode == 200 || response.statusCode == 204;
+    } catch (e) {
+      print('NotificationService.deleteAll: $e');
+      return false;
+    }
+  }
 }

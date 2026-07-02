@@ -410,25 +410,7 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
 
           if (pages.isEmpty) return const SizedBox.shrink();
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              setState(() {
-                _hasNetworkError = false;
-                _networkErrorMsg = '';
-              });
-              try {
-                await controller.fetchPaths();
-              } on DioException catch (e) {
-                if (!mounted) return;
-                setState(() {
-                  _hasNetworkError = true;
-                  _networkErrorMsg = _dioErrorMsg(e);
-                });
-              } catch (_) {}
-            },
-            color: _kOrange,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
+          return SingleChildScrollView(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                     minHeight: MediaQuery.of(context).size.height),
@@ -443,7 +425,6 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
                   ],
                 ),
               ),
-            ),
           );
         }),
       ),
@@ -540,7 +521,10 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
           ),
         const SizedBox(height: 10),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.72,
+          height: MediaQuery.of(context).size.height -
+              MediaQuery.of(context).padding.top -
+              kToolbarHeight -
+              (pages.length > 1 ? 112 : 16),
           child: PageView.builder(
             controller: controller.pageController,
             onPageChanged: controller.onPageChanged,

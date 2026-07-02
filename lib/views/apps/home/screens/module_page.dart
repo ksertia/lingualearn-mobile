@@ -302,24 +302,7 @@ class _HomePageState extends State<HomePage>
 
           final modules = controller.filteredModules;
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              setState(() {
-                _hasNetworkError = false;
-                _networkErrorMsg = '';
-              });
-              try {
-                await controller.onRefresh();
-              } on DioException catch (e) {
-                if (!mounted) return;
-                setState(() {
-                  _hasNetworkError = true;
-                  _networkErrorMsg = _dioErrorMsg(e);
-                });
-              } catch (_) {}
-            },
-            color: _kOrange,
-            child: ListView.builder(
+          return ListView.builder(
               padding: EdgeInsets.fromLTRB(
                 20,
                 MediaQuery.of(context).padding.top + kToolbarHeight + 16,
@@ -400,7 +383,6 @@ class _HomePageState extends State<HomePage>
                 }
                 return moduleRow;
               },
-            ),
           );
         }),
       ),

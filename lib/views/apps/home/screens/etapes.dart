@@ -374,25 +374,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
 
           return Stack(
             children: [
-              RefreshIndicator(
-                onRefresh: () async {
-                  setState(() {
-                    _hasNetworkError = false;
-                    _networkErrorMsg = '';
-                  });
-                  try {
-                    await controller.onRefresh();
-                  } on DioException catch (e) {
-                    if (!mounted) return;
-                    setState(() {
-                      _hasNetworkError = true;
-                      _networkErrorMsg = _dioErrorMsg(e);
-                    });
-                  } catch (_) {}
-                },
-                color: _kYellow,
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
+              SingleChildScrollView(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                         minHeight: MediaQuery.of(context).size.height),
@@ -408,7 +390,6 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                     ),
                   ),
                 ),
-              ),
               // Sticky "Parcours terminé" button
               Positioned(
                 left: 0, right: 0, bottom: 0,

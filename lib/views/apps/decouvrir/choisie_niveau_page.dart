@@ -251,6 +251,8 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
 
       final meta = _levelMeta[index % _levelMeta.length];
       final c    = meta.color;
+      // Couleur active : toujours _kOrange quand sélectionné
+      final activeColor = isSelected ? _kOrange : c;
 
       return GestureDetector(
         onTap: () => _langCtrl.selectLevel(level),
@@ -259,17 +261,17 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: isSelected
-                ? c.withValues(alpha: 0.06)
+                ? activeColor.withValues(alpha: 0.06)
                 : AppColors.card(context),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? c : AppColors.border(context),
+              color: isSelected ? activeColor : AppColors.border(context),
               width: isSelected ? 2 : 1,
             ),
             boxShadow: [
               BoxShadow(
                 color: isSelected
-                    ? c.withValues(alpha: 0.16)
+                    ? activeColor.withValues(alpha: 0.16)
                     : AppColors.shadow(context),
                 blurRadius: isSelected ? 20 : 8,
                 offset: const Offset(0, 5),
@@ -285,7 +287,7 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: isSelected
-                        ? [c, c.withValues(alpha: 0.70)]
+                        ? [activeColor, activeColor.withValues(alpha: 0.70)]
                         : [c.withValues(alpha: 0.10),
                            c.withValues(alpha: 0.05)],
                     begin: Alignment.topLeft,
@@ -312,7 +314,7 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                         color: isSelected
-                            ? c
+                            ? activeColor
                             : AppColors.textPrimary(context),
                       ),
                     ),
@@ -333,18 +335,18 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: c.withValues(alpha: 0.12),
+                          color: activeColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.check_rounded,
-                                color: c, size: 11),
+                                color: activeColor, size: 11),
                             const SizedBox(width: 4),
                             Text('Sélectionné',
                                 style: TextStyle(
-                                    color: c,
+                                    color: activeColor,
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700)),
                           ],
@@ -361,7 +363,7 @@ class _ChoisieNiveauPageState extends State<ChoisieNiveauPage>
                 width: 28, height: 28,
                 decoration: BoxDecoration(
                   gradient: isSelected
-                      ? LinearGradient(colors: [c, c.withValues(alpha: 0.70)])
+                      ? LinearGradient(colors: [activeColor, activeColor.withValues(alpha: 0.70)])
                       : null,
                   color: isSelected ? null : AppColors.cardAlt(context),
                   shape: BoxShape.circle,

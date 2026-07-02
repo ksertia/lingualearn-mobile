@@ -47,6 +47,16 @@ class UserProgressController extends GetxController {
     }
   }
 
+  // Fetch silencieux — ne touche ni isLoading ni progressList.
+  // Retourne la liste brute pour que l'appelant décide quoi en faire.
+  Future<List<UserProgressEntry>?> fetchSilent() async {
+    try {
+      return await UserProgressService.getMyProgress(token: session.token.value);
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   Future<void> refresh() => loadProgress();
 }

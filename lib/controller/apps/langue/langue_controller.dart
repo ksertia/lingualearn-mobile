@@ -36,7 +36,6 @@ class LanguagesController extends GetxController {
       final session = Get.find<SessionController>();
 
       if (session.userId.value.isEmpty) {
-        print("Attente du userId...");
         await Future.delayed(const Duration(milliseconds: 500));
       }
       final String userId = session.userId.value.isNotEmpty
@@ -114,21 +113,23 @@ class LanguagesController extends GetxController {
           "Complet", "Veuillez sélectionner une langue et un niveau.");
       return false;
     }
-    // Use server-authoritative enrolled list for limit/duplicate checks
-    List<String> enrolledIds = [];
-    try {
-      final progressCtrl = Get.find<UserProgressController>();
-      enrolledIds = progressCtrl.progressList.map((e) => e.language.id).toList();
-    } catch (_) {
-      enrolledIds = selectedLanguageLevels
-          .map((e) => e['languageId'] as String? ?? '')
-          .where((id) => id.isNotEmpty)
-          .toList();
-    }
-
-    if (enrolledIds.contains(languageId)) {
-      _showErrorSnackbar(
-          "Déjà inscrite", "Vous êtes déjà inscrit(e) dans cette langue.");
+    // Vérification doublon — combine progressList + session locale
+    final List<String> serverIds = () {
+      try {
+        return Get.find<UserProgressController>()
+            .progressList
+            .map((e) => e.language.id)
+            .toList();
+      } catch (_) {
+        return <String>[];
+      }
+    }();
+    final List<String> sessionIds = selectedLanguageLevels
+        .map((e) => e['languageId'] as String? ?? '')
+        .where((id) => id.isNotEmpty)
+        .toList();
+    if ({...serverIds, ...sessionIds}.contains(languageId)) {
+      _showErrorSnackbar("Déjà inscrite", "Vous êtes déjà inscrit(e) dans cette langue.");
       return false;
     }
     try {
@@ -176,8 +177,7 @@ class LanguagesController extends GetxController {
       isLoading(true);
       selectedLanguageLevels
           .removeWhere((item) => item['languageId'] == languageId);
-    } catch (e) {
-      print("Erreur suppression : $e");
+    } catch (_) {
     } finally {
       isLoading(false);
     }
@@ -206,9 +206,7 @@ class LanguagesController extends GetxController {
         languageId: langId,
       );
       languageLevels.assignAll(result);
-      print("Niveaux chargés : ${result.length} niveau(x)");
-    } catch (e) {
-      print("Erreur lors du chargement des niveaux : $e");
+    } catch (_) {
     } finally {
       isLoadingLevels(false);
     }
@@ -254,16 +252,13 @@ class LanguagesController extends GetxController {
           : (session.user?.id ?? "");
 
       if (userId.isEmpty) {
-        print("userId vide, impossible de charger les langues");
         isLoading(false);
         return;
       }
 
       final result = await _languageService.fetchLanguages(userId: userId);
       allLanguages.assignAll(result);
-      print("Langues chargées : ${result.length} langue(s)");
-    } catch (e) {
-      print("Erreur dans le controller (loadAllLanguages) : $e");
+    } catch (_) {
     } finally {
       isLoading(false);
     }
@@ -373,8 +368,7 @@ class LanguagesController extends GetxController {
 
       final result = await _languageService.fetchModules(userId: userId);
       modules.assignAll(result);
-    } catch (e) {
-      print("Erreur lors du chargement des modules : $e");
+    } catch (_) {
     } finally {
       isLoadingModules(false);
     }

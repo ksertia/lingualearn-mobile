@@ -3,9 +3,11 @@ import 'package:tibi/controller/apps/langue/langue_controller.dart';
 import 'package:tibi/controller/apps/moduls/home_controller.dart';
 import 'package:tibi/controller/apps/session_controller.dart';
 import 'package:tibi/controller/apps/user_progress/user_progress_controller.dart';
+import 'package:tibi/helpers/services/module_service.dart';
 import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
 import 'package:tibi/helpers/storage/local_storage.dart';
 import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/models/modules/modul_model.dart';
 import 'package:tibi/models/user_progress/user_progress_model.dart';
 import 'package:tibi/views/apps/home/screens/module_page.dart';
 import 'package:tibi/views/apps/home/screens/parcours.dart';
@@ -18,6 +20,7 @@ import '../../../../controller/apps/settings/settings_controller.dart';
 import '../../../../controller/apps/notifications/notification_controller.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────
+
 const _kGreen = Color(0xFF188329);
 const _kGreenDark = Color(0xFF0F5C1C);
 const Color _kOrange     = Color(0xFFF27F22);
@@ -57,6 +60,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   bool _isSubscriptionActive = true;
   bool _hasProgressError = false;
   String _progressErrorMsg = '';
+  Map<String, ModuleModel?> _fallbackModules = {};
 
   // ─── Guide ────────────────────────────────────────────────────────────────
   bool _showGuide = false;
@@ -130,6 +134,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     });
     try {
       await progressCtrl.loadProgress();
+      await _loadFallbackModules();
     } on DioException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -142,6 +147,26 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
         _hasProgressError = true;
         _progressErrorMsg = 'Une erreur inattendue s\'est produite.';
       });
+    }
+  }
+
+  Future<void> _loadFallbackModules() async {
+    final entries = progressCtrl.progressList;
+    if (entries.isEmpty) return;
+    final Map<String, ModuleModel?> fallbacks = {};
+    for (final entry in entries) {
+      if (entry.module != null) continue;
+      final modules = await ModuleService.getModulesByLanguageLevel(
+        languageId: entry.language.id,
+        levelId: entry.level.id,
+      );
+      if (modules.isNotEmpty) {
+        modules.sort((a, b) => a.index.compareTo(b.index));
+        fallbacks[entry.language.id] = modules.first;
+      }
+    }
+    if (mounted && fallbacks.isNotEmpty) {
+      setState(() => _fallbackModules = fallbacks);
     }
   }
 
@@ -455,7 +480,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                     ],
                   ),
                 ),
-                const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.md),
+                const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.sm),
               ],
             ),
             // const SizedBox(height: 8),
@@ -807,7 +832,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             icon: const Icon(Icons.add_rounded, size: 18),
             label: const Text("Choisir une langue"),
             style: ElevatedButton.styleFrom(
-              backgroundColor: _kGreen,
+              backgroundColor: _kOrange,
               foregroundColor: Colors.white,
               elevation: 0,
               padding:
@@ -1078,7 +1103,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           decoration: BoxDecoration(
             gradient: LinearGradient(colors: [
               _kOrange.withValues(alpha: 0.06),
-
+              _kOrange.withValues(alpha: 0.03),
             ]),
             borderRadius: BorderRadius.circular(26),
           ),
@@ -1092,7 +1117,11 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
       if (entries.isEmpty) return _buildNoPathCard();
       final idx = _currentLangPage.value.clamp(0, entries.length - 1);
       final entry = entries[idx];
-      if (entry.module == null) return _buildNoPathCard();
+      if (entry.module == null) {
+        final fallback = _fallbackModules[entry.language.id];
+        if (fallback == null) return _buildNoPathCard();
+        return _buildFallbackCurrentCard(entry, fallback);
+      }
 
       final modulePct = entry.module!.progressPercentage;
       final moduleName = entry.module!.title;
@@ -1294,6 +1323,115 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     );
   }
 
+  Widget _buildFallbackCurrentCard(UserProgressEntry entry, ModuleModel module) {
+    final firstPath = (module.paths?.isNotEmpty ?? false) ? module.paths!.first : null;
+    final firstStep = (firstPath?.steps.isNotEmpty ?? false) ? firstPath!.steps.first : null;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.card(_ctx),
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: _kOrange.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.rocket_launch_rounded,
+                    color: Colors.black, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Parcours actuel",
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary(_ctx))),
+                    Text(entry.language.name,
+                        style: TextStyle(
+                            color: AppColors.textSecondary(_ctx), fontSize: 12)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  '0%',
+                  style: TextStyle(
+                      color: _kOrange,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          _buildPathItem(Icons.menu_book_rounded, "Module", module.title, _kOrange),
+          if (firstPath != null) ...[
+            const SizedBox(height: 8),
+            _buildPathItem(Icons.map_rounded, "Parcours", firstPath.title, _kOrange),
+          ],
+          if (firstStep != null) ...[
+            const SizedBox(height: 8),
+            _buildPathItem(Icons.flag_rounded, "Étape", firstStep.title, _kOrange),
+          ],
+          const SizedBox(height: 18),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: const LinearProgressIndicator(
+              value: 0.0,
+              minHeight: 8,
+              backgroundColor: Color(0x1AF27F22),
+              valueColor: AlwaysStoppedAnimation(_kOrange),
+            ),
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _showLanguagePickerSheet,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _kOrange,
+                foregroundColor: const Color(0xFF1A1A1A),
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
+              child: const Text("Explorer les modules",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
   Widget _buildSectionTitle(String title) {
@@ -1400,20 +1538,45 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
       builder: (_) => _AddLanguageSheet(
         langCtrl: langCtrl,
         enrolledIds: enrolledIds,
-        onSuccess: () {
-          _loadProgressSafe();
-          // Retry after 2s — server may need time to propagate the new enrollment
-          Future.delayed(const Duration(seconds: 2), _loadProgressSafe);
+        onSuccess: (String languageId) async {
           Get.snackbar(
             'Langue ajoutée',
-            'La nouvelle langue a été ajoutée avec succès.',
+            'Chargement en cours…',
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: _kGreen,
             colorText: Colors.white,
             margin: const EdgeInsets.all(16),
             borderRadius: 16,
             icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+            duration: const Duration(seconds: 12),
           );
+          // Poll silencieux — ne touche ni isLoading ni progressList.
+          // On attend que le backend assigne un module à la nouvelle langue.
+          bool found = false;
+          for (int i = 0; i < 10; i++) {
+            await Future.delayed(const Duration(milliseconds: 1500));
+            final snapshot = await progressCtrl.fetchSilent();
+            if (snapshot != null &&
+                snapshot.any((e) => e.language.id == languageId)) {
+              found = true;
+              break;
+            }
+          }
+          Get.closeCurrentSnackbar();
+          if (found) {
+            Get.snackbar(
+              'Langue ajoutée',
+              'La nouvelle langue est maintenant disponible.',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: _kGreen,
+              colorText: Colors.white,
+              margin: const EdgeInsets.all(16),
+              borderRadius: 16,
+              icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+              duration: const Duration(seconds: 3),
+            );
+          }
+          Get.offAllNamed('/HomeScreen');
         },
       ),
     );
@@ -1443,7 +1606,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
         'Tes langues sont en cours de chargement.',
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
-        backgroundColor: _kGreen,
+        backgroundColor: _kOrange,
         colorText: Colors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 16,
@@ -1522,7 +1685,7 @@ class _TrianglePainter extends CustomPainter {
 class _AddLanguageSheet extends StatefulWidget {
   final LanguagesController langCtrl;
   final Set<String> enrolledIds;
-  final VoidCallback onSuccess;
+  final void Function(String languageId) onSuccess;
 
   const _AddLanguageSheet({
     required this.langCtrl,
@@ -1685,7 +1848,7 @@ class _AddLanguageSheetState extends State<_AddLanguageSheet> {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: isEnrolled
-                                  ? [_kOrange]
+                                  ? [_kOrange, _kOrange]
                                   : [c1, c1.withValues(alpha: 0.72)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -1961,15 +2124,16 @@ class _AddLanguageSheetState extends State<_AddLanguageSheet> {
                               widget.langCtrl.selectedLevel.value == null
                           ? null
                           : () async {
+                              final langId = widget.langCtrl.selectedLanguage.value?.id ?? '';
                               final ok = await widget.langCtrl
                                   .addLanguageLevelToList();
                               if (ok && mounted) {
                                 Navigator.of(context).pop();
-                                widget.onSuccess();
+                                widget.onSuccess(langId);
                               }
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _kGreen,
+                        backgroundColor: _kOrange,
                         disabledBackgroundColor: Colors.grey.shade200,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16)),

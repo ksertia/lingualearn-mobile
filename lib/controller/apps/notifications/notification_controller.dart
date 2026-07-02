@@ -104,7 +104,27 @@ class NotificationController extends GetxController {
     }
   }
 
+  // ── Supprimer toutes les notifications ───────────────────────────────────
+
+  Future<bool> deleteAll() async {
+    if (_userId.isEmpty) return false;
+    final snapshot = List<NotificationModel>.from(notifications);
+    final prevUnread = unreadCount.value;
+
+    notifications.clear();
+    unreadCount.value = 0;
+    hasMore.value = false;
+
+    final ok = await NotificationService.deleteAll(userId: _userId);
+    if (!ok) {
+      notifications.assignAll(snapshot);
+      unreadCount.value = prevUnread;
+    }
+    return ok;
+  }
+
   // ── Refresh ───────────────────────────────────────────────────────────────
 
+  @override
   Future<void> refresh() => loadNotifications();
 }

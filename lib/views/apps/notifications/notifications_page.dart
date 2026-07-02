@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-const _kGreen     = Color(0xFF188329);
-const _kGreenDark = Color(0xFF0F5C1C);
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -68,7 +68,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           20, MediaQuery.of(context).padding.top + 14, 16, 20),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -114,25 +114,51 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   ],
                 )),
           ),
-          Obx(() => _ctrl.notifications.any((n) => !n.isRead)
-              ? TextButton(
-                  onPressed: _ctrl.markAllRead,
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white.withValues(alpha: 0.18),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+          Obx(() {
+            final hasNotifs = _ctrl.notifications.isNotEmpty;
+            final hasUnread = _ctrl.notifications.any((n) => !n.isRead);
+            if (!hasNotifs) return const SizedBox.shrink();
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (hasUnread) ...[
+                  TextButton(
+                    onPressed: _ctrl.markAllRead,
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.18),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                    ),
+                    child: const Text(
+                      'Tout lire',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700),
+                    ),
                   ),
-                  child: const Text(
-                    'Tout lire',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700),
+                  const SizedBox(width: 8),
+                ],
+                GestureDetector(
+                  onTap: _confirmDeleteAll,
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25), width: 1),
+                    ),
+                    child: const Icon(Icons.delete_outline_rounded,
+                        color: Colors.white, size: 20),
                   ),
-                )
-              : const SizedBox.shrink()),
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -144,14 +170,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Obx(() {
       if (_ctrl.isLoading.value) {
         return const Center(
-          child: CircularProgressIndicator(color: _kGreen, strokeWidth: 2.5),
+          child: CircularProgressIndicator(color: _kOrange, strokeWidth: 2.5),
         );
       }
 
       if (_ctrl.notifications.isEmpty) return _buildEmpty(context);
 
       return RefreshIndicator(
-        color: _kGreen,
+        color: _kOrange,
         onRefresh: _ctrl.refresh,
         child: ListView.builder(
           controller: _scrollCtrl,
@@ -166,7 +192,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         child: SizedBox(
                           width: 22, height: 22,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: _kGreen),
+                              strokeWidth: 2, color: _kOrange),
                         ),
                       ),
                     )
@@ -208,19 +234,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isUnread
-                ? _kGreen.withValues(alpha: 0.05)
+                ? _kOrange.withValues(alpha: 0.05)
                 : AppColors.card(context),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isUnread
-                  ? _kGreen.withValues(alpha: 0.20)
+                  ? _kOrange.withValues(alpha: 0.20)
                   : AppColors.border(context),
               width: isUnread ? 1.5 : 1,
             ),
             boxShadow: [
               BoxShadow(
                 color: isUnread
-                    ? _kGreen.withValues(alpha: 0.08)
+                    ? _kOrange.withValues(alpha: 0.08)
                     : AppColors.shadow(context),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
@@ -261,7 +287,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           Container(
                             width: 8, height: 8,
                             decoration: const BoxDecoration(
-                              color: _kGreen,
+                              color: _kOrange,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -309,11 +335,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: _kGreen.withValues(alpha: 0.08),
+                color: _kOrange.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.notifications_none_rounded,
-                  color: _kGreen, size: 48),
+                  color: _kOrange, size: 48),
             ),
             const SizedBox(height: 20),
             Text(
@@ -342,6 +368,46 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
+  Future<void> _confirmDeleteAll() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: AppColors.card(context),
+        title: Text(
+          'Supprimer tout ?',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 17,
+            color: AppColors.textPrimary(context),
+          ),
+        ),
+        content: Text(
+          'Toutes tes notifications seront supprimées définitivement.',
+          style: TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary(context),
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Annuler',
+                style: TextStyle(color: AppColors.textSecondary(context))),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Supprimer',
+                style: TextStyle(
+                    color: Color(0xFFEF4444), fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) await _ctrl.deleteAll();
+  }
+
   IconData _iconFor(String type) {
     switch (type.toLowerCase()) {
       case 'success': return Icons.check_circle_outline_rounded;
@@ -356,13 +422,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Color _colorFor(String type) {
     switch (type.toLowerCase()) {
-      case 'success': return _kGreen;
+      case 'success': return _kOrange;
       case 'warning': return const Color(0xFFF59E0B);
       case 'error':   return const Color(0xFFEF4444);
       case 'lesson':  return const Color(0xFF0EA5E9);
       case 'badge':   return const Color(0xFFF27F22);
       case 'message': return const Color(0xFF7C3AED);
-      default:        return _kGreen;
+      default:        return _kOrange;
     }
   }
 
