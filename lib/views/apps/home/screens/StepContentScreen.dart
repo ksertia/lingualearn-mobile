@@ -1,7 +1,8 @@
 ﻿import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryImage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
+import 'package:tibi/widgets/lessons/step_audio_player.dart';
+import 'package:tibi/widgets/lessons/step_text_content.dart';
 import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
 import 'package:tibi/widgets/lessons/qcm.dart';
 import '../../../../controller/apps/etapes/stepController.dart';
@@ -31,10 +32,13 @@ class StepContentScreen extends StatelessWidget {
 
         final data = controller.stepData.value;
 
-        if (data == null) return _error();
+        if (data == null) return _error(controller.loadErrorMsg.value);
 
         return Column(
           children: [
+            SizedBox(
+              height: MediaQuery.of(context).padding.top + kToolbarHeight,
+            ),
             Expanded(
               child: _buildBody(context, data, controller),
             ),
@@ -121,7 +125,7 @@ class StepContentScreen extends StatelessWidget {
     );
   }
 
-  Widget _error() {
+  Widget _error([String? debugMessage]) {
     return Container(
       color: Colors.white,
       child: Center(
@@ -166,7 +170,8 @@ class StepContentScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Il n\'y a pas encore de contenu disponible pour cette etape.',
+                  debugMessage ??
+                      'Il n\'y a pas encore de contenu disponible pour cette etape.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontSize: 13,
@@ -303,11 +308,16 @@ class StepContentScreen extends StatelessWidget {
             answerValue: content.text,
           );
         case 'audio':
-          return StepDiscoveryAudio(
+          return StepAudioPlayer(
             title: data.title,
-            texteOriginal: content.text ?? '',
-            answerValue: 'Repete apres moi',
-            lottie: 'assets/lottie/mascot.json',
+            audioUrl: content.mediaUrl ?? '',
+            instruction: "Écoutez attentivement",
+            answerValue: content.text,
+          );
+        case 'text':
+          return StepTextContent(
+            title: data.title,
+            text: content.text ?? '',
           );
         default:
           return Center(child: Text(content.text ?? 'Lecon textuelle'));

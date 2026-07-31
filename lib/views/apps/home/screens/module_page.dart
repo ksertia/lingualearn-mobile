@@ -29,9 +29,6 @@ class _HomePageState extends State<HomePage>
   bool _hasNetworkError = false;
   String _networkErrorMsg = '';
 
-  Timer? _autoRefreshTimer;
-  static const Duration _refreshInterval = Duration(seconds: 60);
-
   // ─── Guide ─────────────────────────────────────────────────────────────────
   bool _showGuide = false;
   late final AnimationController _bounceCtrl;
@@ -61,7 +58,6 @@ class _HomePageState extends State<HomePage>
     super.initState();
     controller = Get.put(HomeController());
     WidgetsBinding.instance.addObserver(this);
-    _startAutoRefresh();
     ever(controller.moduleDisplayStatus, (_) => _autoUnlockNext());
 
     // Guide animation
@@ -98,13 +94,6 @@ class _HomePageState extends State<HomePage>
     _bounceCtrl.stop();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('modules_guide_shown', true);
-  }
-
-  void _startAutoRefresh() {
-    _autoRefreshTimer?.cancel();
-    _autoRefreshTimer = Timer.periodic(_refreshInterval, (_) {
-      if (mounted && !controller.isLoading.value) _silentRefresh();
-    });
   }
 
   Future<void> _silentRefresh() async {
@@ -172,7 +161,6 @@ class _HomePageState extends State<HomePage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _autoRefreshTimer?.cancel();
     _bounceCtrl.dispose();
     _guideWorker?.dispose();
     super.dispose();
@@ -597,7 +585,11 @@ class _HomePageState extends State<HomePage>
                   'userId': userId,
                   'moduleLottie': _animal(index),
                 });
-                _autoUnlockNext();
+                // Le module a pu être marqué "completed" côté serveur
+                // pendant qu'on était sur les parcours/étapes : on
+                // rafraîchit tout de suite pour débloquer le module
+                // suivant sans attendre le timer ou un aller-retour.
+                await controller.onRefresh();
               },
         child: Container(
           constraints: const BoxConstraints(minHeight: 118),

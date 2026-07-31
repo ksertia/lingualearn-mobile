@@ -68,6 +68,31 @@ class LanguagesController extends GetxController {
     selectedLevel.value = null;
   }
 
+  // Étape 1 — POST /users/:userId/languages/:languageId/select
+  Future<bool> selectLanguageOnly(LanguageModel lang) async {
+    final session = Get.find<SessionController>();
+    final String userId = session.userId.value.isNotEmpty
+        ? session.userId.value
+        : (session.user?.id ?? "");
+    if (userId.isEmpty) {
+      _showErrorSnackbar("Erreur", "Utilisateur non identifié.");
+      return false;
+    }
+    selectedLanguage.value = lang;
+    selectedLevel.value = null;
+    try {
+      isLoading(true);
+      final ok = await _languageService.selectLanguageForUser(
+          userId: userId, languageId: lang.id);
+      if (!ok) {
+        _showErrorSnackbar("Erreur", "Impossible de sélectionner cette langue.");
+      }
+      return ok;
+    } finally {
+      isLoading(false);
+    }
+  }
+
   Future<void> confirmLanguageSelection() async {
     final session = Get.find<SessionController>();
     final String userId = session.userId.value.isNotEmpty
@@ -142,17 +167,11 @@ class LanguagesController extends GetxController {
         _showErrorSnackbar("Erreur", "Utilisateur non identifié.");
         return false;
       }
-      bool langOk = await _languageService.selectLanguageForUser(
-          userId: userId, languageId: languageId);
-      if (!langOk) {
-        _showErrorSnackbar("Erreur", "Impossible de sauvegarder la langue.");
-        return false;
-      }
-      await Future.delayed(const Duration(milliseconds: 500));
+      // La langue a déjà été sélectionnée (étape 1) avant le chargement des niveaux.
       bool levelOk = await _languageService.selectLevelForUser(
           userId: userId, languageId: languageId, levelId: levelId);
       if (!levelOk) {
-        _showErrorSnackbar("Erreur", "Langue sauvée mais erreur niveau.");
+        _showErrorSnackbar("Erreur", "Impossible de sauvegarder le niveau.");
         return false;
       }
       selectedLanguageLevels.add({

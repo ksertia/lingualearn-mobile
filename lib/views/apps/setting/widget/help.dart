@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 
-const Color _hOrange  = Color(0xFF188329);
-const Color _hOrange2 = Color(0xFF1EB83A);
+const Color _kOrange     = Color(0xFFF27F22);
 const Color _hPurple  = Color(0xFF7C3AED);
 const Color _hBlue    = Color(0xFF0EA5E9);
 const Color _hGreen   = Color(0xFF10B981);
-const Color _hBg      = Color(0xFFF4FBF6);
 
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
@@ -21,10 +20,10 @@ class _HelpPageState extends State<HelpPage> {
   final _searchCtrl = TextEditingController();
 
   static const _categories = [
-    _HelpCategory(label: 'Tout',          icon: Icons.apps_rounded,               color: _hOrange),
+    _HelpCategory(label: 'Tout',          icon: Icons.apps_rounded,               color: _kOrange),
     _HelpCategory(label: 'Démarrage',     icon: Icons.rocket_launch_rounded,       color: _hPurple),
     _HelpCategory(label: 'Apprentissage', icon: Icons.menu_book_rounded,           color: _hBlue),
-    _HelpCategory(label: 'Abonnement',    icon: Icons.workspace_premium_rounded,   color: _hOrange),
+    _HelpCategory(label: 'Abonnement',    icon: Icons.workspace_premium_rounded,   color: _kOrange),
     _HelpCategory(label: 'Compte',        icon: Icons.manage_accounts_rounded,     color: _hGreen),
     _HelpCategory(label: 'Technique',     icon: Icons.build_circle_rounded,        color: Color(0xFFF59E0B)),
   ];
@@ -177,7 +176,7 @@ class _HelpPageState extends State<HelpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _hBg,
+      backgroundColor: AppColors.bg(context),
       body: NestedScrollView(
         headerSliverBuilder: (_, __) => [_buildSliverAppBar()],
         body: Column(
@@ -198,7 +197,7 @@ class _HelpPageState extends State<HelpPage> {
       expandedHeight: 160,
       floating: false,
       pinned: true,
-      backgroundColor: _hOrange,
+      backgroundColor: _kOrange,
       leading: Padding(
         padding: const EdgeInsets.only(left: 10),
         child: GestureDetector(
@@ -224,7 +223,7 @@ class _HelpPageState extends State<HelpPage> {
         background: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [_hOrange, _hOrange2],
+              colors: [_kOrange, _kOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -265,17 +264,17 @@ class _HelpPageState extends State<HelpPage> {
 
   Widget _buildSearchBar() {
     return Container(
-      color: Colors.white,
+      color: AppColors.card(context),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       child: TextField(
         controller: _searchCtrl,
         onChanged: (v) => setState(() => _searchQuery = v.trim()),
-        style: const TextStyle(fontSize: 14, color: Color(0xFF1A1A1A)),
+        style: TextStyle(fontSize: 14, color: AppColors.textPrimary(context)),
         decoration: InputDecoration(
           hintText: 'Rechercher une question...',
-          hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade400),
+          hintStyle: TextStyle(fontSize: 14, color: AppColors.textHint(context)),
           prefixIcon:
-              Icon(Icons.search_rounded, color: Colors.grey.shade400, size: 20),
+              Icon(Icons.search_rounded, color: AppColors.textSecondary(context), size: 20),
           suffixIcon: _searchQuery.isNotEmpty
               ? GestureDetector(
                   onTap: () {
@@ -283,11 +282,11 @@ class _HelpPageState extends State<HelpPage> {
                     setState(() => _searchQuery = '');
                   },
                   child: Icon(Icons.close_rounded,
-                      color: Colors.grey.shade400, size: 18),
+                      color: AppColors.textSecondary(context), size: 18),
                 )
               : null,
           filled: true,
-          fillColor: const Color(0xFFF5F5F5),
+          fillColor: AppColors.cardAlt(context),
           contentPadding:
               const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           border: OutlineInputBorder(
@@ -303,7 +302,7 @@ class _HelpPageState extends State<HelpPage> {
 
   Widget _buildCategoryRow() {
     return Container(
-      color: Colors.white,
+      color: AppColors.card(context),
       padding: const EdgeInsets.only(bottom: 12),
       child: SizedBox(
         height: 38,
@@ -367,19 +366,19 @@ class _HelpPageState extends State<HelpPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.search_off_rounded,
-                size: 52, color: Colors.grey.shade300),
+                size: 52, color: AppColors.textHint(context)),
             const SizedBox(height: 12),
             Text(
               'Aucun résultat',
               style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Colors.grey.shade500),
+                  color: AppColors.textSecondary(context)),
             ),
             const SizedBox(height: 6),
             Text(
               'Essayez un autre mot-clé ou une autre catégorie.',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary(context)),
             ),
           ],
         ),
@@ -401,11 +400,11 @@ class _HelpPageState extends State<HelpPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: AppColors.shadow(context),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -436,27 +435,27 @@ class _HelpPageState extends State<HelpPage> {
           ),
           title: Text(
             item.question,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
+              color: AppColors.textPrimary(context),
             ),
           ),
-          iconColor: _hOrange,
-          collapsedIconColor: Colors.grey.shade400,
+          iconColor: _kOrange,
+          collapsedIconColor: AppColors.textSecondary(context),
           children: [
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: _hBg,
+                color: AppColors.cardAlt(context),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 item.answer,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.grey.shade700,
+                  color: AppColors.textSecondary(context),
                   height: 1.6,
                 ),
               ),
@@ -497,7 +496,9 @@ class _HelpPageState extends State<HelpPage> {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                      colors: [_hOrange, _hOrange2]),
+                      colors: [_kOrange, _kOrange],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(Icons.support_agent_rounded,

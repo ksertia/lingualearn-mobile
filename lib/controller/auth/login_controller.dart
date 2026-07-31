@@ -68,6 +68,7 @@ class LoginController extends GetxController {
         await LocalStorage.setUserName(
             fullName.isEmpty ? "Apprenant" : fullName);
         await LocalStorage.setAlwaysLoggedIn(isChecked);
+        await LocalStorage.clearPendingLoginCredentials();
         session.updateUser(loggedInUser, accessToken);
         isLoading.value = false;
         await Future.delayed(const Duration(milliseconds: 100));

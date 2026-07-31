@@ -37,12 +37,22 @@ class _SplashCreeState extends State<SplashCree>
   late final Animation<double> _exitOpacity;
   late final Animation<double> _exitScale;
 
+  // Un token est déjà stocké : on vérifie la session en silence avant
+  // d'afficher l'écran marketing (logo animé + boutons), pour éviter que
+  // l'utilisateur déjà connecté ne le voie apparaître avant la redirection.
+  late bool _checkingSession;
+
   @override
   void initState() {
     super.initState();
+    final token = LocalStorage.getAuthToken();
+    _checkingSession = token != null && token.isNotEmpty && token != 'null';
     _build();
-    _start();
-    _checkStatus();
+    if (_checkingSession) {
+      _checkStatus();
+    } else {
+      _start();
+    }
   }
 
   void _build() {
@@ -104,7 +114,10 @@ class _SplashCreeState extends State<SplashCree>
 
   Future<void> _checkStatus() async {
     final token = LocalStorage.getAuthToken();
-    if (token == null || token.isEmpty || token == 'null') return;
+    if (token == null || token.isEmpty || token == 'null') {
+      _showMarketingSplash();
+      return;
+    }
     try {
       final session = Get.find<SessionController>();
       session.token.value = token;
@@ -123,8 +136,21 @@ class _SplashCreeState extends State<SplashCree>
         } else {
           _goTo('/bienvenue');
         }
+        return;
       }
-    } catch (e) { debugPrint('Splash: $e'); }
+      _showMarketingSplash();
+    } catch (e) {
+      debugPrint('Splash: $e');
+      _showMarketingSplash();
+    }
+  }
+
+  /// Session absente ou invalide : on retombe sur l'écran marketing
+  /// (logo animé + boutons) au lieu de rester bloqué sur un loader.
+  void _showMarketingSplash() {
+    if (!mounted) return;
+    setState(() => _checkingSession = false);
+    _start();
   }
 
   Future<void> _goTo(String r) async {
@@ -141,6 +167,8 @@ class _SplashCreeState extends State<SplashCree>
 
   @override
   Widget build(BuildContext context) {
+    if (_checkingSession) return _buildCheckingSession();
+
     final session = Get.find<SessionController>();
     final size    = MediaQuery.of(context).size;
 
@@ -231,6 +259,53 @@ class _SplashCreeState extends State<SplashCree>
                     const SizedBox(height: 28),
                   ],
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Vérification de session (silencieuse) ───────────────────────────────────
+
+  Widget _buildCheckingSession() {
+    return Scaffold(
+      backgroundColor: _bg,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: _orange.withValues(alpha: 0.18),
+                    blurRadius: 40,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Image.asset(
+                'assets/images/logo/login.png',
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) =>
+                    const Icon(Icons.school_rounded, color: _orange, size: 40),
+              ),
+            ),
+            const SizedBox(height: 28),
+            const SizedBox(
+              width: 26,
+              height: 26,
+              child: CircularProgressIndicator(
+                color: _orange,
+                strokeWidth: 2.6,
               ),
             ),
           ],

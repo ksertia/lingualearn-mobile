@@ -26,6 +26,12 @@ class LocalStorage {
   static const String _password = "password";
   static const String _loggedIn = "loggedIn";
   static const String _notification = "notification";
+  static const String _pendingLoginInfo = "pending_login_info";
+  static const String _pendingLoginExpiry = "pending_login_expiry";
+
+  // Durée pendant laquelle les identifiants saisis à l'inscription restent
+  // proposés au pré-remplissage du formulaire de connexion.
+  static const Duration pendingLoginTtl = Duration(minutes: 15);
 
   static const String _vientDeLaDecouverteKey = "vient_de_la_decouverte";
   static const String _selectedLevelIdKey = "selected_level_id";
@@ -233,6 +239,44 @@ class LocalStorage {
 
   static bool getAlwaysLoggedIn() {
     return preferences.getBool(_loggedIn) ?? false;
+  }
+
+  /// Mémorise temporairement les identifiants saisis à l'inscription pour
+  /// pré-remplir le formulaire de connexion — évite à l'utilisateur de les
+  /// ressaisir juste après avoir créé son compte.
+  static Future<void> setPendingLoginCredentials(
+      String loginInfo, String password) async {
+    await preferences.setString(_pendingLoginInfo, loginInfo);
+    await setPassword(password);
+    await preferences.setInt(
+      _pendingLoginExpiry,
+      DateTime.now().add(pendingLoginTtl).millisecondsSinceEpoch,
+    );
+  }
+
+  /// Renvoie les identifiants en attente s'ils existent et ne sont pas
+  /// expirés, sinon `null` (et nettoie les valeurs périmées au passage).
+  static ({String loginInfo, String password})? getPendingLoginCredentials() {
+    final expiry = preferences.getInt(_pendingLoginExpiry);
+    if (expiry == null || DateTime.now().millisecondsSinceEpoch > expiry) {
+      clearPendingLoginCredentials();
+      return null;
+    }
+    final loginInfo = preferences.getString(_pendingLoginInfo);
+    final password = getPassword();
+    if (loginInfo == null ||
+        loginInfo.isEmpty ||
+        password == null ||
+        password.isEmpty) {
+      return null;
+    }
+    return (loginInfo: loginInfo, password: password);
+  }
+
+  static Future<void> clearPendingLoginCredentials() async {
+    await preferences.remove(_pendingLoginInfo);
+    await preferences.remove(_password);
+    await preferences.remove(_pendingLoginExpiry);
   }
 
   static Future<bool> setNotification(List<String> notification) {

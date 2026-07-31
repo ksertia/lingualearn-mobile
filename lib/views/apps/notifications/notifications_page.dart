@@ -27,7 +27,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         : Get.put(NotificationController());
 
     // Charge toujours les données à l'ouverture de la page
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {    
       _ctrl.loadNotifications();
     });
 

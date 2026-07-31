@@ -1,4 +1,5 @@
 ﻿import 'package:tibi/controller/apps/support/support_chat_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:tibi/models/support/support_models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,14 +7,11 @@ import 'package:intl/intl.dart';
 
 import '../../../../helpers/utils/ui_mixins.dart';
 
-const Color _csGreen   = Color(0xFF188329);
-const Color _csGreen2  = Color(0xFF1EB83A);
-const Color _csBg      = Color(0xFFF4FBF6);
-const Color _csDark    = Color(0xFF0F5C1C);
+const Color _kOrange     = Color(0xFFF27F22);
 
-// Couleurs des bulles
-const Color _csBubbleMe       = Color(0xFFE5E5EA); // gris clair (envoyé)
-const Color _csBubbleOther    = Color(0xFF0084FF); // bleu (reçu)
+
+// Couleur de la bulle reçue (bulle envoyée = AppColors.cardAlt, adaptative)
+const Color _csBubbleOther    = Color(0xFF0084FF);
 
 class ContactSupportPage extends StatefulWidget {
   const ContactSupportPage({super.key});
@@ -65,7 +63,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _csBg,
+      backgroundColor: AppColors.bg(context),
       appBar: _buildAppBar(),
       body: Column(
         children: [
@@ -85,7 +83,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [_csGreen, _csGreen2],
+            colors: [_kOrange, _kOrange],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -182,7 +180,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
 
   Widget _buildLoading() {
     return const Center(
-      child: CircularProgressIndicator(color: _csGreen, strokeWidth: 2.5),
+      child: CircularProgressIndicator(color: _kOrange, strokeWidth: 2.5),
     );
   }
 
@@ -197,14 +195,14 @@ class _ContactSupportPageState extends State<ContactSupportPage>
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [_csGreen, _csGreen2],
+                  colors: [_kOrange, _kOrange],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: _csGreen.withValues(alpha: 0.30),
+                    color: _kOrange.withValues(alpha: 0.30),
                     blurRadius: 22,
                     offset: const Offset(0, 8),
                   ),
@@ -214,12 +212,12 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                   color: Colors.white, size: 46),
             ),
             const SizedBox(height: 22),
-            const Text(
+            Text(
               'Bienvenue au support',
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF1A1A1A)),
+                  color: AppColors.textPrimary(context)),
             ),
             const SizedBox(height: 10),
             Text(
@@ -227,7 +225,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 13,
-                  color: Colors.grey.shade500,
+                  color: AppColors.textSecondary(context),
                   height: 1.6),
             ),
             const SizedBox(height: 28),
@@ -250,11 +248,11 @@ class _ContactSupportPageState extends State<ContactSupportPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: AppColors.shadow(context),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -263,10 +261,10 @@ class _ContactSupportPageState extends State<ContactSupportPage>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: _csGreen, size: 15),
+          Icon(icon, color: _kOrange, size: 15),
           const SizedBox(width: 7),
           Text(label,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF555555))),
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary(context))),
         ],
       ),
     );
@@ -289,7 +287,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                     child: SizedBox(
                       width: 20, height: 20,
                       child: CircularProgressIndicator(
-                          strokeWidth: 2, color: _csGreen),
+                          strokeWidth: 2, color: _kOrange),
                     ),
                   ),
                 )
@@ -325,18 +323,18 @@ class _ContactSupportPageState extends State<ContactSupportPage>
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         children: [
-          const Expanded(child: Divider(color: Color(0xFFDDE1F0))),
+          Expanded(child: Divider(color: AppColors.divider(context))),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.card(context),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppColors.shadow(context),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -344,14 +342,14 @@ class _ContactSupportPageState extends State<ContactSupportPage>
               ),
               child: Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 11,
-                    color: Color(0xFF888888),
+                    color: AppColors.textSecondary(context),
                     fontWeight: FontWeight.w600),
               ),
             ),
           ),
-          const Expanded(child: Divider(color: Color(0xFFDDE1F0))),
+          Expanded(child: Divider(color: AppColors.divider(context))),
         ],
       ),
     );
@@ -359,8 +357,8 @@ class _ContactSupportPageState extends State<ContactSupportPage>
 
   Widget _buildBubble(
       SupportMessageModel msg, bool isMe, bool showAvatar) {
-    final bubbleColor = isMe ? _csBubbleMe : _csBubbleOther;
-    final textColor   = isMe ? const Color(0xFF1A1A1A) : Colors.white;
+    final bubbleColor = isMe ? AppColors.cardAlt(context) : _csBubbleOther;
+    final textColor   = isMe ? AppColors.textPrimary(context) : Colors.white;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -424,7 +422,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                     Text(
                       DateFormat('HH:mm').format(msg.createdAt.toLocal()),
                       style: TextStyle(
-                          fontSize: 10.5, color: Colors.grey.shade400),
+                          fontSize: 10.5, color: AppColors.textSecondary(context)),
                     ),
                     if (isMe) ...[
                       const SizedBox(width: 4),
@@ -433,7 +431,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                             ? Icons.done_all_rounded
                             : Icons.done_rounded,
                         size: 13,
-                        color: msg.read ? _csGreen : Colors.grey.shade400,
+                        color: msg.read ? _kOrange : AppColors.textSecondary(context),
                       ),
                     ],
                   ],
@@ -462,16 +460,16 @@ class _ContactSupportPageState extends State<ContactSupportPage>
         ),
         content: Text(
           '"${msg.content.length > 60 ? '${msg.content.substring(0, 60)}…' : msg.content}"',
-          style: const TextStyle(fontSize: 13, color: Color(0xFF555555)),
+          style: TextStyle(fontSize: 13, color: AppColors.textSecondary(context)),
         ),
         actionsPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         actions: [
           TextButton(
             onPressed: Get.back,
-            child: const Text(
+            child: Text(
               'Annuler',
-              style: TextStyle(color: Color(0xFF888888)),
+              style: TextStyle(color: AppColors.textSecondary(context)),
             ),
           ),
           TextButton(
@@ -495,10 +493,10 @@ class _ContactSupportPageState extends State<ContactSupportPage>
   Widget _buildInputBar() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card(context),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppColors.shadow(context),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -515,19 +513,19 @@ class _ContactSupportPageState extends State<ContactSupportPage>
               child: Container(
                 constraints: const BoxConstraints(maxHeight: 120),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: AppColors.cardAlt(context),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: TextField(
                   controller: _msgCtrl,
                   maxLines: null,
                   textCapitalization: TextCapitalization.sentences,
-                  style: const TextStyle(
-                      fontSize: 14, color: Color(0xFF1A1A1A)),
+                  style: TextStyle(
+                      fontSize: 14, color: AppColors.textPrimary(context)),
                   decoration: InputDecoration(
                     hintText: 'Écrire un message...',
                     hintStyle: TextStyle(
-                        fontSize: 14, color: Colors.grey.shade400),
+                        fontSize: 14, color: AppColors.textHint(context)),
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 18, vertical: 12),
                     border: InputBorder.none,
@@ -553,19 +551,19 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                       gradient: _ctrl.isSending.value
                           ? null
                           : const LinearGradient(
-                              colors: [_csGreen, _csGreen2],
+                              colors: [_kOrange, _kOrange],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                       color: _ctrl.isSending.value
-                          ? Colors.grey.shade200
+                          ? AppColors.cardAlt(context)
                           : null,
                       shape: BoxShape.circle,
                       boxShadow: _ctrl.isSending.value
                           ? []
                           : [
                               BoxShadow(
-                                color: _csGreen.withValues(alpha: 0.35),
+                                color: _kOrange.withValues(alpha: 0.35),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -577,7 +575,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2.0, color: _csGreen),
+                                  strokeWidth: 2.0, color: _kOrange),
                             )
                           : const Icon(Icons.send_rounded,
                               color: Colors.white, size: 19),
@@ -599,7 +597,7 @@ class _ContactSupportPageState extends State<ContactSupportPage>
       height: size,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_csDark, Color(0xFF188329)],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

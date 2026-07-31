@@ -49,7 +49,10 @@ class LanguageLevelService {
   Future<List<dynamic>> fetchLevels({required String userId, String? languageId}) async {
     try {
       final response = await _dio.get(
-        '/users/$userId/levels'
+        '/users/$userId/levels',
+        queryParameters: languageId != null && languageId.isNotEmpty
+            ? {'languageId': languageId}
+            : null,
       );
       if (response.statusCode == 200) {
         final levels = response.data['data'] as List<dynamic>;

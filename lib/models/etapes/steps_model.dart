@@ -42,13 +42,15 @@ class StepData {
         'lesson';
 
     String detectedFormat = 'text';
-    final String? rawUrl = contentJson['videoUrl']?.toString();
-    final String? url = rawUrl != null ? Uri.decodeFull(rawUrl) : null;
+    // Simple détection de motif sur la chaîne brute — jamais décodée ici :
+    // le contenu peut être du texte libre (pas une URL), et Uri.decodeFull
+    // plante avec "Illegal percent encoding" dès qu'il contient un "%".
+    final String? rawUrl = contentJson['content']?.toString();
 
     if (rawType == 'quiz' || contentJson['questions'] != null) {
       detectedFormat = 'quiz';
-    } else if (url != null) {
-      final lowerUrl = url.toLowerCase();
+    } else if (rawUrl != null) {
+      final lowerUrl = rawUrl.toLowerCase();
       if (lowerUrl.contains('.mp3') || lowerUrl.contains('/audios/')) {
         detectedFormat = 'audio';
       } else if (lowerUrl.contains('.mp4') || lowerUrl.contains('/videos/')) {
@@ -81,11 +83,26 @@ class Content {
   Content({this.text, this.mediaUrl, this.questions});
 
   factory Content.fromJson(Map<String, dynamic> json, String format) {
+    // Le champ "content" de l'API porte soit l'URL du média (audio/video/image/pdf),
+    // soit le texte brut d'une leçon textuelle — jamais les deux à la fois.
+    final String? rawValue = json['content']?.toString();
+    final bool isMedia = format == 'audio' ||
+        format == 'video' ||
+        format == 'image' ||
+        format == 'pdf';
+
+    String? decodedMediaUrl;
+    if (isMedia && rawValue != null) {
+      try {
+        decodedMediaUrl = Uri.decodeFull(rawValue);
+      } catch (_) {
+        decodedMediaUrl = rawValue;
+      }
+    }
+
     return Content(
-      text: json['content']?.toString(),
-      mediaUrl: json['videoUrl'] != null
-          ? Uri.decodeFull(json['videoUrl'].toString())
-          : null,
+      text: isMedia ? null : rawValue,
+      mediaUrl: decodedMediaUrl,
       questions: json['questions'] is List
           ? (json['questions'] as List)
               .map((q) => Question.fromJson(

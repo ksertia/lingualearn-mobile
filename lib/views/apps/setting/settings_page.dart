@@ -110,7 +110,7 @@ class _SettingScreenState extends State<SettingScreen>
                                 icon: Icons.handshake_rounded,
                                 iconBg: const Color(0xFFDCFCE7),
                                 iconColor: _kGreen,
-                                title: 'Devenir partenaire',
+                                title: 'Système de parrainage',
                                 textColor: textPrimary,
                                 dividerColor: dividerColor,
                                 showDivider: false,

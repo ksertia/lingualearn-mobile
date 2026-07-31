@@ -118,7 +118,9 @@ class SessionController extends GetxController {
           );
 
           if (res.statusCode == 200 && res.data != null) {
-            final data = res.data['data'];
+            // Réponse plate : {success, accessToken, refreshToken, expiresIn}
+            // — pas de wrapper "data" comme sur les autres endpoints.
+            final data = res.data;
             final newAccessToken = data['accessToken'] as String?;
             final newRefreshToken = data['refreshToken'] as String?;
 
@@ -140,11 +142,24 @@ class SessionController extends GetxController {
             final retryResponse = await dio.fetch(retryOptions);
             return handler.resolve(retryResponse);
           } else {
-            _forceLogout();
+            // Refresh token explicitement rejeté par le serveur → déconnexion.
+            // Toute autre réponse (erreur serveur ponctuelle) ne doit pas
+            // faire perdre la session.
+            if (res.statusCode == 401 || res.statusCode == 403) {
+              _forceLogout();
+            }
             return handler.reject(error);
           }
+        } on DioException catch (refreshError) {
+          // Ne déconnecter que si le serveur a explicitement invalidé le
+          // refresh token. Une coupure réseau ou un timeout pendant le
+          // refresh ne doit pas forcer une reconnexion.
+          final refreshStatus = refreshError.response?.statusCode;
+          if (refreshStatus == 401 || refreshStatus == 403) {
+            _forceLogout();
+          }
+          return handler.reject(error);
         } catch (_) {
-          _forceLogout();
           return handler.reject(error);
         } finally {
           _isRefreshing = false;

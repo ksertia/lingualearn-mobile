@@ -498,8 +498,8 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
           Expanded(
             child: Text(
               description,
-              style: const TextStyle(
-                  fontSize: 13, color: Color(0xFF4B5563), height: 1.55),
+              style: TextStyle(
+                  fontSize: 13, color: AppColors.textSecondary(_ctx), height: 1.55),
             ),
           ),
         ],
@@ -769,18 +769,19 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
 
   void _showCancelDialog(BuildContext context) {
     Get.defaultDialog(
+      backgroundColor: AppColors.card(_ctx),
       title: 'Résilier ?',
-      titleStyle: const TextStyle(
-          fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
+      titleStyle: TextStyle(
+          fontWeight: FontWeight.w800, color: AppColors.textPrimary(_ctx)),
       middleText:
           "Voulez-vous vraiment résilier ? Vous conserverez l'accès Premium jusqu'à la fin de la période en cours.",
       middleTextStyle:
-          TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.5),
+          TextStyle(fontSize: 13, color: AppColors.textSecondary(_ctx), height: 1.5),
       textConfirm: 'Confirmer',
       textCancel: 'Annuler',
       confirmTextColor: Colors.white,
       buttonColor: _kRed,
-      cancelTextColor: const Color(0xFF1A1A1A),
+      cancelTextColor: AppColors.textPrimary(_ctx),
       onConfirm: () {
         Get.back();
         Get.snackbar(

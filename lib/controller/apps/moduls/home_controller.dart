@@ -28,6 +28,10 @@ class HomeController extends GetxController {
         argLang.isNotEmpty ? argLang : session.selectedLanguageId.value;
     _levelId = argLvl.isNotEmpty ? argLvl : session.selectedLevelId.value;
 
+    if (_languageId.isNotEmpty && _levelId.isNotEmpty) {
+      isLoading.value = true;
+    }
+
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_languageId.isNotEmpty && _levelId.isNotEmpty) {
         loadModules();

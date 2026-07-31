@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import '../../helpers/storage/local_storage.dart';
 import '../../helpers/utils/app_snackbar.dart';
 import 'login_controller.dart';
 
@@ -13,7 +14,7 @@ class RegisterController extends GetxController {
   final TextEditingController phone = TextEditingController();
   final TextEditingController password = TextEditingController();
   final TextEditingController confirmPassword = TextEditingController();
-  final TextEditingController promoCode      = TextEditingController();
+  final TextEditingController referralCode   = TextEditingController();
 
   RxBool isLoading = false.obs;
   RxString selectedAccountType = "learner".obs; 
@@ -49,12 +50,16 @@ class RegisterController extends GetxController {
         "accountType": selectedAccountType.value,
         "username": null,
         "parentId": null,
-        "promoCode": promoCode.text.trim().isEmpty ? null : promoCode.text.trim().toUpperCase(),
+        "referralCode": referralCode.text.trim().isEmpty ? null : referralCode.text.trim().toUpperCase(),
       };
 
       final response = await AuthService.registerUser(userData);
 
       if (response != null && response['success'] == true) {
+        await LocalStorage.setPendingLoginCredentials(
+          email.text.trim(),
+          password.text,
+        );
         appSnackbar(
           heading: "Félicitations",
           message: "Votre compte a été créé avec succès !",
@@ -158,7 +163,7 @@ class RegisterController extends GetxController {
     phone.dispose();
     password.dispose();
     confirmPassword.dispose();
-    promoCode.dispose();
+    referralCode.dispose();
     super.onClose();
   }
 }

@@ -14,17 +14,16 @@ import 'package:tibi/views/apps/home/screens/parcours.dart';
 import 'package:tibi/views/apps/home/screens/etapes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tibi/widgets/mascots/zaki_mascot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../controller/apps/settings/settings_controller.dart';
 import '../../../../controller/apps/notifications/notification_controller.dart';
 
-// ── Palette ────────────────────────────────────────────────────────────────
 
 const _kGreen = Color(0xFF188329);
 const _kGreenDark = Color(0xFF0F5C1C);
 const Color _kOrange     = Color(0xFFF27F22);
-
 
 const _kLangColors = [
   [Color(0xFF188329), Color(0xFF0F5C1C)],
@@ -658,7 +657,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card(_ctx),
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: _kOrange, width: 1.5),
         boxShadow: [
@@ -697,8 +696,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   children: [
                     Text(
                       entry.language.name,
-                      style: const TextStyle(
-                          color: Colors.black,
+                      style: TextStyle(
+                          color: AppColors.textPrimary(_ctx),
                           fontSize: 19,
                           fontWeight: FontWeight.w800),
                     ),
@@ -766,7 +765,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 currentModule != null
                     ? Icons.menu_book_rounded
                     : Icons.flag_outlined,
-                color: Colors.grey[500],
+                color: AppColors.textSecondary(_ctx),
                 size: 14,
               ),
               const SizedBox(width: 6),
@@ -776,7 +775,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                       (currentStep?.isNotEmpty == true
                           ? currentStep!
                           : "Continue ton aventure !"),
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  style: TextStyle(
+                      color: AppColors.textSecondary(_ctx), fontSize: 12),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -847,18 +847,65 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   }
 
   Widget _buildLangSkeleton() {
-    return Container(
-      width: double.infinity,
-      height: 170,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [
-          _kGreen.withValues(alpha: 0.10),
-          _kOrange.withValues(alpha: 0.05),
-        ]),
-        borderRadius: BorderRadius.circular(26),
-      ),
-      child: const Center(
-        child: CircularProgressIndicator(color: _kGreen, strokeWidth: 2.5),
+    return Shimmer.fromColors(
+      baseColor: AppColors.cardAlt(_ctx),
+      highlightColor: AppColors.card(_ctx),
+      child: Container(
+        width: double.infinity,
+        height: 170,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(26),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(width: 120, height: 16, color: Colors.white),
+                      const SizedBox(height: 8),
+                      Container(width: 70, height: 12, color: Colors.white),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Container(
+              width: double.infinity,
+              height: 8,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(width: 150, height: 12, color: Colors.white),
+          ],
+        ),
       ),
     );
   }
@@ -1064,10 +1111,10 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: AppColors.cardAlt(_ctx),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, color: Colors.black, size: 24),
+              child: Icon(icon, color: AppColors.textPrimary(_ctx), size: 24),
             ),
             const SizedBox(height: 10),
             Text(
@@ -1098,19 +1145,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
 
     return Obx(() {
       if (progressCtrl.isLoading.value) {
-        return Container(
-          height: 120,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [
-              _kOrange.withValues(alpha: 0.06),
-              _kOrange.withValues(alpha: 0.03),
-            ]),
-            borderRadius: BorderRadius.circular(26),
-          ),
-          child: const Center(
-              child:
-                  CircularProgressIndicator(color: _kOrange, strokeWidth: 2)),
-        );
+        return _buildCurrentPathSkeleton();
       }
 
       final entries = progressCtrl.progressList;
@@ -1150,11 +1185,11 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 Container(
                   padding: const EdgeInsets.all(11),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: AppColors.cardAlt(_ctx),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.rocket_launch_rounded,
-                      color: Colors.black, size: 22),
+                  child: Icon(Icons.rocket_launch_rounded,
+                      color: AppColors.textPrimary(_ctx), size: 22),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1176,7 +1211,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: AppColors.cardAlt(_ctx),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -1236,16 +1271,90 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     });
   }
 
+  Widget _buildCurrentPathSkeleton() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.cardAlt(_ctx),
+      highlightColor: AppColors.card(_ctx),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(26),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(width: 130, height: 16, color: Colors.white),
+                      const SizedBox(height: 6),
+                      Container(width: 80, height: 12, color: Colors.white),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 46,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Container(width: double.infinity, height: 14, color: Colors.white),
+            const SizedBox(height: 10),
+            Container(width: double.infinity, height: 14, color: Colors.white),
+            const SizedBox(height: 20),
+            Container(
+              width: double.infinity,
+              height: 8,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              width: double.infinity,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildPathItem(IconData icon, String type, String value, Color color) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
-            color: Colors.grey[200],
+            color: AppColors.cardAlt(_ctx),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: Colors.black, size: 14),
+          child: Icon(icon, color: AppColors.textPrimary(_ctx), size: 14),
         ),
         const SizedBox(width: 10),
         Text("$type : ",
@@ -1349,11 +1458,11 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
               Container(
                 padding: const EdgeInsets.all(11),
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
+                  color: AppColors.cardAlt(_ctx),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(Icons.rocket_launch_rounded,
-                    color: Colors.black, size: 22),
+                child: Icon(Icons.rocket_launch_rounded,
+                    color: AppColors.textPrimary(_ctx), size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1374,7 +1483,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
+                  color: AppColors.cardAlt(_ctx),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Text(
@@ -1492,7 +1601,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 7),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: AppColors.cardAlt(_ctx),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -1814,8 +1923,10 @@ class _AddLanguageSheetState extends State<_AddLanguageSheet> {
                   onTap: isEnrolled
                       ? null
                       : () async {
-                          widget.langCtrl.selectedLanguage.value = lang;
                           widget.langCtrl.languageLevels.clear();
+                          final ok =
+                              await widget.langCtrl.selectLanguageOnly(lang);
+                          if (!ok) return;
                           await widget.langCtrl.loadLanguageLevels();
                           if (mounted) setState(() => _step = 1);
                         },

@@ -3,10 +3,9 @@ import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-const Color _kGreen      = Color(0xFF188329);
-const Color _kGreenDark  = Color(0xFF0F5C1C);
-const Color _kYellow     = Color(0xFFF5BF1E);
 const Color _kRed        = Color(0xFFEF4444);
+const Color _kOrange     = Color(0xFFF27F22);
+
 
 class ChangePasswordPage extends StatelessWidget {
   const ChangePasswordPage({super.key});
@@ -29,13 +28,13 @@ class ChangePasswordPage extends StatelessWidget {
                 children: [
                   _buildHintBanner(),
                   const SizedBox(height: 22),
-                  _sectionHeader('MOT DE PASSE ACTUEL', _kGreen,
+                  _sectionHeader('MOT DE PASSE ACTUEL', _kOrange,
                       Icons.lock_outline_rounded),
                   const SizedBox(height: 10),
                   _buildFieldCard(
                     context: context,
                     icon: Icons.lock_outline_rounded,
-                    iconColor: _kGreen,
+                    iconColor: _kOrange,
                     label: 'Mot de passe actuel',
                     hint: 'Votre mot de passe actuel',
                     fieldController: ctrl.currentPasswordController,
@@ -46,13 +45,13 @@ class ChangePasswordPage extends StatelessWidget {
                     error: ctrl.currentPasswordError.value,
                   ),
                   const SizedBox(height: 24),
-                  _sectionHeader('NOUVEAU MOT DE PASSE', _kGreen,
+                  _sectionHeader('NOUVEAU MOT DE PASSE', _kOrange,
                       Icons.vpn_key_rounded),
                   const SizedBox(height: 10),
                   _buildFieldCard(
                     context: context,
                     icon: Icons.vpn_key_rounded,
-                    iconColor: _kGreen,
+                    iconColor: _kOrange,
                     label: 'Nouveau mot de passe',
                     hint: 'Min. 6 caractères',
                     fieldController: ctrl.newPasswordController,
@@ -68,7 +67,7 @@ class ChangePasswordPage extends StatelessWidget {
                     icon: Icons.check_circle_outline_rounded,
                     iconColor: ctrl.confirmPasswordError.value.isEmpty &&
                             ctrl.confirmPasswordController.text.isNotEmpty
-                        ? _kGreen
+                        ? _kOrange
                         : const Color(0xFF9CA3AF),
                     label: 'Confirmer le mot de passe',
                     hint: 'Répétez le nouveau mot de passe',
@@ -99,7 +98,7 @@ class ChangePasswordPage extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(20, topPad + 16, 20, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kGreen, _kGreenDark],
+          colors: [_kOrange, _kOrange],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -192,27 +191,27 @@ class ChangePasswordPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _kGreen.withValues(alpha: 0.07),
+        color: _kOrange.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kGreen.withValues(alpha: 0.20)),
+        border: Border.all(color: _kOrange.withValues(alpha: 0.20)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _kGreen.withValues(alpha: 0.14),
+              color: _kOrange.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.shield_outlined,
-                color: _kGreen, size: 18),
+                color: _kOrange, size: 18),
           ),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
               'Choisissez un mot de passe fort et unique pour protéger votre compte.',
               style: TextStyle(
-                  color: _kGreenDark,
+                  color: _kOrange,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   height: 1.4),
@@ -246,7 +245,7 @@ class ChangePasswordPage extends StatelessWidget {
               Container(
                 width: 3, height: 13,
                 decoration: BoxDecoration(
-                    color: _kYellow, borderRadius: BorderRadius.circular(2)),
+                    color: _kOrange, borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(width: 7),
               Text(
@@ -402,7 +401,7 @@ class ChangePasswordPage extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: hasError ? _kRed : _kGreen,
+                color: hasError ? _kRed : _kOrange,
                 width: 2,
               ),
             ),
@@ -446,7 +445,7 @@ class ChangePasswordPage extends StatelessWidget {
             gradient: loading
                 ? null
                 : const LinearGradient(
-                    colors: [_kGreen, _kGreenDark],
+                    colors: [_kOrange, _kOrange],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
@@ -456,7 +455,7 @@ class ChangePasswordPage extends StatelessWidget {
                 ? []
                 : [
                     BoxShadow(
-                      color: _kGreen.withValues(alpha: 0.32),
+                      color: _kOrange.withValues(alpha: 0.32),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),

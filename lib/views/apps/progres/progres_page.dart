@@ -4,10 +4,12 @@ import 'package:tibi/controller/apps/settings/children_controller.dart';
 import 'package:tibi/controller/apps/user_progress/user_progress_controller.dart';
 import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:tibi/models/child_model.dart';
+import 'package:tibi/models/progression/progression_detail_model.dart';
 import 'package:tibi/models/user_progress/user_progress_model.dart';
 import 'package:tibi/views/apps/setting/widget/sous-compte/child_progress_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:collection/collection.dart';
 import 'package:lottie/lottie.dart';
 import 'package:tibi/widgets/mascots/zaki_mascot.dart';
 import 'package:shimmer/shimmer.dart';
@@ -43,12 +45,16 @@ class _ProgresPageState extends State<ProgresPage> {
   String get _levelName       => _detailCtrl.nameForLevel(
       _selectedLevelId.isNotEmpty ? _selectedLevelId : _session.selectedLevelId.value);
   int    get _totalXp         => _detailCtrl.totalXp;
-  int    get _totalMinutes    => _detailCtrl.totalMinutes;
-  int    get _quizScore       => _detailCtrl.avgQuizScore;
-  int    get _completedModules  => _detailCtrl.completedModules;
-  int    get _inProgressModules => _detailCtrl.inProgressModules;
-  int    get _lockedModules     => _detailCtrl.lockedModules;
-  int    get _totalModules      => _detailCtrl.totalModules;
+  int    get _totalMinutes       => _detailCtrl.totalMinutes;
+  int    get _quizScore          => _detailCtrl.avgQuizScore;
+      ProgLevel? get _selectedLevel  => _detailCtrl.levels.firstWhereOrNull(
+        (l) => l.id == _selectedLevelId,
+      );
+  int    get _levelTotalModules    => _selectedLevel?.modules.length ?? 0;
+  int    get _levelCompletedModules => _selectedLevel?.completedModuleCount ?? 0;
+  int    get _levelInProgressModules => _selectedLevel?.inProgressModuleCount ?? 0;
+  int    get _levelLockedModules     => _selectedLevel?.lockedModuleCount ?? 0;
+  int    get _levelProgressPct       => _selectedLevel?.progressPercent ?? 0;
 
   // ── Init ───────────────────────────────────────────────────────────────────
 
@@ -377,10 +383,12 @@ class _ProgresPageState extends State<ProgresPage> {
   // ── Language Progress Circle Card ──────────────────────────────────────────
 
   Widget _buildXpCard(BuildContext context) {
-    final progress = _totalModules > 0
-        ? (_completedModules / _totalModules).clamp(0.0, 1.0)
+    final progress = _levelTotalModules > 0
+        ? (_levelCompletedModules / _levelTotalModules).clamp(0.0, 1.0)
         : 0.0;
-    final pct = (progress * 100).round();
+    final pct = _selectedLevel != null
+        ? _levelProgressPct
+        : (progress * 100).round();
 
     return Container(
       width: double.infinity,
@@ -524,13 +532,13 @@ class _ProgresPageState extends State<ProgresPage> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _circleStatCol(context, Icons.check_circle_rounded,
-                    '$_completedModules', 'Terminés', _kGreen),
+                    '$_levelCompletedModules', 'Terminés', _kGreen),
                 Container(width: 1, height: 32, color: AppColors.border(context)),
                 _circleStatCol(context, Icons.play_circle_rounded,
-                    '$_inProgressModules', 'En cours', _kOrange),
+                    '$_levelInProgressModules', 'En cours', _kOrange),
                 Container(width: 1, height: 32, color: AppColors.border(context)),
                 _circleStatCol(context, Icons.lock_rounded,
-                    '$_lockedModules', 'Verrouillés', _kLocked),
+                    '$_levelLockedModules', 'Verrouillés', _kLocked),
               ],
             ),
           ),
@@ -630,9 +638,9 @@ class _ProgresPageState extends State<ProgresPage> {
 
   Widget _buildModuleProgress(BuildContext context) {
     final items = [
-      _ModuleStat('Terminés',      _completedModules,  _kGreen,  Icons.check_circle_rounded),
-      _ModuleStat('En cours',      _inProgressModules, _kOrange, Icons.play_circle_rounded),
-      _ModuleStat('Verrouillés',   _lockedModules,     _kLocked, Icons.lock_rounded),
+      _ModuleStat('Terminés',      _levelCompletedModules,  _kGreen,  Icons.check_circle_rounded),
+      _ModuleStat('En cours',      _levelInProgressModules, _kOrange, Icons.play_circle_rounded),
+      _ModuleStat('Verrouillés',   _levelLockedModules,     _kLocked, Icons.lock_rounded),
     ];
 
     return Container(
@@ -654,7 +662,7 @@ class _ProgresPageState extends State<ProgresPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                '$_totalModules',
+                '$_levelTotalModules',
                 style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
@@ -670,7 +678,7 @@ class _ProgresPageState extends State<ProgresPage> {
                           fontSize: 12,
                           color: AppColors.textSecondary(context),
                           fontWeight: FontWeight.w600)),
-                  Text('au total',
+                  Text('dans ce niveau',
                       style: TextStyle(
                           fontSize: 10,
                           color: AppColors.textSecondary(context))),
@@ -685,15 +693,15 @@ class _ProgresPageState extends State<ProgresPage> {
                   alignment: Alignment.center,
                   children: [
                     CircularProgressIndicator(
-                      value: _totalModules > 0
-                          ? _completedModules / _totalModules
+                      value: _levelTotalModules > 0
+                          ? _levelCompletedModules / _levelTotalModules
                           : 0.0,
                       strokeWidth: 6,
                       backgroundColor: _kLocked.withValues(alpha: 0.20),
                       valueColor: const AlwaysStoppedAnimation(_kGreen),
                     ),
                     Text(
-                      '$_completedModules',
+                      '$_levelCompletedModules',
                       style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w900,
@@ -709,8 +717,8 @@ class _ProgresPageState extends State<ProgresPage> {
           const SizedBox(height: 16),
           // Barres détaillées
           ...items.map((item) {
-            final frac = _totalModules > 0
-                ? item.count / _totalModules
+            final frac = _levelTotalModules > 0
+                ? item.count / _levelTotalModules
                 : 0.0;
             return Padding(
               padding: const EdgeInsets.only(bottom: 14),
@@ -745,7 +753,7 @@ class _ProgresPageState extends State<ProgresPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                '${item.count} / $_totalModules',
+                                '${item.count} / $_levelTotalModules',
                                 style: TextStyle(
                                     fontSize: 11,
                                     color: item.color,

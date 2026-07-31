@@ -1,4 +1,5 @@
 ﻿import 'package:tibi/controller/auth/password/ForgotPasswordController.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -15,7 +16,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
         Get.put(ForgotPasswordController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFDE7),
+      backgroundColor: AppColors.bgForm(context),
       body: Column(
         children: [
           Container(
@@ -92,12 +93,12 @@ class EnterPhonenumberPagge extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Adresse email",
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E232C),
+                      color: AppColors.textLabel(context),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -107,22 +108,22 @@ class EnterPhonenumberPagge extends StatelessWidget {
                     decoration: InputDecoration(
                       hintText: "exemple@mail.com",
                       hintStyle: TextStyle(
-                          color: Colors.grey.shade400, fontSize: 14),
+                          color: AppColors.textHint(context), fontSize: 14),
                       prefixIcon: Icon(Icons.email_outlined,
-                          color: Colors.grey.shade500, size: 20),
+                          color: AppColors.textSecondary(context), size: 20),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: AppColors.inputFill(context),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 16),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide:
-                            BorderSide(color: Colors.grey.shade200),
+                            BorderSide(color: AppColors.border(context)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide:
-                            BorderSide(color: Colors.grey.shade200),
+                            BorderSide(color: AppColors.border(context)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -169,7 +170,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Container(
-        color: const Color(0xFFFFFDE7),
+        color: AppColors.bgForm(context),
         padding: const EdgeInsets.only(bottom: 28, top: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -177,7 +178,7 @@ class EnterPhonenumberPagge extends StatelessWidget {
             Text(
               "Vous vous souvenez ?  ",
               style:
-                  TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                  TextStyle(color: AppColors.textSecondary(context), fontSize: 14),
             ),
             GestureDetector(
               onTap: () => Get.back(),

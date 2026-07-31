@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/auth/register_controller.dart';
+import '../../helpers/theme/app_colors.dart';
 
 const Color _kOrange     = Color(0xFFF27F22);
 
@@ -64,7 +65,7 @@ class _RegisterPageState extends State<RegisterPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFDE7),
+      backgroundColor: AppColors.bgForm(context),
       body: Column(
         children: [
           Container(
@@ -257,7 +258,7 @@ class _RegisterPageState extends State<RegisterPage>
       ),
       bottomNavigationBar: currentStep == 0
           ? Container(
-              color: const Color(0xFFFFFDE7),
+              color: AppColors.bgForm(context),
               padding: const EdgeInsets.only(bottom: 24, top: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -265,7 +266,7 @@ class _RegisterPageState extends State<RegisterPage>
                   Text(
                     "Déjà un compte ?  ",
                     style:
-                        TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                        TextStyle(color: AppColors.textSecondary(context), fontSize: 14),
                   ),
                   GestureDetector(
                     onTap: () => Get.toNamed('/login'),
@@ -371,7 +372,7 @@ class _RegisterPageState extends State<RegisterPage>
           },
         ),
         const SizedBox(height: 24),
-        // ── Code promo partenaire (optionnel) ───────────────────────────────
+        // ── Code de parrainage (optionnel) ──────────────────────────────────
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -394,12 +395,12 @@ class _RegisterPageState extends State<RegisterPage>
                         color: Colors.black, size: 16),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Code partenaire',
+                  Text(
+                    'Code de parrainage',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black,
+                      color: AppColors.textPrimary(context),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -422,19 +423,19 @@ class _RegisterPageState extends State<RegisterPage>
               ),
               const SizedBox(height: 12),
               TextFormField(
-                controller: controller.promoCode,
+                controller: controller.referralCode,
                 textCapitalization: TextCapitalization.characters,
                 decoration: _inputDeco(
-                  hint: "Ex : TIBI-XXXX",
+                  hint: "Ex : LL-ABC12345",
                   icon: Icons.confirmation_number_outlined,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Si quelqu\'un vous a partagé son code, entrez-le ici.',
                 style: TextStyle(
                   fontSize: 11,
-                  color: Colors.black,
+                  color: AppColors.textPrimary(context),
                   height: 1.4,
                 ),
               ),
@@ -472,10 +473,10 @@ class _RegisterPageState extends State<RegisterPage>
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF1E232C),
+          color: AppColors.textLabel(context),
         ),
       ),
     );
@@ -486,21 +487,23 @@ class _RegisterPageState extends State<RegisterPage>
     required IconData icon,
     Widget? suffixIcon,
   }) {
+    final fill = AppColors.inputFill(context);
+    final bdr = AppColors.border(context);
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-      prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 20),
+      hintStyle: TextStyle(color: AppColors.textHint(context), fontSize: 14),
+      prefixIcon: Icon(icon, color: AppColors.textSecondary(context), size: 20),
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: fill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: bdr),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: bdr),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),

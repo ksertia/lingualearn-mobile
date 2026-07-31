@@ -6,27 +6,35 @@ import '../../../models/etapes/steps_model.dart';
 class StepService {
   Dio get _dio => Get.find<SessionController>().dio;
 
-  Future<StepData?> getStepContent(String stepId, {String? userId}) async {
-    try {
-      final Map<String, dynamic> queryParams = {};
-      if (userId != null) {
-        queryParams['userId'] = userId;
-      }
-
-      final response = await _dio.get(
-        '/steps/$stepId/content',
-        queryParameters: queryParams,
-      );
-      if (response.data['success'] == true) {
-        final raw = response.data['data'];
-        if (raw == null) return null;
-        final data = Map<String, dynamic>.from(raw as Map);
-        if (data['content'] == null) return null;
-        return StepData.fromJson(data);
-      }
-      return null;
-    } catch (_) {
-      return null;
+  /// Lance une [DioException] 
+  /// [Exception] descriptive si la réponse est mal formée — le contrôleur
+  Future<StepData> getStepContent(String stepId, {String? userId}) async {
+    final Map<String, dynamic> queryParams = {};
+    if (userId != null) {
+      queryParams['userId'] = userId;
     }
+
+    final response = await _dio.get(
+      '/steps/$stepId/content',
+      queryParameters: queryParams,
+    );
+
+    if (response.data['success'] != true) {
+      throw Exception(
+          'Réponse serveur inattendue (success=false) : ${response.data}');
+    }
+
+    final raw = response.data['data'];
+    if (raw == null) {
+      throw Exception('Le serveur a renvoyé data=null pour cette étape.');
+    }
+
+    final data = Map<String, dynamic>.from(raw as Map);
+    if (data['content'] == null) {
+      throw Exception(
+          "Cette étape n'a pas encore de contenu (content=null) — payload: $data");
+    }
+
+    return StepData.fromJson(data);
   }
 }

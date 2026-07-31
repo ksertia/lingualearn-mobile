@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/auth/login_controller.dart';
+import '../../helpers/storage/local_storage.dart';
 import '../../helpers/theme/app_colors.dart';
 
 const Color _kOrange     = Color(0xFFF27F22);
@@ -23,6 +24,17 @@ class _LoginPageState extends State<LoginPage> {
       Get.put(LoginController(), permanent: true);
     }
     controller = Get.find<LoginController>();
+    _prefillPendingCredentials();
+  }
+
+  // Pré-remplit le formulaire avec les identifiants saisis à l'inscription,
+  // s'ils existent encore et ne sont pas expirés — évite à l'utilisateur de
+  // les ressaisir juste après avoir créé son compte.
+  void _prefillPendingCredentials() {
+    final pending = LocalStorage.getPendingLoginCredentials();
+    if (pending == null) return;
+    controller.email.text = pending.loginInfo;
+    controller.password.text = pending.password;
   }
 
   @override

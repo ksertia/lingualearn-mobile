@@ -120,9 +120,6 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
   bool _hasNetworkError = false;
   String _networkErrorMsg = '';
 
-  Timer? _autoRefreshTimer;
-  static const Duration _refreshInterval = Duration(seconds: 60);
-
   // ─── Guide ─────────────────────────────────────────────────────────────────
   bool _showGuide = false;
   late final AnimationController _bounceCtrl;
@@ -134,7 +131,6 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
     super.initState();
     controller = Get.put(StepsController());
     WidgetsBinding.instance.addObserver(this);
-    _startAutoRefresh();
 
     _bounceCtrl = AnimationController(
       vsync: this,
@@ -168,13 +164,6 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
     _bounceCtrl.stop();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('steps_guide_shown', true);
-  }
-
-  void _startAutoRefresh() {
-    _autoRefreshTimer?.cancel();
-    _autoRefreshTimer = Timer.periodic(_refreshInterval, (_) {
-      if (mounted && !controller.isLoading.value) _silentRefresh();
-    });
   }
 
   Future<void> _silentRefresh() async {
@@ -228,7 +217,6 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _autoRefreshTimer?.cancel();
     _bounceCtrl.dispose();
     _guideWorker?.dispose();
     super.dispose();
@@ -561,7 +549,10 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
           ),
         const SizedBox(height: 8),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.72,
+          height: MediaQuery.of(context).size.height -
+              MediaQuery.of(context).padding.top -
+              kToolbarHeight -
+              (pages.length > 1 ? 112 : 16),
           child: PageView.builder(
             controller: controller.pageController,
             onPageChanged: controller.onPageChanged,
@@ -681,10 +672,15 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
       if (userId.isNotEmpty && stepStatus == 'unlocked') {
         await StepsService.startStep(userId: userId, stepId: step.id);
       }
-      await Get.to(
+      final res = await Get.to(
         () => StepContentScreen(stepId: step.id, userId: userId),
         transition: Transition.rightToLeft,
       );
+      if (res == true) {
+        // Rafraîchit tout de suite : débloque l'étape suivante (et en
+        // cascade le parcours/module) sans attendre le refresh périodique.
+        await controller.fetchSteps();
+      }
     }
 
     // ── Couleurs & styles par statut ──────────────────────────────────────

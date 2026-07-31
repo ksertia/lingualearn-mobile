@@ -1,36 +1,12 @@
-﻿import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:intl/intl.dart';
+import 'package:tibi/controller/apps/partner/partner_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
+import 'package:tibi/models/partner/referral_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 const Color _kGreen      = Color(0xFF188329);
 const Color _kOrange     = Color(0xFFF27F22);
-
-const String _staticCode = 'TIBI-X7K2M';
-
-// ── Modèle retrait ────────────────────────────────────────────────────────────
-
-class _WithdrawItem {
-  final String date;
-  final String amount;
-  final String status;
-  final bool isPaid;
-  const _WithdrawItem({
-    required this.date,
-    required this.amount,
-    required this.status,
-    required this.isPaid,
-  });
-}
-
-const _withdrawals = [
-  _WithdrawItem(date: '15 Mai 2025',  amount: '5 000 FCFA', status: 'Paye',       isPaid: true),
-  _WithdrawItem(date: '02 Avr 2025',  amount: '3 500 FCFA', status: 'Paye',       isPaid: true),
-  _WithdrawItem(date: '18 Mars 2025', amount: '8 000 FCFA', status: 'Paye',       isPaid: true),
-  _WithdrawItem(date: '28 Mai 2025',  amount: '7 000 FCFA', status: 'En attente', isPaid: false),
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 class PartnerDashboardPage extends StatefulWidget {
   const PartnerDashboardPage({super.key});
@@ -41,35 +17,92 @@ class PartnerDashboardPage extends StatefulWidget {
 
 class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
   late BuildContext _ctx;
+  final PartnerController controller = Get.put(PartnerController());
 
   @override
   Widget build(BuildContext context) {
     _ctx = context;
     return Scaffold(
       backgroundColor: AppColors.bgPartner(context),
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverHeader(),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildKpiCards(),
-                  const SizedBox(height: 24),
-                  _buildCodeCard(),
-                  const SizedBox(height: 24),
-                  _buildMonthlyStats(),
-                  const SizedBox(height: 24),
-                  _buildWithdrawalHistory(),
-                  const SizedBox(height: 16),
-                  _buildWithdrawButton(),
-                ],
+      body: Obx(() {
+        if (controller.isLoading.value && controller.referralData.value == null) {
+          return _buildLoading();
+        }
+
+        final data = controller.referralData.value;
+        if (data == null) {
+          return _buildError(controller.loadErrorMsg.value);
+        }
+
+        return RefreshIndicator(
+          onRefresh: controller.fetchMyReferral,
+          child: CustomScrollView(
+            slivers: [
+              _buildSliverHeader(),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildKpiCards(data),
+                      const SizedBox(height: 24),
+                      _buildCodeCard(data),
+                      const SizedBox(height: 24),
+                      _buildFilleulsList(data),
+                      const SizedBox(height: 16),
+                      _buildPointsButton(),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        );
+      }),
+    );
+  }
+
+  // ── Loading / erreur ────────────────────────────────────────────────────────
+
+  Widget _buildLoading() {
+    return Container(
+      color: AppColors.bgPartner(context),
+      child: const Center(child: CircularProgressIndicator(color: _kOrange)),
+    );
+  }
+
+  Widget _buildError(String? message) {
+    return Container(
+      color: AppColors.bgPartner(context),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline_rounded,
+                  color: AppColors.textSecondary(context), size: 42),
+              const SizedBox(height: 16),
+              Text(
+                message ?? 'Impossible de charger vos données de parrainage.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.textSecondary(context)),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: controller.fetchMyReferral,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _kOrange,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text('Réessayer',
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -94,7 +127,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
         ),
       ),
       title: const Text(
-        'Espace Partenaire',
+        'Espace Parrainage',
         style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700),
       ),
       flexibleSpace: FlexibleSpaceBar(
@@ -140,7 +173,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Espace Partenaire',
+                          'Espace Parrainage',
                           style: TextStyle(
                             color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800,
                           ),
@@ -175,30 +208,25 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
 
   // ── KPI cards ──────────────────────────────────────────────────────────────
 
-  Widget _buildKpiCards() {
+  Widget _buildKpiCards(ReferralData data) {
     return Column(
       children: [
         Row(
           children: [
             _kpiCard(
-              label: 'Inscrits via code',
-              value: '12',
+              label: 'Filleuls inscrits',
+              value: '${data.totalFilleuls}',
               icon: Icons.people_alt_rounded,
-              iconColor:  Colors.black,
-              iconBg:  Colors.grey.shade200,
-              trend: '+3 ce mois',
-              trendUp: true,
+              iconColor: AppColors.textPrimary(_ctx),
+              iconBg: AppColors.cardAlt(_ctx),
             ),
             const SizedBox(width: 14),
             _kpiCard(
-              label: 'Revenus generes',
-              value: '24 500',
-              unit: 'FCFA',
-              icon: Icons.account_balance_wallet_rounded,
-              iconColor: Colors.black,
-              iconBg: Colors.grey.shade200,
-              trend: '+8 000 ce mois',
-              trendUp: true,
+              label: 'Filleuls récompensés',
+              value: '${data.totalRewarded}',
+              icon: Icons.emoji_events_rounded,
+              iconColor: _kGreen,
+              iconBg: const Color(0xFFDCFCE7),
             ),
           ],
         ),
@@ -206,26 +234,19 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
         Row(
           children: [
             _kpiCard(
-              label: 'Solde disponible',
-              value: '8 000',
-              unit: 'FCFA',
-              icon: Icons.savings_rounded,
-              iconColor:  Colors.black,
-              iconBg:  Colors.grey.shade200,
-              trend: 'Retrait possible',
-              trendUp: true,
-              trendColor: const Color(0xFFD97706),
+              label: 'Points XP gagnés',
+              value: '${data.totalXpEarned}',
+              icon: Icons.bolt_rounded,
+              iconColor: AppColors.textPrimary(_ctx),
+              iconBg: AppColors.cardAlt(_ctx),
             ),
             const SizedBox(width: 14),
             _kpiCard(
-              label: 'Retraits effectues',
-              value: '16 500',
-              unit: 'FCFA',
-              icon: Icons.move_to_inbox_rounded,
-              iconColor:  Colors.black,
-              iconBg:  Colors.grey.shade200,
-              trend: '3 retraits',
-              trendUp: null,
+              label: 'Points gagnés',
+              value: '${data.totalCoinsEarned}',
+              icon: Icons.savings_rounded,
+              iconColor: const Color(0xFFD97706),
+              iconBg: const Color(0xFFFEF3C7),
             ),
           ],
         ),
@@ -240,17 +261,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
     required IconData icon,
     required Color iconColor,
     required Color iconBg,
-    required String trend,
-    required bool? trendUp,
-    Color? trendColor,
   }) {
-    final Color tc = trendColor ??
-        (trendUp == true
-            ? Colors.black
-            : trendUp == false
-                ? Colors.redAccent
-                : const Color(0xFF9CA3AF));
-
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -259,7 +270,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: AppColors.shadow(_ctx),
               blurRadius: 12, offset: const Offset(0, 4),
             ),
           ],
@@ -285,8 +296,8 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                   if (unit != null)
                     TextSpan(
                       text: ' $unit',
-                      style: const TextStyle(
-                        fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF9CA3AF),
+                      style: TextStyle(
+                        fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary(_ctx),
                       ),
                     ),
                 ],
@@ -294,23 +305,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
             ),
             const SizedBox(height: 2),
             Text(label,
-                style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF), fontWeight: FontWeight.w500)),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                if (trendUp != null)
-                  Icon(
-                    trendUp ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
-                    color: tc, size: 12,
-                  ),
-                if (trendUp != null) const SizedBox(width: 2),
-                Flexible(
-                  child: Text(trend,
-                      style: TextStyle(fontSize: 10, color: tc, fontWeight: FontWeight.w600),
-                      overflow: TextOverflow.ellipsis),
-                ),
-              ],
-            ),
+                style: TextStyle(fontSize: 11, color: AppColors.textSecondary(_ctx), fontWeight: FontWeight.w500)),
           ],
         ),
       ),
@@ -319,7 +314,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
 
   // ── Code card ──────────────────────────────────────────────────────────────
 
-  Widget _buildCodeCard() {
+  Widget _buildCodeCard(ReferralData data) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card(_ctx),
@@ -344,9 +339,9 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Votre code partenaire',
+                      Text('Votre code de parrainage',
                           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary(_ctx))),
-                      Text('Unique et lie a votre compte',
+                      Text('Unique et lié à votre compte',
                           style: TextStyle(fontSize: 12, color: AppColors.textSecondary(_ctx))),
                     ],
                   ),
@@ -380,10 +375,10 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: _kOrange.withValues(alpha: 0.30), width: 1.5),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  _staticCode,
-                  style: TextStyle(
+                  data.referralCode,
+                  style: const TextStyle(
                     fontSize: 26, fontWeight: FontWeight.w800,
                     color: Color(0xFF1A1A1A), letterSpacing: 3,
                   ),
@@ -399,25 +394,16 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                 Expanded(
                   child: _actionBtn(
                     icon: Icons.copy_rounded, label: 'Copier',
-                    color:  Colors.black, bg:  Color(0xFF1A1A1A).withValues(alpha: 0.05),
-                    onTap: () {
-                      Clipboard.setData(const ClipboardData(text: _staticCode));
-                      Get.snackbar(
-                        'Copie !', 'Code copie dans le presse-papiers.',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: _kOrange, colorText: Colors.white,
-                        margin: const EdgeInsets.all(16), borderRadius: 14,
-                        duration: const Duration(seconds: 2),
-                      );
-                    },
+                    color:  AppColors.textPrimary(_ctx), bg:  AppColors.cardAlt(_ctx),
+                    onTap: controller.copyReferralCode,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _actionBtn(
                     icon: Icons.share_rounded, label: 'Partager',
-                    color:  Colors.black, bg:  Colors.grey.shade200,
-                    onTap: () {},
+                    color:  AppColors.textPrimary(_ctx), bg:  AppColors.cardAlt(_ctx),
+                    onTap: controller.shareReferralCode,
                   ),
                 ),
               ],
@@ -429,174 +415,107 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
     );
   }
 
-  // ── Statistiques mensuelles ────────────────────────────────────────────────
+  // ── Liste des filleuls ──────────────────────────────────────────────────────
 
-  Widget _buildMonthlyStats() {
-    final months = [
-      ('Jan', 0.2), ('Fev', 0.4), ('Mar', 0.75),
-      ('Avr', 0.55), ('Mai', 1.0), ('Jun', 0.3),
-    ];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.card(_ctx),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 14, offset: const Offset(0, 5)),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 38, height: 38,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEDE9FF),
-                    borderRadius: BorderRadius.circular(11),
-                  ),
-                  child: const Icon(Icons.bar_chart_rounded, color: Color(0xFF7C3AED), size: 20),
-                ),
-                const SizedBox(width: 12),
-                Text('Statistiques mensuelles',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary(_ctx))),
+  Widget _buildFilleulsList(ReferralData data) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Vos filleuls',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(_ctx))),
+        const SizedBox(height: 14),
+        if (data.filleuls.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+            decoration: BoxDecoration(
+              color: AppColors.card(_ctx),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(color: AppColors.shadow(_ctx), blurRadius: 14, offset: const Offset(0, 5)),
               ],
             ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 100,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: months.map((m) {
-                  final isLast = m == months.last;
-                  final isMax = m.$2 == 1.0;
-                  return Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(right: isLast ? 0 : 8),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
+            child: Column(
+              children: [
+                Icon(Icons.person_add_alt_1_rounded, color: AppColors.textSecondary(_ctx), size: 32),
+                const SizedBox(height: 10),
+                Text('Aucun filleul pour l\'instant',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary(_ctx))),
+                const SizedBox(height: 4),
+                Text('Partagez votre code pour commencer à gagner des points.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary(_ctx))),
+              ],
+            ),
+          )
+        else
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.card(_ctx),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(color: AppColors.shadow(_ctx), blurRadius: 14, offset: const Offset(0, 5)),
+              ],
+            ),
+            child: Column(
+              children: data.filleuls.asMap().entries.map((e) {
+                final i = e.key;
+                final f = e.value;
+                final Color iconColor = f.isRewarded ? _kGreen : const Color(0xFFD97706);
+                final Color iconBg = f.isRewarded ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7);
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      child: Row(
                         children: [
                           Container(
-                            height: 78 * m.$2,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: isMax
-                                    ? [_kOrange, const Color(0xFFFDE68A)]
-                                    : [const Color(0xFFFEF3C7), const Color(0xFFFDE68A)],
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                              ),
-                              borderRadius: BorderRadius.circular(6),
+                            width: 40, height: 40,
+                            decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(12)),
+                            child: Icon(
+                              f.isRewarded ? Icons.check_circle_outline_rounded : Icons.schedule_rounded,
+                              color: iconColor, size: 20,
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            m.$1,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: isMax ? FontWeight.w700 : FontWeight.w500,
-                              color: isMax ? _kOrange : const Color(0xFF9CA3AF),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(f.displayName,
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary(_ctx))),
+                                if (f.joinedAt != null)
+                                  Text(DateFormat('dd MMM yyyy', 'fr_FR').format(f.joinedAt!.toLocal()),
+                                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary(_ctx))),
+                              ],
                             ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(20)),
+                            child: Text(f.isRewarded ? 'Récompensé' : 'En attente',
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: iconColor)),
                           ),
                         ],
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
+                    if (i < data.filleuls.length - 1)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 68),
+                        child: Divider(height: 1, color: AppColors.divider(_ctx)),
+                      ),
+                  ],
+                );
+              }).toList(),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── Historique des retraits ────────────────────────────────────────────────
-
-  Widget _buildWithdrawalHistory() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Historique des retraits',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(_ctx))),
-        const SizedBox(height: 14),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 14, offset: const Offset(0, 5)),
-            ],
           ),
-          child: Column(
-            children: _withdrawals.asMap().entries.map((e) {
-              final i = e.key;
-              final item = e.value;
-              final Color iconColor = item.isPaid ? _kGreen : const Color(0xFFD97706);
-              final Color iconBg = item.isPaid ? const Color(0xFFDCFCE7) : const Color(0xFFFEF3C7);
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40, height: 40,
-                          decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(12)),
-                          child: Icon(
-                            item.isPaid ? Icons.check_circle_outline_rounded : Icons.schedule_rounded,
-                            color: iconColor, size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Retrait partenaire',
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary(_ctx))),
-                              Text(item.date,
-                                  style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(item.amount,
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: iconColor)),
-                            const SizedBox(height: 3),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(20)),
-                              child: Text(item.status,
-                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: iconColor)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (i < _withdrawals.length - 1)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 68),
-                      child: Divider(height: 1, color: Color(0xFFF3F4F6)),
-                    ),
-                ],
-              );
-            }).toList(),
-          ),
-        ),
       ],
     );
   }
 
-  // ── Bouton retrait ─────────────────────────────────────────────────────────
+  // ── Bouton points ────────────────────────────────────────────────────────────
 
-  Widget _buildWithdrawButton() {
+  Widget _buildPointsButton() {
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -618,10 +537,10 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 20),
+                Icon(Icons.savings_rounded, color: Colors.white, size: 20),
                 SizedBox(width: 10),
                 Text(
-                  'Demander un retrait',
+                  'Voir mes points',
                   style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ],

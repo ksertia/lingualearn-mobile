@@ -1,14 +1,14 @@
 ﻿import 'package:tibi/controller/apps/subscription/subscription_controller.dart';
 import 'package:tibi/helpers/services/souscription/payment_service.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:tibi/helpers/utils/ui_mixins.dart';
 import 'package:tibi/models/souscription/souscription_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 
-const _kBg         = Color(0xFFF4FBF6);
-const _kDark       = Color(0xFF1A1A1A);
 const Color _kOrange     = Color(0xFFF27F22);
+const Color _kGreen      = Color(0xFF188329);
 
 
 class SubscriptionPlansPage extends StatefulWidget {
@@ -55,7 +55,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
       return ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         child: Container(
-          color: _kBg,
+          color: AppColors.bgAlt(context),
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.92,
           ),
@@ -83,12 +83,12 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
     }
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: AppColors.bgAlt(context),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: _kDark),
+          icon: Icon(Icons.close, color: AppColors.textPrimary(context)),
           onPressed: () => Get.back(),
         ),
       ),
@@ -126,7 +126,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
             ),
           ),
           IconButton(
-            icon: Icon(Icons.close, color: Colors.grey.shade400),
+            icon: Icon(Icons.close, color: AppColors.textHint(context)),
             onPressed: () => Get.back(),
           ),
         ],
@@ -241,12 +241,12 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
 
           const SizedBox(height: 28),
 
-          const Text(
+          Text(
             "Choisissez votre opérateur",
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary(context),
             ),
           ),
           const SizedBox(height: 16),
@@ -307,7 +307,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
               child: TextField(
                 controller: _phoneCtrl,
                 keyboardType: TextInputType.phone,
-                style: const TextStyle(color: _kDark, fontWeight: FontWeight.w600),
+                style: TextStyle(color: AppColors.textPrimary(context), fontWeight: FontWeight.w600),
                 decoration: _fieldDeco(hint: "+226 75 00 00 00"),
               ),
             ),
@@ -352,8 +352,8 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                 controller: _otpCtrl,
                 keyboardType: TextInputType.number,
                 maxLength: 6,
-                style: const TextStyle(
-                  color: _kDark, fontSize: 26, letterSpacing: 10, fontWeight: FontWeight.w800,
+                style: TextStyle(
+                  color: AppColors.textPrimary(context), fontSize: 26, letterSpacing: 10, fontWeight: FontWeight.w800,
                 ),
                 textAlign: TextAlign.center,
                 decoration: _fieldDeco(hint: "• • • • • •", counterText: ""),
@@ -377,7 +377,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                 child: TextField(
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
-                  style: const TextStyle(color: _kDark, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: AppColors.textPrimary(context), fontWeight: FontWeight.w600),
                   decoration: _fieldDeco(hint: "+226 70 00 00 00"),
                 ),
               ),
@@ -411,7 +411,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                 child: TextField(
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
-                  style: const TextStyle(color: _kDark, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: AppColors.textPrimary(context), fontWeight: FontWeight.w600),
                   decoration: _fieldDeco(hint: "+226 78 00 00 00"),
                 ),
               ),
@@ -494,11 +494,11 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.lock_outline, color: Colors.grey.shade400, size: 14),
+              Icon(Icons.lock_outline, color: AppColors.textHint(context), size: 14),
               const SizedBox(width: 6),
               Text(
                 "Paiement sécurisé chiffré SSL",
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                style: TextStyle(fontSize: 12, color: AppColors.textHint(context)),
               ),
             ],
           ),
@@ -542,8 +542,8 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
         controller: _otpCtrl,
         keyboardType: TextInputType.number,
         maxLength: 6,
-        style: const TextStyle(
-          color: _kDark,
+        style: TextStyle(
+          color: AppColors.textPrimary(context),
           fontSize: 26,
           letterSpacing: 10,
           fontWeight: FontWeight.w800,
@@ -558,11 +558,9 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFEDF7ED), Color(0xFFE0F5E0)],
-        ),
+        color: _kGreen.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Color(0xFFBBF7D0)),
+        border: Border.all(color: _kGreen.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -584,12 +582,12 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                 children: [
                   Text(
                     _selectedPlan!.planName,
-                    style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w700, color: _kDark),
+                    style: TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)),
                   ),
                   Text(
                     "Abonnement mensuel",
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary(context)),
                   ),
                 ],
               ),
@@ -756,7 +754,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           decoration: BoxDecoration(
-            color: _kBg,
+            color: AppColors.bgAlt(context),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: SingleChildScrollView(
@@ -796,7 +794,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                     ),
                     IconButton(
                       onPressed: () => Get.back(),
-                      icon: Icon(Icons.close, color: Colors.grey.shade400),
+                      icon: Icon(Icons.close, color: AppColors.textHint(context)),
                     ),
                   ],
                 ),
@@ -832,20 +830,18 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFEDF7ED), Color(0xFFDCF5DC)],
-                          ),
+                          color: _kGreen.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Color(0xFFBBF7D0)),
+                          border: Border.all(color: _kGreen.withValues(alpha: 0.25)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(plan.planName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
-                                    color: _kDark)),
+                                    color: AppColors.textPrimary(context))),
                             Text(
                               "${plan.priceMonthly} ${plan.currency}",
                               style: const TextStyle(
@@ -868,7 +864,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                             : method == "TELECEL"
                                 ? "Composez *134*montant# pour l'OTP Telecel"
                                 : "Composez *555*montant# pour l'OTP Moov",
-                        style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary(context)),
                       ),
                       const SizedBox(height: 24),
                       SizedBox(
@@ -898,10 +894,10 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.lock_outline, color: Colors.grey.shade400, size: 14),
+                    Icon(Icons.lock_outline, color: AppColors.textHint(context), size: 14),
                     const SizedBox(width: 6),
                     Text("Paiement sécurisé chiffré SSL",
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
+                        style: TextStyle(fontSize: 12, color: AppColors.textHint(context))),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -931,7 +927,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: isPremium ? _kOrange : const Color(0xFFDCFCE7),
@@ -941,7 +937,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
           BoxShadow(
             color: isPremium
                 ? _kOrange.withValues(alpha: 0.25)
-                : Colors.black.withValues(alpha: 0.10),
+                : AppColors.shadow(context),
             blurRadius: isPremium ? 24 : 16,
             offset: const Offset(0, 8),
           ),
@@ -978,14 +974,14 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                           decoration: BoxDecoration(
                             color: isPremium
                                 ? _kOrange.withValues(alpha: 0.1)
-                                : Colors.grey.shade100,
+                                : AppColors.cardAlt(context),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
                             isPremium
                                 ? Icons.workspace_premium_rounded
                                 : Icons.star_border_rounded,
-                            color: isPremium ? _kOrange : Colors.grey.shade400,
+                            color: isPremium ? _kOrange : AppColors.textHint(context),
                             size: 22,
                           ),
                         ),
@@ -995,16 +991,16 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                           children: [
                             Text(
                               plan.planName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w800,
-                                color: _kDark,
+                                color: AppColors.textPrimary(context),
                               ),
                             ),
                             Text(
                               isPremium ? "Le plus populaire" : "Idéal pour débuter",
                               style: TextStyle(
-                                  fontSize: 11, color: Colors.grey.shade500),
+                                  fontSize: 11, color: AppColors.textSecondary(context)),
                             ),
                           ],
                         ),
@@ -1037,16 +1033,14 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: isPremium
-                          ? [const Color(0xFFEDF7ED), const Color(0xFFDCF5DC)]
-                          : [Colors.grey.shade50, Colors.grey.shade100],
-                    ),
+                    color: isPremium
+                        ? _kGreen.withValues(alpha: 0.08)
+                        : AppColors.cardAlt(context),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isPremium
-                          ? const Color(0xFFBBF7D0)
-                          : Colors.grey.shade200,
+                          ? _kGreen.withValues(alpha: 0.25)
+                          : AppColors.border(context),
                     ),
                   ),
                   child: Row(
@@ -1057,7 +1051,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w900,
-                          color: isPremium ? _kOrange : Colors.grey.shade700,
+                          color: isPremium ? _kOrange : AppColors.textPrimary(context),
                           height: 1,
                         ),
                       ),
@@ -1067,7 +1061,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                         child: Text(
                           "${plan.currency} / mois",
                           style: TextStyle(
-                              fontSize: 13, color: Colors.grey.shade500),
+                              fontSize: 13, color: AppColors.textSecondary(context)),
                         ),
                       ),
                     ],
@@ -1087,13 +1081,13 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                             decoration: BoxDecoration(
                               color: isPremium
                                   ? _kOrange.withValues(alpha: 0.1)
-                                  : Colors.grey.shade100,
+                                  : AppColors.cardAlt(context),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               Icons.check,
                               size: 13,
-                              color: isPremium ? _kOrange : Colors.grey.shade400,
+                              color: isPremium ? _kOrange : AppColors.textSecondary(context),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -1102,7 +1096,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                               text,
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey.shade700,
+                                color: AppColors.textPrimary(context),
                                 height: 1.3,
                               ),
                             ),
@@ -1121,9 +1115,9 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                     onPressed: onSelect,
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
-                          isPremium ? _kOrange : Colors.grey.shade100,
+                          isPremium ? _kOrange : AppColors.cardAlt(context),
                       foregroundColor:
-                          isPremium ? Colors.white : Colors.grey.shade700,
+                          isPremium ? Colors.white : AppColors.textPrimary(context),
                       elevation: isPremium ? 0 : 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14)),
@@ -1136,14 +1130,14 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
-                            color: isPremium ? Colors.white : Colors.grey.shade700,
+                            color: isPremium ? Colors.white : AppColors.textPrimary(context),
                           ),
                         ),
                         const SizedBox(width: 6),
                         Icon(
                           Icons.arrow_forward_rounded,
                           size: 18,
-                          color: isPremium ? Colors.white : Colors.grey.shade600,
+                          color: isPremium ? Colors.white : AppColors.textSecondary(context),
                         ),
                       ],
                     ),
@@ -1161,20 +1155,20 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
 
   Widget _sectionTitle(String text) => Text(
         text,
-        style: const TextStyle(
-            fontSize: 22, fontWeight: FontWeight.w900, color: _kDark),
+        style: TextStyle(
+            fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary(context)),
       );
 
   Widget _sectionSubtitle(String text) => Text(
         text,
-        style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+        style: TextStyle(fontSize: 14, color: AppColors.textSecondary(context)),
       );
 
   Widget _stepCircle(String n, bool active) => Container(
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: active ? _kOrange : Colors.grey.shade200,
+          color: active ? _kOrange : AppColors.cardAlt(context),
           shape: BoxShape.circle,
           boxShadow: active
               ? [
@@ -1190,7 +1184,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
           child: Text(
             n,
             style: TextStyle(
-              color: active ? Colors.white : Colors.grey.shade400,
+              color: active ? Colors.white : AppColors.textSecondary(context),
               fontWeight: FontWeight.bold,
               fontSize: 13,
             ),
@@ -1202,7 +1196,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
         width: 28,
         height: 2.5,
         decoration: BoxDecoration(
-          color: active ? _kOrange : Colors.grey.shade200,
+          color: active ? _kOrange : AppColors.border(context),
           borderRadius: BorderRadius.circular(2),
         ),
       );
@@ -1212,12 +1206,12 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.border(context)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: AppColors.shadow(context),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1236,19 +1230,19 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
           child: Icon(icon, color: color, size: 22),
         ),
         title: Text(title,
-            style: const TextStyle(
-                color: _kDark, fontWeight: FontWeight.w700, fontSize: 15)),
+            style: TextStyle(
+                color: AppColors.textPrimary(context), fontWeight: FontWeight.w700, fontSize: 15)),
         subtitle: Text(sub,
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+            style: TextStyle(color: AppColors.textSecondary(context), fontSize: 12)),
         trailing: Container(
           width: 28,
           height: 28,
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: AppColors.cardAlt(context),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(Icons.arrow_forward_ios,
-              color: Colors.grey.shade400, size: 13),
+              color: AppColors.textSecondary(context), size: 13),
         ),
       ),
     );
@@ -1263,7 +1257,7 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: Colors.grey.shade500,
+            color: AppColors.textSecondary(context),
             letterSpacing: 0.5,
           ),
         ),
@@ -1276,17 +1270,17 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
   InputDecoration _fieldDeco({required String hint, String? counterText}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey.shade400),
+      hintStyle: TextStyle(color: AppColors.textHint(context)),
       counterText: counterText,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppColors.inputFill(context),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.border(context)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.border(context)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -1353,25 +1347,25 @@ class _SubscriptionPlansPageState extends State<SubscriptionPlansPage>
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: Colors.grey.shade500,
+            color: AppColors.textSecondary(context),
             letterSpacing: 0.5,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
-          style: const TextStyle(color: _kDark),
+          style: TextStyle(color: AppColors.textPrimary(context)),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey.shade400),
+            hintStyle: TextStyle(color: AppColors.textHint(context)),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppColors.inputFill(context),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: AppColors.border(context)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: AppColors.border(context)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
@@ -1408,12 +1402,12 @@ class OperatorTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.card(context),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.border(context)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: AppColors.shadow(context),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -1434,10 +1428,10 @@ class OperatorTile extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: _kDark,
+                  color: AppColors.textPrimary(context),
                 ),
               ),
             ),

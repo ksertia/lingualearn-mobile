@@ -1,4 +1,5 @@
 ﻿import 'package:tibi/controller/auth/password/ForgotPasswordController.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -80,7 +81,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFDE7),
+      backgroundColor: AppColors.bgForm(context),
       body: Column(
         children: [
           Container(
@@ -166,13 +167,13 @@ class _OtpcodePageState extends State<OtpcodePage> {
                               ? _kOrange
                               : (_isFilled[index]
                                   ? _successColor
-                                  : Colors.grey.shade200));
+                                  : AppColors.border(context)));
 
                       final Color bgColor = _isFilled[index]
                           ? _successColor.withValues(alpha: 0.06)
                           : (isFocused
                               ? _kOrange.withValues(alpha: 0.04)
-                              : Colors.white);
+                              : AppColors.inputFill(context));
 
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 180),
@@ -204,7 +205,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
                             fontWeight: FontWeight.w700,
                             color: _isFilled[index]
                                 ? _successColor
-                                : const Color(0xFF1E232C),
+                                : AppColors.textPrimary(context),
                           ),
                           decoration: const InputDecoration(
                               counterText: '', border: InputBorder.none),
@@ -262,7 +263,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
         ],
       ),
       bottomNavigationBar: Container(
-        color: const Color(0xFFFFFDE7),
+        color: AppColors.bgForm(context),
         padding: const EdgeInsets.only(bottom: 28, top: 8),
         child: Obx(() => Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -270,7 +271,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
                 Text(
                   "Code non reçu ?  ",
                   style: TextStyle(
-                      color: Colors.grey.shade600, fontSize: 14),
+                      color: AppColors.textSecondary(context), fontSize: 14),
                 ),
                 GestureDetector(
                   onTap: controller.isLoading.value
@@ -281,7 +282,7 @@ class _OtpcodePageState extends State<OtpcodePage> {
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: controller.isLoading.value
-                          ? Colors.grey
+                          ? AppColors.textSecondary(context)
                           : _kOrange,
                       fontSize: 14,
                     ),

@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:lottie/lottie.dart';
-import 'package:tibi/helpers/services/module_service.dart';
 import 'package:tibi/helpers/services/parcoure/parcoure_service.dart';
 import 'package:tibi/models/modules/modul_model.dart';
 import 'package:tibi/models/parcoure/parcour_model.dart';
@@ -129,9 +128,6 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
   bool _hasNetworkError = false;
   String _networkErrorMsg = '';
 
-  Timer? _autoRefreshTimer;
-  static const Duration _refreshInterval = Duration(seconds: 60);
-
   // ─── Guide ─────────────────────────────────────────────────────────────────
   bool _showGuide = false;
   late final AnimationController _bounceCtrl;
@@ -153,7 +149,6 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
     super.initState();
     controller = Get.put(ParcoursSelectionController());
     WidgetsBinding.instance.addObserver(this);
-    _startAutoRefresh();
 
     _bounceCtrl = AnimationController(
       vsync: this,
@@ -187,13 +182,6 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
     _bounceCtrl.stop();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('parcours_guide_shown', true);
-  }
-
-  void _startAutoRefresh() {
-    _autoRefreshTimer?.cancel();
-    _autoRefreshTimer = Timer.periodic(_refreshInterval, (_) {
-      if (mounted && !controller.isLoading.value) _silentRefresh();
-    });
   }
 
   Future<void> _silentRefresh() async {
@@ -247,7 +235,6 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _autoRefreshTimer?.cancel();
     _bounceCtrl.dispose();
     _guideWorker?.dispose();
     super.dispose();
@@ -695,31 +682,16 @@ class _ParcoursSelectionPageState extends State<ParcoursSelectionPage>
       if (userId.isNotEmpty && ps == 'unlocked') {
         await LearningPathService.startPath(userId: userId, pathId: path.id);
       }
-      final res = await Get.toNamed('/stepsscreens', arguments: {
+      await Get.toNamed('/stepsscreens', arguments: {
         'moduleId': path.moduleId,
         'pathId': path.id,
         'userId': userId,
         'moduleLottie': page.lottie,
       });
-      if (res == true || res == 'completed' || res == 'finished') {
-        final allPaths = controller.items
-            .whereType<LearningPathModel>()
-            .where((p) => p.moduleId == path.moduleId)
-            .toList();
-        final allDone = allPaths.isNotEmpty &&
-            allPaths.every((p) {
-              final st =
-                  (p.progress != null && p.progress!['status'] != null)
-                      ? p.progress!['status'].toString().toLowerCase()
-                      : (p.status ?? 'locked').toLowerCase();
-              return st == 'completed';
-            });
-        if (userId.isNotEmpty && path.moduleId.isNotEmpty && allDone) {
-          await ModuleService.completeModule(
-              userId: userId, moduleId: path.moduleId);
-        }
-        Get.back(result: true);
-      }
+      // Le déblocage étape → parcours → module est déjà géré
+      // automatiquement par l'écran des étapes. On rafraîchit ici pour
+      // afficher l'état à jour sans quitter cette page.
+      await controller.fetchPaths();
     }
 
     void onLockedTap() => Get.snackbar(

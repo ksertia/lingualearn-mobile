@@ -1,5 +1,6 @@
 ﻿import 'package:tibi/controller/auth/password/ForgotPasswordController.dart';
 import 'package:tibi/controller/auth/login_controller.dart';
+import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -33,9 +34,9 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
       isScrollControlled: true,
       Container(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        decoration: BoxDecoration(
+          color: AppColors.card(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -45,7 +46,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
               height: 4,
               margin: const EdgeInsets.only(bottom: 28),
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: AppColors.divider(context),
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -63,19 +64,19 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
                   color: Color(0xFF1A1A1A), size: 48),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               "Mot de passe changé !",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E232C),
+                color: AppColors.textPrimary(context),
               ),
             ),
             const SizedBox(height: 10),
             Text(
               "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.",
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary(context)),
             ),
             const SizedBox(height: 32),
             SizedBox(
@@ -112,7 +113,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFDE7),
+      backgroundColor: AppColors.bgForm(context),
       body: Column(
         children: [
           Container(
@@ -264,10 +265,10 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF1E232C),
+          color: AppColors.textLabel(context),
         ),
       ),
     );
@@ -280,20 +281,20 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
   }) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-      prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 20),
+      hintStyle: TextStyle(color: AppColors.textHint(context), fontSize: 14),
+      prefixIcon: Icon(icon, color: AppColors.textSecondary(context), size: 20),
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppColors.inputFill(context),
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.border(context)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: AppColors.border(context)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
