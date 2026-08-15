@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+﻿import 'package:intl/intl.dart';
 import 'package:tibi/controller/apps/partner/partner_controller.dart';
 import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:tibi/models/partner/referral_model.dart';
@@ -421,7 +421,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Vos filleuls',
+        Text('Mes filleuls',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(_ctx))),
         const SizedBox(height: 14),
         if (data.filleuls.isEmpty)

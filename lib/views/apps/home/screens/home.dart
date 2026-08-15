@@ -283,7 +283,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   Get.toNamed('/subscription_plans');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kGreen,
+                  backgroundColor: _kOrange,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
@@ -912,6 +912,26 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
 
   // ─── Navigation rapide ────────────────────────────────────────────────────
 
+  /// Langue/niveau à utiliser pour "Parcours" et "Étapes" : celle actuellement
+  /// affichée dans le carrousel "Mes langues" (pas forcément celle de la
+  /// session), pour que l'utilisateur voie bien les parcours/étapes de la
+  /// langue qu'il est en train de consulter.
+  (String, String) _currentLangSelection() {
+    final entries = progressCtrl.progressList;
+    if (entries.isNotEmpty) {
+      final entry =
+          entries[_currentLangPage.value.clamp(0, entries.length - 1)];
+      return (entry.language.id, entry.level.id);
+    }
+    final languageId = session.selectedLanguageId.value.isNotEmpty
+        ? session.selectedLanguageId.value
+        : session.user?.selectedLanguageId ?? "";
+    final levelId = session.selectedLevelId.value.isNotEmpty
+        ? session.selectedLevelId.value
+        : session.user?.selectedLevelId ?? "";
+    return (languageId, levelId);
+  }
+
   Widget _buildNavigationRow() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -944,17 +964,14 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 _showSubscriptionRequired();
                 return;
               }
+              final (languageId, levelId) = _currentLangSelection();
               Get.to(() => const ParcoursSelectionPage(), arguments: {
                 'showAllPaths': true,
                 'userId': session.userId.value.isNotEmpty
                     ? session.userId.value
                     : session.user?.id ?? "",
-                'languageId': session.selectedLanguageId.value.isNotEmpty
-                    ? session.selectedLanguageId.value
-                    : session.user?.selectedLanguageId ?? "",
-                'levelId': session.selectedLevelId.value.isNotEmpty
-                    ? session.selectedLevelId.value
-                    : session.user?.selectedLevelId ?? "",
+                'languageId': languageId,
+                'levelId': levelId,
               });
             },
           ),
@@ -970,17 +987,14 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 _showSubscriptionRequired();
                 return;
               }
+              final (languageId, levelId) = _currentLangSelection();
               Get.to(() => const StepsScreensPages(), arguments: {
                 'showAllSteps': true,
                 'userId': session.userId.value.isNotEmpty
                     ? session.userId.value
                     : session.user?.id ?? "",
-                'languageId': session.selectedLanguageId.value.isNotEmpty
-                    ? session.selectedLanguageId.value
-                    : session.user?.selectedLanguageId ?? "",
-                'levelId': session.selectedLevelId.value.isNotEmpty
-                    ? session.selectedLevelId.value
-                    : session.user?.selectedLevelId ?? "",
+                'languageId': languageId,
+                'levelId': levelId,
               });
             },
           ),

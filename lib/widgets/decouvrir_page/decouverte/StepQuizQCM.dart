@@ -351,7 +351,7 @@ class _StepQuizQCMState extends State<StepQuizQCM>
               const SizedBox(height: 30),
 
               Text("CHOISIE LA BONNE REPONSE", style: const TextStyle(
-               fontSize: 22,
+               fontSize: 18,
                fontWeight: FontWeight.bold,
                 color: Color(0xFF1A1A1A),
               )),
@@ -486,7 +486,7 @@ class _StepQuizQCMState extends State<StepQuizQCM>
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1A1A)),
+                    color: Colors.white),
               ),
             ),
           ),

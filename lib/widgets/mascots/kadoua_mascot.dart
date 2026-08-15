@@ -173,6 +173,7 @@ class _KadouaPainter extends CustomPainter {
     canvas.scale(sc);
 
     _drawDress(canvas);
+    _drawFeet(canvas);
     _drawNeck(canvas);
     _drawHead(canvas);
     _drawEars(canvas);
@@ -210,20 +211,20 @@ class _KadouaPainter extends CustomPainter {
       _f(_skin),
     );
 
-    // Corps de la robe (ligne A)
+    // Corps de la robe (ligne A) — raccourcie pour laisser voir les pieds
     canvas.drawPath(
       Path()
         ..moveTo(32, 100)
         ..lineTo(88, 100)
-        ..lineTo(112, 198)
-        ..lineTo(8, 198)
+        ..lineTo(110, 184)
+        ..lineTo(10, 184)
         ..close(),
       Paint()
         ..shader = const LinearGradient(
           colors: [Color(0xFFD81880), Color(0xFFE91C8B)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-        ).createShader(Rect.fromLTWH(8, 100, 104, 98)),
+        ).createShader(Rect.fromLTWH(8, 100, 104, 84)),
     );
 
     // Ceinture / bande décorative
@@ -246,6 +247,29 @@ class _KadouaPainter extends CustomPainter {
     }
   }
 
+  // ── Pieds ─────────────────────────────────────────────────────────────────
+  void _drawFeet(Canvas canvas) {
+    for (final cx in [42.0, 78.0]) {
+      // Petite jambe qui dépasse de la robe
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            Rect.fromLTWH(cx - 5, 180, 10, 8), const Radius.circular(4)),
+        _f(_skin),
+      );
+      // Chaussure ronde
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            Rect.fromLTWH(cx - 10, 186, 20, 12), const Radius.circular(7)),
+        _f(_gold),
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            Rect.fromLTWH(cx - 10, 186, 20, 5), const Radius.circular(4)),
+        _f(const Color(0xFFFFE066), o: 0.55),
+      );
+    }
+  }
+
   void _drawStar(Canvas canvas, Offset c, double p) {
     final paint = Paint()
       ..color = const Color(0xFFFFE066).withValues(alpha: ((p - 0.3) * 1.4).clamp(0.0, 0.9))
@@ -265,8 +289,7 @@ class _KadouaPainter extends CustomPainter {
 
   // ── Cou ───────────────────────────────────────────────────────────────────
   void _drawNeck(Canvas canvas) {
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
+    canvas.drawRRect(      RRect.fromRectAndRadius(
           Rect.fromLTWH(50, 90, 20, 14), const Radius.circular(5)),
       _f(_skin),
     );
@@ -275,15 +298,15 @@ class _KadouaPainter extends CustomPainter {
   // ── Tête ──────────────────────────────────────────────────────────────────
   void _drawHead(Canvas canvas) {
     canvas.drawOval(Rect.fromLTWH(22, 10, 76, 84), _f(_skin));
-    // Joues rosées
-    canvas.drawCircle(const Offset(30, 66), 12, _f(_skinRosy, o: 0.25));
-    canvas.drawCircle(const Offset(90, 66), 12, _f(_skinRosy, o: 0.25));
+    // Joues rosées — plus basses et plus pleines pour un air enfantin
+    canvas.drawCircle(const Offset(30, 70), 13, _f(_skinRosy, o: 0.25));
+    canvas.drawCircle(const Offset(90, 70), 13, _f(_skinRosy, o: 0.25));
     // Joues rougeoyantes (correct)
     if (happyAnim > 0) {
       canvas.drawCircle(
-          const Offset(30, 66), 12, _f(const Color(0xFFFF8888), o: happyAnim * 0.28));
+          const Offset(30, 70), 13, _f(const Color(0xFFFF8888), o: happyAnim * 0.28));
       canvas.drawCircle(
-          const Offset(90, 66), 12, _f(const Color(0xFFFF8888), o: happyAnim * 0.28));
+          const Offset(90, 70), 13, _f(const Color(0xFFFF8888), o: happyAnim * 0.28));
     }
   }
 
@@ -363,22 +386,22 @@ class _KadouaPainter extends CustomPainter {
       case KadouaMood.incorrect:
         // Inquiets : extrémités internes relevées
         canvas.drawPath(
-            Path()..moveTo(34, 37)..quadraticBezierTo(44, 42, 54, 38), bp);
+            Path()..moveTo(34, 41)..quadraticBezierTo(44, 46, 54, 42), bp);
         canvas.drawPath(
-            Path()..moveTo(66, 38)..quadraticBezierTo(76, 42, 86, 37), bp);
+            Path()..moveTo(66, 42)..quadraticBezierTo(76, 46, 86, 41), bp);
         break;
       case KadouaMood.correct:
         // Heureux : haut et arqués
         canvas.drawPath(
-            Path()..moveTo(34, 30)..quadraticBezierTo(44, 25, 54, 30), bp);
+            Path()..moveTo(34, 34)..quadraticBezierTo(44, 29, 54, 34), bp);
         canvas.drawPath(
-            Path()..moveTo(66, 30)..quadraticBezierTo(76, 25, 86, 30), bp);
+            Path()..moveTo(66, 34)..quadraticBezierTo(76, 29, 86, 34), bp);
         break;
       default:
         canvas.drawPath(
-            Path()..moveTo(34, 35)..quadraticBezierTo(44, 30, 54, 34), bp);
+            Path()..moveTo(34, 39)..quadraticBezierTo(44, 34, 54, 38), bp);
         canvas.drawPath(
-            Path()..moveTo(66, 34)..quadraticBezierTo(76, 30, 86, 35), bp);
+            Path()..moveTo(66, 38)..quadraticBezierTo(76, 34, 86, 39), bp);
     }
   }
 
@@ -392,19 +415,19 @@ class _KadouaPainter extends CustomPainter {
   }
 
   void _drawNormalEyes(Canvas canvas) {
-    for (final c in [const Offset(46, 52), const Offset(74, 52)]) {
+    for (final c in [const Offset(43, 58), const Offset(77, 58)]) {
       _drawOneEye(canvas, c, const Offset(0.5, -1.5)); // regard légèrement levé
     }
   }
 
   void _drawSadEyes(Canvas canvas) {
-    for (final c in [const Offset(46, 54), const Offset(74, 54)]) {
+    for (final c in [const Offset(43, 60), const Offset(77, 60)]) {
       _drawOneEye(canvas, c, const Offset(-0.5, 1.5)); // regard baissé
       // Paupière tombante
       canvas.drawPath(
         Path()
-          ..moveTo(c.dx - 10, c.dy - 8)
-          ..quadraticBezierTo(c.dx, c.dy - 12, c.dx + 10, c.dy - 8),
+          ..moveTo(c.dx - 11, c.dy - 9)
+          ..quadraticBezierTo(c.dx, c.dy - 13, c.dx + 11, c.dy - 9),
         _st(_hair, 3.5),
       );
     }
@@ -414,71 +437,72 @@ class _KadouaPainter extends CustomPainter {
     // Yeux arc (^_^)
     final eyeP = _st(_iris, 5.5);
     final rimP = _st(_hair, 2);
-    for (final cx in [46.0, 74.0]) {
+    for (final cx in [43.0, 77.0]) {
       canvas.drawPath(
-        Path()..moveTo(cx - 10, 54)..quadraticBezierTo(cx, 43, cx + 10, 54),
+        Path()..moveTo(cx - 11, 58)..quadraticBezierTo(cx, 46, cx + 11, 58),
         eyeP,
       );
       canvas.drawPath(
-        Path()..moveTo(cx - 10, 54)..quadraticBezierTo(cx, 43, cx + 10, 54),
+        Path()..moveTo(cx - 11, 58)..quadraticBezierTo(cx, 46, cx + 11, 58),
         rimP,
       );
       final lp = _st(_hair, 1.5);
       for (int i = -2; i <= 2; i++) {
         canvas.drawLine(
-            Offset(cx + i * 3.5, 44), Offset(cx + i * 4, 41), lp);
+            Offset(cx + i * 3.5, 48), Offset(cx + i * 4, 45), lp);
       }
     }
     // Paillettes dorées près des joues
     final sparkP = _f(const Color(0xFFFFCC00), o: happyAnim * 0.9);
     for (final cx in [30.0, 90.0]) {
-      canvas.drawCircle(Offset(cx, 66), 2.5, sparkP);
-      canvas.drawCircle(Offset(cx + (cx < 60 ? 6 : -6), 70), 1.8, sparkP);
-      canvas.drawCircle(Offset(cx + (cx < 60 ? -3 : 3), 73), 1.5, sparkP);
+      canvas.drawCircle(Offset(cx, 70), 2.5, sparkP);
+      canvas.drawCircle(Offset(cx + (cx < 60 ? 6 : -6), 74), 1.8, sparkP);
+      canvas.drawCircle(Offset(cx + (cx < 60 ? -3 : 3), 77), 1.5, sparkP);
     }
   }
 
   void _drawOneEye(Canvas canvas, Offset c, Offset irisOffset) {
-    canvas.drawCircle(c, 10, _f(_eyeW));
+    canvas.drawCircle(c, 11, _f(_eyeW));
     final ic = Offset(c.dx + irisOffset.dx, c.dy + irisOffset.dy);
-    canvas.drawCircle(ic, 7, _f(_iris));
-    canvas.drawCircle(ic, 3.5, _f(_pupil));
-    canvas.drawCircle(Offset(ic.dx + 2, ic.dy - 2), 1.8, _f(Colors.white));
-    canvas.drawCircle(c, 10, _st(_hair, 1.4));
+    canvas.drawCircle(ic, 7.5, _f(_iris));
+    canvas.drawCircle(ic, 4, _f(_pupil));
+    canvas.drawCircle(Offset(ic.dx + 2.2, ic.dy - 2.2), 2, _f(Colors.white));
+    canvas.drawCircle(c, 11, _st(_hair, 1.4));
     // Cils supérieurs
     final lp = _st(_hair, 1.5);
     for (int i = -2; i <= 2; i++) {
       canvas.drawLine(
-        Offset(c.dx + i * 3.5, c.dy - 10),
-        Offset(c.dx + i * 3.8, c.dy - 14),
+        Offset(c.dx + i * 3.7, c.dy - 11),
+        Offset(c.dx + i * 4, c.dy - 15),
         lp,
       );
     }
     // Ligne inférieure de la paupière
     canvas.drawPath(
       Path()
-        ..moveTo(c.dx - 9, c.dy + 6)
-        ..quadraticBezierTo(c.dx, c.dy + 9, c.dx + 9, c.dy + 6),
+        ..moveTo(c.dx - 10, c.dy + 6.5)
+        ..quadraticBezierTo(c.dx, c.dy + 10, c.dx + 10, c.dy + 6.5),
       _st(_hair, 1),
     );
   }
 
   void _drawBlinkEyes(Canvas canvas) {
-    for (final c in [const Offset(46, 52), const Offset(74, 52)]) {
-      canvas.drawCircle(c, 10, _f(_eyeW));
-      final lidH = 20.0 * blink;
+    for (final c in [const Offset(43, 58), const Offset(77, 58)]) {
+      canvas.drawCircle(c, 11, _f(_eyeW));
+      final lidH = 22.0 * blink;
       canvas.save();
-      canvas.clipRect(Rect.fromLTWH(c.dx - 10, c.dy - 10, 20, 20));
+      canvas.clipRect(Rect.fromLTWH(c.dx - 11, c.dy - 11, 22, 22));
       canvas.drawRect(
-          Rect.fromLTWH(c.dx - 10, c.dy - 10, 20, lidH), _f(_skin));
+          Rect.fromLTWH(c.dx - 11, c.dy - 11, 22, lidH), _f(_skin));
       canvas.restore();
-      canvas.drawCircle(c, 10, _st(_hair, 1.4));
+      canvas.drawCircle(c, 11, _st(_hair, 1.4));
     }
   }
 
   void _drawNose(Canvas canvas) {
-    canvas.drawCircle(const Offset(56, 70), 2.5, _f(_skinDk, o: 0.38));
-    canvas.drawCircle(const Offset(64, 70), 2.5, _f(_skinDk, o: 0.38));
+    // Nez discret, resserré — plus enfantin
+    canvas.drawCircle(const Offset(57, 76), 2, _f(_skinDk, o: 0.38));
+    canvas.drawCircle(const Offset(63, 76), 2, _f(_skinDk, o: 0.38));
   }
 
   void _drawMouth(Canvas canvas) {
@@ -486,34 +510,37 @@ class _KadouaPainter extends CustomPainter {
       case KadouaMood.correct:
         // Grand sourire avec dents
         canvas.drawPath(
-          Path()..moveTo(44, 80)..quadraticBezierTo(60, 94, 76, 80),
+          Path()..moveTo(46, 86)..quadraticBezierTo(60, 100, 74, 86),
           _st(_lips, 3),
         );
         canvas.drawPath(
           Path()
-            ..moveTo(46, 81)
-            ..quadraticBezierTo(60, 93, 74, 81)
-            ..lineTo(74, 84)
-            ..quadraticBezierTo(60, 92, 46, 84)
+            ..moveTo(48, 87)
+            ..quadraticBezierTo(60, 99, 72, 87)
+            ..lineTo(72, 90)
+            ..quadraticBezierTo(60, 98, 48, 90)
             ..close(),
           _f(_pupil),
         );
-        canvas.drawRect(Rect.fromLTWH(48, 81, 24, 7), _f(_teeth));
-        canvas.drawLine(
-            const Offset(60, 81), const Offset(60, 88), _st(_lips, 0.8));
+        // Petit sourire de dents, discret et doux (pas de gros bloc blanc)
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+              Rect.fromLTWH(51, 87.5, 18, 4), const Radius.circular(2.5)),
+          _f(_teeth),
+        );
         break;
 
       case KadouaMood.incorrect:
         // Moue triste
         canvas.drawPath(
-          Path()..moveTo(48, 86)..quadraticBezierTo(60, 78, 72, 86),
+          Path()..moveTo(50, 92)..quadraticBezierTo(60, 84, 70, 92),
           _st(_lips, 3),
         );
         canvas.drawPath(
           Path()
-            ..moveTo(50, 86)
-            ..quadraticBezierTo(55, 84, 60, 85)
-            ..quadraticBezierTo(65, 84, 70, 86),
+            ..moveTo(52, 92)
+            ..quadraticBezierTo(56, 90, 60, 91)
+            ..quadraticBezierTo(64, 90, 68, 92),
           _st(_lips.withValues(alpha: 0.4), 1.5),
         );
         break;
@@ -524,31 +551,31 @@ class _KadouaPainter extends CustomPainter {
           final h = 9.0 * mouthOpen;
           canvas.drawPath(
             Path()
-              ..moveTo(48, 80)
-              ..quadraticBezierTo(60, 80 + h * 2, 72, 80),
+              ..moveTo(48, 86)
+              ..quadraticBezierTo(60, 86 + h * 2, 72, 86),
             _f(_pupil),
           );
           if (mouthOpen > 0.3) {
             canvas.drawRect(
-                Rect.fromLTWH(50, 80, 20, h * 1.3), _f(_teeth));
+                Rect.fromLTWH(50, 86, 20, h * 1.3), _f(_teeth));
           }
           canvas.drawPath(
             Path()
-              ..moveTo(48, 80)
-              ..quadraticBezierTo(60, 80 + h * 2.2, 72, 80),
+              ..moveTo(48, 86)
+              ..quadraticBezierTo(60, 86 + h * 2.2, 72, 86),
             _st(_lips, 2.5),
           );
           canvas.drawPath(
             Path()
-              ..moveTo(48, 80)
-              ..quadraticBezierTo(53, 77, 60, 78)
-              ..quadraticBezierTo(67, 77, 72, 80),
+              ..moveTo(48, 86)
+              ..quadraticBezierTo(53, 83, 60, 84)
+              ..quadraticBezierTo(67, 83, 72, 86),
             _st(_lips.withValues(alpha: 0.5), 1.5),
           );
         } else {
           // Sourire léger au repos
           canvas.drawPath(
-            Path()..moveTo(50, 81)..quadraticBezierTo(60, 89, 70, 81),
+            Path()..moveTo(50, 87)..quadraticBezierTo(60, 95, 70, 87),
             _st(_lips, 2.5),
           );
         }
@@ -558,15 +585,15 @@ class _KadouaPainter extends CustomPainter {
   // ── Larme (incorrect seulement) ───────────────────────────────────────────
   void _drawTear(Canvas canvas) {
     final progress = ((sadAnim - 0.1) / 0.9).clamp(0.0, 1.0);
-    final tearY = 64.0 + progress * 24;
+    final tearY = 68.0 + progress * 24;
     final opacity = (progress * 1.2).clamp(0.0, 0.85);
     final tearPath = Path()
-      ..moveTo(36, tearY - 5)
-      ..quadraticBezierTo(31, tearY + 2, 36, tearY + 8)
-      ..quadraticBezierTo(41, tearY + 2, 36, tearY - 5);
+      ..moveTo(37, tearY - 5)
+      ..quadraticBezierTo(32, tearY + 2, 37, tearY + 8)
+      ..quadraticBezierTo(42, tearY + 2, 37, tearY - 5);
     canvas.drawPath(tearPath, _f(_tearClr, o: opacity));
     // Reflet dans la larme
-    canvas.drawCircle(Offset(34, tearY), 1.2, _f(Colors.white, o: opacity * 0.7));
+    canvas.drawCircle(Offset(35, tearY), 1.2, _f(Colors.white, o: opacity * 0.7));
   }
 
   @override

@@ -1,6 +1,5 @@
 ﻿import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
@@ -8,12 +7,14 @@ class StepDiscoveryVideo extends StatefulWidget {
   final String videoTitle;
   final String videoUrl;
   final VoidCallback onVideoFinished;
+  final bool showTitle;
 
   const StepDiscoveryVideo({
     super.key,
     required this.videoTitle,
     required this.videoUrl,
     required this.onVideoFinished,
+    this.showTitle = true,
   });
 
   @override
@@ -135,7 +136,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
       barrierDismissible: false,
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+        insetPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
         child: Stack(
           clipBehavior: Clip.none,
           alignment: Alignment.topCenter,
@@ -149,19 +150,18 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                 child: child,
               ),
               child: Container(
-                padding: EdgeInsets.fromLTRB(24.w, 56.h, 24.w, 22.h),
+                padding: const EdgeInsets.fromLTRB(24, 44, 24, 22),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF6750A4), Color(0xFF7F3DFF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(32.r),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                      color: const Color(0xFFF27F22).withValues(alpha: 0.15),
+                      width: 1.5),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.deepPurple.withAlpha(56),
-                      blurRadius: 24.r,
-                      offset: Offset(0, 14.h),
+                      color: Colors.black.withValues(alpha: 0.10),
+                      blurRadius: 24,
+                      offset: Offset(0, 14),
                     ),
                   ],
                 ),
@@ -172,64 +172,63 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                       'Félicitations 🎉',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 22.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1A1A1A),
                       ),
                     ),
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 10),
                     Text(
                       'Tu as terminé cette étape !',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 16.sp,
-                        color: Colors.white70,
+                        fontSize: 15,
+                        color: Colors.grey.shade600,
                         height: 1.4,
                       ),
                     ),
-                    SizedBox(height: 18.h),
+                    SizedBox(height: 18),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.emoji_events,
-                            color: Colors.amberAccent, size: 28.sp),
-                        SizedBox(width: 8.w),
-                        Icon(Icons.auto_awesome,
-                            color: Colors.lightGreenAccent, size: 28.sp),
-                        SizedBox(width: 8.w),
-                        Icon(Icons.star, color: Colors.pinkAccent, size: 28.sp),
+                        _rewardBadge(Icons.emoji_events, Colors.amber),
+                        SizedBox(width: 10),
+                        _rewardBadge(Icons.auto_awesome, Colors.green),
+                        SizedBox(width: 10),
+                        _rewardBadge(Icons.star_rounded, Colors.pinkAccent),
                       ],
                     ),
-                    SizedBox(height: 22.h),
+                    SizedBox(height: 22),
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(
-                          horizontal: 16.w, vertical: 14.h),
+                          horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.14),
-                        borderRadius: BorderRadius.circular(18.r),
+                        color: const Color(0xFFF27F22).withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(18),
                       ),
                       child: Text(
                         'Ton aventure continue, clique sur Continuer pour débloquer la suite.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.white.withOpacity(0.92),
+                          fontSize: 14,
+                          color: const Color(0xFF8A4A38),
+                          height: 1.4,
                         ),
                       ),
                     ),
-                    SizedBox(height: 20.h),
+                    SizedBox(height: 20),
                     Row(
                       children: [
                         Expanded(
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(color: Colors.white54),
+                              foregroundColor: Colors.grey.shade700,
+                              side: BorderSide(color: Colors.grey.shade300),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18.r),
+                                borderRadius: BorderRadius.circular(18),
                               ),
-                              padding: EdgeInsets.symmetric(vertical: 14.h),
+                              padding: EdgeInsets.symmetric(vertical: 14),
                             ),
                             onPressed: () {
                               Navigator.pop(context);
@@ -238,33 +237,55 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
                             child: Text(
                               'Revoir',
                               style: TextStyle(
-                                fontSize: 15.sp,
+                                fontSize: 15,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                         ),
-                        SizedBox(width: 12.w),
+                        SizedBox(width: 12),
                         Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.amberAccent.shade700,
-                              elevation: 6,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18.r),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFFF27F22),
+                                  Color(0xFFF27F22)
+                                ],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
                               ),
-                              padding: EdgeInsets.symmetric(vertical: 14.h),
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFFF27F22)
+                                      .withValues(alpha: 0.35),
+                                  blurRadius: 14,
+                                  offset: Offset(0, 6),
+                                ),
+                              ],
                             ),
-                            onPressed: () {
-                              Navigator.pop(context);
-                              widget.onVideoFinished();
-                            },
-                            child: Text(
-                              'Continuer',
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(18),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  widget.onVideoFinished();
+                                },
+                                child: Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(vertical: 14),
+                                  child: Text(
+                                    'Continuer',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -276,26 +297,53 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
               ),
             ),
             Positioned(
-              top: -36.h,
-              child: CircleAvatar(
-                radius: 36.r,
-                backgroundColor: Colors.white,
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.7, end: 1.0),
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.elasticOut,
-                  builder: (context, scale, child) => Transform.scale(
-                    scale: scale,
-                    child: child,
+              top: -36,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.7, end: 1.0),
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.elasticOut,
+                builder: (context, scale, child) => Transform.scale(
+                  scale: scale,
+                  child: child,
+                ),
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFF27F22), Color(0xFFF27F22)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    border: Border.all(color: Colors.white, width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFF27F22).withValues(alpha: 0.35),
+                        blurRadius: 16,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
                   ),
                   child: Icon(Icons.celebration,
-                      color: const Color(0xFF7F3DFF), size: 40.sp),
+                      color: Colors.white, size: 36),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _rewardBadge(IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: color, size: 22),
     );
   }
 
@@ -327,39 +375,36 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(height: 10.h),
-        Text(
-          widget.videoTitle,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 15.h),
-        Expanded(
-          child: Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15.r),
-              child: _hasError
-                  ? _buildErrorScreen()
-                  : Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Container(
-                          color: Colors.black,
-                          child: Video(
-                            controller: _controller,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        if (_isLoading)
-                          const Center(
-                            child: CircularProgressIndicator(color: Colors.white),
-                          )
-                        else
-                          _buildOverlay(),
-                      ],
-                    ),
-            ),
+        if (widget.showTitle) ...[
+          SizedBox(height: 10),
+          Text(
+            widget.videoTitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
+          SizedBox(height: 15),
+        ],
+        Expanded(
+          child: _hasError
+              ? _buildErrorScreen()
+              : Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Container(
+                      color: Colors.black,
+                      child: Video(
+                        controller: _controller,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    if (_isLoading)
+                      const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      )
+                    else
+                      _buildOverlay(),
+                  ],
+                ),
         ),
       ],
     );
@@ -371,10 +416,10 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, color: Colors.white, size: 50.sp),
+          Icon(Icons.error_outline, color: Colors.white, size: 50),
           const SizedBox(height: 10),
           const Text('Erreur vidéo', style: TextStyle(color: Colors.white)),
-          SizedBox(height: 10.h),
+          SizedBox(height: 10),
           ElevatedButton(
             onPressed: _retryVideo,
             child: const Text('Réessayer'),
@@ -393,7 +438,7 @@ class _StepDiscoveryVideoState extends State<StepDiscoveryVideo> {
           color: Colors.black.withOpacity(0.5),
           alignment: Alignment.center,
           child: Icon(Icons.star,
-              color: Colors.yellow.withOpacity(0.3), size: 150.sp),
+              color: Color(0xFFF27F22), size: 150),
         ),
       ),
     );

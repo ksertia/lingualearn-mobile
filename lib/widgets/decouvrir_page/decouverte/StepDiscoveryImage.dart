@@ -11,6 +11,7 @@ class StepDiscoveryImage extends StatefulWidget {
   final String imageUrl;
   final String? answerType;
   final String? answerValue;
+  final bool showTitle;
 
   const StepDiscoveryImage({
     super.key,
@@ -18,6 +19,7 @@ class StepDiscoveryImage extends StatefulWidget {
     required this.imageUrl,
     this.answerType,
     this.answerValue,
+    this.showTitle = true,
   });
 
   @override
@@ -127,31 +129,32 @@ class _StepDiscoveryImageState extends State<StepDiscoveryImage> {
     return Column(
       children: [
         // Titre en badge pill
-        Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(30.r),
-              border: Border.all(
-                color: _kOrange.withValues(alpha: 0.30),
+        if (widget.showTitle) ...[
+          Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(30.r),
+                border: Border.all(
+                  color: _kOrange.withValues(alpha: 0.30),
+                ),
               ),
-            ),
-            child: Text(
-              widget.title.toUpperCase(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: Colors.black,
-                letterSpacing: 0.6,
+              child: Text(
+                widget.title.toUpperCase(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black,
+                  letterSpacing: 0.6,
+                ),
               ),
             ),
           ),
-        ),
-
-        SizedBox(height: 14.h),
+          SizedBox(height: 14.h),
+        ],
 
         // Image
         Expanded(

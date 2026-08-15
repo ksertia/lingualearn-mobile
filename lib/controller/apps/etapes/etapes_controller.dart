@@ -12,6 +12,8 @@ class StepsController extends GetxController {
   late String moduleId;
   late String pathId;
   late String userId;
+  late String languageId;
+  late String levelId;
   late bool showAllSteps;
 
   RxBool isLoading = false.obs;
@@ -33,6 +35,8 @@ class StepsController extends GetxController {
     moduleId = "";
     pathId = "";
     userId = session?.userId.value ?? "";
+    languageId = "";
+    levelId = "";
     showAllSteps = false;
 
     try {
@@ -41,6 +45,8 @@ class StepsController extends GetxController {
         moduleId = (args['moduleId'] ?? "").toString();
         pathId = (args['pathId'] ?? "").toString();
         userId = (args['userId'] ?? userId).toString();
+        languageId = (args['languageId'] ?? "").toString();
+        levelId = (args['levelId'] ?? "").toString();
         showAllSteps = args['showAllSteps'] == true;
       } else {
         moduleId = Get.arguments?.toString() ?? "";
@@ -50,6 +56,8 @@ class StepsController extends GetxController {
       moduleId = "";
       pathId = "";
       userId = session?.userId.value ?? "";
+      languageId = "";
+      levelId = "";
       showAllSteps = false;
     }
 
@@ -92,7 +100,23 @@ class StepsController extends GetxController {
           return;
         }
 
-        final paths = await LearningPathService.getPathsByUser(userId);
+        List<LearningPathModel> paths;
+        if (languageId.isNotEmpty) {
+          // Ne charge que les parcours de la langue actuellement consultée
+          // (getPathsByUser ne filtre pas par langue côté serveur).
+          final modules = await ModuleService.getAllModules(
+            languageId: languageId,
+            levelId: levelId,
+          );
+          modules.sort((a, b) => a.index.compareTo(b.index));
+          paths = [];
+          for (final module in modules) {
+            paths.addAll(
+                await LearningPathService.getPathsBySpecificModule(module.id));
+          }
+        } else {
+          paths = await LearningPathService.getPathsByUser(userId);
+        }
         final List<dynamic> allItems = [];
 
         paths.sort((a, b) => a.index.compareTo(b.index));

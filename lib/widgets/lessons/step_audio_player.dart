@@ -5,7 +5,6 @@ import 'package:tibi/widgets/decouvrir_page/decouverte/answer_section.dart';
 import 'package:flutter/material.dart';
 
 class StepAudioPlayer extends StatefulWidget {
-  final String title;
   final String audioUrl;
   final String? answerType;
   final String? answerValue;
@@ -14,7 +13,6 @@ class StepAudioPlayer extends StatefulWidget {
 
   const StepAudioPlayer({
     super.key,
-    required this.title,
     required this.audioUrl,
     this.answerType,
     this.answerValue,
@@ -98,34 +96,6 @@ class _StepAudioPlayerState extends State<StepAudioPlayer>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Titre
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF8F00).withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.person_pin,
-                    size: 20, color: Color(0xFFFF8F00)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
           // Instruction
           SizedBox(
             width: double.infinity,

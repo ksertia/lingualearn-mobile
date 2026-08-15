@@ -5,90 +5,160 @@ import 'package:tibi/widgets/lessons/step_audio_player.dart';
 import 'package:tibi/widgets/lessons/step_text_content.dart';
 import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryVideo.dart';
 import 'package:tibi/widgets/lessons/qcm.dart';
+import 'package:tibi/widgets/lessons/animated_stat_chip.dart';
+import 'package:tibi/widgets/mascots/zaki_mascot.dart';
+import 'package:tibi/helpers/services/sound_service.dart';
+import 'XpRewardScreen.dart';
 import '../../../../controller/apps/etapes/stepController.dart';
 import '../../../../models/etapes/steps_model.dart';
 
-const Color _cOrange  = Color(0xFFFF7043);
-const Color _cOrange2 = Color(0xFFFFB74D);
+const Color _kOrange = Color(0xFFF27F22);
 
 class StepContentScreen extends StatelessWidget {
   final String stepId;
   final String userId;
+  final String stepType;
 
-  const StepContentScreen(
-      {super.key, required this.stepId, required this.userId});
+  const StepContentScreen({
+    super.key,
+    required this.stepId,
+    required this.userId,
+    this.stepType = 'lesson',
+  });
 
   @override
   Widget build(BuildContext context) {
     final StepController controller = Get.put(StepController());
 
-    Future.microtask(() => controller.loadStepContent(stepId, userId));
+    Future.microtask(
+        () => controller.loadStepContent(stepId, userId, stepType: stepType));
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: _appBar(controller),
+      backgroundColor: Colors.white,
       body: Obx(() {
-        if (controller.isLoading.value) return _loading();
+        if (controller.isLoading.value) {
+          return Column(
+            children: [
+              _progressHeader(0),
+              Expanded(child: _loading()),
+            ],
+          );
+        }
 
-        final data = controller.stepData.value;
+        if (stepType == 'quiz') {
+          final data = controller.stepData.value;
+          if (data == null) {
+            return Column(
+              children: [
+                _progressHeader(0),
+                Expanded(child: _error(controller.loadErrorMsg.value)),
+              ],
+            );
+          }
 
-        if (data == null) return _error(controller.loadErrorMsg.value);
+          final questionsList = data.content.questions ?? [];
+          final progress = questionsList.isEmpty
+              ? 0.0
+              : (controller.currentQuestionIndex.value + 1) /
+                  questionsList.length;
+
+          return Column(
+            children: [
+              _progressHeader(progress),
+              Expanded(child: _buildQuizBody(context, data, controller)),
+            ],
+          );
+        }
+
+        final lesson = controller.lessonData.value;
+        if (lesson == null) {
+          return Column(
+            children: [
+              _progressHeader(0),
+              Expanded(child: _error(controller.loadErrorMsg.value)),
+            ],
+          );
+        }
+
+        final blocks = controller.lessonBlocks;
+        if (blocks.isEmpty) {
+          return Column(
+            children: [
+              _progressHeader(0),
+              Expanded(
+                child:
+                    _error('Cette leçon ne contient pas encore de contenu.'),
+              ),
+            ],
+          );
+        }
+
+        final blockIndex = controller.currentBlockIndex.value;
+        final currentBlock = blocks[blockIndex];
+        final isLastBlock = blockIndex == blocks.length - 1;
+        final isVideoBlock = currentBlock.contentType == 'video';
+        final progress = (blockIndex + 1) / blocks.length;
+
+        void handleVideoFinished() {
+          if (isLastBlock) {
+            controller.completeCurrentStep(stepId: stepId, userId: userId);
+          } else {
+            controller.nextBlock();
+          }
+        }
 
         return Column(
           children: [
-            SizedBox(
-              height: MediaQuery.of(context).padding.top + kToolbarHeight,
-            ),
+            _progressHeader(progress),
             Expanded(
-              child: _buildBody(context, data, controller),
+              child: _buildLessonBlock(
+                currentBlock,
+                lesson.title,
+                onVideoFinished: handleVideoFinished,
+              ),
             ),
-            if (data.type != 'quiz') _completeButton(controller),
+            if (!isVideoBlock) _navigationBar(controller, isLastBlock),
           ],
         );
       }),
     );
   }
 
-  PreferredSizeWidget _appBar(StepController controller) {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [_cOrange, _cOrange2],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
+  Widget _progressHeader(double progress) {
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+        child: Row(
+          children: [
+            GestureDetector(
+              onTap: Get.back,
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: _kOrange.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.close_rounded,
+                    color: _kOrange, size: 20),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: progress.clamp(0, 1),
+                  minHeight: 16,
+                  backgroundColor: _kOrange.withValues(alpha: 0.12),
+                  valueColor: const AlwaysStoppedAnimation(_kOrange),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
-      ),
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 10),
-        child: GestureDetector(
-          onTap: Get.back,
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.22),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.arrow_back_ios_new,
-                color: Colors.white, size: 17),
-          ),
-        ),
-      ),
-      title: Obx(() => Text(
-            controller.stepData.value?.title ?? 'Chargement...',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 17,
-            ),
-          )),
     );
   }
 
@@ -102,11 +172,11 @@ class StepContentScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: _cOrange.withValues(alpha: 0.10),
+                color: _kOrange.withValues(alpha: 0.10),
                 shape: BoxShape.circle,
               ),
               child: const CircularProgressIndicator(
-                color: _cOrange,
+                color: _kOrange,
                 strokeWidth: 3,
               ),
             ),
@@ -137,7 +207,7 @@ class StepContentScreen extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(28),
               border: Border.all(
-                  color: _cOrange.withValues(alpha: 0.15), width: 1.5),
+                  color: _kOrange.withValues(alpha: 0.15), width: 1.5),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.07),
@@ -152,11 +222,11 @@ class StepContentScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: _cOrange.withValues(alpha: 0.10),
+                    color: _kOrange.withValues(alpha: 0.10),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.article_outlined,
-                      color: _cOrange, size: 42),
+                      color: _kOrange, size: 42),
                 ),
                 const SizedBox(height: 18),
                 const Text(
@@ -186,12 +256,12 @@ class StepContentScreen extends StatelessWidget {
                         horizontal: 28, vertical: 13),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [_cOrange, _cOrange2],
+                        colors: [_kOrange, _kOrange],
                       ),
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: _cOrange.withValues(alpha: 0.30),
+                          color: _kOrange.withValues(alpha: 0.30),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -215,120 +285,210 @@ class StepContentScreen extends StatelessWidget {
     );
   }
 
-  Widget _completeButton(StepController controller) {
+  Widget _navigationBar(StepController controller, bool isLastBlock) {
     return SafeArea(
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-        child: Obx(
-          () => GestureDetector(
-            onTap: controller.isCompleting.value
-                ? null
-                : () => controller.completeCurrentStep(
-                      stepId: stepId,
-                      userId: userId,
+        child: Obx(() {
+          final hasPrevious = controller.currentBlockIndex.value > 0;
+          return Row(
+            mainAxisAlignment: hasPrevious
+                ? MainAxisAlignment.spaceBetween
+                : MainAxisAlignment.end,
+            children: [
+              if (hasPrevious)
+                GestureDetector(
+                  onTap: controller.previousBlock,
+                  child: Container(
+                    height: 46,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _kOrange, width: 1.5),
                     ),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              height: 54,
-              decoration: BoxDecoration(
-                gradient: controller.isCompleting.value
-                    ? null
-                    : const LinearGradient(
-                        colors: [_cOrange, _cOrange2],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                color: controller.isCompleting.value
-                    ? Colors.grey.shade300
-                    : null,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: controller.isCompleting.value
-                    ? []
-                    : [
-                        BoxShadow(
-                          color: _cOrange.withValues(alpha: 0.35),
-                          blurRadius: 14,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-              ),
-              child: Center(
-                child: controller.isCompleting.value
-                    ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Row(
+                    child: Center(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.check_circle_rounded,
-                              color: Colors.white, size: 20),
-                          SizedBox(width: 8),
+                          Icon(Icons.chevron_left_rounded,
+                              color: _kOrange, size: 20),
                           Text(
-                            "Terminer l'etape",
+                            'Précédent',
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
+                              color: _kOrange,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
                       ),
-              ),
-            ),
+                    ),
+                  ),
+                ),
+              isLastBlock
+                  ? _completeButton(controller)
+                  : _nextBlockButton(controller),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _completeButton(StepController controller) {
+    return Obx(
+      () => GestureDetector(
+        onTap: controller.isCompleting.value
+            ? null
+            : () => controller.completeCurrentStep(
+                  stepId: stepId,
+                  userId: userId,
+                ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: 46,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          decoration: BoxDecoration(
+            gradient: controller.isCompleting.value
+                ? null
+                : const LinearGradient(
+                    colors: [_kOrange, _kOrange],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+            color: controller.isCompleting.value
+                ? Colors.grey.shade300
+                : null,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: controller.isCompleting.value
+                ? []
+                : [
+                    BoxShadow(
+                      color: _kOrange.withValues(alpha: 0.35),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+          ),
+          child: Center(
+            child: controller.isCompleting.value
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check_circle_rounded,
+                          color: Colors.white, size: 18),
+                      SizedBox(width: 6),
+                      Text(
+                        "Terminer",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildBody(
+  Widget _nextBlockButton(StepController controller) {
+    return GestureDetector(
+      onTap: controller.nextBlock,
+      child: Container(
+        height: 46,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [_kOrange, _kOrange],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: _kOrange.withValues(alpha: 0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Suivant',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  color: Colors.white, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLessonBlock(
+    LessonBlock block,
+    String lessonTitle, {
+    required VoidCallback onVideoFinished,
+  }) {
+    switch (block.contentType) {
+      case 'video':
+        return StepDiscoveryVideo(
+          videoTitle: lessonTitle,
+          videoUrl: block.content,
+          onVideoFinished: onVideoFinished,
+          showTitle: false,
+        );
+      case 'image':
+        return StepDiscoveryImage(
+          title: lessonTitle,
+          imageUrl: block.content,
+          answerValue: block.caption,
+          showTitle: false,
+        );
+      case 'audio':
+        return StepAudioPlayer(
+          audioUrl: block.content,
+          instruction: 'Écoutez attentivement',
+          answerValue: block.caption,
+        );
+      case 'text':
+      default:
+        return StepTextContent(
+          text: block.content,
+        );
+    }
+  }
+
+  Widget _buildQuizBody(
       BuildContext context, StepData data, StepController controller) {
-    final String type = data.type;
-    final String format = data.format;
     final content = data.content;
+    final questionsList = content.questions;
 
-    if (type == 'lesson') {
-      switch (format) {
-        case 'video':
-          return StepDiscoveryVideo(
-            videoTitle: data.title,
-            videoUrl: content.mediaUrl ?? '',
-            onVideoFinished: () => Get.back(),
-          );
-        case 'image':
-          return StepDiscoveryImage(
-            title: data.title,
-            imageUrl: content.mediaUrl ?? '',
-            answerValue: content.text,
-          );
-        case 'audio':
-          return StepAudioPlayer(
-            title: data.title,
-            audioUrl: content.mediaUrl ?? '',
-            instruction: "Écoutez attentivement",
-            answerValue: content.text,
-          );
-        case 'text':
-          return StepTextContent(
-            title: data.title,
-            text: content.text ?? '',
-          );
-        default:
-          return Center(child: Text(content.text ?? 'Lecon textuelle'));
-      }
-    } else if (type == 'quiz') {
-      final questionsList = content.questions;
-
-      if (questionsList == null || questionsList.isEmpty) {
-        return Container(
-          color: Colors.white,
-          child: Center(
+    if (questionsList == null || questionsList.isEmpty) {
+      return Container(
+        color: Colors.white,
+        child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Container(
@@ -337,7 +497,7 @@ class StepContentScreen extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(28),
                   border: Border.all(
-                      color: _cOrange.withValues(alpha: 0.15), width: 1.5),
+                      color: _kOrange.withValues(alpha: 0.15), width: 1.5),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.07),
@@ -352,11 +512,11 @@ class StepContentScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: _cOrange.withValues(alpha: 0.10),
+                        color: _kOrange.withValues(alpha: 0.10),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.quiz_outlined,
-                          color: _cOrange, size: 42),
+                          color: _kOrange, size: 42),
                     ),
                     const SizedBox(height: 18),
                     const Text(
@@ -385,12 +545,12 @@ class StepContentScreen extends StatelessWidget {
                             horizontal: 28, vertical: 13),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [_cOrange, _cOrange2],
+                            colors: [_kOrange, _kOrange],
                           ),
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
-                              color: _cOrange.withValues(alpha: 0.30),
+                              color: _kOrange.withValues(alpha: 0.30),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -424,14 +584,12 @@ class StepContentScreen extends StatelessWidget {
           options: currentQuestion.options,
           correctOption: currentQuestion.answer,
           questionIndex: controller.currentQuestionIndex.value,
+          onAnswered: controller.recordAnswer,
           onNext: () => _handleQuizNext(context, controller, questionsList),
         );
       }
 
-      return const Center(child: Text('Type de question non supporte'));
-    }
-
-    return const Center(child: Text('Type de contenu inconnu'));
+    return const Center(child: Text('Type de question non supporte'));
   }
 
   void _handleQuizNext(BuildContext context, StepController controller,
@@ -447,6 +605,7 @@ class StepContentScreen extends StatelessWidget {
 
   void _showQuizCompletedBottomSheet(
       BuildContext context, StepController controller) {
+    SoundService.playBackgroundLoop();
     showModalBottomSheet(
       context: context,
       isDismissible: false,
@@ -458,15 +617,11 @@ class StepContentScreen extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF7B61FF), Color(0xFF8456FF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 22,
                   offset: const Offset(0, 10),
                 ),
@@ -477,43 +632,69 @@ class StepContentScreen extends StatelessWidget {
               children: [
                 Flexible(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.emoji_events,
-                            color: Colors.white, size: 54),
-                        const SizedBox(height: 16),
+                        Container(
+                          width: 44,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const ZakiMascot(
+                          mood: ZakiMood.celebrating,
+                          size: ZakiSize.lg,
+                          animated: true,
+                        ),
+                        const SizedBox(height: 8),
                         const Text(
-                          'Nous avons une surprise pour vous',
+                          'Quiz terminé !',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Color(0xFF1A1A1A),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Tu as termine le quiz\nBravo pour ta perseverance !',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 15, color: Colors.white70, height: 1.4),
                         ),
                         const SizedBox(height: 20),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: const Text(
-                            'Tu gagnes une recompense speciale pour ta reussite !',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 14, color: Colors.white),
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AnimatedStatChip(
+                                label: 'XP GAGNÉS',
+                                countTo: controller.earnedXp,
+                                icon: Icons.bolt_rounded,
+                                color: const Color(0xFFFFC800),
+                                delay: const Duration(milliseconds: 200),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: AnimatedStatChip(
+                                label: 'SCORE',
+                                countTo: controller.scorePercentage,
+                                suffix: '%',
+                                icon: Icons.track_changes_rounded,
+                                color: const Color(0xFF58CC02),
+                                delay: const Duration(milliseconds: 500),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: AnimatedStatChip(
+                                label: 'TEMPS',
+                                staticValue:
+                                    _formatDuration(controller.quizElapsed),
+                                icon: Icons.timer_outlined,
+                                color: const Color(0xFF1CB0F6),
+                                delay: const Duration(milliseconds: 800),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -527,15 +708,22 @@ class StepContentScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: controller.isCompleting.value
                           ? null
-                          : () async {
+                          : () {
                               Navigator.of(context).pop();
-                              await controller.completeCurrentStep(
-                                stepId: stepId,
-                                userId: userId,
+                              Get.off(
+                                () => XpRewardScreen(
+                                  xp: controller.earnedXp,
+                                  scorePercent: controller.scorePercentage,
+                                  elapsed: controller.quizElapsed,
+                                  stepId: stepId,
+                                  userId: userId,
+                                  controller: controller,
+                                ),
                               );
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
+                        backgroundColor: const Color(0xFFF27F22),
+                        disabledBackgroundColor: Colors.grey.shade300,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18)),
                         elevation: 0,
@@ -547,14 +735,15 @@ class StepContentScreen extends StatelessWidget {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2.5,
+                                  color: Colors.white,
                                 ),
                               )
                             : const Text(
-                                'Terminer',
+                                'RÉCUPÉRER MES XP',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF7B61FF),
+                                  color: Colors.white,
                                 ),
                               ),
                       ),
@@ -566,6 +755,12 @@ class StepContentScreen extends StatelessWidget {
           ),
         );
       },
-    );
+    ).then((_) => SoundService.stopBackgroundLoop());
+  }
+
+  String _formatDuration(Duration d) {
+    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
   }
 }

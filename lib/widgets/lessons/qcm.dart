@@ -9,6 +9,7 @@ class QuizQCM extends StatefulWidget {
   final String correctOption;
   final VoidCallback onNext;
   final int questionIndex;
+  final ValueChanged<bool>? onAnswered;
   // conservés pour compatibilité ascendante (ignorés)
   final String lottieQuestion;
   final String lottieCorrect;
@@ -21,6 +22,7 @@ class QuizQCM extends StatefulWidget {
     required this.correctOption,
     required this.onNext,
     this.questionIndex = 0,
+    this.onAnswered,
     this.lottieQuestion = '',
     this.lottieCorrect = '',
     this.lottieIncorrect = '',
@@ -348,49 +350,34 @@ class _QuizQCMState extends State<QuizQCM> with TickerProviderStateMixin {
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.symmetric(
-                    vertical: 16, horizontal: 18),
+                    vertical: 14, horizontal: 16),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFC845), Color(0xFFFF9100)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.orange.withValues(alpha:0.22),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                  color: const Color(0xFFFFF4E0),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                      color: const Color(0xFFFF9800).withValues(alpha: 0.25),
+                      width: 1.5),
                 ),
                 child: Row(
                   children: [
                     Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFF9800),
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha:0.08),
-                            blurRadius: 12,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
                       ),
-                      child: const Icon(Icons.lightbulb,
-                          color: Color(0xFFFF9100)),
+                      child: const Icon(Icons.lightbulb_rounded,
+                          color: Colors.white, size: 20),
                     ),
                     const SizedBox(width: 12),
                     const Expanded(
                       child: Text(
                         "Choisis la bonne réponse pour continuer l'aventure !",
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: Color(0xFF8A5300),
                         ),
                       ),
                     ),
@@ -513,6 +500,7 @@ class _QuizQCMState extends State<QuizQCM> with TickerProviderStateMixin {
                         _shakeCtrl.forward(from: 0);
                         SoundService.playWrong();
                       }
+                      widget.onAnswered?.call(isCorrect);
                       _showResultBottomSheet(isCorrect);
                     }
                   : null,

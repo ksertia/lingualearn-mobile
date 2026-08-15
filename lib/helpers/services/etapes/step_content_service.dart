@@ -37,4 +37,29 @@ class StepService {
 
     return StepData.fromJson(data);
   }
+
+  /// Leçon d'une étape avec ses blocs (texte/vidéo/image/audio) et sa progression.
+  Future<LessonContent> getStepLessons(String stepId, {String? userId}) async {
+    final Map<String, dynamic> queryParams = {};
+    if (userId != null) {
+      queryParams['userId'] = userId;
+    }
+
+    final response = await _dio.get(
+      '/courses/step/$stepId/lessons',
+      queryParameters: queryParams,
+    );
+
+    if (response.data['success'] != true) {
+      throw Exception(
+          'Réponse serveur inattendue (success=false) : ${response.data}');
+    }
+
+    final raw = response.data['data'];
+    if (raw == null) {
+      throw Exception('Le serveur a renvoyé data=null pour cette étape.');
+    }
+
+    return LessonContent.fromJson(Map<String, dynamic>.from(raw as Map));
+  }
 }

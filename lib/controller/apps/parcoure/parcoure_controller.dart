@@ -70,7 +70,10 @@ class ParcoursSelectionController extends GetxController {
       items.clear();
 
       if (showAllPaths) {
-        final modules = await ModuleService.getAllModules();
+        final modules = await ModuleService.getAllModules(
+          languageId: languageId,
+          levelId: levelId,
+        );
         if (modules.isNotEmpty) {
           modules.sort((a, b) => a.index.compareTo(b.index));
           for (final module in modules) {

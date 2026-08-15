@@ -56,6 +56,7 @@ class DiscoveryPage extends StatelessWidget {
           stepWidget = StepDiscoveryVideo(
             videoTitle: section.title.toUpperCase(),
             videoUrl: content.questionValue,
+            showTitle: false,
             onVideoFinished: () {
               if (controller.currentPage.value == allSteps.length - 1) {
                 StepSuccess.show(context);
@@ -224,39 +225,52 @@ class DiscoveryPage extends StatelessWidget {
             ),
 
             Expanded(
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.w),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 15.r,
-                      offset: Offset(0, 5.h),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30.r),
-                  child: PageView(
-                    controller: controller.pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    onPageChanged: (index) {
-                      controller.currentPage.value = index;
-                    },
-                    children: allSteps.map((step) => step.widget).toList(),
+              child: Obx(() {
+                final isVideo = allSteps[controller.currentPage.value].widget
+                    is StepDiscoveryVideo;
+
+                return Container(
+                  margin: isVideo
+                      ? EdgeInsets.zero
+                      : EdgeInsets.symmetric(horizontal: 16.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                        isVideo ? BorderRadius.zero : BorderRadius.circular(30.r),
+                    boxShadow: isVideo
+                        ? []
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 15.r,
+                              offset: Offset(0, 5.h),
+                            ),
+                          ],
                   ),
-                ),
-              ),
+                  child: ClipRRect(
+                    borderRadius:
+                        isVideo ? BorderRadius.zero : BorderRadius.circular(30.r),
+                    child: PageView(
+                      controller: controller.pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      onPageChanged: (index) {
+                        controller.currentPage.value = index;
+                      },
+                      children: allSteps.map((step) => step.widget).toList(),
+                    ),
+                  ),
+                );
+              }),
             ),
 
             Obx(() {
               int currentIndex = controller.currentPage.value;
               bool isExercise =
                   allSteps[currentIndex].sectionType == "exercise";
+              bool isVideo =
+                  allSteps[currentIndex].widget is StepDiscoveryVideo;
 
-              if (isExercise) {
+              if (isExercise || isVideo) {
                 return const SizedBox.shrink();
               }
 

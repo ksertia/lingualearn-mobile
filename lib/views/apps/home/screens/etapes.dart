@@ -12,12 +12,9 @@ import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tibi/models/parcoure/parcour_model.dart';
 
-// ── Palette ────────────────────────────────────────────────────────────────
+// ── Palette ────────────────────────────────────────────────
 const Color _kGreen      = Color(0xFF188329);
-const Color _kYellow     = Color(0xFFF5BF1E);
-const Color _kYellowDark = Color(0xFF8B6B00);
 const Color _kOrange     = Color(0xFFF27F22);
-
 const Color _sLocked    = Color(0xFFB0BEC5);
 
 void _showSubscriptionRequired(BuildContext context) {
@@ -48,7 +45,7 @@ void _showSubscriptionRequired(BuildContext context) {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                    color: _kYellow.withValues(alpha: 0.35),
+                    color: _kOrange.withValues(alpha: 0.35),
                     blurRadius: 20,
                     offset: const Offset(0, 8))
               ],
@@ -79,7 +76,7 @@ void _showSubscriptionRequired(BuildContext context) {
                 Get.toNamed('/subscription_plans');
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kYellow,
+                backgroundColor: _kOrange,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
@@ -103,7 +100,7 @@ void _showSubscriptionRequired(BuildContext context) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────
 
 class StepsScreensPages extends StatefulWidget {
   const StepsScreensPages({super.key});
@@ -120,7 +117,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
   bool _hasNetworkError = false;
   String _networkErrorMsg = '';
 
-  // ─── Guide ─────────────────────────────────────────────────────────────────
+  // ─── Guide ─────────────────────────────────────────────────────
   bool _showGuide = false;
   late final AnimationController _bounceCtrl;
   late final Animation<double> _bounceAnim;
@@ -239,7 +236,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: _kYellow.withValues(alpha: 0.30),
+                  color: _kOrange.withValues(alpha: 0.30),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -248,7 +245,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.lightbulb_rounded, color: Color(0xFF1A1A1A), size: 20),
+                const Icon(Icons.lightbulb_rounded, color: Colors.white, size: 20),
                 const SizedBox(width: 10),
                 const Expanded(
                   child: Text(
@@ -300,11 +297,11 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                         children: [
                           CustomPaint(
                             size: const Size(14, 7),
-                            painter: _StepsTrianglePainter(color: _kYellow),
+                            painter: _StepsTrianglePainter(color: _kOrange),
                           ),
                           const SizedBox(height: 2),
                           const Icon(Icons.touch_app_rounded,
-                              color: _kYellowDark, size: 30),
+                              color: _kOrange, size: 30),
                         ],
                       ),
                     ),
@@ -416,7 +413,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: _kYellow.withValues(alpha: 0.40),
+                              color: _kOrange.withValues(alpha: 0.40),
                               blurRadius: 16,
                               offset: const Offset(0, 6),
                             ),
@@ -444,11 +441,11 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.check_circle_rounded,
-                                  color: Color(0xFF1A1A1A), size: 20),
+                                  color: Colors.white, size: 20),
                               SizedBox(width: 8),
                               Text('Parcours terminé !',
                                   style: TextStyle(
-                                      color: Color(0xFF1A1A1A),
+                                      color: Colors.white,
                                       fontWeight: FontWeight.w800,
                                       fontSize: 16)),
                             ],
@@ -486,10 +483,10 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                         color: Colors.white.withValues(alpha: 0.95),
                         borderRadius: BorderRadius.circular(50),
                         border: Border.all(
-                            color: _kYellow.withValues(alpha: 0.15), width: 1),
+                            color: _kOrange.withValues(alpha: 0.15), width: 1),
                         boxShadow: [
                           BoxShadow(
-                            color: _kYellow.withValues(alpha: 0.10),
+                            color: _kOrange.withValues(alpha: 0.10),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -571,13 +568,13 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
         padding: const EdgeInsets.all(7),
         decoration: BoxDecoration(
           color: enabled
-              ? _kYellow.withValues(alpha: 0.12)
+              ? _kOrange.withValues(alpha: 0.12)
               : Colors.grey.withValues(alpha: 0.08),
           shape: BoxShape.circle,
         ),
         child: Icon(icon,
             size: 15,
-            color: enabled ? _kYellowDark : Colors.grey.shade400),
+            color: enabled ? _kOrange : Colors.grey.shade400),
       ),
     );
   }
@@ -644,7 +641,6 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
   ) {
     final isLeft = i % 2 == 0;
     final color = isCompleted ? _kGreen : (isActive ? _kOrange : _sLocked);
-    final xp = step.stepType == 'quiz' ? '+20 XP' : '+10 XP';
 
     Future<void> handleTap() async {
       if (!isActive) {
@@ -673,7 +669,11 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
         await StepsService.startStep(userId: userId, stepId: step.id);
       }
       final res = await Get.to(
-        () => StepContentScreen(stepId: step.id, userId: userId),
+        () => StepContentScreen(
+          stepId: step.id,
+          userId: userId,
+          stepType: step.stepType,
+        ),
         transition: Transition.rightToLeft,
       );
       if (res == true) {
@@ -790,21 +790,6 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                 color: titleColor,
               ),
             ),
-            const SizedBox(height: 5),
-            // XP uniquement
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.bolt_rounded, size: 11,
-                    color: isActive ? _kYellow : Colors.grey.shade300),
-                const SizedBox(width: 2),
-                Text(xp,
-                    style: TextStyle(
-                        fontSize: 10,
-                        color: isActive ? _kYellow : Colors.grey.shade300,
-                        fontWeight: FontWeight.w700)),
-              ],
-            ),
           ],
         ),
       ),
@@ -885,20 +870,13 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            _kYellow.withValues(alpha: 0.10),
-            _kYellowDark.withValues(alpha: 0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.black.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(20),
         border:
-            Border.all(color: _kYellow.withValues(alpha: 0.20), width: 1.5),
+            Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1.5),
         boxShadow: [
           BoxShadow(
-              color: _kYellow.withValues(alpha: 0.08),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 12,
               offset: const Offset(0, 4)),
         ],
@@ -912,21 +890,21 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                    color: _kYellow.withValues(alpha: 0.30),
+                    color: _kOrange.withValues(alpha: 0.30),
                     blurRadius: 8,
                     offset: const Offset(0, 3)),
               ],
             ),
             child: const Icon(Icons.route_rounded,
-                color: Color(0xFF1A1A1A), size: 18),
+                color: Colors.white, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(path.title,
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary(_ctx))),
+                    color: Colors.white)),
           ),
         ],
       ),
@@ -940,7 +918,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
         color: Colors.white.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(18),
         border:
-            Border.all(color: _kYellow.withValues(alpha: 0.12), width: 1),
+            Border.all(color: _kOrange.withValues(alpha: 0.12), width: 1),
       ),
       child: Text('Étapes du parcours',
           style: TextStyle(
@@ -1000,7 +978,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Réessayer'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kYellow,
+                  backgroundColor: _kOrange,
                   foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(
@@ -1028,7 +1006,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                  color: _kYellow.withValues(alpha: 0.10),
+                  color: _kOrange.withValues(alpha: 0.10),
                   blurRadius: 28,
                   offset: const Offset(0, 12))
             ],
@@ -1040,13 +1018,13 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(colors: [
-                    _kYellow.withValues(alpha: 0.12),
-                    _kYellowDark.withValues(alpha: 0.08),
+                    _kOrange.withValues(alpha: 0.12),
+                    _kOrange.withValues(alpha: 0.08),
                   ]),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.flag_outlined,
-                    color: _kYellowDark, size: 44),
+                    color: _kOrange, size: 44),
               ),
               const SizedBox(height: 20),
               Text('Aucune étape disponible',
@@ -1069,7 +1047,7 @@ class _StepsScreensPagesState extends State<StepsScreensPages>
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Réessayer'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kYellow,
+                  backgroundColor: _kOrange,
                   foregroundColor: const Color(0xFF1A1A1A),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(

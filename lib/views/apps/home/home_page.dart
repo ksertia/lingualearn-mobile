@@ -29,14 +29,23 @@ class _HomeScreenState extends State<HomeScreen>
       SettingScreen(),
     ];
 
-    return Scaffold(
-      body: IndexedStack(
-        index: navigationProvider.currentIndex,
-        children: screens,
-      ),
-      bottomNavigationBar: AppBottomNavBar(
-        currentIndex: navigationProvider.currentIndex,
-        onTabChange: (index) => navigationProvider.setCurrentIndex(index),
+    return PopScope(
+      // Retour depuis un autre onglet → revient d'abord à l'accueil.
+      // Retour depuis l'accueil → laisse quitter l'application.
+      canPop: navigationProvider.currentIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        navigationProvider.goToDashboard();
+      },
+      child: Scaffold(
+        body: IndexedStack(
+          index: navigationProvider.currentIndex,
+          children: screens,
+        ),
+        bottomNavigationBar: AppBottomNavBar(
+          currentIndex: navigationProvider.currentIndex,
+          onTabChange: (index) => navigationProvider.setCurrentIndex(index),
+        ),
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 /// Sons UI générés en mémoire — aucun fichier asset requis.
 class SoundService {
   static final AudioPlayer _player = AudioPlayer();
+  static final AudioPlayer _bgPlayer = AudioPlayer();
 
   static const int _sampleRate = 44100;
 
@@ -43,6 +44,18 @@ class SoundService {
       await _player.play(AssetSource('sound/succes.mp3'), volume: 0.8);
     }
   }
+
+  /// Musique de fond, jouée une seule fois (lecteur dédié, indépendant des effets sonores)
+  static Future<void> playBackgroundLoop() async {
+    await _bgPlayer.setReleaseMode(ReleaseMode.release);
+    if (kIsWeb) {
+      await _bgPlayer.play(UrlSource('assets/sound/succes.mp3'), volume: 0.4);
+    } else {
+      await _bgPlayer.play(AssetSource('sound/succes.mp3'), volume: 0.4);
+    }
+  }
+
+  static Future<void> stopBackgroundLoop() => _bgPlayer.stop();
 
   // ── Lecteur ──────────────────────────────────────────────────────────────
 
