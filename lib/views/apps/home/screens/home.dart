@@ -5,13 +5,15 @@ import 'package:tibi/controller/apps/session_controller.dart';
 import 'package:tibi/controller/apps/user_progress/user_progress_controller.dart';
 import 'package:tibi/helpers/services/module_service.dart';
 import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
+import 'package:tibi/helpers/services/themes/theme_service.dart';
+import 'package:tibi/helpers/services/themes/sub_theme_service.dart';
 import 'package:tibi/helpers/storage/local_storage.dart';
 import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:tibi/models/modules/modul_model.dart';
+import 'package:tibi/models/themes/theme_model.dart';
+import 'package:tibi/models/themes/sub_theme_model.dart';
 import 'package:tibi/models/user_progress/user_progress_model.dart';
 import 'package:tibi/views/apps/home/screens/module_page.dart';
-import 'package:tibi/views/apps/home/screens/parcours.dart';
-import 'package:tibi/views/apps/home/screens/etapes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -61,11 +63,12 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   String _progressErrorMsg = '';
   Map<String, ModuleModel?> _fallbackModules = {};
 
-  // ─── Guide ────────────────────────────────────────────────────────────────
-  bool _showGuide = false;
+  final ThemeService _themeService = ThemeService();
+  final SubThemeService _subThemeService = SubThemeService();
+  final Map<String, ThemeModel?> _currentThemeByModule = {};
+  final Map<String, SubThemeModel?> _currentSubThemeByModule = {};
+
   bool _isFirstVisit = false;
-  late final AnimationController _bounceCtrl;
-  late final Animation<double> _bounceAnim;
 
   @override
   void initState() {
@@ -79,47 +82,22 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
         : Get.put(NotificationController());
     _loadProgressSafe();
     _checkSubscription();
-
-    // Guide bounce animation
-    _bounceCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
-    _bounceAnim = Tween<double>(begin: 0.0, end: 8.0).animate(
-      CurvedAnimation(parent: _bounceCtrl, curve: Curves.easeInOut),
-    );
     _initGuide();
   }
 
   Future<void> _initGuide() async {
     final prefs = await SharedPreferences.getInstance();
-    final shown = prefs.getBool('home_guide_shown') ?? false;
     final visited = prefs.getBool('home_first_visit_done') ?? false;
     if (!mounted) return;
     setState(() => _isFirstVisit = !visited);
     if (!visited) {
       await prefs.setBool('home_first_visit_done', true);
     }
-    if (!shown && mounted) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (!mounted) return;
-      setState(() => _showGuide = true);
-      _bounceCtrl.repeat(reverse: true);
-    }
-  }
-
-  Future<void> _dismissGuide() async {
-    if (!mounted) return;
-    setState(() => _showGuide = false);
-    _bounceCtrl.stop();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('home_guide_shown', true);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
-    _bounceCtrl.dispose();
     super.dispose();
   }
 
@@ -134,6 +112,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     try {
       await progressCtrl.loadProgress();
       await _loadFallbackModules();
+      _loadCurrentThemesAndSubThemes();
     } on DioException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -167,6 +146,34 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     if (mounted && fallbacks.isNotEmpty) {
       setState(() => _fallbackModules = fallbacks);
     }
+  }
+
+  void _loadCurrentThemesAndSubThemes() {
+    final entries = progressCtrl.progressList;
+    for (final entry in entries) {
+      final moduleId = entry.module?.id ?? _fallbackModules[entry.language.id]?.id;
+      if (moduleId == null || moduleId.isEmpty) continue;
+      if (_currentThemeByModule.containsKey(moduleId)) continue;
+      _loadCurrentThemeAndSubTheme(moduleId);
+    }
+  }
+
+  Future<void> _loadCurrentThemeAndSubTheme(String moduleId) async {
+    _currentThemeByModule[moduleId] = null;
+    try {
+      final themes = await _themeService.getThemesByModule(moduleId);
+      if (themes.isEmpty) return;
+      themes.sort((a, b) => a.index.compareTo(b.index));
+      final theme = themes.first;
+      if (!mounted) return;
+      setState(() => _currentThemeByModule[moduleId] = theme);
+
+      final subThemes = await _subThemeService.getSubThemesByTheme(theme.id);
+      if (subThemes.isEmpty) return;
+      subThemes.sort((a, b) => a.index.compareTo(b.index));
+      if (!mounted) return;
+      setState(() => _currentSubThemeByModule[moduleId] = subThemes.first);
+    } catch (_) {}
   }
 
   String _dioErrorMsg(DioException e) {
@@ -211,107 +218,6 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     }
   }
 
-  void _showSubscriptionRequired() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => Container(
-        decoration: BoxDecoration(
-          color: AppColors.card(context),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.divider(context),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 28),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [_kOrange, _kOrange],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: _kOrange.withValues(alpha: 0.35),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.workspace_premium_rounded,
-                  color: Color(0xFF1A1A1A), size: 38),
-            ),
-            const SizedBox(height: 22),
-            Text(
-              'Abonnement requis',
-              style: TextStyle(
-                color: AppColors.textPrimary(context),
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Accédez à tous les parcours et étapes en illimité.\nSouscrivez dès maintenant et commencez à apprendre.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textSecondary(context),
-                fontSize: 14,
-                height: 1.6,
-              ),
-            ),
-            const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Get.toNamed('/subscription_plans');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _kOrange,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Voir les forfaits',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Plus tard',
-                style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     _ctx = context;
@@ -337,10 +243,6 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                       _buildSectionTitleLangue("Mes langues", "Ajouter"),
                       const SizedBox(height: 14),
                       _buildLanguageSection(),
-                      const SizedBox(height: 28),
-                      _buildSectionTitle("Navigation rapide"),
-                      const SizedBox(height: 14),
-                      _buildNavigationRow(),
                       const SizedBox(height: 28),
                       _buildSectionTitle("En ce moment"),
                       const SizedBox(height: 14),
@@ -912,239 +814,6 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
 
   // ─── Navigation rapide ────────────────────────────────────────────────────
 
-  /// Langue/niveau à utiliser pour "Parcours" et "Étapes" : celle actuellement
-  /// affichée dans le carrousel "Mes langues" (pas forcément celle de la
-  /// session), pour que l'utilisateur voie bien les parcours/étapes de la
-  /// langue qu'il est en train de consulter.
-  (String, String) _currentLangSelection() {
-    final entries = progressCtrl.progressList;
-    if (entries.isNotEmpty) {
-      final entry =
-          entries[_currentLangPage.value.clamp(0, entries.length - 1)];
-      return (entry.language.id, entry.level.id);
-    }
-    final languageId = session.selectedLanguageId.value.isNotEmpty
-        ? session.selectedLanguageId.value
-        : session.user?.selectedLanguageId ?? "";
-    final levelId = session.selectedLevelId.value.isNotEmpty
-        ? session.selectedLevelId.value
-        : session.user?.selectedLevelId ?? "";
-    return (languageId, levelId);
-  }
-
-  Widget _buildNavigationRow() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_showGuide) ...[
-          _buildGuideContent(),
-          const SizedBox(height: 8),
-        ],
-        Row(
-          children: [
-            Expanded(
-              child: _buildNavBtn(
-                Icons.menu_book_rounded,
-                "Modules",
-                _kOrange,
-                () {
-                  if (_showGuide) _dismissGuide();
-                  _showLanguagePickerSheet();
-                },
-              ),
-            ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildNavBtn(
-            Icons.map_rounded,
-            "Parcours",
-            _kOrange,
-            () {
-              if (!_isSubscriptionActive) {
-                _showSubscriptionRequired();
-                return;
-              }
-              final (languageId, levelId) = _currentLangSelection();
-              Get.to(() => const ParcoursSelectionPage(), arguments: {
-                'showAllPaths': true,
-                'userId': session.userId.value.isNotEmpty
-                    ? session.userId.value
-                    : session.user?.id ?? "",
-                'languageId': languageId,
-                'levelId': levelId,
-              });
-            },
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildNavBtn(
-            Icons.flag_rounded,
-            "Étapes",
-            _kOrange,
-            () {
-              if (!_isSubscriptionActive) {
-                _showSubscriptionRequired();
-                return;
-              }
-              final (languageId, levelId) = _currentLangSelection();
-              Get.to(() => const StepsScreensPages(), arguments: {
-                'showAllSteps': true,
-                'userId': session.userId.value.isNotEmpty
-                    ? session.userId.value
-                    : session.user?.id ?? "",
-                'languageId': languageId,
-                'levelId': levelId,
-              });
-            },
-          ),
-        ),
-      ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGuideContent() {
-    return Column(
-      children: [
-        // ── Bulle tooltip (fixe) ─────────────────────────────────────────
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [_kOrange, _kOrange],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: _kOrange.withValues(alpha: 0.30),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Icons.lightbulb_rounded, color: Color(0xFF1A1A1A), size: 20),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Text(
-                  'Prêt à commencer ? Clique ici pour voir tes modules !',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    height: 1.45,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: _dismissGuide,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.20),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.close_rounded,
-                      color: Colors.white, size: 13),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // ── Doigt animé — centré exactement sur le card Modules ─────────
-        // La nav row = 3 Expanded séparés par 2 × SizedBox(12).
-        // Centre du 1er bouton = (totalWidth - 24) / 6
-        LayoutBuilder(
-          builder: (_, constraints) {
-            final btnWidth = (constraints.maxWidth - 24.0) / 3.0;
-            final fingerCenterX = btnWidth / 2.0;
-            return SizedBox(
-              width: constraints.maxWidth,
-              height: 46,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  AnimatedBuilder(
-                    animation: _bounceAnim,
-                    builder: (_, child) => Positioned(
-                      left: fingerCenterX - 18,
-                      top: _bounceAnim.value,
-                      child: child!,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CustomPaint(
-                          size: const Size(14, 7),
-                          painter: _TrianglePainter(color: _kOrange),
-                        ),
-                        const SizedBox(height: 2),
-                        const Icon(Icons.touch_app_rounded,
-                            color: _kOrange, size: 30),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNavBtn(
-      IconData icon, String label, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-        decoration: BoxDecoration(
-          color: AppColors.card(_ctx),
-          borderRadius: BorderRadius.circular(22),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.cardAlt(_ctx),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(icon, color: AppColors.textPrimary(_ctx), size: 24),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary(_ctx)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ─── En ce moment ─────────────────────────────────────────────────────────
 
   Widget _buildCurrentPathCard() {
@@ -1174,8 +843,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
 
       final modulePct = entry.module!.progressPercentage;
       final moduleName = entry.module!.title;
-      final pathName = entry.path?.title;
-      final stepName = entry.step?.title;
+      final themeName = _currentThemeByModule[entry.module!.id]?.title;
+      final subThemeName = _currentSubThemeByModule[entry.module!.id]?.title;
 
       return Container(
         width: double.infinity,
@@ -1241,15 +910,15 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             const SizedBox(height: 18),
             _buildPathItem(
                 Icons.menu_book_rounded, "Module", moduleName, _kOrange),
-            if (pathName != null) ...[
+            if (themeName != null) ...[
               const SizedBox(height: 8),
               _buildPathItem(
-                  Icons.map_rounded, "Parcours", pathName, _kOrange),
+                  Icons.label_outline, "Thème", themeName, _kOrange),
             ],
-            if (stepName != null) ...[
+            if (subThemeName != null) ...[
               const SizedBox(height: 8),
               _buildPathItem(
-                  Icons.flag_rounded, "Étape", stepName, _kOrange),
+                  Icons.flag_rounded, "Sous-thème", subThemeName, _kOrange),
             ],
             const SizedBox(height: 18),
             ClipRRect(
@@ -1447,9 +1116,6 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   }
 
   Widget _buildFallbackCurrentCard(UserProgressEntry entry, ModuleModel module) {
-    final firstPath = (module.paths?.isNotEmpty ?? false) ? module.paths!.first : null;
-    final firstStep = (firstPath?.steps.isNotEmpty ?? false) ? firstPath!.steps.first : null;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -1512,13 +1178,14 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           ),
           const SizedBox(height: 18),
           _buildPathItem(Icons.menu_book_rounded, "Module", module.title, _kOrange),
-          if (firstPath != null) ...[
+          if (_currentThemeByModule[module.id]?.title case final themeName?) ...[
             const SizedBox(height: 8),
-            _buildPathItem(Icons.map_rounded, "Parcours", firstPath.title, _kOrange),
+            _buildPathItem(Icons.label_outline, "Thème", themeName, _kOrange),
           ],
-          if (firstStep != null) ...[
+          if (_currentSubThemeByModule[module.id]?.title case final subThemeName?) ...[
             const SizedBox(height: 8),
-            _buildPathItem(Icons.flag_rounded, "Étape", firstStep.title, _kOrange),
+            _buildPathItem(
+                Icons.flag_rounded, "Sous-thème", subThemeName, _kOrange),
           ],
           const SizedBox(height: 18),
           ClipRRect(
@@ -1781,27 +1448,6 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
 }
 
 
-
-// ─── Triangle pointer for guide tooltip ─────────────────────────────────────
-
-class _TrianglePainter extends CustomPainter {
-  final Color color;
-  const _TrianglePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width / 2, size.height)
-      ..close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(_TrianglePainter old) => old.color != color;
-}
 
 // ─── Add Language Bottom Sheet ───────────────────────────────────────────────
 

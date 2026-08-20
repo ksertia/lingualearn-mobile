@@ -1,21 +1,65 @@
 ﻿import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:tibi/controller/apps/session_controller.dart';
 import 'package:tibi/helpers/services/module_service.dart';
 import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
+import 'package:tibi/helpers/services/themes/theme_service.dart';
+import 'package:tibi/helpers/services/themes/sub_theme_service.dart';
 import 'package:tibi/models/modules/modul_model.dart';
+import 'package:tibi/models/themes/theme_model.dart';
+import 'package:tibi/models/themes/sub_theme_model.dart';
 import 'package:get/get.dart';
+
+class ThemeNode {
+  final ThemeModel theme;
+  final RxList<SubThemeModel> subThemes = <SubThemeModel>[].obs;
+  final RxBool subThemesLoading = true.obs;
+  final RxBool subThemesError = false.obs;
+  ThemeNode(this.theme);
+}
+
+class ModuleNode {
+  final ModuleModel module;
+  final RxList<ThemeNode> themeNodes = <ThemeNode>[].obs;
+  final RxBool themesLoading = true.obs;
+  final RxBool themesError = false.obs;
+  ModuleNode(this.module);
+}
 
 class HomeController extends GetxController {
   final session = Get.find<SessionController>();
+  final _themeService = ThemeService();
+  final _subThemeService = SubThemeService();
 
   RxBool isLoading = false.obs;
   RxBool hasSubscriptionError = false.obs;
   RxBool isSubscriptionActive = true.obs;
   RxList<ModuleModel> filteredModules = <ModuleModel>[].obs;
   RxMap<String, String> moduleDisplayStatus = <String, String>{}.obs;
+  RxList<ModuleNode> moduleTree = <ModuleNode>[].obs;
+
+  final PageController pageController = PageController();
+  RxInt currentPage = 0.obs;
 
   late final String _languageId;
   late final String _levelId;
+
+  void onPageChanged(int page) => currentPage.value = page;
+
+  void goToPage(int page) {
+    currentPage.value = page;
+    pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void onClose() {
+    pageController.dispose();
+    super.onClose();
+  }
 
   @override
   void onInit() {
@@ -62,8 +106,19 @@ class HomeController extends GetxController {
         for (var m in modulesFromApi) {
           moduleDisplayStatus[m.id] = _resolveDisplayStatus(m);
         }
+
+        moduleTree.assignAll(modulesFromApi.map((m) => ModuleNode(m)));
+        for (final node in moduleTree) {
+          _loadThemesForModule(node);
+        }
+        currentPage.value = 0;
+        if (pageController.hasClients) {
+          pageController.jumpToPage(0);
+        }
       } else {
         filteredModules.clear();
+        moduleTree.clear();
+        currentPage.value = 0;
       }
     } catch (e) {
       final isSubError = (e is DioException &&
@@ -109,25 +164,50 @@ class HomeController extends GetxController {
     }
   }
 
+  Future<void> _loadThemesForModule(ModuleNode node) async {
+    try {
+      final themes = await _themeService.getThemesByModule(node.module.id);
+      themes.sort((a, b) => a.index.compareTo(b.index));
+      node.themeNodes.assignAll(themes.map((t) => ThemeNode(t)));
+      node.themesLoading.value = false;
+      for (final themeNode in node.themeNodes) {
+        _loadSubThemesForTheme(themeNode);
+      }
+    } catch (_) {
+      node.themesLoading.value = false;
+      node.themesError.value = true;
+    }
+  }
+
+  Future<void> _loadSubThemesForTheme(ThemeNode node) async {
+    try {
+      final subThemes =
+          await _subThemeService.getSubThemesByTheme(node.theme.id);
+      subThemes.sort((a, b) => a.index.compareTo(b.index));
+      node.subThemes.assignAll(subThemes);
+    } catch (_) {
+      node.subThemesError.value = true;
+    } finally {
+      node.subThemesLoading.value = false;
+    }
+  }
+
+  Future<void> retryThemesForModule(ModuleNode node) async {
+    node.themesLoading.value = true;
+    node.themesError.value = false;
+    await _loadThemesForModule(node);
+  }
+
+  Future<void> retrySubThemesForTheme(ThemeNode node) async {
+    node.subThemesLoading.value = true;
+    node.subThemesError.value = false;
+    await _loadSubThemesForTheme(node);
+  }
+
   String _resolveDisplayStatus(ModuleModel m) {
-    final status =
-        (m.progress?.status ?? m.status ?? 'locked').toString().toLowerCase();
+    final status = (m.progress?.status ?? m.status ?? '').toString().toLowerCase();
     if (status == 'completed' || status == 'complete') return 'completed';
-    if (status == 'unlocked' ||
-        status == 'started' ||
-        status == 'in_progress' ||
-        status == 'deblocked' ||
-        status == 'debloque' ||
-        status == 'debloqued') return 'unlocked';
-    return 'locked';
-  }
-
-  bool isLocked(String moduleId) {
-    return moduleDisplayStatus[moduleId]?.toLowerCase() == 'locked';
-  }
-
-  bool isUnlocked(String moduleId) {
-    return moduleDisplayStatus[moduleId]?.toLowerCase() == 'unlocked';
+    return 'unlocked';
   }
 
   bool isCompleted(String moduleId) {
@@ -170,7 +250,6 @@ class HomeController extends GetxController {
         isActive: m.isActive,
         createdAt: m.createdAt,
         updatedAt: now,
-        paths: m.paths,
         status: 'completed',
         progress: completedProgress,
         progressPercentage: '100',
@@ -217,7 +296,6 @@ class HomeController extends GetxController {
           isActive: next.isActive,
           createdAt: next.createdAt,
           updatedAt: now,
-          paths: next.paths,
           status: 'unlocked',
           progress: unlockedProgress,
           progressPercentage: next.progressPercentage ?? '0',

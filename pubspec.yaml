@@ -151,8 +151,6 @@ flutter:
     - assets/images/app/plan5.jpg
     - assets/images/app/plan51.jpg
     - assets/images/app/splash11.png
-    - assets/images/app/splash22.jpeg
-    - assets/images/app/splash33.jpeg
     - assets/images/app/logo.png
     # Images quiz (uniquement celles utilisées)
     - assets/images/quiz/certificat.jpg

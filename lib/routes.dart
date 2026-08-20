@@ -12,8 +12,6 @@ import 'package:tibi/views/apps/notifications/notifications_page.dart';
 import 'package:tibi/views/apps/home/screens/module_page.dart';
 import 'package:tibi/views/apps/home/screens/home.dart';
 import 'package:tibi/views/apps/home/home_page.dart';
-import 'package:tibi/views/apps/home/screens/parcours.dart';
-import 'package:tibi/views/apps/home/screens/etapes.dart';
 import 'package:tibi/views/apps/profile/edit_profile.dart';
 import 'package:tibi/views/apps/profile/profile.dart';
 import 'package:tibi/views/apps/progres/progres_page.dart';
@@ -83,9 +81,6 @@ getPageRoute() {
         name: '/children_progress',
         page: () => const ChildrenProgressListPage()),
 
-    GetPage(name: '/stepsscreens', page: () => const StepsScreensPages()),
-    GetPage(
-        name: '/parcoursselectionpage', page: () => ParcoursSelectionPage()),
     GetPage(
         name: '/subscription_details', page: () => SubscriptionDetailsPage()),
     GetPage(name: '/subscription_plans', page: () => SubscriptionPlansPage()),

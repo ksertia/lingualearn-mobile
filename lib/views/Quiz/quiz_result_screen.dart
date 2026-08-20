@@ -1,6 +1,6 @@
 ﻿import 'package:tibi/views/Quiz/quizFinalExamenFinal.dart';
-import 'package:tibi/views/apps/home/screens/parcours.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:tibi/widgets/quiz/confetti_widget.dart';
 class QuizResultScreen extends StatelessWidget {
   final int correctAnswers;
@@ -130,12 +130,7 @@ class QuizResultScreen extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ParcoursSelectionPage(),
-                          ),
-                        );
+                        Get.offAllNamed('/dashboard');
                       },
                       child: const Text(
                         "CONTINUER",

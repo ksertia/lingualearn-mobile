@@ -347,43 +347,43 @@ class _QuizQCMState extends State<QuizQCM> with TickerProviderStateMixin {
             children: [
               const SizedBox(height: 30),
               // Bannière conseil
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                padding: const EdgeInsets.symmetric(
-                    vertical: 14, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF4E0),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                      color: const Color(0xFFFF9800).withValues(alpha: 0.25),
-                      width: 1.5),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFF9800),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.lightbulb_rounded,
-                          color: Colors.white, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        "Choisis la bonne réponse pour continuer l'aventure !",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF8A5300),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Container(
+              //   margin: const EdgeInsets.symmetric(horizontal: 20),
+              //   padding: const EdgeInsets.symmetric(
+              //       vertical: 14, horizontal: 16),
+              //   decoration: BoxDecoration(
+              //     color: const Color(0xFFFFF4E0),
+              //     borderRadius: BorderRadius.circular(18),
+              //     border: Border.all(
+              //         color: const Color(0xFFFF9800).withValues(alpha: 0.25),
+              //         width: 1.5),
+              //   ),
+              //   child: Row(
+              //     children: [
+              //       Container(
+              //         width: 40,
+              //         height: 40,
+              //         decoration: const BoxDecoration(
+              //           color: Color(0xFFFF9800),
+              //           shape: BoxShape.circle,
+              //         ),
+              //         child: const Icon(Icons.lightbulb_rounded,
+              //             color: Colors.white, size: 20),
+              //       ),
+              //       const SizedBox(width: 12),
+              //       const Expanded(
+              //         child: Text(
+              //           "Choisis la bonne réponse pour continuer l'aventure !",
+              //           style: TextStyle(
+              //             fontSize: 14,
+              //             fontWeight: FontWeight.w700,
+              //             color: Color(0xFF8A5300),
+              //           ),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
               const SizedBox(height: 22),
               // Mascotte + bulle question
               Padding(

@@ -3,17 +3,14 @@ import 'package:dio/dio.dart';
 import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tibi/controller/apps/moduls/home_controller.dart';
-import 'package:tibi/helpers/services/module_service.dart';
-import 'package:tibi/models/modules/modul_model.dart';
+import 'package:tibi/views/apps/home/screens/sub_themes_page.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────
 const Color _kGreen  = Color(0xFF188329);
-const Color _kLocked = Color(0xFFB0BEC5);
 const Color _kOrange = Color(0xFFF27F22);
-
+const int _kModulesPerPage = 2;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,98 +19,25 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> 
-    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late HomeController controller;
 
   bool _hasNetworkError = false;
   String _networkErrorMsg = '';
 
-  // ─── Guide ─────────────────────────────────────────────────────────────────
-  bool _showGuide = false;
-  late final AnimationController _bounceCtrl;
-  late final Animation<double> _bounceAnim;
-  Worker? _guideWorker;
-
-  static const List<String> _animals = [
-    'assets/lottie/poulet.json',
-    'assets/lottie/elephant.json',
-    'assets/lottie/cat.json',
-    'assets/lottie/Chicken.json',
-    'assets/lottie/dino.json',
-    'assets/lottie/Dog.json',
-    'assets/lottie/Lion.json',
-  ];
-
-  String _animal(int i) => _animals[i % _animals.length];
-
-  Color _accent(String s) {
-    if (s == 'completed') return _kGreen;
-    if (s == 'unlocked' || s == 'started') return _kOrange;
-    return _kLocked;
-  }
+  Color _accent(String s) => s == 'completed' ? _kGreen : _kOrange;
 
   @override
   void initState() {
     super.initState();
     controller = Get.put(HomeController());
     WidgetsBinding.instance.addObserver(this);
-    ever(controller.moduleDisplayStatus, (_) => _autoUnlockNext());
-
-    // Guide animation
-    _bounceCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
-    _bounceAnim = Tween<double>(begin: 0.0, end: 8.0).animate(
-      CurvedAnimation(parent: _bounceCtrl, curve: Curves.easeInOut),
-    );
-    _checkGuideOnLoad();
-  }
-
-  Future<void> _checkGuideOnLoad() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool('modules_guide_shown') ?? false) return;
-
-    // Attend que les modules soient chargés pour afficher le guide
-    _guideWorker = ever(controller.isLoading, (bool loading) async {
-      if (loading) return;
-      if (controller.filteredModules.isEmpty) return;
-      _guideWorker?.dispose();
-      _guideWorker = null;
-      await Future.delayed(const Duration(milliseconds: 600));
-      if (!mounted) return;
-      setState(() => _showGuide = true);
-      _bounceCtrl.repeat(reverse: true);
-    });
-  }
-
-  Future<void> _dismissModuleGuide() async {
-    if (!mounted) return;
-    setState(() => _showGuide = false);
-    _bounceCtrl.stop();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('modules_guide_shown', true);
   }
 
   Future<void> _silentRefresh() async {
     try {
       await controller.onRefresh();
     } catch (_) {}
-  }
-
-  void _autoUnlockNext() {
-    final modules = controller.filteredModules;
-    final statuses = controller.moduleDisplayStatus;
-    for (int i = 0; i < modules.length - 1; i++) {
-      final currentStatus =
-          (statuses[modules[i].id] ?? 'locked').toLowerCase();
-      final nextId = modules[i + 1].id;
-      final nextStatus = (statuses[nextId] ?? 'locked').toLowerCase();
-      if (currentStatus == 'completed' && nextStatus == 'locked') {
-        statuses[nextId] = 'unlocked';
-      }
-    }
   }
 
   @override
@@ -158,110 +82,14 @@ class _HomePageState extends State<HomePage>
     return 'Impossible de charger les modules. Réessaie.';
   }
 
+  String get _userId => controller.session.userId.value.isNotEmpty
+      ? controller.session.userId.value
+      : (controller.session.user?.id ?? '');
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _bounceCtrl.dispose();
-    _guideWorker?.dispose();
     super.dispose();
-  }
-
-  // ── Guide widget ───────────────────────────────────────────────────────────
-
-  Widget _buildModuleGuide() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Bulle tooltip
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: _kOrange,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: _kOrange.withValues(alpha: 0.30),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Icons.lightbulb_rounded, color: Color(0xFF1A1A1A), size: 20),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Text(
-                  'Clique sur le premier module pour découvrir ses parcours !',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    height: 1.45,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: _dismissModuleGuide,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.20),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.close_rounded,
-                      color: Colors.white, size: 13),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 4),
-
-        // Doigt animé centré sur le card module
-        // Ligne = SizedBox(52) + SizedBox(12) + Expanded(card)
-        // Centre du card = 52 + 12 + (largeur_card / 2)
-        LayoutBuilder(
-          builder: (_, constraints) {
-            const timelineW = 52.0;
-            const gapW = 12.0;
-            final cardW = constraints.maxWidth - timelineW - gapW;
-            final fingerX = timelineW + gapW + cardW / 2 - 15; // 15 = moitié icône
-            return SizedBox(
-              height: 46,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  AnimatedBuilder(
-                    animation: _bounceAnim,
-                    builder: (_, child) => Positioned(
-                      left: fingerX,
-                      top: _bounceAnim.value,
-                      child: child!,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CustomPaint(
-                          size: const Size(14, 7),
-                          painter: _ModuleTrianglePainter(color: _kOrange),
-                        ),
-                        const SizedBox(height: 2),
-                        const Icon(Icons.touch_app_rounded,
-                            color: _kOrange, size: 30),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    );
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
@@ -288,91 +116,140 @@ class _HomePageState extends State<HomePage>
             return _buildEmptyModules(context);
           }
 
-          final modules = controller.filteredModules;
+          final modules = controller.moduleTree;
+          final pages = <List<ModuleNode>>[];
+          for (int i = 0; i < modules.length; i += _kModulesPerPage) {
+            pages.add(modules.sublist(
+                i, (i + _kModulesPerPage).clamp(0, modules.length)));
+          }
 
-          return ListView.builder(
-              padding: EdgeInsets.fromLTRB(
-                20,
-                MediaQuery.of(context).padding.top + kToolbarHeight + 16,
-                20,
-                48,
+          return Column(
+            children: [
+              SizedBox(
+                  height:
+                      MediaQuery.of(context).padding.top + kToolbarHeight + 16),
+              if (pages.length > 1) _buildPageIndicator(context, pages.length),
+              const SizedBox(height: 4),
+              Expanded(
+                child: PageView.builder(
+                  controller: controller.pageController,
+                  onPageChanged: controller.onPageChanged,
+                  itemCount: pages.length,
+                  itemBuilder: (_, i) => _buildModulesPage(
+                      context, pages[i], i * _kModulesPerPage),
+                ),
               ),
-              itemCount: modules.length,
-              itemBuilder: (_, index) {
-                final moduleIndex = index;
-                final module = modules[moduleIndex];
-                final bool isLast = moduleIndex == modules.length - 1;
-                final String st =
-                    (controller.moduleDisplayStatus[module.id] ?? 'locked')
-                        .toLowerCase();
-                final bool isUnlocked =
-                    st == 'unlocked' || st == 'started' || st == 'completed';
-                final accent = _accent(st);
-
-                final moduleRow = IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 52,
-                        child: Column(
-                          children: [
-                            _buildTimelineNode(st, accent),
-                            if (!isLast)
-                              Expanded(
-                                child: Center(
-                                  child: Container(
-                                    width: 4,
-                                    margin: const EdgeInsets.symmetric(
-                                        vertical: 4),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          accent.withValues(alpha: 0.65),
-                                          accent.withValues(alpha: 0.05),
-                                        ],
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                      ),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 22),
-                          child: _buildModuleCard(
-                            context, module, st, isUnlocked, accent,
-                            moduleIndex,
-                            onBeforeTap: moduleIndex == 0 && _showGuide
-                                ? _dismissModuleGuide
-                                : null,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-
-                if (moduleIndex == 0 && _showGuide) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildModuleGuide(),
-                      const SizedBox(height: 6),
-                      moduleRow,
-                    ],
-                  );
-                }
-                return moduleRow;
-              },
+            ],
           );
         }),
+      ),
+    );
+  }
+
+  // ── Pagination ─────────────────────────────────────────────────────────────
+
+  Widget _buildModulesPage(
+      BuildContext context, List<ModuleNode> pageModules, int startIndex) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 48),
+      itemCount: pageModules.length,
+      itemBuilder: (_, index) {
+        final moduleNode = pageModules[index];
+        final st = (controller.moduleDisplayStatus[moduleNode.module.id] ??
+                'unlocked')
+            .toLowerCase();
+        final accent = _accent(st);
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildModuleHeader(
+                  context, moduleNode, accent, startIndex + index),
+              _buildThemesSection(context, moduleNode),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPageIndicator(BuildContext context, int pageCount) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: Center(
+        child: Obx(() => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.96),
+                borderRadius: BorderRadius.circular(50),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildPageNavBtn(
+                    Icons.arrow_back_ios_new_rounded,
+                    controller.currentPage.value > 0,
+                    () => controller.goToPage(controller.currentPage.value - 1),
+                  ),
+                  const SizedBox(width: 12),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(pageCount, (i) {
+                      final isActive = i == controller.currentPage.value;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 280),
+                        curve: Curves.easeOutCubic,
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        width: isActive ? 22.0 : 7.0,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          gradient: isActive
+                              ? const LinearGradient(
+                                  colors: [_kOrange, Color(0xFFFFB347)])
+                              : null,
+                          color: isActive
+                              ? null
+                              : _kOrange.withValues(alpha: 0.20),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(width: 12),
+                  _buildPageNavBtn(
+                    Icons.arrow_forward_ios_rounded,
+                    controller.currentPage.value < pageCount - 1,
+                    () => controller.goToPage(controller.currentPage.value + 1),
+                  ),
+                ],
+              ),
+            )),
+      ),
+    );
+  }
+
+  Widget _buildPageNavBtn(IconData icon, bool enabled, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        padding: const EdgeInsets.all(7),
+        decoration: BoxDecoration(
+          color: enabled
+              ? _kOrange.withValues(alpha: 0.12)
+              : Colors.grey.withValues(alpha: 0.08),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon,
+            size: 15, color: enabled ? _kOrange : Colors.grey.shade400),
       ),
     );
   }
@@ -456,343 +333,226 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ── Timeline node ─────────────────────────────────────────────────────────
+  // ── Module header ─────────────────────────────────────────────────────────
 
-  Widget _buildTimelineNode(String status, Color accent) {
-    final IconData icon;
-    if (status == 'completed') {
-      icon = Icons.check_rounded;
-    } else if (status == 'unlocked' || status == 'started') {
-      icon = Icons.play_arrow_rounded;
-    } else {
-      icon = Icons.lock_rounded;
-    }
-
-    final bool isActive = status != 'locked';
-    final List<Color> gradientColors = status == 'completed'
-        ? [_kGreen, const Color(0xFF22A63B)]
-        : (status == 'unlocked' || status == 'started')
-            ? [_kOrange, const Color(0xFFFFB347)]
-            : [const Color(0xFFECEFF1), const Color(0xFFCFD8DC)];
-
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        shape: BoxShape.circle,
-        boxShadow: isActive
-            ? [
-                BoxShadow(
-                  color: accent.withValues(alpha: 0.40),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-                BoxShadow(
-                  color: accent.withValues(alpha: 0.15),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : [],
-      ),
-      child: Icon(
-        icon,
-        color: isActive ? Colors.white : _kLocked,
-        size: 24,
-      ),
-    );
-  }
-
-  // ── Module card ───────────────────────────────────────────────────────────
-
-  Widget _buildModuleCard(
-    BuildContext context,
-    ModuleModel module,
-    String st,
-    bool isUnlocked,
-    Color accent,
-    int index, {
-    VoidCallback? onBeforeTap,
-  }) {
-    final isCompleted = st == 'completed';
-    final isOrange = accent == _kOrange;
-
-    final List<Color> stripeColors = isCompleted
-        ? [_kGreen, const Color(0xFF22A63B)]
-        : isUnlocked
-            ? [_kOrange, const Color(0xFFFFB347)]
-            : [const Color(0xFFCFD8DC), const Color(0xFFB0BEC5)];
-
-    return GestureDetector(
-        onTap: !isUnlocked
-            ? () => Get.snackbar(
-                  '🔒 Module verrouillé',
-                  'Termine le module précédent pour débloquer celui-ci.',
-                  backgroundColor: const Color(0xFF1A1A1A),
-                  colorText: Colors.white,
-                  snackPosition: SnackPosition.BOTTOM,
-                  margin: const EdgeInsets.all(16),
-                  borderRadius: 16,
-                  icon: const Icon(Icons.lock_rounded, color: Colors.white70),
-                )
-            : () async {
-                onBeforeTap?.call();
-                if (!controller.isSubscriptionActive.value) {
-                  _showSubscriptionRequired(context);
-                  return;
-                }
-                final userId =
-                    controller.session.userId.value.isNotEmpty
-                        ? controller.session.userId.value
-                        : (controller.session.user?.id ?? '');
-                final raw =
-                    (module.progress?.status ?? module.status ?? '')
-                        .toLowerCase();
-                if (userId.isNotEmpty && raw == 'unlocked') {
-                  try {
-                    await ModuleService.startModule(
-                        userId: userId, moduleId: module.id);
-                  } on DioException catch (e) {
-                    final status = e.response?.statusCode ?? 0;
-                    if (status == 402 || status == 403) {
-                      controller.isSubscriptionActive.value = false;
-                      if (context.mounted) _showSubscriptionRequired(context);
-                      return;
-                    }
-                    if (status == 0 || e.response == null) {
-                      if (context.mounted) {
-                        Get.snackbar(
-                          'Connexion perdue',
-                          'Vérifie ton internet et réessaie.',
-                          backgroundColor: const Color(0xFFE53E3E),
-                          colorText: Colors.white,
-                          snackPosition: SnackPosition.BOTTOM,
-                          margin: const EdgeInsets.all(16),
-                          borderRadius: 16,
-                        );
-                      }
-                      return;
-                    }
-                  }
-                }
-                await Get.toNamed('/parcoursselectionpage', arguments: {
-                  'moduleId': module.id,
-                  'userId': userId,
-                  'moduleLottie': _animal(index),
-                });
-                // Le module a pu être marqué "completed" côté serveur
-                // pendant qu'on était sur les parcours/étapes : on
-                // rafraîchit tout de suite pour débloquer le module
-                // suivant sans attendre le timer ou un aller-retour.
-                await controller.onRefresh();
-              },
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 118),
-          decoration: BoxDecoration(
-            color: AppColors.card(context),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: accent.withValues(alpha: isUnlocked ? 0.22 : 0.10),
-              width: 1.5,
+  Widget _buildModuleHeader(BuildContext context, ModuleNode moduleNode,
+      Color accent, int moduleIndex) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.94),
+              borderRadius: BorderRadius.circular(8),
             ),
-            boxShadow: isUnlocked
-                ? [
-                    BoxShadow(
-                      color: accent.withValues(alpha: 0.18),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : [],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(23),
-            child: Stack(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Gradient left stripe
-                Positioned(
-                  left: 0, top: 0, bottom: 0,
-                  child: Container(
-                    width: 6,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: stripeColors,
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                    ),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'MODULE ${moduleIndex + 1} — ${moduleNode.module.title.toUpperCase()}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    letterSpacing: 0.4,
+                    color: Color(0xFF1A1A1A),
                   ),
                 ),
-                // Text content
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 10, 16, 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          children: [
-                            _buildStatusBadge(
-                                st, isUnlocked, accent, isOrange),
-                            if (isCompleted) ...[
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 7, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: _kOrange.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(7),
-                                  border: Border.all(
-                                      color: _kOrange.withValues(alpha: 0.3),
-                                      width: 1),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.star_rounded,
-                                        color: _kOrange, size: 10),
-                                    SizedBox(width: 3),
-                                    Text(
-                                      'BRAVO',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF8B6B00),
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        const SizedBox(height: 7),
-                        Text(
-                          module.title.toUpperCase(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 14.5,
-                            letterSpacing: 0.3,
-                            color: isUnlocked
-                                ? AppColors.textPrimary(context)
-                                : Colors.grey.shade400,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          isUnlocked
-                              ? module.description
-                              : 'Continue pour découvrir ce module…',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: isUnlocked
-                                ? AppColors.textSecondary(context)
-                                : Colors.grey.shade400,
-                            fontSize: 12,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Play button for active
-                if (st == 'unlocked' || st == 'started')
-                  Positioned(
-                    right: 8, bottom: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: _kOrange.withValues(alpha: 0.30),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.play_circle_fill,
-                          color: _kOrange, size: 30),
-                    ),
-                  ),
-                // Completed checkmark
-                if (isCompleted)
-                  Positioned(
-                    right: 8, top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: _kGreen,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: _kGreen.withValues(alpha: 0.35),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.check_rounded,
-                          color: Colors.white, size: 14),
-                    ),
-                  ),
               ],
             ),
           ),
         ),
+      ),
     );
   }
 
-  Widget _buildStatusBadge(
-      String st, bool isUnlocked, Color accent, bool isOrange) {
-    final String label;
-    final IconData icon;
-    if (st == 'completed') {
-      label = 'TERMINÉ';
-      icon = Icons.check_rounded;
-    } else if (isUnlocked) {
-      label = 'EN COURS';
-      icon = Icons.bolt_rounded;
-    } else {
-      label = 'VERROUILLÉ';
-      icon = Icons.lock_rounded;
-    }
+  // ── Thèmes ────────────────────────────────────────────────────────────────
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(7),
-        border:
-            Border.all(color: accent.withValues(alpha: 0.2), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon,
-              color: isOrange ? const Color(0xFF8B6B00) : accent,
-              size: 10),
-          const SizedBox(width: 3),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w800,
-              color: isOrange ? const Color(0xFF8B6B00) : accent,
-              letterSpacing: 0.8,
+  Widget _buildThemesSection(BuildContext context, ModuleNode moduleNode) {
+    return Obx(() {
+      if (moduleNode.themesLoading.value) {
+        return _buildInlineShimmerRows(context, count: 2);
+      }
+      if (moduleNode.themesError.value) {
+        return _buildInlineError(
+          context,
+          message: 'Impossible de charger les thèmes.',
+          onRetry: () => controller.retryThemesForModule(moduleNode),
+        );
+      }
+      if (moduleNode.themeNodes.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.45),
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (int i = 0; i < moduleNode.themeNodes.length; i++)
+              Padding(
+                padding: EdgeInsets.only(
+                    bottom: i == moduleNode.themeNodes.length - 1 ? 0 : 12),
+                child: _buildThemeCard(context, moduleNode.themeNodes[i], i),
+              ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildThemeCard(BuildContext context, ThemeNode themeNode, int themeIdx) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () => Get.to(
+          () => SubThemesPage(
+            controller: controller,
+            themeNode: themeNode,
+            themeIdx: themeIdx,
+            userId: _userId,
+          ),
+          transition: Transition.rightToLeft,
+        ),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 88),
+          decoration: BoxDecoration(
+            color: AppColors.card(context),
+            borderRadius: BorderRadius.circular(18),
+            border:
+                Border.all(color: _kOrange.withValues(alpha: 0.28), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: _kOrange.withValues(alpha: 0.12),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(17),
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Container(width: 5, color: _kOrange),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 12, 20),
+                  child: Row(
+                    children: [
+                      Icon(Icons.label_outline, size: 18, color: _kOrange),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              themeNode.theme.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15.5,
+                                color: AppColors.textPrimary(context),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Obx(() {
+                              if (themeNode.subThemesLoading.value) {
+                                return const SizedBox.shrink();
+                              }
+                              final n = themeNode.subThemes.length;
+                              return Text(
+                                n <= 1 ? '$n sous-thème' : '$n sous-thèmes',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary(context),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.chevron_right_rounded,
+                          color: _kOrange, size: 22),
+                    ],
+                  ),
+                ),
+              ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── États locaux (thème/sous-thème) ────────────────────────────────────────
+
+  Widget _buildInlineShimmerRows(BuildContext context,
+      {required int count, double cardHeight = 40}) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, bottom: 4),
+      child: Shimmer.fromColors(
+        baseColor: AppColors.shimmerBase(context),
+        highlightColor: AppColors.shimmerHighlight(context),
+        child: Column(
+          children: List.generate(
+            count,
+            (_) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Container(
+                height: cardHeight,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInlineError(BuildContext context,
+      {required String message, required VoidCallback onRetry}) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, bottom: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                fontSize: 12.5,
+                color: AppColors.textSecondary(context),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: onRetry,
+            child: const Text('Réessayer',
+                style: TextStyle(color: _kOrange, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -1045,106 +805,6 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  // ── Subscription bottom sheet ──────────────────────────────────────────────
-
-  void _showSubscriptionRequired(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => Container(
-        decoration: BoxDecoration(
-          color: AppColors.card(context),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.divider(context),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 28),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: _kOrange,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: _kOrange.withValues(alpha: 0.35),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.workspace_premium_rounded,
-                  color: Colors.white, size: 38),
-            ),
-            const SizedBox(height: 22),
-            Text(
-              'Abonnement requis',
-              style: TextStyle(
-                color: AppColors.textPrimary(context),
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Accédez à tous les modules en illimité.\nSouscrivez dès maintenant et commencez à apprendre.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textSecondary(context),
-                fontSize: 14,
-                height: 1.6,
-              ),
-            ),
-            const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Get.toNamed('/subscription_plans');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _kOrange,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Voir les forfaits',
-                  style: TextStyle(
-                    color: Color(0xFF1A1A1A),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Plus tard',
-                style:
-                    TextStyle(color: Colors.grey.shade400, fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ── Shimmer ────────────────────────────────────────────────────────────────
 
   Widget _buildShimmer(BuildContext context) {
@@ -1160,7 +820,6 @@ class _HomePageState extends State<HomePage>
         ),
         itemCount: 6,
         itemBuilder: (_, i) {
-          // Header card shimmer
           if (i == 0) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 20),
@@ -1173,56 +832,18 @@ class _HomePageState extends State<HomePage>
               ),
             );
           }
-          // Module row shimmer
           return Padding(
             padding: const EdgeInsets.only(bottom: 22),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Container(
-                    height: 118,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                ),
-              ],
+            child: Container(
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
             ),
           );
         },
       ),
     );
   }
-}
-
-// ── Triangle painter (guide) ──────────────────────────────────────────────────
-
-class _ModuleTrianglePainter extends CustomPainter {
-  final Color color;
-  const _ModuleTrianglePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width / 2, size.height)
-      ..close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(_ModuleTrianglePainter old) => old.color != color;
 }

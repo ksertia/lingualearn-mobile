@@ -1,7 +1,4 @@
-﻿import 'package:tibi/models/parcoure/parcour_model.dart';
-
-
-class ModuleProgress {
+﻿class ModuleProgress {
   final String? id;
   final String? userId;
   final String? moduleId;
@@ -55,7 +52,6 @@ class ModuleModel {
   final bool isActive;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final List<LearningPathModel>? paths;
   final String? status; // 'locked' | 'unlocked' | 'completed'
   final ModuleProgress? progress;
   final int? totalXp;
@@ -72,7 +68,6 @@ class ModuleModel {
     required this.isActive,
     this.createdAt,
     this.updatedAt,
-    this.paths,
     this.status,
     this.progress,
     this.totalXp,
@@ -93,9 +88,6 @@ class ModuleModel {
       isActive: json['isActive'] ?? true,
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
       updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
-      paths: json['paths'] != null
-          ? (json['paths'] as List).map((p) => LearningPathModel.fromJson(Map<String, dynamic>.from(p))).toList()
-          : null,
       status: json['status']?.toString(),
       progress: json['progress'] != null ? ModuleProgress.fromJson(Map<String, dynamic>.from(json['progress'])) : null,
       totalXp: json['totalXp'] is int ? json['totalXp'] : (json['totalXp'] != null ? int.tryParse(json['totalXp'].toString()) : null),
