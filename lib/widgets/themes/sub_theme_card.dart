@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tibi/controller/apps/moduls/home_controller.dart';
 import 'package:tibi/helpers/services/contents/content_service.dart';
 import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:tibi/models/contents/content_model.dart';
@@ -7,23 +8,31 @@ import 'package:tibi/models/themes/sub_theme_model.dart';
 import 'package:tibi/views/apps/home/screens/StepContentScreen.dart';
 
 const Color _kOrange = Color(0xFFF27F22);
+const Color _kGreen = Color(0xFF188329);
+const Color _kLocked = Color(0xFF9AA0A6);
 
 class SubThemeCard extends StatefulWidget {
+  final HomeController controller;
+  final ThemeNode themeNode;
   final SubThemeModel subTheme;
   final int themeIdx;
   final int subThemeIdx;
   final String userId;
   final bool Function() isSubscriptionActive;
   final void Function(BuildContext context) onSubscriptionRequired;
+  final VoidCallback? onSubThemeCompleted;
 
   const SubThemeCard({
     super.key,
+    required this.controller,
+    required this.themeNode,
     required this.subTheme,
     required this.themeIdx,
     required this.subThemeIdx,
     required this.userId,
     required this.isSubscriptionActive,
     required this.onSubscriptionRequired,
+    this.onSubThemeCompleted,
   });
 
   @override
@@ -74,12 +83,14 @@ class _SubThemeCardState extends State<SubThemeCard> {
     }
   }
 
-  void _openContent(int index) {
+  Future<void> _openContent(int index) async {
     if (!widget.isSubscriptionActive()) {
       widget.onSubscriptionRequired(context);
       return;
     }
-    Get.to(
+    // Optimiste, non bloquant : l'appel réseau se poursuit en arrière-plan.
+    widget.controller.markSubThemeOpened(widget.themeNode, widget.subTheme);
+    final result = await Get.to(
       () => StepContentScreen(
         subThemeId: widget.subTheme.id,
         userId: widget.userId,
@@ -87,6 +98,9 @@ class _SubThemeCardState extends State<SubThemeCard> {
       ),
       transition: Transition.rightToLeft,
     );
+    if (result == true) {
+      widget.onSubThemeCompleted?.call();
+    }
   }
 
   _ContentStyle _styleFor(String contentType) {
@@ -109,101 +123,138 @@ class _SubThemeCardState extends State<SubThemeCard> {
     }
   }
 
+  Color _accent(String status) {
+    if (status == 'completed') return _kGreen;
+    if (status == 'locked') return _kLocked;
+    return _kOrange;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.card(context),
-          borderRadius: BorderRadius.circular(20),
-          border:
-              Border.all(color: _kOrange.withValues(alpha: 0.20), width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: _kOrange.withValues(alpha: 0.10),
-              blurRadius: 14,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(19),
-          child: Stack(
-            children: [
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: Container(width: 5, color: _kOrange),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildHeader(context),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 240),
-                    curve: Curves.easeInOut,
-                    alignment: Alignment.topCenter,
-                    child: _expanded
-                        ? _buildExpandedBody(context)
-                        : const SizedBox(width: double.infinity),
-                  ),
-                ],
+    return Obx(() {
+      final accent = _accent(
+          (widget.controller.subThemeDisplayStatus[widget.subTheme.id] ?? 'locked')
+              .toLowerCase());
+      return GestureDetector(
+        onTap: _handleTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.card(context),
+            borderRadius: BorderRadius.circular(20),
+            border:
+                Border.all(color: accent.withValues(alpha: 0.20), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: accent.withValues(alpha: 0.10),
+                blurRadius: 14,
+                offset: const Offset(0, 5),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(19),
+            child: Stack(
               children: [
-                Text(
-                  '${widget.themeIdx + 1}.${widget.subThemeIdx + 1} — ${widget.subTheme.title}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14.5,
-                    color: AppColors.textPrimary(context),
-                  ),
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Container(width: 5, color: accent),
                 ),
-                if (widget.subTheme.description.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.subTheme.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: AppColors.textSecondary(context),
-                      height: 1.3,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildHeader(context),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 240),
+                      curve: Curves.easeInOut,
+                      alignment: Alignment.topCenter,
+                      child: _expanded
+                          ? _buildExpandedBody(context)
+                          : const SizedBox(width: double.infinity),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          AnimatedRotation(
-            duration: const Duration(milliseconds: 200),
-            turns: _expanded ? 0.25 : 0,
-            child: const Icon(Icons.chevron_right_rounded,
-                color: _kOrange, size: 24),
-          ),
-        ],
-      ),
-    );
+        ),
+      );
+    });
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Obx(() {
+      final status = (widget.controller.subThemeDisplayStatus[widget.subTheme.id] ??
+              'locked')
+          .toLowerCase();
+      final isCompleted = status == 'completed';
+      final isLocked = status == 'locked';
+      final accent = isCompleted ? _kGreen : (isLocked ? _kLocked : _kOrange);
+
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+        child: Row(
+          children: [
+            Icon(
+              isLocked
+                  ? Icons.lock_rounded
+                  : isCompleted
+                      ? Icons.check_circle_rounded
+                      : Icons.play_circle_fill_rounded,
+              color: accent,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${widget.themeIdx + 1}.${widget.subThemeIdx + 1} — ${widget.subTheme.title}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14.5,
+                      color: AppColors.textPrimary(context),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  if (isLocked)
+                    Text(
+                      'Pas encore commencé',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: accent,
+                      ),
+                    )
+                  else if (widget.subTheme.description.isNotEmpty)
+                    Text(
+                      widget.subTheme.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: AppColors.textSecondary(context),
+                        height: 1.3,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            AnimatedRotation(
+              duration: const Duration(milliseconds: 200),
+              turns: _expanded ? 0.25 : 0,
+              child: Icon(Icons.chevron_right_rounded, color: accent, size: 24),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildExpandedBody(BuildContext context) {

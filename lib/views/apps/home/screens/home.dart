@@ -3,18 +3,19 @@ import 'package:tibi/controller/apps/langue/langue_controller.dart';
 import 'package:tibi/controller/apps/moduls/home_controller.dart';
 import 'package:tibi/controller/apps/session_controller.dart';
 import 'package:tibi/controller/apps/user_progress/user_progress_controller.dart';
-import 'package:tibi/helpers/services/module_service.dart';
 import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
 import 'package:tibi/helpers/services/themes/theme_service.dart';
 import 'package:tibi/helpers/services/themes/sub_theme_service.dart';
+import 'package:tibi/helpers/services/progression/progression_detail_service.dart';
 import 'package:tibi/helpers/storage/local_storage.dart';
 import 'package:tibi/helpers/theme/app_colors.dart';
-import 'package:tibi/models/modules/modul_model.dart';
+import 'package:tibi/models/progression/level_module_progress_model.dart';
 import 'package:tibi/models/themes/theme_model.dart';
 import 'package:tibi/models/themes/sub_theme_model.dart';
 import 'package:tibi/models/user_progress/user_progress_model.dart';
 import 'package:tibi/views/apps/home/screens/module_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tibi/widgets/mascots/zaki_mascot.dart';
@@ -61,12 +62,13 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   bool _isSubscriptionActive = true;
   bool _hasProgressError = false;
   String _progressErrorMsg = '';
-  Map<String, ModuleModel?> _fallbackModules = {};
-
   final ThemeService _themeService = ThemeService();
   final SubThemeService _subThemeService = SubThemeService();
-  final Map<String, ThemeModel?> _currentThemeByModule = {};
-  final Map<String, SubThemeModel?> _currentSubThemeByModule = {};
+  // Thème / sous-thème "en cours" par niveau (niveau → thèmes → sous-thèmes).
+  final Map<String, ThemeModel?> _currentThemeByLevel = {};
+  final Map<String, SubThemeModel?> _currentSubThemeByLevel = {};
+  final Map<String, List<ThemeModel>> _themesByLevel = {};
+  final Map<String, LevelModuleProgress?> _levelModuleProgressByLevel = {};
 
   bool _isFirstVisit = false;
 
@@ -111,8 +113,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     });
     try {
       await progressCtrl.loadProgress();
-      await _loadFallbackModules();
       _loadCurrentThemesAndSubThemes();
+      _loadLevelModuleProgress();
     } on DioException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -128,51 +130,62 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     }
   }
 
-  Future<void> _loadFallbackModules() async {
-    final entries = progressCtrl.progressList;
-    if (entries.isEmpty) return;
-    final Map<String, ModuleModel?> fallbacks = {};
-    for (final entry in entries) {
-      if (entry.module != null) continue;
-      final modules = await ModuleService.getModulesByLanguageLevel(
-        languageId: entry.language.id,
-        levelId: entry.level.id,
-      );
-      if (modules.isNotEmpty) {
-        modules.sort((a, b) => a.index.compareTo(b.index));
-        fallbacks[entry.language.id] = modules.first;
-      }
-    }
-    if (mounted && fallbacks.isNotEmpty) {
-      setState(() => _fallbackModules = fallbacks);
-    }
-  }
-
   void _loadCurrentThemesAndSubThemes() {
     final entries = progressCtrl.progressList;
     for (final entry in entries) {
-      final moduleId = entry.module?.id ?? _fallbackModules[entry.language.id]?.id;
-      if (moduleId == null || moduleId.isEmpty) continue;
-      if (_currentThemeByModule.containsKey(moduleId)) continue;
-      _loadCurrentThemeAndSubTheme(moduleId);
+      final levelId = entry.level.id;
+      if (levelId.isEmpty || _currentThemeByLevel.containsKey(levelId)) continue;
+      _loadCurrentThemeAndSubTheme(levelId);
     }
   }
 
-  Future<void> _loadCurrentThemeAndSubTheme(String moduleId) async {
-    _currentThemeByModule[moduleId] = null;
+  // Même source que la page Progression (GET /progress/user/.../level/...) :
+  // `entry.level.totalModules/completedModules` de /users/my-progress reste
+  // à 0, donc on va chercher la vraie répartition module par module ici.
+  void _loadLevelModuleProgress() {
+    final userId =
+        session.userId.value.isNotEmpty ? session.userId.value : (session.user?.id ?? '');
+    if (userId.isEmpty) return;
+    final entries = progressCtrl.progressList;
+    for (final entry in entries) {
+      final levelId = entry.level.id;
+      if (levelId.isEmpty || _levelModuleProgressByLevel.containsKey(levelId)) continue;
+      _levelModuleProgressByLevel[levelId] = null;
+      ProgressionDetailService.getLevelModuleProgress(userId: userId, levelId: levelId)
+          .then((result) {
+        if (!mounted) return;
+        setState(() => _levelModuleProgressByLevel[levelId] = result);
+      });
+    }
+  }
+
+  // Thème en cours = premier thème démarré non terminé, sinon premier thème
+  // non terminé (dans l'ordre `index`) ; même règle pour le sous-thème.
+  Future<void> _loadCurrentThemeAndSubTheme(String levelId) async {
+    _currentThemeByLevel[levelId] = null;
+    final userId =
+        session.userId.value.isNotEmpty ? session.userId.value : (session.user?.id ?? '');
     try {
-      final themes = await _themeService.getThemesByModule(moduleId);
+      final themes = await _themeService.getThemesByLevel(levelId, userId: userId);
       if (themes.isEmpty) return;
       themes.sort((a, b) => a.index.compareTo(b.index));
-      final theme = themes.first;
+      if (mounted) setState(() => _themesByLevel[levelId] = themes);
+      final theme = themes.firstWhereOrNull((t) => t.isStarted && !t.isCompleted) ??
+          themes.firstWhereOrNull((t) => !t.isCompleted) ??
+          themes.last;
       if (!mounted) return;
-      setState(() => _currentThemeByModule[moduleId] = theme);
+      setState(() => _currentThemeByLevel[levelId] = theme);
 
-      final subThemes = await _subThemeService.getSubThemesByTheme(theme.id);
+      final subThemes =
+          await _subThemeService.getSubThemesByTheme(theme.id, userId: userId);
       if (subThemes.isEmpty) return;
       subThemes.sort((a, b) => a.index.compareTo(b.index));
+      final subTheme =
+          subThemes.firstWhereOrNull((st) => st.isStarted && !st.isCompleted) ??
+              subThemes.firstWhereOrNull((st) => !st.isCompleted) ??
+              subThemes.last;
       if (!mounted) return;
-      setState(() => _currentSubThemeByModule[moduleId] = subThemes.first);
+      setState(() => _currentSubThemeByLevel[levelId] = subTheme);
     } catch (_) {}
   }
 
@@ -221,9 +234,16 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   @override
   Widget build(BuildContext context) {
     _ctx = context;
-    return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
       backgroundColor: AppColors.bg(context),
       body: SafeArea(
+        top: false,
         child: RefreshIndicator(
           onRefresh: () async {
             await Future.wait([_loadProgressSafe(), _checkSubscription()]);
@@ -256,6 +276,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -279,7 +300,8 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 10, 16, 14),
+        padding: EdgeInsets.fromLTRB(
+            20, MediaQuery.of(context).padding.top + 10, 16, 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -548,11 +570,34 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   }
 
   Widget _buildLangCard(UserProgressEntry entry) {
-    final pct = (entry.language.progressPercentage / 100.0).clamp(0.0, 1.0);
-    final pctInt = entry.language.progressPercentage;
+    // Progression du niveau = moyenne des progressions de ses thèmes (même
+    // principe que le backend). En repli, tant que les thèmes ne sont pas
+    // chargés : détail module par module puis /users/my-progress.
+    final levelThemes = _themesByLevel[entry.level.id];
+    final levelModules = _levelModuleProgressByLevel[entry.level.id];
+    final int pctInt;
+    if (levelThemes != null && levelThemes.isNotEmpty) {
+      final sum = levelThemes.fold<num>(
+          0, (acc, t) => acc + (t.progressPercentage ?? (t.isCompleted ? 100 : 0)));
+      pctInt = (sum / levelThemes.length).round().clamp(0, 100);
+    } else {
+      final int totalModules;
+      final int completedModules;
+      if (levelModules != null) {
+        totalModules = levelModules.modules.length;
+        completedModules = levelModules.modules.where((m) => m.isCompleted).length;
+      } else {
+        totalModules = entry.level.totalModules;
+        completedModules = entry.level.completedModules;
+      }
+      pctInt = totalModules > 0
+          ? ((completedModules / totalModules) * 100).round()
+          : 0;
+    }
+    final pct = (pctInt / 100.0).clamp(0.0, 1.0);
     final code = entry.language.code.toUpperCase();
     final shortCode = code.length >= 2 ? code.substring(0, 2) : code;
-    final currentModule = entry.module?.title;
+    final currentTheme = _currentThemeByLevel[entry.level.id]?.title;
     final currentStep = entry.step?.title;
 
     return Container(
@@ -664,7 +709,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
           Row(
             children: [
               Icon(
-                currentModule != null
+                currentTheme != null
                     ? Icons.menu_book_rounded
                     : Icons.flag_outlined,
                 color: AppColors.textSecondary(_ctx),
@@ -673,7 +718,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  currentModule ??
+                  currentTheme ??
                       (currentStep?.isNotEmpty == true
                           ? currentStep!
                           : "Continue ton aventure !"),
@@ -835,16 +880,11 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
       if (entries.isEmpty) return _buildNoPathCard();
       final idx = _currentLangPage.value.clamp(0, entries.length - 1);
       final entry = entries[idx];
-      if (entry.module == null) {
-        final fallback = _fallbackModules[entry.language.id];
-        if (fallback == null) return _buildNoPathCard();
-        return _buildFallbackCurrentCard(entry, fallback);
-      }
+      final currentTheme = _currentThemeByLevel[entry.level.id];
+      if (currentTheme == null) return _buildNoPathCard();
 
-      final modulePct = entry.module!.progressPercentage;
-      final moduleName = entry.module!.title;
-      final themeName = _currentThemeByModule[entry.module!.id]?.title;
-      final subThemeName = _currentSubThemeByModule[entry.module!.id]?.title;
+      final themePct = (currentTheme.progressPercentage ?? 0).round().clamp(0, 100);
+      final subThemeName = _currentSubThemeByLevel[entry.level.id]?.title;
 
       return Container(
         width: double.infinity,
@@ -898,7 +938,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '$modulePct%',
+                    '$themePct%',
                     style: const TextStyle(
                         color: _kOrange,
                         fontWeight: FontWeight.w800,
@@ -909,12 +949,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             ),
             const SizedBox(height: 18),
             _buildPathItem(
-                Icons.menu_book_rounded, "Module", moduleName, _kOrange),
-            if (themeName != null) ...[
-              const SizedBox(height: 8),
-              _buildPathItem(
-                  Icons.label_outline, "Thème", themeName, _kOrange),
-            ],
+                Icons.label_outline, "Thème", currentTheme.title, _kOrange),
             if (subThemeName != null) ...[
               const SizedBox(height: 8),
               _buildPathItem(
@@ -924,7 +959,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
-                value: modulePct / 100.0,
+                value: themePct / 100.0,
                 minHeight: 8,
                 backgroundColor: _kOrange.withValues(alpha: 0.10),
                 valueColor: const AlwaysStoppedAnimation(_kOrange),
@@ -943,7 +978,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text("Explorer les modules",
+                child: const Text("Explorer les thèmes",
                     style:
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white)),
               ),
@@ -1093,7 +1128,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   fontSize: 15,
                   color: AppColors.textPrimary(_ctx))),
           const SizedBox(height: 6),
-          Text("Choisis un module pour commencer",
+          Text("Choisis un thème pour commencer",
               style: TextStyle(color: AppColors.textSecondary(_ctx), fontSize: 12)),
           const SizedBox(height: 18),
           ElevatedButton(
@@ -1109,113 +1144,6 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             ),
             child: const Text("Commencer",
                 style: TextStyle(fontWeight: FontWeight.w700)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFallbackCurrentCard(UserProgressEntry entry, ModuleModel module) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.card(_ctx),
-        borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(
-            color: _kOrange.withValues(alpha: 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(11),
-                decoration: BoxDecoration(
-                  color: AppColors.cardAlt(_ctx),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(Icons.rocket_launch_rounded,
-                    color: AppColors.textPrimary(_ctx), size: 22),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Parcours actuel",
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary(_ctx))),
-                    Text(entry.language.name,
-                        style: TextStyle(
-                            color: AppColors.textSecondary(_ctx), fontSize: 12)),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.cardAlt(_ctx),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Text(
-                  '0%',
-                  style: TextStyle(
-                      color: _kOrange,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          _buildPathItem(Icons.menu_book_rounded, "Module", module.title, _kOrange),
-          if (_currentThemeByModule[module.id]?.title case final themeName?) ...[
-            const SizedBox(height: 8),
-            _buildPathItem(Icons.label_outline, "Thème", themeName, _kOrange),
-          ],
-          if (_currentSubThemeByModule[module.id]?.title case final subThemeName?) ...[
-            const SizedBox(height: 8),
-            _buildPathItem(
-                Icons.flag_rounded, "Sous-thème", subThemeName, _kOrange),
-          ],
-          const SizedBox(height: 18),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: const LinearProgressIndicator(
-              value: 0.0,
-              minHeight: 8,
-              backgroundColor: Color(0x1AF27F22),
-              valueColor: AlwaysStoppedAnimation(_kOrange),
-            ),
-          ),
-          const SizedBox(height: 18),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _showLanguagePickerSheet,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _kOrange,
-                foregroundColor: const Color(0xFF1A1A1A),
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-              ),
-              child: const Text("Explorer les modules",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: Colors.white)),
-            ),
           ),
         ],
       ),
@@ -1341,7 +1269,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
             duration: const Duration(seconds: 12),
           );
           // Poll silencieux — ne touche ni isLoading ni progressList.
-          // On attend que le backend assigne un module à la nouvelle langue.
+          // On attend que le backend inscrive la nouvelle langue.
           bool found = false;
           for (int i = 0; i < 10; i++) {
             await Future.delayed(const Duration(milliseconds: 1500));
@@ -1374,7 +1302,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
 
   // ─── Language picker bottom sheet ─────────────────────────────────────────
 
-  void _navigateToModules(UserProgressEntry entry) {
+  void _navigateToThemes(UserProgressEntry entry) {
     session.selectedLanguageId.value = entry.language.id;
     session.selectedLevelId.value = entry.level.id;
     if (Get.isRegistered<HomeController>()) {
@@ -1443,7 +1371,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
 
     // Navigue vers la langue actuellement visible dans le PageView
     final idx = _currentLangPage.value.clamp(0, entries.length - 1);
-    _navigateToModules(entries[idx]);
+    _navigateToThemes(entries[idx]);
   }
 }
 

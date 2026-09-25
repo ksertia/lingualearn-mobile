@@ -51,12 +51,16 @@ class SubThemesPage extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 14),
                 child: SubThemeCard(
+                  controller: controller,
+                  themeNode: themeNode,
                   subTheme: subTheme,
                   themeIdx: themeIdx,
                   subThemeIdx: i,
                   userId: userId,
                   isSubscriptionActive: () => controller.isSubscriptionActive.value,
                   onSubscriptionRequired: _showSubscriptionRequired,
+                  onSubThemeCompleted: () =>
+                      controller.markSubThemeCompleted(themeNode, subTheme.id),
                 ),
               );
             },

@@ -47,7 +47,7 @@ class _PartnerPageState extends State<PartnerPage> {
 
   Widget _buildSliverHeader() {
     return SliverAppBar(
-      expandedHeight: 240,
+      expandedHeight: 150,
       pinned: true,
       backgroundColor: _kOrange,
       surfaceTintColor: _kOrange,
@@ -103,34 +103,40 @@ class _PartnerPageState extends State<PartnerPage> {
               ),
             ),
             Positioned(
-              left: 20, right: 20, bottom: 28,
+              left: 20, right: 20, bottom: 18,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(Icons.handshake_rounded,
-                        color: Colors.white, size: 26),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: const Icon(Icons.handshake_rounded,
+                            color: Colors.white, size: 16),
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Devenez Parrain TiBi',
+                          style: TextStyle(
+                            color: Colors.white, fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Devenez\nParrain TiBi',
-                    style: TextStyle(
-                      color: Colors.white, fontSize: 26,
-                      fontWeight: FontWeight.w800, height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Text(
-                    'Partagez votre code et gagnez des points\npour chaque filleul qui rejoint TiBi.',
+                    'Partagez votre code et gagnez des points pour chaque filleul.',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.80),
-                      fontSize: 13, height: 1.5,
+                      fontSize: 12, height: 1.3,
                     ),
                   ),
                 ],

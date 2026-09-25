@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tibi/models/contents/content_model.dart';
+import 'package:tibi/models/langue/decouverte_model.dart';
 
 // Palette inspirée de la maquette "leçon culturelle"
 const Color _terra     = Color(0xFFBF4E2C);
@@ -13,23 +13,19 @@ const Color _green     = Color(0xFF2E6B4C);
 const Color _greenSoft = Color(0xFFD9E7DE);
 const Color _ink       = Color(0xFF241A12);
 
-// Affiche un contenu de type "course" en cartes par section,
+// Affiche un contenu de type "course" (leçon démo) en cartes par section,
 // une par bloc (introduction / vocabulaire / exemples / points clés / résumé).
-class CourseArticleView extends StatelessWidget {
-  final String title;
-  final List<ContentBlockModel> blocks;
+class StepDiscoveryCourse extends StatelessWidget {
+  final DemoContent content;
 
-  const CourseArticleView({
-    super.key,
-    required this.title,
-    required this.blocks,
-  });
+  const StepDiscoveryCourse({super.key, required this.content});
 
   @override
   Widget build(BuildContext context) {
-    final sortedBlocks = [...blocks]..sort((a, b) => a.index.compareTo(b.index));
+    final blocks = [...content.blocks]
+      ..sort((a, b) => a.index.compareTo(b.index));
 
-    final vocabTerms = sortedBlocks
+    final vocabTerms = blocks
         .where((b) => b.sectionType == 'lesson')
         .expand((b) => _parseVocab(b.content))
         .map((e) => e.key)
@@ -42,14 +38,14 @@ class CourseArticleView extends StatelessWidget {
         children: [
           _buildIdentity(),
           const SizedBox(height: 22),
-          if (sortedBlocks.isEmpty)
-            Text(
-              'Aucun contenu pour cette leçon.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade500),
+          if (blocks.isEmpty && content.summary != null)
+            _buildParagraphCard(
+              meta: _metaFor('introduction'),
+              label: 'Objectif',
+              text: content.summary!,
             )
           else
-            for (final block in sortedBlocks) _buildSectionCard(block, vocabTerms),
+            for (final block in blocks) _buildSectionCard(block, vocabTerms),
         ],
       ),
     );
@@ -93,7 +89,7 @@ class CourseArticleView extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          title,
+          content.title,
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 21,
@@ -108,7 +104,7 @@ class CourseArticleView extends StatelessWidget {
 
   // ── Cartes de section ──────────────────────────────────────────────────────
 
-  Widget _buildSectionCard(ContentBlockModel block, List<String> vocabTerms) {
+  Widget _buildSectionCard(DemoBlock block, List<String> vocabTerms) {
     final meta = _metaFor(block.sectionType);
     final label = (block.caption != null && block.caption!.trim().isNotEmpty)
         ? block.caption!

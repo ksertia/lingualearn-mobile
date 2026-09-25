@@ -1,5 +1,6 @@
 ﻿import 'package:dio/dio.dart';
 import 'package:tibi/helpers/remote/api_service.dart';
+import 'package:tibi/models/progression/level_module_progress_model.dart';
 import 'package:tibi/models/progression/progression_detail_model.dart';
 
 class ProgressionDetailService {
@@ -18,6 +19,28 @@ class ProgressionDetailService {
       final data = response.data!['data'];
       if (data is Map<String, dynamic>) {
         return ProgressionDetailModel.fromJson(data);
+      }
+    }
+    return null;
+  }
+
+  /// GET /progress/user/{userId}/level/{levelId}
+  /// Répartition module par module d'un niveau (plus simple/directe que
+  /// /progression/user/.../language/... qui inclut aussi parcours/étapes).
+  static Future<LevelModuleProgress?> getLevelModuleProgress({
+    required String userId,
+    required String levelId,
+  }) async {
+    final Response<Map<String, dynamic>?> response = await APIService.get(
+      path: '/progress/user/$userId/level/$levelId',
+    );
+
+    if (response.statusCode == 200 &&
+        response.data != null &&
+        response.data!['success'] == true) {
+      final data = response.data!['data'];
+      if (data is Map<String, dynamic>) {
+        return LevelModuleProgress.fromJson(data);
       }
     }
     return null;

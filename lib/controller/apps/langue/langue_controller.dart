@@ -114,6 +114,12 @@ class LanguagesController extends GetxController {
         return;
       }
       session.selectedLanguageId.value = languageId;
+      // Le niveau sélectionné appartient à l'ancienne langue (chaque langue a
+      // ses propres ids de niveau, même quand le nom/code est identique,
+      // ex. "Débutant A1") : on l'efface pour éviter qu'un ancien levelId
+      // reste associé à cette nouvelle langue tant que /niveau n'en choisit
+      // pas un nouveau.
+      session.selectedLevelId.value = '';
       Get.toNamed('/niveau');
     } catch (e) {
       _showErrorSnackbar("Erreur", "Échec lors de la sauvegarde de la langue.");

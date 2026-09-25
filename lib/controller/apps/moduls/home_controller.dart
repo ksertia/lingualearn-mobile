@@ -1,29 +1,20 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:tibi/controller/apps/session_controller.dart';
-import 'package:tibi/helpers/services/module_service.dart';
 import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
 import 'package:tibi/helpers/services/themes/theme_service.dart';
 import 'package:tibi/helpers/services/themes/sub_theme_service.dart';
-import 'package:tibi/models/modules/modul_model.dart';
 import 'package:tibi/models/themes/theme_model.dart';
 import 'package:tibi/models/themes/sub_theme_model.dart';
+import 'package:tibi/widgets/moduls/module_completed_dialog.dart';
 import 'package:get/get.dart';
 
 class ThemeNode {
-  final ThemeModel theme;
+  ThemeModel theme;
   final RxList<SubThemeModel> subThemes = <SubThemeModel>[].obs;
   final RxBool subThemesLoading = true.obs;
   final RxBool subThemesError = false.obs;
   ThemeNode(this.theme);
-}
-
-class ModuleNode {
-  final ModuleModel module;
-  final RxList<ThemeNode> themeNodes = <ThemeNode>[].obs;
-  final RxBool themesLoading = true.obs;
-  final RxBool themesError = false.obs;
-  ModuleNode(this.module);
 }
 
 class HomeController extends GetxController {
@@ -34,9 +25,11 @@ class HomeController extends GetxController {
   RxBool isLoading = false.obs;
   RxBool hasSubscriptionError = false.obs;
   RxBool isSubscriptionActive = true.obs;
-  RxList<ModuleModel> filteredModules = <ModuleModel>[].obs;
-  RxMap<String, String> moduleDisplayStatus = <String, String>{}.obs;
-  RxList<ModuleNode> moduleTree = <ModuleNode>[].obs;
+  RxMap<String, String> themeDisplayStatus = <String, String>{}.obs;
+  RxMap<String, String> subThemeDisplayStatus = <String, String>{}.obs;
+  // Les thèmes sont désormais le premier niveau de la hiérarchie
+  // (niveau → thèmes → sous-thèmes), chargés via GET /themes/level/{levelId}.
+  RxList<ThemeNode> themeNodes = <ThemeNode>[].obs;
 
   final PageController pageController = PageController();
   RxInt currentPage = 0.obs;
@@ -78,13 +71,13 @@ class HomeController extends GetxController {
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_languageId.isNotEmpty && _levelId.isNotEmpty) {
-        loadModules();
+        loadThemes();
         checkSubscription();
       }
     });
   }
 
-  Future<void> loadModules() async {
+  Future<void> loadThemes() async {
     try {
       isLoading.value = true;
       hasSubscriptionError.value = false;
@@ -94,31 +87,22 @@ class HomeController extends GetxController {
         return;
       }
 
-      List<ModuleModel> modulesFromApi = await ModuleService.getAllModules(
-        languageId: _languageId,
-        levelId: _levelId,
+      final themes = await _themeService.getThemesByLevel(
+        _levelId,
+        userId: _userId,
       );
+      themes.sort((a, b) => a.index.compareTo(b.index));
 
-      if (modulesFromApi.isNotEmpty) {
-        modulesFromApi.sort((a, b) => a.index.compareTo(b.index));
-        filteredModules.assignAll(modulesFromApi);
-        moduleDisplayStatus.clear();
-        for (var m in modulesFromApi) {
-          moduleDisplayStatus[m.id] = _resolveDisplayStatus(m);
-        }
-
-        moduleTree.assignAll(modulesFromApi.map((m) => ModuleNode(m)));
-        for (final node in moduleTree) {
-          _loadThemesForModule(node);
-        }
-        currentPage.value = 0;
-        if (pageController.hasClients) {
-          pageController.jumpToPage(0);
-        }
-      } else {
-        filteredModules.clear();
-        moduleTree.clear();
-        currentPage.value = 0;
+      themeNodes.assignAll(themes.map((t) => ThemeNode(t)));
+      for (final t in themes) {
+        themeDisplayStatus[t.id] = _displayStatusFor(t.isCompleted, t.isStarted);
+      }
+      currentPage.value = 0;
+      if (pageController.hasClients) {
+        pageController.jumpToPage(0);
+      }
+      for (final node in themeNodes) {
+        _loadSubThemesForTheme(node);
       }
     } catch (e) {
       final isSubError = (e is DioException &&
@@ -164,38 +148,32 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> _loadThemesForModule(ModuleNode node) async {
-    try {
-      final themes = await _themeService.getThemesByModule(node.module.id);
-      themes.sort((a, b) => a.index.compareTo(b.index));
-      node.themeNodes.assignAll(themes.map((t) => ThemeNode(t)));
-      node.themesLoading.value = false;
-      for (final themeNode in node.themeNodes) {
-        _loadSubThemesForTheme(themeNode);
-      }
-    } catch (_) {
-      node.themesLoading.value = false;
-      node.themesError.value = true;
-    }
+  // 'locked' | 'unlocked' | 'completed' à partir du seul état de l'entité :
+  // pas d'ordre imposé, le cadenas est purement informatif — le tap est
+  // toujours possible et déclenche le passage 'not_started' → 'in_progress'
+  // (voir markThemeOpened / markSubThemeOpened).
+  String _displayStatusFor(bool isCompleted, bool isStarted) {
+    if (isCompleted) return 'completed';
+    if (isStarted) return 'unlocked';
+    return 'locked';
   }
 
   Future<void> _loadSubThemesForTheme(ThemeNode node) async {
     try {
-      final subThemes =
-          await _subThemeService.getSubThemesByTheme(node.theme.id);
+      final subThemes = await _subThemeService.getSubThemesByTheme(
+        node.theme.id,
+        userId: _userId,
+      );
       subThemes.sort((a, b) => a.index.compareTo(b.index));
       node.subThemes.assignAll(subThemes);
+      for (final s in subThemes) {
+        subThemeDisplayStatus[s.id] = _displayStatusFor(s.isCompleted, s.isStarted);
+      }
     } catch (_) {
       node.subThemesError.value = true;
     } finally {
       node.subThemesLoading.value = false;
     }
-  }
-
-  Future<void> retryThemesForModule(ModuleNode node) async {
-    node.themesLoading.value = true;
-    node.themesError.value = false;
-    await _loadThemesForModule(node);
   }
 
   Future<void> retrySubThemesForTheme(ThemeNode node) async {
@@ -204,106 +182,155 @@ class HomeController extends GetxController {
     await _loadSubThemesForTheme(node);
   }
 
-  String _resolveDisplayStatus(ModuleModel m) {
-    final status = (m.progress?.status ?? m.status ?? '').toString().toLowerCase();
-    if (status == 'completed' || status == 'complete') return 'completed';
-    return 'unlocked';
-  }
+  bool get hasStartedAnyTheme =>
+      themeNodes.any((n) => n.theme.isStarted || n.theme.isCompleted);
 
-  bool isCompleted(String moduleId) {
-    return moduleDisplayStatus[moduleId]?.toLowerCase() == 'completed';
-  }
+  String get _userId =>
+      session.userId.value.isNotEmpty ? session.userId.value : (session.user?.id ?? '');
 
   Future<void> onRefresh() async {
-    await loadModules();
+    await loadThemes();
   }
 
-  Future<void> onModuleCompleted(String moduleId) async {
-    try {
-      final idx = filteredModules.indexWhere((m) => m.id == moduleId);
-      if (idx == -1) return;
+  // Appelé quand l'utilisateur ouvre un thème verrouillé pour la première
+  // fois. L'endpoint POST .../themes/{themeId}/start n'existe pas encore côté
+  // backend — l'appel échouera silencieusement (progress == null) tant qu'il
+  // n'est pas disponible, et l'état optimiste local sera conservé.
+  Future<void> markThemeOpened(ThemeNode node) async {
+    final t = node.theme;
+    if (t.isCompleted || t.isStarted || _userId.isEmpty) return;
 
-      final m = filteredModules[idx];
+    final optimistic =
+        t.copyWith(state: 'in_progress', startedAt: DateTime.now().toUtc());
+    node.theme = optimistic;
+    themeNodes.refresh();
+    themeDisplayStatus[t.id] = _displayStatusFor(false, true);
+
+    final progress =
+        await _themeService.startTheme(userId: _userId, themeId: t.id);
+    if (progress == null) return;
+
+    final confirmed = optimistic.copyWith(
+      state: progress.state ?? 'in_progress',
+      startedAt: progress.startedAt,
+      lastAccessedAt: progress.lastAccessedAt,
+      progressPercentage: num.tryParse(progress.progressPercentage ?? ''),
+    );
+    node.theme = confirmed;
+    themeDisplayStatus[t.id] =
+        _displayStatusFor(confirmed.isCompleted, confirmed.isStarted);
+  }
+
+  // Appelé quand l'utilisateur ouvre le premier contenu d'un sous-thème non
+  // verrouillé : persiste 'not_started' → 'in_progress' côté backend.
+  // Endpoint POST .../sub-themes/{subThemeId}/start à faire développer, même
+  // modèle que les modules — en attendant, échoue silencieusement et l'état
+  // optimiste local est conservé.
+  Future<void> markSubThemeOpened(ThemeNode themeNode, SubThemeModel subTheme) async {
+    if (subTheme.isCompleted || subTheme.isStarted || _userId.isEmpty) return;
+    final idx = themeNode.subThemes.indexWhere((s) => s.id == subTheme.id);
+    if (idx == -1) return;
+
+    final optimistic =
+        subTheme.copyWith(state: 'in_progress', startedAt: DateTime.now().toUtc());
+    themeNode.subThemes[idx] = optimistic;
+    subThemeDisplayStatus[subTheme.id] = _displayStatusFor(false, true);
+
+    final progress = await _subThemeService.startSubTheme(
+        userId: _userId, subThemeId: subTheme.id);
+    if (progress == null) return;
+
+    final confirmed = optimistic.copyWith(
+      state: progress.state ?? 'in_progress',
+      startedAt: progress.startedAt,
+      lastAccessedAt: progress.lastAccessedAt,
+      progressPercentage: num.tryParse(progress.progressPercentage ?? ''),
+    );
+    final currentIdx = themeNode.subThemes.indexWhere((s) => s.id == subTheme.id);
+    if (currentIdx != -1) themeNode.subThemes[currentIdx] = confirmed;
+    subThemeDisplayStatus[subTheme.id] =
+        _displayStatusFor(confirmed.isCompleted, confirmed.isStarted);
+  }
+
+  // Suit les sous-thèmes terminés par thème. Une fois tous les sous-thèmes
+  // d'un thème marqués, on complète le thème.
+  final Map<String, Set<String>> _completedSubThemesByTheme = {};
+
+  Future<void> markSubThemeCompleted(
+      ThemeNode themeNode, String subThemeId) async {
+    final set = _completedSubThemesByTheme.putIfAbsent(
+        themeNode.theme.id, () => <String>{});
+    set.add(subThemeId);
+
+    final idx = themeNode.subThemes.indexWhere((s) => s.id == subThemeId);
+    if (idx != -1 && !themeNode.subThemes[idx].isCompleted) {
       final now = DateTime.now().toUtc();
-
-      final completedProgress = ModuleProgress(
-        id: m.progress?.id,
-        userId: m.progress?.userId,
-        moduleId: m.id,
-        status: 'completed',
-        progressPercentage: '100',
-        totalXp: m.progress?.totalXp ?? m.totalXp,
-        timeSpentMinutes: m.progress?.timeSpentMinutes ?? m.timeSpentMinutes,
-        unlockedAt: m.progress?.unlockedAt,
-        startedAt: m.progress?.startedAt ?? now,
+      final updated = themeNode.subThemes[idx].copyWith(
+        state: 'completed',
         completedAt: now,
         lastAccessedAt: now,
+        progressPercentage: 100,
       );
+      themeNode.subThemes[idx] = updated;
+      subThemeDisplayStatus[subThemeId] = 'completed';
 
-      final updated = ModuleModel(
-        id: m.id,
-        levelId: m.levelId,
-        title: m.title,
-        description: m.description,
-        iconUrl: m.iconUrl,
-        index: m.index,
-        isActive: m.isActive,
-        createdAt: m.createdAt,
-        updatedAt: now,
-        status: 'completed',
-        progress: completedProgress,
-        progressPercentage: '100',
-      );
-
-      filteredModules[idx] = updated;
-      moduleDisplayStatus[updated.id] = 'completed';
-
-      // Afficher un dialog de réussite
-      Get.defaultDialog(
-        title: 'Félicitations',
-        middleText: 'Module terminé',
-        textConfirm: 'Continuer',
-        onConfirm: () {
-          Get.back();
-        },
-      );
-
-      final nextIdx = idx + 1;
-      if (nextIdx < filteredModules.length) {
-        final next = filteredModules[nextIdx];
-        final unlockedProgress = ModuleProgress(
-          id: next.progress?.id,
-          userId: next.progress?.userId,
-          moduleId: next.id,
-          status: 'unlocked',
-          progressPercentage: next.progressPercentage ?? '0',
-          totalXp: next.progress?.totalXp ?? next.totalXp,
-          timeSpentMinutes:
-              next.progress?.timeSpentMinutes ?? next.timeSpentMinutes,
-          unlockedAt: now,
-          startedAt: next.progress?.startedAt,
-          completedAt: next.progress?.completedAt,
-          lastAccessedAt: now,
-        );
-
-        final updatedNext = ModuleModel(
-          id: next.id,
-          levelId: next.levelId,
-          title: next.title,
-          description: next.description,
-          iconUrl: next.iconUrl,
-          index: next.index,
-          isActive: next.isActive,
-          createdAt: next.createdAt,
-          updatedAt: now,
-          status: 'unlocked',
-          progress: unlockedProgress,
-          progressPercentage: next.progressPercentage ?? '0',
-        );
-
-        filteredModules[nextIdx] = updatedNext;
-        moduleDisplayStatus[updatedNext.id] = 'unlocked';
+      // Endpoint POST .../sub-themes/{subThemeId}/complete à faire
+      // développer, même modèle que les modules.
+      if (_userId.isNotEmpty) {
+        final progress = await _subThemeService.completeSubTheme(
+            userId: _userId, subThemeId: subThemeId);
+        if (progress != null) {
+          final confirmed = updated.copyWith(
+            state: progress.state ?? 'completed',
+            completedAt: progress.completedAt ?? now,
+            lastAccessedAt: progress.lastAccessedAt ?? now,
+            progressPercentage: num.tryParse(progress.progressPercentage ?? '100'),
+          );
+          final currentIdx =
+              themeNode.subThemes.indexWhere((s) => s.id == subThemeId);
+          if (currentIdx != -1) themeNode.subThemes[currentIdx] = confirmed;
+          subThemeDisplayStatus[subThemeId] = 'completed';
+        }
       }
-    } catch (e) {}
+    }
+
+    final allSubThemeIds = themeNode.subThemes.map((s) => s.id).toSet();
+    if (allSubThemeIds.isEmpty || !set.containsAll(allSubThemeIds)) return;
+
+    onThemeCompleted(themeNode);
+  }
+
+  Future<void> onThemeCompleted(ThemeNode themeNode) async {
+    if (themeNode.theme.isCompleted) return;
+
+    final now = DateTime.now().toUtc();
+    final updated = themeNode.theme.copyWith(
+      state: 'completed',
+      completedAt: now,
+      lastAccessedAt: now,
+      progressPercentage: 100,
+    );
+    themeNode.theme = updated;
+    themeNodes.refresh();
+    themeDisplayStatus[updated.id] = 'completed';
+
+    ModuleCompletedDialog.show(updated.title);
+
+    if (_userId.isNotEmpty) {
+      final progress = await _themeService.completeTheme(
+          userId: _userId, themeId: updated.id);
+      if (progress != null) {
+        final confirmed = updated.copyWith(
+          state: progress.state ?? 'completed',
+          completedAt: progress.completedAt ?? now,
+          lastAccessedAt: progress.lastAccessedAt ?? now,
+          progressPercentage: num.tryParse(progress.progressPercentage ?? '100'),
+        );
+        themeNode.theme = confirmed;
+        themeDisplayStatus[confirmed.id] = 'completed';
+      }
+      // Si l'appel échoue (endpoint pas encore dispo), l'état local
+      // optimiste ('completed') est conservé.
+    }
   }
 }

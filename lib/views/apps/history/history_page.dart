@@ -1,6 +1,8 @@
 ﻿import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:tibi/widgets/bottom_bar/navigation_provider.dart';
 import 'package:tibi/widgets/mascots/zaki_mascot.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tibi/controller/apps/user_progress/user_progress_controller.dart';
@@ -46,6 +48,13 @@ class _LangGroup {
   // Total des modules sur TOUS les niveaux de cette langue
   int get totalModulesAll =>
       entries.fold<int>(0, (sum, e) => sum + e.level.totalModules);
+
+  // Calculé localement (modules terminés / total) plutôt que depuis
+  // `language.progressPercentage` : ce champ agrégé côté backend reste
+  // parfois désynchronisé des modules réellement complétés (même souci que
+  // pour la page Progression).
+  int get computedProgressPct =>
+      totalModulesAll > 0 ? ((totalCompletedModulesAll / totalModulesAll) * 100).round() : 0;
 
   List<UserProgressEntry> get sortedLevels {
     final copy = entries.toList();
@@ -192,7 +201,7 @@ class _HistoryPageState extends State<HistoryPage> {
         final totalLangs = groups.length;
         final globalAvgPct = groups.isEmpty
             ? 0
-            : groups.map((g) => g.language.progressPercentage).fold(0, (a, b) => a + b) ~/
+            : groups.map((g) => g.computedProgressPct).fold(0, (a, b) => a + b) ~/
                 groups.length;
 
         // Summary stats reflect the current selection
@@ -201,7 +210,7 @@ class _HistoryPageState extends State<HistoryPage> {
             displayGroups.fold<int>(0, (sum, g) => sum + g.totalCompletedModulesAll);
         final avgPct = displayGroups.isEmpty
             ? 0
-            : displayGroups.map((g) => g.language.progressPercentage).fold(0, (a, b) => a + b) ~/
+            : displayGroups.map((g) => g.computedProgressPct).fold(0, (a, b) => a + b) ~/
                 displayGroups.length;
         final totalCompletedLevels =
             displayGroups.fold<int>(0, (sum, g) => sum + g.completedLevels);
@@ -387,6 +396,23 @@ class _HistoryPageState extends State<HistoryPage> {
 
   // ── Header banner (compact green, same as other pages) ────────────────────
 
+  Widget _buildBackButton() {
+    return GestureDetector(
+      onTap: () => context.read<NavigationProvider>().goToDashboard(),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1),
+        ),
+        child: const Icon(Icons.arrow_back_ios_new_rounded,
+            color: Colors.white, size: 17),
+      ),
+    );
+  }
+
   Widget _buildHeader(int totalLangs, int avgPct) {
     return Container(
       decoration: BoxDecoration(
@@ -417,6 +443,8 @@ class _HistoryPageState extends State<HistoryPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            _buildBackButton(),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,7 +563,7 @@ class _HistoryPageState extends State<HistoryPage> {
     final step = entry.step;
 
     final statusColor = _statusColor(lang.status);
-    final pct = lang.progressPercentage.clamp(0, 100).toDouble();
+    final pct = group.computedProgressPct.clamp(0, 100).toDouble();
 
     final List<Color> stripeColors = lang.status.toLowerCase() == 'completed'
         ? [_kGreen, _kOrange]

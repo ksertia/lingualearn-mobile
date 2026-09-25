@@ -1,5 +1,6 @@
 ﻿import 'package:dio/dio.dart';
 import 'package:tibi/helpers/services/progression/progression_detail_service.dart';
+import 'package:tibi/models/progression/level_module_progress_model.dart';
 import 'package:tibi/models/progression/progression_detail_model.dart';
 import 'package:get/get.dart';
 
@@ -8,6 +9,9 @@ class ProgressionDetailController extends GetxController {
   final RxBool isLoading  = false.obs;
   final RxBool hasError   = false.obs;
   final RxString errorMsg = ''.obs;
+
+  final Rxn<LevelModuleProgress> levelModuleProgress = Rxn<LevelModuleProgress>();
+  final RxBool isLoadingLevelModules = false.obs;
 
   // Garde les paramètres pour pouvoir recharger
   String _userId     = '';
@@ -48,6 +52,24 @@ class ProgressionDetailController extends GetxController {
   }
 
   Future<void> reload() => load(userId: _userId, languageId: _languageId);
+
+  Future<void> loadLevelModules({
+    required String userId,
+    required String levelId,
+  }) async {
+    if (levelId.isEmpty || userId.isEmpty) return;
+    isLoadingLevelModules.value = true;
+    try {
+      levelModuleProgress.value = await ProgressionDetailService.getLevelModuleProgress(
+        userId: userId,
+        levelId: levelId,
+      );
+    } catch (_) {
+      levelModuleProgress.value = null;
+    } finally {
+      isLoadingLevelModules.value = false;
+    }
+  }
 
   // ── Computed getters ───────────────────────────────────────────────────────
 

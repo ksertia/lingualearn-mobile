@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 class DiscoverController extends ChangeNotifier {
   final DiscoverService _service = DiscoverService();
 
-  List<String> languages = [];
-  LanguageData? languageContent;
-  String? selectedLanguage;
+  List<DiscoverLanguage> languages = [];
+  DemoLanguageData? demoContent;
+  DiscoverLanguage? selectedLanguage;
 
   bool isLoading = false;
   String? error;
@@ -26,18 +26,19 @@ class DiscoverController extends ChangeNotifier {
     }
   }
 
-  Future<void> selectLanguage(String language) async {
-    if (selectedLanguage == language && languageContent != null) return;
+  Future<void> selectLanguage(DiscoverLanguage language) async {
+    if (selectedLanguage?.code == language.code && demoContent != null) {
+      return;
+    }
     selectedLanguage = language;
     isLoading = true;
     error = null;
     notifyListeners();
     try {
-      languageContent = await _service.getContentByLanguage(language);
-      languageContent?.lessons.sort((a, b) => a.order.compareTo(b.order));
-      languageContent?.exercises.sort((a, b) => a.order.compareTo(b.order));
+      demoContent = await _service.getDemoContentByLanguage(language.code);
+      demoContent?.contents.sort((a, b) => a.index.compareTo(b.index));
     } catch (e) {
-      error = "Erreur de chargement pour $language";
+      error = "Erreur de chargement pour ${language.name}";
     } finally {
       isLoading = false;
       notifyListeners();

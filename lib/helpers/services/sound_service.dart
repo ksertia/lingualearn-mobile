@@ -34,6 +34,13 @@ class SoundService {
         volume: 0.5,
       ));
 
+  /// Arpège ascendant "power-up" au déverrouillage d'un module
+  static Future<void> playUnlock() => _play(_buildArpeggio(
+        frequencies: const [523.25, 659.25, 783.99, 1046.50], // C5 E5 G5 C6
+        noteMs: 85,
+        volume: 0.45,
+      ));
+
   /// Son de célébration depuis le fichier asset
   static Future<void> playCelebration() async {
     await _player.stop();
@@ -110,6 +117,30 @@ class SoundService {
     }
 
     return _wavHeader(samples)..buffer.asInt16List(44).setAll(0, pcm);
+  }
+
+  /// Suite de notes jouées à la queue leu leu (arpège)
+  static Uint8List _buildArpeggio({
+    required List<double> frequencies,
+    required int noteMs,
+    double volume = 0.5,
+  }) {
+    final noteSamples = _samplesFor(noteMs);
+    final noteDuration = noteMs / 1000.0;
+    final pcm = Int16List(noteSamples * frequencies.length);
+
+    for (int n = 0; n < frequencies.length; n++) {
+      final freq = frequencies[n];
+      for (int i = 0; i < noteSamples; i++) {
+        final t = i / _sampleRate;
+        final env = _envelope(t, noteDuration);
+        pcm[n * noteSamples + i] = (volume * env * sin(2 * pi * freq * t) * 32767)
+            .round()
+            .clamp(-32768, 32767);
+      }
+    }
+
+    return _wavHeader(pcm.length)..buffer.asInt16List(44).setAll(0, pcm);
   }
 
   // ── Helpers internes ──────────────────────────────────────────────────────

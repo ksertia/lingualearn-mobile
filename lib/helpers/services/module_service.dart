@@ -71,18 +71,32 @@ class ModuleService {
     }
   }
 
-  static Future<bool> startModule({
+  // Retourne la progression persistée par le backend (state, startedAt...),
+  // ou null si l'appel a échoué (l'appelant garde alors son état optimiste).
+  static Future<ModuleProgress?> startModule({
     required String userId,
     required String moduleId,
   }) async {
-    _ensurePrettyLogger();
-    final response = await session.dio.post(
-      '/users/$userId/modules/$moduleId/start',
-    );
-    return response.statusCode == 200 || response.statusCode == 201;
+    try {
+      _ensurePrettyLogger();
+      final response = await session.dio.post(
+        '/users/$userId/modules/$moduleId/start',
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data['data'];
+        if (data is Map) {
+          return ModuleProgress.fromJson(Map<String, dynamic>.from(data));
+        }
+      }
+      return null;
+    } on DioException catch (_) {
+      return null;
+    } catch (_) {
+      return null;
+    }
   }
 
-  static Future<bool> completeModule({
+  static Future<ModuleProgress?> completeModule({
     required String userId,
     required String moduleId,
   }) async {
@@ -91,11 +105,17 @@ class ModuleService {
       final response = await session.dio.post(
         '/users/$userId/modules/$moduleId/complete',
       );
-      return response.statusCode == 200 || response.statusCode == 201;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data['data'];
+        if (data is Map) {
+          return ModuleProgress.fromJson(Map<String, dynamic>.from(data));
+        }
+      }
+      return null;
     } on DioException catch (_) {
-      return false;
+      return null;
     } catch (_) {
-      return false;
+      return null;
     }
   }
 

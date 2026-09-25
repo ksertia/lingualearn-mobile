@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class PlanModel {
   final String id;
   final String planCode;
@@ -45,7 +47,7 @@ class PlanModel {
       reducePrice: json['reducePrice']?.toString(),
       percentage: json['percentage']?.toString(),
       currency: json['currency'] ?? 'XOF',
-      features: json['features'] ?? {},
+      features: _parseFeatures(json['features']),
       maxSubAccounts: json['maxSubAccounts'] ?? 1,
       isActive: json['isActive'] ?? false,
       createdAt: json['createdAt'] != null 
@@ -57,6 +59,21 @@ class PlanModel {
       // Extraction du champ imbriqué _count.subscriptions
       subscriptionCount: json['_count']?['subscriptions'] ?? 0,
     );
+  }
+
+  // Le backend renvoie parfois `features` comme une chaîne JSON encodée
+  // (ex: "{\"trial\":true}") plutôt que comme un objet — on gère les deux cas.
+  static Map<String, dynamic> _parseFeatures(dynamic raw) {
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is String && raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) return decoded;
+      } catch (_) {
+        // ignore et retombe sur {}
+      }
+    }
+    return {};
   }
 
   // Méthode pour transformer l'objet en Map (utile pour le debug ou l'envoi au serveur)

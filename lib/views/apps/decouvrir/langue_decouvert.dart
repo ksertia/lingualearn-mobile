@@ -1,4 +1,6 @@
 ﻿import 'package:tibi/controller/apps/langue/discover_controller.dart';
+import 'package:tibi/helpers/services/langue/discover_service.dart';
+import 'package:tibi/models/langue/decouverte_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -280,18 +282,18 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
     }
     return Column(
       children: _controller.languages
-          .map((name) => _buildCard(name))
+          .map((lang) => _buildCard(lang))
           .toList(),
     );
   }
 
-  Widget _buildCard(String name) {
-    final meta = _getMeta(name);
-    final sel = _controller.selectedLanguage == name;
+  Widget _buildCard(DiscoverLanguage lang) {
+    final meta = _getMeta(lang.name);
+    final sel = _controller.selectedLanguage?.code == lang.code;
     final loading = _controller.isLoading && sel;
 
     return GestureDetector(
-      onTap: () => _controller.selectLanguage(name),
+      onTap: () => _controller.selectLanguage(lang),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 260),
         curve: Curves.easeOutCubic,
@@ -339,7 +341,7 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    lang.name,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -353,6 +355,27 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
                       fontSize: 11.5,
                       color: Color(0xFFAAAAAA),
                       fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _showPreview(context, lang),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.menu_book_rounded,
+                            size: 13, color: _kOrange.withValues(alpha: 0.85)),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Voir le programme',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: _kOrange.withValues(alpha: 0.85),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -435,6 +458,17 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
     );
   }
 
+  // ── Aperçu du programme ───────────────────────────────────────────────────
+
+  void _showPreview(BuildContext context, DiscoverLanguage lang) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _LanguagePreviewSheet(code: lang.code, name: lang.name),
+    );
+  }
+
   // ── Bouton CTA ─────────────────────────────────────────────────────────────
 
   Widget _buildButton() {
@@ -471,8 +505,10 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: canGo
-              ? () => Get.toNamed('/decouverte',
-                  arguments: _controller.languageContent)
+              ? () => Get.toNamed('/decouverte', arguments: {
+                    'data': _controller.demoContent,
+                    'languageName': _controller.selectedLanguage!.name,
+                  })
               : null,
           child: Center(
             child: Text(
@@ -485,6 +521,276 @@ class _LanguageDcouvertPageState extends State<LanguageDcouvertPage> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Aperçu du programme complet ──────────────────────────────────────────────
+
+class _LanguagePreviewSheet extends StatefulWidget {
+  final String code;
+  final String name;
+  const _LanguagePreviewSheet({required this.code, required this.name});
+
+  @override
+  State<_LanguagePreviewSheet> createState() => _LanguagePreviewSheetState();
+}
+
+class _LanguagePreviewSheetState extends State<_LanguagePreviewSheet> {
+  final DiscoverService _service = DiscoverService();
+  late Future<LanguagePreview> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _service.getLanguagePreview(widget.code);
+  }
+
+  void _retry() {
+    setState(() => _future = _service.getLanguagePreview(widget.code));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 12, 12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: _kOrange.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.menu_book_rounded, color: _kOrange),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'PROGRAMME COMPLET',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.6,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                        Text(
+                          widget.name,
+                          style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF1A1A2E)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: FutureBuilder<LanguagePreview>(
+                future: _future,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: _kOrange),
+                    );
+                  }
+                  if (snapshot.hasError || !snapshot.hasData) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.cloud_off_rounded,
+                                size: 40, color: Colors.red.shade300),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Impossible de charger le programme.',
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 14),
+                            ElevatedButton.icon(
+                              onPressed: _retry,
+                              icon: const Icon(Icons.refresh_rounded, size: 17),
+                              label: const Text('Réessayer'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _kOrange,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  final preview = snapshot.data!;
+                  return ListView.builder(
+                    controller: scrollController,
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                    itemCount: preview.levels.length,
+                    itemBuilder: (_, i) => _buildLevelSection(preview.levels[i]),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLevelSection(PreviewLevel level) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: _kOrange,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  level.code,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  level.name,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1A1A2E)),
+                ),
+              ),
+            ],
+          ),
+          if (level.description.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              level.description,
+              style: TextStyle(
+                  fontSize: 12.5, color: Colors.grey.shade600, height: 1.4),
+            ),
+          ],
+          const SizedBox(height: 10),
+          ...level.modules.map(_buildModuleTile),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModuleTile(PreviewModule module) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F8F8),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+          title: Text(
+            module.title,
+            style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1A1A2E)),
+          ),
+          subtitle: module.description.isNotEmpty
+              ? Text(
+                  module.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style:
+                      TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                )
+              : null,
+          children: module.themes
+              .map((theme) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Icon(Icons.circle,
+                              size: 6, color: _kOrange),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                theme.title,
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF1A1A2E)),
+                              ),
+                              if (theme.description.isNotEmpty)
+                                Text(
+                                  theme.description,
+                                  style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Colors.grey.shade600,
+                                      height: 1.3),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ))
+              .toList(),
         ),
       ),
     );

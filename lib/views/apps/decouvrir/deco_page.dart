@@ -7,11 +7,12 @@ import 'package:tibi/widgets/decouvrir_page/decouverte/StepQuizDrag.dart';
 import 'package:tibi/widgets/decouvrir_page/decouverte/StepQuizQCM.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryAudio.dart';
+import 'package:tibi/widgets/decouvrir_page/decouverte/StepDiscoveryCourse.dart';
 import 'package:tibi/widgets/decouvrir_page/decouverte/step_discovery_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-const Color _kOrange     = Color(0xFFF27F22);
+const Color _kOrange = Color(0xFFF27F22);
 
 class DiscoveryStep {
   final Widget widget;
@@ -26,17 +27,59 @@ class DiscoveryStep {
 class DiscoveryPage extends StatelessWidget {
   const DiscoveryPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    final dynamic args = Get.arguments;
+  List<DiscoveryStep> _buildSteps(BuildContext context, dynamic args) {
+    final DiscoveryController controller = Get.put(DiscoveryController());
+    final List<DiscoveryStep> allSteps = [];
+
+    final DemoLanguageData? demoData = args is DemoLanguageData ? args : null;
+    if (demoData != null) {
+      for (int i = 0; i < demoData.contents.length; i++) {
+        final content = demoData.contents[i];
+
+        if (content.contentType == 'course') {
+          allSteps.add(
+            DiscoveryStep(
+              widget: StepDiscoveryCourse(content: content),
+              sectionType: 'lesson',
+            ),
+          );
+          continue;
+        }
+
+        if (content.contentType == 'exercise') {
+          final options = content.possibleAnswers ?? const <String>[];
+
+          allSteps.add(
+            DiscoveryStep(
+              sectionType: 'exercise',
+              widget: StepQuizQCM(
+                title: content.title.toUpperCase(),
+                question: content.question ?? content.statement ?? 'Question',
+                options: options,
+                correctOption: null,
+                contentId: content.id,
+                lottieQuestion: 'assets/lottie/mascot.json',
+                lottieCorrect: 'assets/lottie/Happy mascot.json',
+                lottieIncorrect: 'assets/lottie/Sad mascot.json',
+                onContinue: () {
+                  final bool isLastPage =
+                      controller.currentPage.value == allSteps.length - 1;
+                  if (isLastPage) {
+                    StepSuccess.show(context);
+                  } else {
+                    controller.nextPage();
+                  }
+                },
+              ),
+            ),
+          );
+        }
+      }
+      return allSteps;
+    }
 
     final LanguageData languageData =
         args is LanguageData ? args : LanguageData(lessons: [], exercises: []);
-
-    final DiscoveryController controller = Get.put(DiscoveryController());
-
-    List<DiscoveryStep> allSteps = [];
-
 
     // GESTION DES LEÇONS (AUDIO, VIDÉO, IMAGE)
     for (var section in languageData.lessons) {
@@ -147,6 +190,22 @@ class DiscoveryPage extends StatelessWidget {
       }
     }
 
+    return allSteps;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dynamic args = Get.arguments;
+
+    final String pageTitle = args is DemoLanguageData
+        ? args.subTheme.theme.title
+        : args is LanguageData
+            ? args.language
+            : 'Langue';
+
+    final DiscoveryController controller = Get.put(DiscoveryController());
+    final List<DiscoveryStep> allSteps = _buildSteps(context, args);
+
     if (allSteps.isEmpty) {
       return const Scaffold(
         body: Center(
@@ -182,7 +241,7 @@ class DiscoveryPage extends StatelessWidget {
           elevation: 0,
           centerTitle: true,
           title: Text(
-            "Découvrir le ${languageData.language}",
+            'Découvrir le $pageTitle',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,

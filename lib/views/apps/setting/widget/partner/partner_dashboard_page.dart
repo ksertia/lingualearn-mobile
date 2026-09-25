@@ -111,7 +111,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
 
   Widget _buildSliverHeader() {
     return SliverAppBar(
-      expandedHeight: 180,
+      expandedHeight: 150,
       pinned: true,
       backgroundColor: _kOrange,
       surfaceTintColor: _kOrange,
@@ -155,7 +155,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
               ),
             ),
             Positioned(
-              left: 20, right: 20, bottom: 24,
+              left: 20, right: 20, bottom: 18,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [

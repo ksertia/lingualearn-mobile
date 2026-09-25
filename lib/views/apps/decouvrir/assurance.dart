@@ -24,7 +24,7 @@ class _DecouvertePageState extends State<DecouvertePage>
   // ── TTS ────────────────────────────────────────────────────────────────────
   final FlutterTts _tts = FlutterTts();
   late String _langueChoisie;
-  late LanguageData? _languageData;
+  DemoLanguageData? _languageData;
 
   Future<void> _initTts() async {
     await _tts.setLanguage('fr-FR');
@@ -45,8 +45,18 @@ class _DecouvertePageState extends State<DecouvertePage>
 
     // Récupère la langue dès l'init pour le TTS
     final dynamic args = Get.arguments;
-    _languageData = args is LanguageData ? args : null;
-    _langueChoisie = _languageData?.language ?? 'la langue';
+    if (args is Map) {
+      _languageData = args['data'] is DemoLanguageData ? args['data'] : null;
+      _langueChoisie = (args['languageName'] as String?) ??
+          _languageData?.language ??
+          'la langue';
+    } else if (args is DemoLanguageData) {
+      _languageData = args;
+      _langueChoisie = args.language;
+    } else {
+      _languageData = null;
+      _langueChoisie = 'la langue';
+    }
 
     _bounceController = AnimationController(
       duration: const Duration(milliseconds: 1500),
@@ -81,7 +91,7 @@ class _DecouvertePageState extends State<DecouvertePage>
 
   @override
   Widget build(BuildContext context) {
-    final LanguageData? languageData = _languageData;
+    final DemoLanguageData? languageData = _languageData;
     final String langueChoisie = _langueChoisie;
 
     return Scaffold(
@@ -111,20 +121,39 @@ class _DecouvertePageState extends State<DecouvertePage>
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      AnimatedBuilder(
-                        animation: _bounceAnimation,
-                        builder: (context, child) {
-                          return Transform.translate(
-                            offset: Offset(0, -_bounceAnimation.value),
-                            child: child,
-                          );
-                        },
-                        child: Lottie.asset(
-                          'assets/lottie/Sad mascot.json',
-                          width: 150,
-                          height: 150,
-                          fit: BoxFit.contain,
-                        ),
+                      Stack(
+                        alignment: Alignment.bottomCenter,
+                        clipBehavior: Clip.none,
+                        children: [
+                          Positioned(
+                            bottom: 6,
+                            child: Container(
+                              width: 80,
+                              height: 18,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [Colors.black26, Colors.transparent],
+                                ),
+                              ),
+                            ),
+                          ),
+                          AnimatedBuilder(
+                            animation: _bounceAnimation,
+                            builder: (context, child) {
+                              return Transform.translate(
+                                offset: Offset(0, -_bounceAnimation.value),
+                                child: child,
+                              );
+                            },
+                            child: Lottie.asset(
+                              'assets/lottie/Sad mascot.json',
+                              width: 150,
+                              height: 150,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(width: 5),
                       Expanded(
@@ -191,7 +220,7 @@ class _DecouvertePageState extends State<DecouvertePage>
                 height: 150,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.92),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(25),
                     topRight: Radius.circular(25),
@@ -204,9 +233,9 @@ class _DecouvertePageState extends State<DecouvertePage>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
+                      color: Colors.black.withValues(alpha: 0.10),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
@@ -253,7 +282,7 @@ class _DecouvertePageState extends State<DecouvertePage>
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.20),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -269,39 +298,42 @@ class _DecouvertePageState extends State<DecouvertePage>
 
   Widget _buildActionButton(String label, VoidCallback onTap,
       {bool isPrimary = false}) {
+    final icon = isPrimary ? Icons.check_circle_rounded : Icons.close_rounded;
     return SizedBox(
       height: 55,
       child: isPrimary
-          ? ElevatedButton(
+          ? ElevatedButton.icon(
               onPressed: onTap,
+              icon: Icon(icon, size: 20),
+              label: Text(
+                label,
+                style: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _kOrange,
-                foregroundColor:  Colors.white,
+                foregroundColor: Colors.white,
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: Text(
+            )
+          : OutlinedButton.icon(
+              onPressed: onTap,
+              icon: Icon(icon, size: 20),
+              label: Text(
                 label,
                 style: const TextStyle(
                     fontSize: 16, fontWeight: FontWeight.bold),
               ),
-            )
-          : OutlinedButton(
-              onPressed: onTap,
               style: OutlinedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor:  _kOrange,
+                foregroundColor: _kOrange,
                 side: const BorderSide(color: _kOrange, width: 2),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-              ),
-              child: Text(
-                label,
-                style: const TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
     );

@@ -2,10 +2,10 @@
 import 'package:tibi/views/apps/change_language.dart';
 import 'package:tibi/views/apps/decouvrir/assurance.dart';
 import 'package:tibi/views/apps/decouvrir/bienvenu_page.dart';
-import 'package:tibi/views/apps/decouvrir/choisie_niveau_page.dart';
+import 'package:tibi/views/apps/home/screens/choisie_niveau_page.dart';
 import 'package:tibi/views/apps/decouvrir/deco_page.dart';
 import 'package:tibi/views/apps/decouvrir/langue_decouvert.dart';
-import 'package:tibi/views/apps/decouvrir/selection_langues_page.dart';
+import 'package:tibi/views/apps/home/screens/selection_langues_page.dart';
 import 'package:tibi/views/apps/decouvrir/step_mascotte.dart';
 import 'package:tibi/views/apps/history/history_page.dart';
 import 'package:tibi/views/apps/notifications/notifications_page.dart';

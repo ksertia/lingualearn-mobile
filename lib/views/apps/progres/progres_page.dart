@@ -4,13 +4,14 @@ import 'package:tibi/controller/apps/settings/children_controller.dart';
 import 'package:tibi/controller/apps/user_progress/user_progress_controller.dart';
 import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:tibi/models/child_model.dart';
-import 'package:tibi/models/progression/progression_detail_model.dart';
+import 'package:tibi/models/progression/level_module_progress_model.dart';
 import 'package:tibi/models/user_progress/user_progress_model.dart';
 import 'package:tibi/views/apps/setting/widget/sous-compte/child_progress_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:collection/collection.dart';
+import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
+import 'package:tibi/widgets/bottom_bar/navigation_provider.dart';
 import 'package:tibi/widgets/mascots/zaki_mascot.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -47,14 +48,26 @@ class _ProgresPageState extends State<ProgresPage> {
   int    get _totalXp         => _detailCtrl.totalXp;
   int    get _totalMinutes       => _detailCtrl.totalMinutes;
   int    get _quizScore          => _detailCtrl.avgQuizScore;
-      ProgLevel? get _selectedLevel  => _detailCtrl.levels.firstWhereOrNull(
-        (l) => l.id == _selectedLevelId,
-      );
-  int    get _levelTotalModules    => _selectedLevel?.modules.length ?? 0;
-  int    get _levelCompletedModules => _selectedLevel?.completedModuleCount ?? 0;
-  int    get _levelInProgressModules => _selectedLevel?.inProgressModuleCount ?? 0;
-  int    get _levelLockedModules     => _selectedLevel?.lockedModuleCount ?? 0;
-  int    get _levelProgressPct       => _selectedLevel?.progressPercent ?? 0;
+
+  // Répartition des modules du niveau sélectionné — issue de
+  // GET /progress/user/{userId}/level/{levelId}, une source directe et
+  // fiable (l'ancien /progression/user/.../language/... peut renvoyer une
+  // liste vide selon les niveaux).
+  LevelModuleProgress? get _levelModules => _detailCtrl.levelModuleProgress.value;
+  int    get _levelTotalModules      => _levelModules?.modules.length ?? 0;
+  int    get _levelCompletedModules  =>
+      _levelModules?.modules.where((m) => m.isCompleted).length ?? 0;
+  int    get _levelInProgressModules =>
+      _levelModules?.modules.where((m) => m.isStarted && !m.isCompleted).length ?? 0;
+  int    get _levelLockedModules     =>
+      _levelModules?.modules.where((m) => !m.isStarted && !m.isCompleted).length ?? 0;
+  // Calculé localement (modules terminés / total) plutôt que depuis le champ
+  // `progressPercentage` renvoyé par le backend au niveau du level : ce
+  // dernier reste à "0" tant qu'aucun mécanisme de "démarrage de niveau"
+  // n'existe côté serveur, même quand des modules sont déjà terminés.
+  int    get _levelProgressPct       => _levelTotalModules > 0
+      ? ((_levelCompletedModules / _levelTotalModules) * 100).round()
+      : 0;
 
   // ── Init ───────────────────────────────────────────────────────────────────
 
@@ -84,15 +97,15 @@ class _ProgresPageState extends State<ProgresPage> {
         : (_session.selectedLanguageId.value.isNotEmpty
             ? _session.selectedLanguageId.value
             : _session.user?.selectedLanguageId ?? '');
+    final userId = _session.userId.value.isNotEmpty
+        ? _session.userId.value
+        : _session.user?.id ?? '';
     await Future.wait([
-      _detailCtrl.load(
-        userId: _session.userId.value.isNotEmpty
-            ? _session.userId.value
-            : _session.user?.id ?? '',
-        languageId: langId,
-      ),
+      _detailCtrl.load(userId: userId, languageId: langId),
       _progressCtrl.loadProgress(),
       _childrenCtrl.fetchMyChildren(),
+      if (_selectedLevelId.isNotEmpty)
+        _detailCtrl.loadLevelModules(userId: userId, levelId: _selectedLevelId),
     ]);
     if (mounted) setState(() => _isLoading = false);
   }
@@ -104,12 +117,13 @@ class _ProgresPageState extends State<ProgresPage> {
       _selectedLevelId = entry.level.id;
       _isLoading = true;
     });
-    await _detailCtrl.load(
-      userId: _session.userId.value.isNotEmpty
-          ? _session.userId.value
-          : _session.user?.id ?? '',
-      languageId: entry.language.id,
-    );
+    final userId = _session.userId.value.isNotEmpty
+        ? _session.userId.value
+        : _session.user?.id ?? '';
+    await Future.wait([
+      _detailCtrl.load(userId: userId, languageId: entry.language.id),
+      _detailCtrl.loadLevelModules(userId: userId, levelId: entry.level.id),
+    ]);
     if (mounted) setState(() => _isLoading = false);
   }
 
@@ -271,10 +285,27 @@ class _ProgresPageState extends State<ProgresPage> {
 
   // ── Header ─────────────────────────────────────────────────────────────────
 
+  Widget _buildBackButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.read<NavigationProvider>().goToDashboard(),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1),
+        ),
+        child: const Icon(Icons.arrow_back_ios_new_rounded,
+            color: Colors.white, size: 17),
+      ),
+    );
+  }
+
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(
-        20, MediaQuery.of(context).padding.top + 16, 20, 24,
+        20, MediaQuery.of(context).padding.top + 8, 20, 14,
       ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -287,6 +318,8 @@ class _ProgresPageState extends State<ProgresPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          _buildBackButton(context),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,12 +328,12 @@ class _ProgresPageState extends State<ProgresPage> {
                   'Ma Progression',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 20,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Wrap(
                   spacing: 8,
                   children: [
@@ -386,9 +419,7 @@ class _ProgresPageState extends State<ProgresPage> {
     final progress = _levelTotalModules > 0
         ? (_levelCompletedModules / _levelTotalModules).clamp(0.0, 1.0)
         : 0.0;
-    final pct = _selectedLevel != null
-        ? _levelProgressPct
-        : (progress * 100).round();
+    final pct = _levelProgressPct;
 
     return Container(
       width: double.infinity,
