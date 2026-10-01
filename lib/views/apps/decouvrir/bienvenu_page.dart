@@ -6,8 +6,6 @@ import 'package:lottie/lottie.dart';
 
 const Color _kOrange     = Color(0xFFF27F22);
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 class BienvenuPage extends StatefulWidget {
   const BienvenuPage({super.key});
 
@@ -22,7 +20,6 @@ class _BienvenuPageState extends State<BienvenuPage>
   late final AnimationController _enterCtrl;
   late final AnimationController _mascotCtrl;
   late final AnimationController _staggerCtrl;
-
   late final Animation<double> _headerFade;
   late final Animation<Offset>  _headerSlide;
   late final Animation<double> _mascotFade;

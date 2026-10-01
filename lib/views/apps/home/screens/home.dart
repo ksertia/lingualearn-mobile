@@ -7,18 +7,20 @@ import 'package:tibi/helpers/services/souscription/sousciption_service.dart';
 import 'package:tibi/helpers/services/themes/theme_service.dart';
 import 'package:tibi/helpers/services/themes/sub_theme_service.dart';
 import 'package:tibi/helpers/services/progression/progression_detail_service.dart';
+import 'package:tibi/helpers/services/standard/standard_content_service.dart';
 import 'package:tibi/helpers/storage/local_storage.dart';
 import 'package:tibi/helpers/theme/app_colors.dart';
 import 'package:tibi/models/progression/level_module_progress_model.dart';
+import 'package:tibi/models/standard/standard_content_model.dart';
 import 'package:tibi/models/themes/theme_model.dart';
 import 'package:tibi/models/themes/sub_theme_model.dart';
 import 'package:tibi/models/user_progress/user_progress_model.dart';
 import 'package:tibi/views/apps/home/screens/module_page.dart';
+import 'package:tibi/views/apps/home/screens/standard_session_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:tibi/widgets/mascots/zaki_mascot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../controller/apps/settings/settings_controller.dart';
 import '../../../../controller/apps/notifications/notification_controller.dart';
@@ -68,9 +70,12 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   final Map<String, ThemeModel?> _currentThemeByLevel = {};
   final Map<String, SubThemeModel?> _currentSubThemeByLevel = {};
   final Map<String, List<ThemeModel>> _themesByLevel = {};
+  // Aperçu de la prochaine session du mode Standard, par langue.
+  final Map<String, StandardSession> _nextStandardByLanguage = {};
   final Map<String, LevelModuleProgress?> _levelModuleProgressByLevel = {};
 
   bool _isFirstVisit = false;
+  int _selectedLearningMode = 0;
 
   @override
   void initState() {
@@ -133,10 +138,21 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   void _loadCurrentThemesAndSubThemes() {
     final entries = progressCtrl.progressList;
     for (final entry in entries) {
+      _loadNextStandardSession(entry.language.id);
       final levelId = entry.level.id;
       if (levelId.isEmpty || _currentThemeByLevel.containsKey(levelId)) continue;
       _loadCurrentThemeAndSubTheme(levelId);
     }
+  }
+
+  Future<void> _loadNextStandardSession(String languageId) async {
+    if (languageId.isEmpty) return;
+    try {
+      final next =
+          await StandardContentService.peekNextSession(languageId: languageId);
+      if (!mounted) return;
+      setState(() => _nextStandardByLanguage[languageId] = next);
+    } catch (_) {}
   }
 
   // Même source que la page Progression (GET /progress/user/.../level/...) :
@@ -264,10 +280,9 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                       const SizedBox(height: 14),
                       _buildLanguageSection(),
                       const SizedBox(height: 28),
-                      _buildSectionTitle("En ce moment"),
+                      _buildSectionTitle("Comment veux-tu apprendre ?"),
                       const SizedBox(height: 14),
-                      _buildCurrentPathCard(),
-                      const SizedBox(height: 34),
+                      _buildLearningModes(),
                     ],
                   ),
                 ),
@@ -290,42 +305,22 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [_kOrange, _kOrange],
+          colors: [_kOrange, Color(0xFFF6A23C)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(36),
-          bottomRight: Radius.circular(36),
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(
-            20, MediaQuery.of(context).padding.top + 10, 16, 14),
+        padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 12, 20, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Ligne 1 : badge "Bonne journée" + cloche ──────────────────
             Row(
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.4), width: 1),
-                  ),
-                  child: Text(
-                    "Content de te voir !",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
                 const Spacer(),
                 Obx(() {
                   final count = _notifCtrl.unreadCount.value;
@@ -338,13 +333,17 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                           padding: const EdgeInsets.all(9),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                width: 1),
+                              color: Colors.white.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
                           ),
-                          child: const Icon(Icons.notifications_rounded,
-                              color: Colors.white, size: 20),
+                          child: const Icon(
+                            Icons.notifications_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
                         if (count > 0)
                           Positioned(
@@ -352,12 +351,13 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                             right: -4,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 5, vertical: 2),
+                                horizontal: 5,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFEF4444),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                    color: Colors.white, width: 1.5),
+                                border: Border.all(color: Colors.white, width: 1.5),
                               ),
                               child: Text(
                                 count > 99 ? '99+' : '$count',
@@ -375,47 +375,42 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                 }),
               ],
             ),
-            // const SizedBox(height: 4),
-            // ── Ligne 2 : texte (gauche) + Zaki (droite) ──────────────────
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Salut, $firstName",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          height: 1.1,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _isFirstVisit
-                            ? "Prêt pour commencer ?"
-                            : "Bon retour parmi nous ! Prêt pour continuer ?",
-                        style: const TextStyle(color: Colors.white70, fontSize: 13),
-                      ),
-                    ],
+            const SizedBox(height: 16),
+            SizedBox(
+              width: 250,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Salut, $firstName",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w900,
+                      height: 1.15,
+                    ),
                   ),
-                ),
-                const ZakiMascot(mood: ZakiMood.happy, size: ZakiSize.sm),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    _isFirstVisit
+                        ? "Prêt pour commencer ?"
+                        : "Bon retour parmi nous ! Prêt pour continuer ?",
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            // const SizedBox(height: 8),
-            // ── Ligne 3 : chips stats ──────────────────────────────────────
-            Row(
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                _buildStatChip(
-                    Icons.auto_stories_rounded, "Apprends",  Colors.white),
-                const SizedBox(width: 8),
-                _buildStatChip(
-                    Icons.emoji_events_rounded, "Progresse", Colors.white),
-                const SizedBox(width: 8),
+                _buildStatChip(Icons.auto_stories_rounded, "Apprends", Colors.white),
+                _buildStatChip(Icons.emoji_events_rounded, "Progresse", Colors.white),
                 _buildStatChip(Icons.translate_rounded, "Maîtrise", Colors.white),
               ],
             ),
@@ -857,297 +852,263 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
     );
   }
 
-  // ─── Navigation rapide ────────────────────────────────────────────────────
 
-  // ─── En ce moment ─────────────────────────────────────────────────────────
+  // ─── Modes d'apprentissage ────────────────────────────────────────────────
+  // Standard : contenu poussé session par session, sans liste de thèmes
+  // (données moquées pour l'instant, voir StandardContentService).
+  // Personnalisé : parcours structuré thèmes → sous-thèmes.
 
-  Widget _buildCurrentPathCard() {
-    if (_hasProgressError) {
-      return _buildErrorWidget(
-        icon: Icons.cloud_off_rounded,
-        message: 'Impossible de charger le parcours actuel.',
-        onRetry: _loadProgressSafe,
-        color: _kOrange,
-      );
-    }
-
+  Widget _buildLearningModes() {
     return Obx(() {
-      if (progressCtrl.isLoading.value) {
-        return _buildCurrentPathSkeleton();
+      final entries = progressCtrl.progressList;
+      final entry = entries.isEmpty
+          ? null
+          : entries[_currentLangPage.value.clamp(0, entries.length - 1)];
+
+      final nextSession =
+          entry == null ? null : _nextStandardByLanguage[entry.language.id];
+      final standardInfo = nextSession == null
+          ? 'Des petites sessions prêtes à l\'emploi'
+          : 'Prochaine session : ${nextSession.title} · ${nextSession.estimatedMinutes} min';
+
+      final themes = entry == null ? null : _themesByLevel[entry.level.id];
+      final currentTheme =
+          entry == null ? null : _currentThemeByLevel[entry.level.id];
+      final String personalizedInfo;
+      if (currentTheme != null && currentTheme.isStarted) {
+        personalizedInfo = 'Thème en cours : ${currentTheme.title}';
+      } else if (themes != null && themes.isNotEmpty) {
+        personalizedInfo = '${themes.length} thèmes à explorer';
+      } else {
+        personalizedInfo = 'Choisis tes thèmes et avance à ton rythme';
       }
 
-      final entries = progressCtrl.progressList;
-      if (entries.isEmpty) return _buildNoPathCard();
-      final idx = _currentLangPage.value.clamp(0, entries.length - 1);
-      final entry = entries[idx];
-      final currentTheme = _currentThemeByLevel[entry.level.id];
-      if (currentTheme == null) return _buildNoPathCard();
-
-      final themePct = (currentTheme.progressPercentage ?? 0).round().clamp(0, 100);
-      final subThemeName = _currentSubThemeByLevel[entry.level.id]?.title;
-
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.card(_ctx),
-          borderRadius: BorderRadius.circular(26),
-          boxShadow: [
-            BoxShadow(
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 54,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
               color: _kOrange.withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+              borderRadius: BorderRadius.circular(16),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+            child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(11),
-                  decoration: BoxDecoration(
-                    color: AppColors.cardAlt(_ctx),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(Icons.rocket_launch_rounded,
-                      color: AppColors.textPrimary(_ctx), size: 22),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Parcours actuel",
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary(_ctx))),
-                      Text(entry.language.name,
-                          style: TextStyle(
-                              color: AppColors.textSecondary(_ctx), fontSize: 12)),
-                    ],
+                  child: _buildLearningModeTab(
+                    label: 'Standard',
+                    icon: Icons.bolt_rounded,
+                    color: _kOrange,
+                    index: 0,
                   ),
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.cardAlt(_ctx),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '$themePct%',
-                    style: const TextStyle(
-                        color: _kOrange,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13),
+                Expanded(
+                  child: _buildLearningModeTab(
+                    label: 'Personnalisé',
+                    icon: Icons.account_tree_rounded,
+                    color: _kOrange,
+                    index: 1,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 18),
-            _buildPathItem(
-                Icons.label_outline, "Thème", currentTheme.title, _kOrange),
-            if (subThemeName != null) ...[
-              const SizedBox(height: 8),
-              _buildPathItem(
-                  Icons.flag_rounded, "Sous-thème", subThemeName, _kOrange),
-            ],
-            const SizedBox(height: 18),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: themePct / 100.0,
-                minHeight: 8,
-                backgroundColor: _kOrange.withValues(alpha: 0.10),
-                valueColor: const AlwaysStoppedAnimation(_kOrange),
-              ),
-            ),
-            const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _showLanguagePickerSheet,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _kOrange,
-                  foregroundColor: const Color(0xFF1A1A1A),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                ),
-                child: const Text("Explorer les thèmes",
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white)),
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 18),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
+            child: _selectedLearningMode == 0
+                ? KeyedSubtree(
+                    key: const ValueKey('standard'),
+                    child: _buildModeCard(
+                      icon: Icons.account_tree_rounded,
+                      color:Colors.black,
+                      tag: 'STANDARD',
+                      title: 'Laisse-toi guider',
+                      description:
+                          'On te propose le contenu au fur et à mesure, pas besoin de choisir.',
+                      info: standardInfo,
+                      cta: 'Lancer une session',
+                      onTap: _openStandardMode,
+                    ),
+                  )
+                : KeyedSubtree(
+                    key: const ValueKey('personalized'),
+                    child: _buildModeCard(
+                      icon: Icons.account_tree_rounded,
+                      color: Colors.black,
+                      tag: 'PERSONNALISÉ',
+                      title: 'Choisis ton parcours',
+                      description:
+                          'Parcours structuré par thèmes puis sous-thèmes, dans l\'ordre que tu veux.',
+                      info: personalizedInfo,
+                      cta: 'Voir les thèmes',
+                      onTap: _showLanguagePickerSheet,
+                    ),
+                  ),
+          ),
+        ],
       );
     });
   }
 
-  Widget _buildCurrentPathSkeleton() {
-    return Shimmer.fromColors(
-      baseColor: AppColors.cardAlt(_ctx),
-      highlightColor: AppColors.card(_ctx),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(26),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+  Widget _buildLearningModeTab({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required int index,
+  }) {
+    final isSelected = _selectedLearningMode == index;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => setState(() => _selectedLearningMode = index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          height: 46,
+          decoration: BoxDecoration(
+            color: isSelected ? color : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 17,
+                  color: isSelected ? Colors.white : AppColors.textPrimary(_ctx)),
+              const SizedBox(width: 7),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected ? Colors.white : AppColors.textPrimary(_ctx),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(width: 130, height: 16, color: Colors.white),
-                      const SizedBox(height: 6),
-                      Container(width: 80, height: 12, color: Colors.white),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 46,
-                  height: 26,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Container(width: double.infinity, height: 14, color: Colors.white),
-            const SizedBox(height: 10),
-            Container(width: double.infinity, height: 14, color: Colors.white),
-            const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
-              height: 8,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
               ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPathItem(IconData icon, String type, String value, Color color) {
-    return Row(
+  Widget _buildModeCard({
+    required IconData icon,
+    Widget? leading,
+    required Color color,
+    required String tag,
+    required String title,
+    required String description,
+    required String info,
+    required String cta,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(
-            color: AppColors.cardAlt(_ctx),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: AppColors.textPrimary(_ctx), size: 14),
+        Row(
+          children: [
+            leading ??
+                Container(
+                  padding: const EdgeInsets.all(11),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tag,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: _kOrange,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary(_ctx),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 10),
-        Text("$type : ",
+        const SizedBox(height: 12),
+        Text(
+          description,
+          style: TextStyle(
+            fontSize: 13,
+            height: 1.4,
+            color: AppColors.textSecondary(_ctx),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          decoration: BoxDecoration(
+            color: _kOrange.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            info,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textSecondary(_ctx),
-                fontWeight: FontWeight.w500)),
-        Expanded(
-          child: Text(value,
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary(_ctx)),
-              overflow: TextOverflow.ellipsis),
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary(_ctx),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 46,
+          child: ElevatedButton.icon(
+            onPressed: onTap,
+            iconAlignment: IconAlignment.end,
+            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+            label: Text(cta,
+                style: const TextStyle(fontWeight: FontWeight.w800)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _kOrange,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(13),
+              ),
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildNoPathCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.card(_ctx),
-        borderRadius: BorderRadius.circular(26),
-        border: Border.all(
-            color: _kGreen.withValues(alpha: 0.10), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-              color: AppColors.shadow(_ctx),
-              blurRadius: 16,
-              offset: const Offset(0, 6)),
-        ],
+  Future<void> _openStandardMode() async {
+    final entry = _currentEntryOrNotify();
+    if (entry == null) return;
+    await Get.to(
+      () => StandardSessionPage(
+        languageId: entry.language.id,
+        languageName: entry.language.name,
       ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [
-                _kGreen.withValues(alpha: 0.08),
-                _kOrange.withValues(alpha: 0.06),
-              ]),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.explore_outlined, size: 38, color: _kGreen),
-          ),
-          const SizedBox(height: 12),
-          Text("Pas encore de parcours",
-              style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                  color: AppColors.textPrimary(_ctx))),
-          const SizedBox(height: 6),
-          Text("Choisis un thème pour commencer",
-              style: TextStyle(color: AppColors.textSecondary(_ctx), fontSize: 12)),
-          const SizedBox(height: 18),
-          ElevatedButton(
-            onPressed: _showLanguagePickerSheet,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _kGreen,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
-            ),
-            child: const Text("Commencer",
-                style: TextStyle(fontWeight: FontWeight.w700)),
-          ),
-        ],
-      ),
+      transition: Transition.downToUp,
     );
+    _loadNextStandardSession(entry.language.id);
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -1318,6 +1279,13 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
   }
 
   void _showLanguagePickerSheet() {
+    final entry = _currentEntryOrNotify();
+    if (entry != null) _navigateToThemes(entry);
+  }
+
+  // Langue actuellement visible dans le PageView, ou null (avec un message
+  // à l'utilisateur) si les langues sont en chargement, en erreur ou absentes.
+  UserProgressEntry? _currentEntryOrNotify() {
     if (progressCtrl.isLoading.value) {
       Get.snackbar(
         'Chargement...',
@@ -1329,7 +1297,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
         margin: const EdgeInsets.all(16),
         borderRadius: 16,
       );
-      return;
+      return null;
     }
 
     if (_hasProgressError) {
@@ -1351,7 +1319,7 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
                   color: Colors.white, fontWeight: FontWeight.w700)),
         ),
       );
-      return;
+      return null;
     }
 
     final entries = progressCtrl.progressList;
@@ -1366,12 +1334,10 @@ class _AcceuilleSreenState extends State<AcceuilleSreen>
         margin: const EdgeInsets.all(16),
         borderRadius: 16,
       );
-      return;
+      return null;
     }
 
-    // Navigue vers la langue actuellement visible dans le PageView
-    final idx = _currentLangPage.value.clamp(0, entries.length - 1);
-    _navigateToThemes(entries[idx]);
+    return entries[_currentLangPage.value.clamp(0, entries.length - 1)];
   }
 }
 
